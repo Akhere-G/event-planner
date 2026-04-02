@@ -1,6 +1,6 @@
 from src.config.config import Config
 from src import create_app
-from src.models import user_model
+from src.models import User
 
 dev_config = Config().dev_config
 app = create_app(config_class=dev_config)

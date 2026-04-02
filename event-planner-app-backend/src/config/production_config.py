@@ -1,6 +1,7 @@
+import os
 class ProductionConfig:
     def __init__(self):
         self.ENV = "production"
         self.DEBUG = False
-        self.PORT = 80
-        self.HOST = "0.0.0.0"
+        self.PORT = os.getenv("FLASK_PORT")
+        self.HOST = os.getenv("FLASK_HOST")
