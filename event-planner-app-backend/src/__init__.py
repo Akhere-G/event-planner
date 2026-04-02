@@ -1,8 +1,9 @@
 import os
 from flask import Flask
 from dotenv import load_dotenv
-from .extensions import db, alembic
+from .extensions import db, alembic, flask_bcrypt
 from .config.config import Config
+
 
 load_dotenv()
 
@@ -25,9 +26,11 @@ def create_app(config_class=None):
 
     db.init_app(app)
     alembic.init_app(app)
+    flask_bcrypt.init_app(app)
+    app.secret_key = os.environ.get("FLASK_SECRET_KEY")
 
     with app.app_context():
-        from .routes.auth import auth_bp
+        from .routes.auth_routes import auth_bp
 
         app.register_blueprint(auth_bp, url_prefix="/api/auth")
 
