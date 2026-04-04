@@ -1,6 +1,10 @@
 from flask import Blueprint, request
-from ..controllers.itinerary_controller import get_itineraries, create_itinerary
-from ..exceptions import UserDoesNotExistError
+from ..controllers.itinerary_controller import (
+    get_itineraries,
+    create_itinerary,
+    update_itinerary,
+)
+from ..exceptions import UserDoesNotExistError, ItineraryDoesNotExistError
 from ..schemas.itinerary_schema import ItinerarySchema
 from ..utils.format_response import api_response
 from ..middleware.login_required import login_required
@@ -49,4 +53,31 @@ def create_itinerary_route(user_id):
     except ValidationError as err:
         return api_response(
             message="Bad request.", success=False, error=err.messages, status_code=400
+        )
+
+
+@itinerary_bp.route("<int:itinerary_id>", methods=["PATCH"])
+@login_required
+def update_itinerary_route(user_id, itinerary_id):
+    try:
+        schema = ItinerarySchema(partial=True)
+        validated_data = schema.load(request.json)
+        updated_itinerary = update_itinerary(user_id, itinerary_id, validated_data)
+
+        return api_response(
+            success=True,
+            message="Successfully updated itinerary.",
+            data=schema.dump(updated_itinerary),
+            status_code=200,
+        )
+    except ValidationError as err:
+        return api_response(
+            success=False, message="Bad request.", error=err.messages, status_code=400
+        )
+    except ItineraryDoesNotExistError as err:
+        return api_response(
+            success=False,
+            message=err.message,
+            error=err.message,
+            status_code=err.status_code,
         )

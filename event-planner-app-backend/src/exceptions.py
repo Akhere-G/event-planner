@@ -17,3 +17,10 @@ class InvalidCredentialsError(Exception):
         self.message = message
         self.status_code = 400
         super().__init__(self.message)
+
+
+class ItineraryDoesNotExistError(Exception):
+    def __init__(self, message="This itinerary does not exist."):
+        self.message = message
+        self.status_code = 404
+        super().__init__(self.message)
