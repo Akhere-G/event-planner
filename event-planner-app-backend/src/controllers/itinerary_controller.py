@@ -48,3 +48,4 @@ def update_itinerary(user_id: int, itinerary_id: int, data: dict):
             setattr(itinerary, k, v)
 
     db.session.commit()
+    return itinerary
