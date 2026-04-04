@@ -23,11 +23,11 @@ def create_app(config_class=None):
         SQLALCHEMY_TRACK_MODIFICATIONS=False,
         ALEMBIC_CONTEXT={"render_as_batch": True},
     )
+    app.secret_key = os.environ.get("FLASK_SECRET_KEY")
 
     db.init_app(app)
     alembic.init_app(app)
     flask_bcrypt.init_app(app)
-    app.secret_key = os.environ.get("FLASK_SECRET_KEY")
 
     with app.app_context():
         from .routes.auth_routes import auth_bp
