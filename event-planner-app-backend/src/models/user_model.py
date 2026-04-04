@@ -12,6 +12,6 @@ class User(Base):
     email: Mapped[str] = mapped_column(String(100), unique=True)
     password: Mapped[str] = mapped_column(String(256))
 
-    itineraries: Mapped[List["Itinerary"]] = relationship(  # type: ignore  # noqa: F821
-        secondary="itinerary_users", back_populates="users"
+    itinerary_memberships: Mapped[List["ItineraryUser"]] = relationship(  # type: ignore  # noqa: F821
+        back_populates="user"
     )

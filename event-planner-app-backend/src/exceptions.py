@@ -24,3 +24,10 @@ class ItineraryDoesNotExistError(Exception):
         self.message = message
         self.status_code = 404
         super().__init__(self.message)
+
+
+class UserNotAuthorisedError(Exception):
+    def __init__(self, message="You are not authorised to completed this action."):
+        self.message = message
+        self.status_code = 400
+        super().__init__(self.message)

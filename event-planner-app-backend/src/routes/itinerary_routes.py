@@ -5,7 +5,11 @@ from ..controllers.itinerary_controller import (
     update_itinerary,
     delete_itinerary,
 )
-from ..exceptions import UserDoesNotExistError, ItineraryDoesNotExistError
+from ..exceptions import (
+    UserDoesNotExistError,
+    ItineraryDoesNotExistError,
+    UserNotAuthorisedError,
+)
 from ..schemas.itinerary_schema import ItinerarySchema
 from ..utils.format_response import api_response
 from ..middleware.login_required import login_required
@@ -42,11 +46,11 @@ def create_itinerary_route(user_id):
     try:
         schema = ItinerarySchema()
         validated_data = schema.load(request.json)
-        new_itineray = create_itinerary(user_id, validated_data)
+        new_itinerary = create_itinerary(user_id, validated_data)
 
         return api_response(
             success=True,
-            data=schema.dump(new_itineray),
+            data=schema.dump(new_itinerary),
             message="Succesfully created new itinerary.",
             status_code=201,
         )
@@ -75,7 +79,7 @@ def update_itinerary_route(user_id, itinerary_id):
         return api_response(
             success=False, message="Bad request.", error=err.messages, status_code=400
         )
-    except ItineraryDoesNotExistError as err:
+    except (ItineraryDoesNotExistError, UserNotAuthorisedError) as err:
         return api_response(
             success=False,
             message=err.message,

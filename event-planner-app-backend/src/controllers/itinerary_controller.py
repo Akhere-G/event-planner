@@ -1,31 +1,31 @@
 from ..extensions import db
-from ..models import User, Itinerary
+from ..models import Itinerary, ItineraryUser, UserRole
 from sqlalchemy import select
-from ..exceptions import UserDoesNotExistError, ItineraryDoesNotExistError
+from ..exceptions import UserNotAuthorisedError, ItineraryDoesNotExistError
 from sqlalchemy.orm import selectinload
 
 
 def get_itineraries(user_id: int):
     stmt = (
-        select(User).where(User.id == user_id).options(selectinload(User.itineraries))
+        select(ItineraryUser)
+        .where(ItineraryUser.user_id == user_id)
+        .options(selectinload(ItineraryUser.itinerary))
     )
-    user = db.session.execute(stmt).scalar_one_or_none()
+    results = db.session.execute(stmt).scalars().all()
 
-    if not user:
-        raise UserDoesNotExistError()
-
-    return user.itineraries
+    return [m.itinerary for m in results]
 
 
 def create_itinerary(user_id: int, data: dict):
-    stmt = select(User).where(User.id == user_id)
-    user = db.session.execute(stmt).scalar_one_or_none()
-
-    if not user:
-        raise UserDoesNotExistError()
-
     new_itinerary = Itinerary(**data)
-    user.itineraries.append(new_itinerary)
+    db.session.add(new_itinerary)
+    db.session.flush()
+
+    new_membership = ItineraryUser(
+        itinerary_id=new_itinerary.id, user_id=user_id, role=UserRole.ADMIN
+    )
+
+    db.session.add(new_membership)
     db.session.commit()
 
     return new_itinerary
@@ -33,15 +33,19 @@ def create_itinerary(user_id: int, data: dict):
 
 def update_itinerary(user_id: int, itinerary_id: int, data: dict):
     stmt = (
-        select(Itinerary)
-        .join(Itinerary.users)
-        .where(Itinerary.id == itinerary_id)
-        .where(User.id == user_id)
+        select(ItineraryUser)
+        .where(ItineraryUser.itinerary_id == itinerary_id)
+        .where(ItineraryUser.user_id == user_id)
     )
-    itinerary = db.session.execute(stmt).scalar_one_or_none()
+    membership = db.session.execute(stmt).scalar_one_or_none()
 
-    if not itinerary:
+    if not membership:
         raise ItineraryDoesNotExistError()
+
+    if membership.role != UserRole.ADMIN:
+        raise UserNotAuthorisedError("You must be an admin to update this itinerary.")
+
+    itinerary = membership.itinerary
 
     for k, v in data.items():
         if hasattr(itinerary, k):
@@ -53,16 +57,20 @@ def update_itinerary(user_id: int, itinerary_id: int, data: dict):
 
 def delete_itinerary(user_id: int, itinerary_id: int):
     stmt = (
-        select(Itinerary)
-        .join(Itinerary.users)
-        .where(Itinerary.id == itinerary_id)
-        .where(User.id == user_id)
+        select(ItineraryUser)
+        .where(ItineraryUser.itinerary_id == itinerary_id)
+        .where(ItineraryUser.user_id == user_id)
     )
 
-    itinerary = db.session.execute(stmt).scalar_one_or_none()
+    membership = db.session.execute(stmt).scalar_one_or_none()
 
-    if not itinerary:
+    if not membership:
         raise ItineraryDoesNotExistError()
+
+    if membership.role != UserRole.ADMIN:
+        raise UserNotAuthorisedError("You must be an admin to delete this itinerary.")
+
+    itinerary = membership.itinerary
 
     db.session.delete(itinerary)
     db.session.commit()

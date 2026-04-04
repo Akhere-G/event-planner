@@ -16,6 +16,6 @@ class Itinerary(Base):
     end_date: Mapped[date] = mapped_column(Date)
     created_at: Mapped[date] = mapped_column(Date, default=date.today)
 
-    users: Mapped[List["User"]] = relationship(  # type: ignore  # noqa: F821
-        secondary="itinerary_users", back_populates="itineraries"
+    user_memberships: Mapped[List["ItineraryUser"]] = relationship(  # type: ignore  # noqa: F821
+        back_populates="itinerary", cascade="all, delete-orphan"
     )
