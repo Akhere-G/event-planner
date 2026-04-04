@@ -11,9 +11,7 @@ def get_itineraries(user_id: int):
         .where(ItineraryUser.user_id == user_id)
         .options(selectinload(ItineraryUser.itinerary))
     )
-    results = db.session.execute(stmt).scalars().all()
-
-    return [m.itinerary for m in results]
+    return db.session.execute(stmt).scalars().all()
 
 
 def create_itinerary(user_id: int, data: dict):

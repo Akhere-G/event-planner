@@ -2,6 +2,9 @@ from marshmallow_sqlalchemy import SQLAlchemyAutoSchema, auto_field
 from ..models import Itinerary
 from marshmallow import pre_load
 import re
+from marshmallow import fields, post_dump, Schema
+from ..models import UserRole
+from .event_schema import EventSchema
 
 
 class ItinerarySchema(SQLAlchemyAutoSchema):
@@ -33,3 +36,16 @@ class ItinerarySchema(SQLAlchemyAutoSchema):
         }
     )
     created_at = auto_field(dump_only=True)
+
+    events = fields.Nested(EventSchema, many=True, dump_only=True)
+
+
+class ItineraryWithRoleSchema(Schema):
+    itinerary = fields.Nested("ItinerarySchema")
+    role = fields.Enum(UserRole)
+
+    @post_dump
+    def flatten_output(self, data, many, **kwargs):
+        itinerary_data = data.pop("itinerary")
+        itinerary_data["role"] = data["role"]
+        return itinerary_data

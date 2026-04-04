@@ -4,6 +4,7 @@ from sqlalchemy import Integer, String, Date
 from datetime import date
 from typing import Optional
 from typing import List
+from .itinerary_event_model import itinerary_events
 
 
 class Itinerary(Base):
@@ -18,4 +19,8 @@ class Itinerary(Base):
 
     user_memberships: Mapped[List["ItineraryUser"]] = relationship(  # type: ignore  # noqa: F821
         back_populates="itinerary", cascade="all, delete-orphan"
+    )
+
+    events: Mapped[List["Event"]] = relationship(  # type: ignore  # noqa: F821
+        secondary=itinerary_events
     )

@@ -10,7 +10,7 @@ from ..exceptions import (
     ItineraryDoesNotExistError,
     UserNotAuthorisedError,
 )
-from ..schemas.itinerary_schema import ItinerarySchema
+from ..schemas.itinerary_schema import ItinerarySchema, ItineraryWithRoleSchema
 from ..utils.format_response import api_response
 from ..middleware.login_required import login_required
 from marshmallow import ValidationError
@@ -22,7 +22,7 @@ itinerary_bp = Blueprint("itinerary", __name__)
 @login_required
 def get_itineraries_route(user_id):
     try:
-        schema = ItinerarySchema(many=True)
+        schema = ItineraryWithRoleSchema(many=True)
         result = get_itineraries(user_id)
         itineraries = schema.dump(result)
         return api_response(
