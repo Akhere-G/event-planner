@@ -3,6 +3,7 @@ from ..controllers.itinerary_controller import (
     get_itineraries,
     create_itinerary,
     update_itinerary,
+    delete_itinerary,
 )
 from ..exceptions import UserDoesNotExistError, ItineraryDoesNotExistError
 from ..schemas.itinerary_schema import ItinerarySchema
@@ -73,6 +74,23 @@ def update_itinerary_route(user_id, itinerary_id):
     except ValidationError as err:
         return api_response(
             success=False, message="Bad request.", error=err.messages, status_code=400
+        )
+    except ItineraryDoesNotExistError as err:
+        return api_response(
+            success=False,
+            message=err.message,
+            error=err.message,
+            status_code=err.status_code,
+        )
+
+
+@itinerary_bp.route("/<int:itinerary_id>", methods=["DELETE"])
+@login_required
+def delete_itinerary_route(user_id, itinerary_id):
+    try:
+        delete_itinerary(user_id, itinerary_id)
+        return api_response(
+            success=True, message="Successfully deleted Itinerary.", status_code=200
         )
     except ItineraryDoesNotExistError as err:
         return api_response(

@@ -49,3 +49,20 @@ def update_itinerary(user_id: int, itinerary_id: int, data: dict):
 
     db.session.commit()
     return itinerary
+
+
+def delete_itinerary(user_id: int, itinerary_id: int):
+    stmt = (
+        select(Itinerary)
+        .join(Itinerary.users)
+        .where(Itinerary.id == itinerary_id)
+        .where(User.id == user_id)
+    )
+
+    itinerary = db.session.execute(stmt).scalar_one_or_none()
+
+    if not itinerary:
+        raise ItineraryDoesNotExistError()
+
+    db.session.delete(itinerary)
+    db.session.commit()
