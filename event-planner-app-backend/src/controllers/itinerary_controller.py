@@ -5,6 +5,22 @@ from ..exceptions import UserNotAuthorisedError, ItineraryDoesNotExistError
 from sqlalchemy.orm import selectinload
 
 
+def get_itinerary(user_id: int, itinerary_id: int):
+    stmt = (
+        select(ItineraryUser)
+        .where(ItineraryUser.itinerary_id == itinerary_id)
+        .where(ItineraryUser.user_id == user_id)
+        .options(selectinload(ItineraryUser.itinerary))
+    )
+
+    itinerary = db.session.execute(stmt).scalar_one_or_none()
+
+    if not itinerary:
+        raise ItineraryDoesNotExistError
+
+    return itinerary
+
+
 def get_itineraries(user_id: int):
     stmt = (
         select(ItineraryUser)

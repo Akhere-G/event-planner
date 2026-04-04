@@ -1,6 +1,7 @@
 from flask import Blueprint, request
 from ..controllers.itinerary_controller import (
     get_itineraries,
+    get_itinerary,
     create_itinerary,
     update_itinerary,
     delete_itinerary,
@@ -36,6 +37,28 @@ def get_itineraries_route(user_id):
             message="User not found.",
             success=False,
             error="User not found.",
+            status_code=404,
+        )
+
+
+@itinerary_bp.route("<int:itinerary_id>", methods=["GET"])
+@login_required
+def get_itinerary_route(user_id, itinerary_id):
+    try:
+        schema = ItineraryWithRoleSchema()
+        result = get_itinerary(user_id, itinerary_id)
+
+        return api_response(
+            data=schema.dump(result),
+            message="Fetched itinerary.",
+            success=True,
+            status_code=200,
+        )
+    except ItineraryDoesNotExistError:
+        return api_response(
+            message="Itinerary not found.",
+            success=False,
+            error="Itinerary not found.",
             status_code=404,
         )
 
