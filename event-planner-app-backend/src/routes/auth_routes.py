@@ -71,3 +71,21 @@ def login_user_route():
             error="Could not login. Password or email incorrect.",
             status_code=401,
         )
+
+
+@auth_bp.route("/logout", methods=["POST"])
+def logout_user_route():
+    session.clear()
+    return api_response(
+        success=True, message="Successfully logged out.", status_code=200
+    )
+
+
+@auth_bp.route("/check", methods=["GET"])
+def check_auth():
+    user_id = session.get("user_id")
+    if user_id:
+        return api_response(
+            success=True, data={"userId": user_id}, message="User is authenticated."
+        )
+    return api_response(success=False, message="Not authenticated.", status_code=401)
