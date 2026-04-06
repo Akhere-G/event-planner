@@ -31,3 +31,10 @@ class UserNotAuthorisedError(Exception):
         self.message = message
         self.status_code = 403
         super().__init__(self.message)
+
+
+class EventNotFoundError(Exception):
+    def __init__(self, message="Event not found."):
+        self.message = message
+        self.status_code = 404
+        super().__init__(self.message)
