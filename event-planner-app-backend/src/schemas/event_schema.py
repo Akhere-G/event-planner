@@ -1,6 +1,6 @@
 from marshmallow_sqlalchemy import SQLAlchemyAutoSchema, auto_field
-from marshmallow import pre_load
-from ..models import Event
+from marshmallow import pre_load, fields
+from ..models import Event, EventStatus, EventSource
 import re
 
 
@@ -43,36 +43,16 @@ class EventSchema(SQLAlchemyAutoSchema):
         }
     )
     min_age = auto_field()
-    capacity = auto_field(
-        error_messages={
-            "required": "Capacity is required.",
-        }
-    )
-    event_status = auto_field()
+
+    event_source = fields.Enum(EventSource, by_value=True)
+    event_status = fields.Enum(EventStatus, by_value=True)
 
     price = auto_field(
         error_messages={
             "required": "Price is required.",
         }
     )
-    event_source = auto_field(
-        error_messages={
-            "required": "Event Source is required.",
-        }
-    )
-    image_url = auto_field(
-        error_messages={
-            "required": "Image source is required.",
-        }
-    )
-    video_url = auto_field()
-    external_id = auto_field(
-        error_messages={
-            "required": "External id is required.",
-        }
-    )
-    last_sync = auto_field(
-        error_messages={
-            "required": "Last sync is required.",
-        }
-    )
+
+    image_url = auto_field()
+    external_id = auto_field()
+    last_sync = auto_field()
