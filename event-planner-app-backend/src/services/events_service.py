@@ -9,8 +9,6 @@ from ..exceptions import (
 )
 from sqlalchemy import select, func
 
-from typing import List
-
 
 def get_events(user_id: int, itinerary_id: int):
     try:
@@ -61,7 +59,7 @@ def update_event(user_id: int, itinerary_id: int, event_id: int, data: dict):
         raise EventNotFoundError()
 
     if event.external_id is not None:
-        raise UserNotAuthorisedError("You cannot edit external events.")
+        raise UserNotAuthorisedError("You cannot edit non custom events.")
 
     for k, v in data.items():
         if k in [
