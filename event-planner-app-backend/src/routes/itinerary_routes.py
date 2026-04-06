@@ -7,7 +7,6 @@ from ..controllers.itinerary_controller import (
     delete_itinerary,
 )
 from ..exceptions import (
-    UserDoesNotExistError,
     ItineraryDoesNotExistError,
     UserNotAuthorisedError,
 )
@@ -22,23 +21,15 @@ itinerary_bp = Blueprint("itinerary", __name__)
 @itinerary_bp.route("", methods=["GET"])
 @login_required
 def get_itineraries_route(user_id):
-    try:
-        schema = ItineraryWithRoleSchema(many=True)
-        result = get_itineraries(user_id)
-        itineraries = schema.dump(result)
-        return api_response(
-            data={"itineraries": itineraries},
-            message="Fetched user itineraries.",
-            success=True,
-            status_code=200,
-        )
-    except UserDoesNotExistError:
-        return api_response(
-            message="User not found.",
-            success=False,
-            error="User not found.",
-            status_code=404,
-        )
+    schema = ItineraryWithRoleSchema(many=True)
+    result = get_itineraries(user_id)
+    itineraries = schema.dump(result)
+    return api_response(
+        data={"itineraries": itineraries},
+        message="Fetched user itineraries.",
+        success=True,
+        status_code=200,
+    )
 
 
 @itinerary_bp.route("<int:itinerary_id>", methods=["GET"])
