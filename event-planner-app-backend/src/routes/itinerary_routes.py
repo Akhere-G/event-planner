@@ -108,7 +108,10 @@ def delete_itinerary_route(user_id, itinerary_id):
     try:
         delete_itinerary(user_id, itinerary_id)
         return api_response(
-            success=True, message="Successfully deleted Itinerary.", status_code=200
+            success=True,
+            message="Successfully deleted Itinerary.",
+            data={"deleted_id": itinerary_id},
+            status_code=200,
         )
     except ItineraryDoesNotExistError as err:
         return api_response(
