@@ -1,5 +1,5 @@
 from ..extensions import db
-from ..models import Event
+from ..models import Event, itinerary_events
 from ..schemas.itinerary_schema import UserRole
 from .itinerary_controller import get_itinerary
 from ..exceptions import (
@@ -7,7 +7,9 @@ from ..exceptions import (
     UserNotAuthorisedError,
     EventNotFoundError,
 )
-from sqlalchemy import select
+from sqlalchemy import select, func
+
+from typing import List
 
 
 def get_events(user_id: int, itinerary_id: int):
@@ -75,3 +77,32 @@ def update_event(user_id: int, itinerary_id: int, event_id: int, data: dict):
 
     db.session.commit()
     return event
+
+
+def delete_event(user_id: int, itinerary_id: int, event_id: int):
+    result = get_itinerary(user_id, itinerary_id)
+    itinerary = result.itinerary
+
+    if result.role not in [UserRole.ADMIN, UserRole.EDITOR]:
+        raise UserNotAuthorisedError(
+            "You must be an admin or an editor to delete events."
+        )
+
+    event = next((e for e in itinerary.events if e.id == event_id), None)
+
+    if not event:
+        raise EventNotFoundError()
+
+    itinerary.events.remove(event)
+
+    db.session.flush()
+
+    count = db.session.execute(
+        select(func.count())
+        .select_from(itinerary_events)
+        .where(itinerary_events.c.event_id == event.id)
+    ).scalar()
+
+    if count == 0:
+        db.session.delete(event)
+    db.session.commit()
