@@ -4,7 +4,11 @@ from ..controllers.events_controller import get_events, create_event, update_eve
 from ..schemas.event_schema import EventSchema
 from ..utils.format_response import api_response
 from marshmallow import ValidationError
-from ..exceptions import UserNotAuthorisedError, EventNotFoundError
+from ..exceptions import (
+    UserNotAuthorisedError,
+    EventNotFoundError,
+    ItineraryDoesNotExistError,
+)
 
 events_bp = Blueprint("events", __name__)
 
@@ -41,7 +45,7 @@ def create_events_route(user_id: int, itinerary_id: int):
         return api_response(
             message="Bad request.", success=False, error=err.messages, status_code=400
         )
-    except UserNotAuthorisedError as err:
+    except (UserNotAuthorisedError, ItineraryDoesNotExistError) as err:
         return api_response(
             message=err.message,
             success=False,
@@ -68,7 +72,11 @@ def update_event_route(user_id: int, itinerary_id: int, event_id: int):
         return api_response(
             message="Bad request.", success=False, error=err.messages, status_code=400
         )
-    except (UserNotAuthorisedError, EventNotFoundError) as err:
+    except (
+        UserNotAuthorisedError,
+        ItineraryDoesNotExistError,
+        EventNotFoundError,
+    ) as err:
         return api_response(
             message=err.message,
             success=False,
