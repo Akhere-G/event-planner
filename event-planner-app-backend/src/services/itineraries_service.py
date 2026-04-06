@@ -50,6 +50,7 @@ def update_itinerary(user_id: int, itinerary_id: int, data: dict):
         select(ItineraryUser)
         .where(ItineraryUser.itinerary_id == itinerary_id)
         .where(ItineraryUser.user_id == user_id)
+        .options(selectinload(ItineraryUser.itinerary))
     )
     membership = db.session.execute(stmt).scalar_one_or_none()
 
@@ -74,6 +75,7 @@ def delete_itinerary(user_id: int, itinerary_id: int):
         select(ItineraryUser)
         .where(ItineraryUser.itinerary_id == itinerary_id)
         .where(ItineraryUser.user_id == user_id)
+        .options(selectinload(ItineraryUser.itinerary))
     )
 
     membership = db.session.execute(stmt).scalar_one_or_none()
