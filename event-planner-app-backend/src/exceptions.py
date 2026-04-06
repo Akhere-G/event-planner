@@ -15,7 +15,7 @@ class UserDoesNotExistError(Exception):
 class InvalidCredentialsError(Exception):
     def __init__(self, message="Invalid Credentials."):
         self.message = message
-        self.status_code = 400
+        self.status_code = 401
         super().__init__(self.message)
 
 
@@ -27,7 +27,7 @@ class ItineraryDoesNotExistError(Exception):
 
 
 class UserNotAuthorisedError(Exception):
-    def __init__(self, message="You are not authorised to completed this action."):
+    def __init__(self, message="You are not authorised to complete this action."):
         self.message = message
-        self.status_code = 400
+        self.status_code = 403
         super().__init__(self.message)
