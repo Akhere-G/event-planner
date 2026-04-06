@@ -1,6 +1,6 @@
 from flask import Blueprint, request
 from ..middleware.login_required import login_required
-from ..controllers.events_controller import (
+from ..services.events_service import (
     get_events,
     create_event,
     update_event,

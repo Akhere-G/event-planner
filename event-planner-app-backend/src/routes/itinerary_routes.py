@@ -1,5 +1,5 @@
 from flask import Blueprint, request
-from ..controllers.itinerary_controller import (
+from ..services.itineraries_service import (
     get_itineraries,
     get_itinerary,
     create_itinerary,

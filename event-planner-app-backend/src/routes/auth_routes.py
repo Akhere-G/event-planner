@@ -1,6 +1,6 @@
 from flask import Blueprint, request, session
 from marshmallow import ValidationError
-from ..controllers.auth_controller import register_user, login_user
+from ..services.auth_service import register_user, login_user
 from ..exceptions import (
     UserAlreadyExistsError,
     UserDoesNotExistError,
