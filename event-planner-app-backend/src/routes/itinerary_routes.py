@@ -113,7 +113,7 @@ def delete_itinerary_route(user_id, itinerary_id):
             data={"deleted_id": itinerary_id},
             status_code=200,
         )
-    except ItineraryDoesNotExistError as err:
+    except (ItineraryDoesNotExistError, UserNotAuthorisedError) as err:
         return api_response(
             success=False,
             message=err.message,
