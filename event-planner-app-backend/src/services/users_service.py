@@ -69,3 +69,25 @@ def update_user_role(
     membership.role = new_role
     db.session.commit()
     return membership
+
+
+def remove_user(user_id: int, itinerary_id: int, other_user_id: int):
+    membership = get_itinerary_membership(other_user_id, itinerary_id)
+
+    if membership.role == UserRole.ADMIN.value:
+        if membership.user_id != user_id:
+            raise UserNotAuthorisedError("You cannot remove other admins.")
+        count = db.session.execute(
+            select(func.count())
+            .select_from(ItineraryUser)
+            .where(ItineraryUser.itinerary_id == itinerary_id)
+            .where(ItineraryUser.role == UserRole.ADMIN.value)
+        ).scalar_one_or_none()
+        if count <= 1:
+            raise UserNotAuthorisedError(
+                "You cannot remove yourself when there is only one admin. Appoint another first."
+            )
+
+    db.session.delete(membership)
+    db.session.commit()
+    return other_user_id

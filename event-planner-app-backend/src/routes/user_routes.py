@@ -9,7 +9,11 @@ from ..exceptions import (
 )
 from ..utils.format_response import api_response
 from ..schemas.user_schema import UserWithRoleSchema, AddOrUpdateUserRoleSchema
-from ..services.users_service import add_user_to_itinerary, update_user_role
+from ..services.users_service import (
+    add_user_to_itinerary,
+    update_user_role,
+    remove_user,
+)
 from marshmallow import ValidationError
 from ..models import UserRole
 
@@ -84,7 +88,7 @@ def add_user_to_itinerary_route(user_id: int, itinerary_id: int):
         )
 
 
-@user_bp.route("/<other_user_id>", methods=["PATCH"])
+@user_bp.route("/<int:other_user_id>", methods=["PATCH"])
 @login_required
 def update_user_role_route(user_id: int, itinerary_id: int, other_user_id: int):
     new_role = request.json.get("role")
@@ -113,6 +117,37 @@ def update_user_role_route(user_id: int, itinerary_id: int, other_user_id: int):
             data=user_schema.dump(membership),
             success=True,
             message="Updated membership.",
+            status_code=200,
+        )
+    except (
+        ItineraryDoesNotExistError,
+        UserNotAuthorisedError,
+        UserDoesNotExistError,
+    ) as err:
+        return api_response(
+            message=err.message,
+            success=False,
+            error=err.message,
+            status_code=err.status_code,
+        )
+
+
+@user_bp.route("/<int:other_user_id>", methods=["DELETE"])
+@login_required
+def remove_user_route(user_id: int, itinerary_id: int, other_user_id: int):
+    try:
+        is_authorised(
+            user_id=user_id,
+            itinerary_id=itinerary_id,
+            message="You must be an admin to remove users.",
+        )
+        deleted_user_id = remove_user(
+            user_id=user_id, itinerary_id=itinerary_id, other_user_id=other_user_id
+        )
+        return api_response(
+            data={"deleted_id": deleted_user_id},
+            success=True,
+            message="removed member.",
             status_code=200,
         )
     except (

@@ -16,7 +16,7 @@ def get_itinerary_membership(user_id: int, itinerary_id: int):
     membership = db.session.execute(stmt).scalar_one_or_none()
 
     if not membership:
-        raise ItineraryDoesNotExistError
+        raise ItineraryDoesNotExistError()
 
     return membership
 
@@ -36,7 +36,7 @@ def get_itinerary(itinerary_id: int):
     itinerary = db.session.execute(stmt).scalar_one_or_none()
 
     if not itinerary:
-        raise ItineraryDoesNotExistError
+        raise ItineraryDoesNotExistError()
 
     return itinerary
 
