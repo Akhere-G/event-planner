@@ -103,11 +103,16 @@ def update_user_role_route(user_id: int, itinerary_id: int, other_user_id: int):
         )
 
         user_schema = UserWithRoleSchema()
-        membership = update_user_role(itinerary_id, other_user_id, new_role)
+        membership = update_user_role(
+            user_id=user_id,
+            itinerary_id=itinerary_id,
+            other_user_id=other_user_id,
+            new_role=new_role,
+        )
         return api_response(
             data=user_schema.dump(membership),
             success=True,
-            message="Updated membership",
+            message="Updated membership.",
             status_code=200,
         )
     except (
