@@ -5,7 +5,7 @@ from ..exceptions import UserNotAuthorisedError, ItineraryDoesNotExistError
 from sqlalchemy.orm import selectinload
 
 
-def get_itinerary(user_id: int, itinerary_id: int):
+def get_itinerary_membership(user_id: int, itinerary_id: int):
     stmt = (
         select(ItineraryUser)
         .where(ItineraryUser.itinerary_id == itinerary_id)
@@ -21,7 +21,32 @@ def get_itinerary(user_id: int, itinerary_id: int):
     return itinerary
 
 
+def get_itinerary(itinerary_id: int):
+    stmt = select(Itinerary).where(Itinerary.id == itinerary_id)
+
+    itinerary = db.session.execute(stmt).scalar_one_or_none()
+
+    if not itinerary:
+        raise ItineraryDoesNotExistError
+
+    return itinerary
+
+
 def get_itineraries(user_id: int):
+    stmt = (
+        select(Itinerary)
+        .join(Itinerary.user_memberships)
+        .where(ItineraryUser.user_id == user_id)
+        .options(
+            selectinload(Itinerary.user_memberships).selectinload(ItineraryUser.user),
+            selectinload(Itinerary.events),
+        )
+    )
+
+    return db.session.execute(stmt).scalars().all()
+
+
+def get_itinerary_memberships(user_id: int):
     stmt = (
         select(ItineraryUser)
         .where(ItineraryUser.user_id == user_id)
@@ -45,7 +70,13 @@ def create_itinerary(user_id: int, data: dict):
     return new_itinerary
 
 
-def update_itinerary(user_id: int, itinerary_id: int, data: dict):
+def is_authorised(
+    user_id: int,
+    itinerary_id: int,
+    authorised_roles=None,
+    message="You are not authorised to complete this action.",
+):
+    authorised_roles = authorised_roles or [UserRole.ADMIN]
     stmt = (
         select(ItineraryUser)
         .where(ItineraryUser.itinerary_id == itinerary_id)
@@ -57,8 +88,20 @@ def update_itinerary(user_id: int, itinerary_id: int, data: dict):
     if not membership:
         raise ItineraryDoesNotExistError()
 
-    if membership.role != UserRole.ADMIN:
-        raise UserNotAuthorisedError("You must be an admin to update this itinerary.")
+    if membership.role not in authorised_roles:
+        raise UserNotAuthorisedError(message)
+
+
+def update_itinerary(itinerary_id: int, data: dict):
+    stmt = (
+        select(ItineraryUser)
+        .where(ItineraryUser.itinerary_id == itinerary_id)
+        .options(selectinload(ItineraryUser.itinerary))
+    )
+    membership = db.session.execute(stmt).scalar_one_or_none()
+
+    if not membership:
+        raise ItineraryDoesNotExistError()
 
     itinerary = membership.itinerary
 
@@ -70,11 +113,10 @@ def update_itinerary(user_id: int, itinerary_id: int, data: dict):
     return itinerary
 
 
-def delete_itinerary(user_id: int, itinerary_id: int):
+def delete_itinerary(itinerary_id: int):
     stmt = (
         select(ItineraryUser)
         .where(ItineraryUser.itinerary_id == itinerary_id)
-        .where(ItineraryUser.user_id == user_id)
         .options(selectinload(ItineraryUser.itinerary))
     )
 
@@ -82,9 +124,6 @@ def delete_itinerary(user_id: int, itinerary_id: int):
 
     if not membership:
         raise ItineraryDoesNotExistError()
-
-    if membership.role != UserRole.ADMIN:
-        raise UserNotAuthorisedError("You must be an admin to delete this itinerary.")
 
     itinerary = membership.itinerary
 

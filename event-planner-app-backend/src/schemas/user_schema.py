@@ -1,4 +1,3 @@
-import re
 from ..models import User
 from marshmallow_sqlalchemy import SQLAlchemyAutoSchema, auto_field
 from marshmallow import (
@@ -9,6 +8,7 @@ from marshmallow import (
     ValidationError,
     post_dump,
 )
+from ..models import UserRole
 
 
 class UserSchema(SQLAlchemyAutoSchema):
@@ -22,7 +22,7 @@ class UserSchema(SQLAlchemyAutoSchema):
 
 
 class UserWithRoleSchema(Schema):
-    role = fields.String(required=True, dump_only=True)
+    role = fields.Enum(UserRole)  # type: ignore
     user = fields.Nested(UserSchema, dump_only=True)
 
     @post_dump

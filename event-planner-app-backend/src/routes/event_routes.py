@@ -6,7 +6,9 @@ from ..services.events_service import (
     update_event,
     delete_event,
 )
+from ..services.itineraries_service import is_authorised
 from ..schemas.event_schema import EventSchema
+from ..schemas.itinerary_schema import UserRole
 from ..utils.format_response import api_response
 from marshmallow import ValidationError
 from ..exceptions import (
@@ -23,7 +25,7 @@ event_bp = Blueprint("events", __name__)
 def get_events_routes(user_id: str, itinerary_id: str):
     schema = EventSchema(many=True)
 
-    events = get_events(user_id, itinerary_id)
+    events = get_events(itinerary_id)
     return api_response(
         success=True,
         data={"events": schema.dump(events)},
@@ -38,8 +40,14 @@ def create_events_route(user_id: int, itinerary_id: int):
     schema = EventSchema()
 
     try:
+        is_authorised(
+            user_id=user_id,
+            itinerary_id=itinerary_id,
+            authorised_roles=[UserRole.ADMIN, UserRole.EDITOR],
+            message="You must be an admin or an editor to add events.",
+        )
         validated_event = schema.load(request.json)
-        new_event = create_event(user_id, itinerary_id, validated_event)
+        new_event = create_event(itinerary_id, validated_event)
         return api_response(
             message="Created new event.",
             data=schema.dump(new_event),
@@ -65,8 +73,14 @@ def update_event_route(user_id: int, itinerary_id: int, event_id: int):
     schema = EventSchema(partial=True)
 
     try:
+        is_authorised(
+            user_id=user_id,
+            itinerary_id=itinerary_id,
+            authorised_roles=[UserRole.ADMIN, UserRole.EDITOR],
+            message="You must be an admin or an editor to update events.",
+        )
         validated_event = schema.load(request.json)
-        updated_event = update_event(user_id, itinerary_id, event_id, validated_event)
+        updated_event = update_event(itinerary_id, event_id, validated_event)
         return api_response(
             message="Updated event.",
             data=schema.dump(updated_event),
@@ -94,7 +108,14 @@ def update_event_route(user_id: int, itinerary_id: int, event_id: int):
 @login_required
 def delete_event_route(user_id: int, itinerary_id: int, event_id: int):
     try:
-        delete_event(user_id, itinerary_id, event_id)
+        is_authorised(
+            user_id=user_id,
+            itinerary_id=itinerary_id,
+            authorised_roles=[UserRole.ADMIN, UserRole.EDITOR],
+            message="You must be an admin or an editor to delete events.",
+        )
+
+        delete_event(itinerary_id, event_id)
         return api_response(
             message="Event removed from itinerary.",
             success=True,

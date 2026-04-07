@@ -1,10 +1,11 @@
 from flask import Blueprint, request
 from ..services.itineraries_service import (
-    get_itineraries,
-    get_itinerary,
+    get_itinerary_memberships,
+    get_itinerary_membership,
     create_itinerary,
     update_itinerary,
     delete_itinerary,
+    is_authorised,
 )
 from ..exceptions import (
     ItineraryDoesNotExistError,
@@ -22,7 +23,7 @@ itinerary_bp = Blueprint("itinerary", __name__)
 @login_required
 def get_itineraries_route(user_id):
     schema = ItineraryWithRoleSchema(many=True)
-    result = get_itineraries(user_id)
+    result = get_itinerary_memberships(user_id)
     itineraries = schema.dump(result)
     return api_response(
         data={"itineraries": itineraries},
@@ -37,7 +38,7 @@ def get_itineraries_route(user_id):
 def get_itinerary_route(user_id, itinerary_id):
     try:
         schema = ItineraryWithRoleSchema()
-        result = get_itinerary(user_id, itinerary_id)
+        result = get_itinerary_membership(user_id, itinerary_id)
 
         return api_response(
             data=schema.dump(result),
@@ -79,9 +80,14 @@ def create_itinerary_route(user_id):
 @login_required
 def update_itinerary_route(user_id, itinerary_id):
     try:
+        is_authorised(
+            user_id=user_id,
+            itinerary_id=itinerary_id,
+            message="You must be an admin to update this itinerary.",
+        )
         schema = ItinerarySchema(partial=True)
         validated_data = schema.load(request.json)
-        updated_itinerary = update_itinerary(user_id, itinerary_id, validated_data)
+        updated_itinerary = update_itinerary(itinerary_id, validated_data)
 
         return api_response(
             success=True,
@@ -106,7 +112,12 @@ def update_itinerary_route(user_id, itinerary_id):
 @login_required
 def delete_itinerary_route(user_id, itinerary_id):
     try:
-        delete_itinerary(user_id, itinerary_id)
+        is_authorised(
+            user_id=user_id,
+            itinerary_id=itinerary_id,
+            message="You must be an admin to delete this itinerary.",
+        )
+        delete_itinerary(itinerary_id)
         return api_response(
             success=True,
             message="Successfully deleted Itinerary.",

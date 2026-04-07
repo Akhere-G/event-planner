@@ -1,6 +1,5 @@
 from ..extensions import db
 from ..models import Event, itinerary_events
-from ..schemas.itinerary_schema import UserRole
 from .itineraries_service import get_itinerary
 from ..exceptions import (
     ItineraryDoesNotExistError,
@@ -10,20 +9,16 @@ from ..exceptions import (
 from sqlalchemy import select, func
 
 
-def get_events(user_id: int, itinerary_id: int):
+def get_events(itinerary_id: int):
     try:
-        results = get_itinerary(user_id, itinerary_id)
-        return results.itinerary.events
+        results = get_itinerary(itinerary_id)
+        return results.events
     except ItineraryDoesNotExistError:
         return []
 
 
-def create_event(user_id: int, itinerary_id: int, data: dict):
-    result = get_itinerary(user_id, itinerary_id)
-    itinerary = result.itinerary
-
-    if result.role not in [UserRole.ADMIN, UserRole.EDITOR]:
-        raise UserNotAuthorisedError("You must be an admin or an editor to add events.")
+def create_event(itinerary_id: int, data: dict):
+    itinerary = get_itinerary(itinerary_id)
 
     external_id = data.get("external_id")
     event = None
@@ -44,14 +39,8 @@ def create_event(user_id: int, itinerary_id: int, data: dict):
     return event
 
 
-def update_event(user_id: int, itinerary_id: int, event_id: int, data: dict):
-    result = get_itinerary(user_id, itinerary_id)
-    itinerary = result.itinerary
-
-    if result.role not in [UserRole.ADMIN, UserRole.EDITOR]:
-        raise UserNotAuthorisedError(
-            "You must be an admin or an editor to update events."
-        )
+def update_event(itinerary_id: int, event_id: int, data: dict):
+    itinerary = get_itinerary(itinerary_id)
 
     event = next((e for e in itinerary.events if e.id == event_id), None)
 
@@ -77,14 +66,8 @@ def update_event(user_id: int, itinerary_id: int, event_id: int, data: dict):
     return event
 
 
-def delete_event(user_id: int, itinerary_id: int, event_id: int):
-    result = get_itinerary(user_id, itinerary_id)
-    itinerary = result.itinerary
-
-    if result.role not in [UserRole.ADMIN, UserRole.EDITOR]:
-        raise UserNotAuthorisedError(
-            "You must be an admin or an editor to delete events."
-        )
+def delete_event(itinerary_id: int, event_id: int):
+    itinerary = get_itinerary(itinerary_id)
 
     event = next((e for e in itinerary.events if e.id == event_id), None)
 
