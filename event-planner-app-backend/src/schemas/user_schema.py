@@ -22,7 +22,7 @@ class UserSchema(SQLAlchemyAutoSchema):
 
 
 class UserWithRoleSchema(Schema):
-    role = fields.Enum(UserRole)  # type: ignore
+    role = fields.Enum(UserRole, by_value=True)
     user = fields.Nested(UserSchema, dump_only=True)
 
     @post_dump
@@ -83,3 +83,15 @@ class RegisterSchema(SQLAlchemyAutoSchema):
     def validate_passwords(self, data, **kwargs):
         if data.get("password") != data.get("repeat_password"):
             raise ValidationError("Passwords must match.", field_name="repeat_password")
+
+
+class AddOrUpdateUserRoleSchema(Schema):
+    email = fields.Email(
+        required=True, error_messages={"required": "Email is required."}
+    )
+    role = fields.Enum(
+        UserRole,
+        by_value=True,
+        required=True,
+        error_messages={"required": "Role is required."},
+    )

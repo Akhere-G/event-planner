@@ -44,7 +44,7 @@ class ItinerarySchema(SQLAlchemyAutoSchema):
 
 class ItineraryWithRoleSchema(Schema):
     itinerary = fields.Nested("ItinerarySchema")
-    role = fields.Enum(UserRole)
+    role = fields.Enum(UserRole, by_value=True)
 
     @post_dump
     def flatten_output(self, data, many, **kwargs):
