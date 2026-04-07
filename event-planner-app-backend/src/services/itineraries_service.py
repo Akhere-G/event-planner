@@ -13,12 +13,21 @@ def get_itinerary_membership(user_id: int, itinerary_id: int):
         .options(selectinload(ItineraryUser.itinerary))
     )
 
-    itinerary = db.session.execute(stmt).scalar_one_or_none()
+    membership = db.session.execute(stmt).scalar_one_or_none()
 
-    if not itinerary:
+    if not membership:
         raise ItineraryDoesNotExistError
 
-    return itinerary
+    return membership
+
+
+def get_itinerary_memberships(user_id: int):
+    stmt = (
+        select(ItineraryUser)
+        .where(ItineraryUser.user_id == user_id)
+        .options(selectinload(ItineraryUser.itinerary))
+    )
+    return db.session.execute(stmt).scalars().all()
 
 
 def get_itinerary(itinerary_id: int):
@@ -46,15 +55,6 @@ def get_itineraries(user_id: int):
     return db.session.execute(stmt).scalars().all()
 
 
-def get_itinerary_memberships(user_id: int):
-    stmt = (
-        select(ItineraryUser)
-        .where(ItineraryUser.user_id == user_id)
-        .options(selectinload(ItineraryUser.itinerary))
-    )
-    return db.session.execute(stmt).scalars().all()
-
-
 def create_itinerary(user_id: int, data: dict):
     new_itinerary = Itinerary(**data)
     db.session.add(new_itinerary)
@@ -77,16 +77,7 @@ def is_authorised(
     message="You are not authorised to complete this action.",
 ):
     authorised_roles = authorised_roles or [UserRole.ADMIN]
-    stmt = (
-        select(ItineraryUser)
-        .where(ItineraryUser.itinerary_id == itinerary_id)
-        .where(ItineraryUser.user_id == user_id)
-        .options(selectinload(ItineraryUser.itinerary))
-    )
-    membership = db.session.execute(stmt).scalar_one_or_none()
-
-    if not membership:
-        raise ItineraryDoesNotExistError()
+    membership = get_itinerary_membership(user_id, itinerary_id)
 
     if membership.role not in authorised_roles:
         raise UserNotAuthorisedError(message)

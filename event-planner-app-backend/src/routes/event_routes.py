@@ -6,7 +6,7 @@ from ..services.events_service import (
     update_event,
     delete_event,
 )
-from ..services.itineraries_service import is_authorised
+from ..services.itineraries_service import is_authorised, get_itinerary_membership
 from ..schemas.event_schema import EventSchema
 from ..schemas.itinerary_schema import UserRole
 from ..utils.format_response import api_response
@@ -24,14 +24,20 @@ event_bp = Blueprint("events", __name__)
 @login_required
 def get_events_routes(user_id: str, itinerary_id: str):
     schema = EventSchema(many=True)
+    try:
+        get_itinerary_membership(user_id, itinerary_id)
 
-    events = get_events(itinerary_id)
-    return api_response(
-        success=True,
-        data={"events": schema.dump(events)},
-        message="Fetched events from user itineraries.",
-        status_code=200,
-    )
+        events = get_events(itinerary_id)
+        return api_response(
+            success=True,
+            data={"events": schema.dump(events)},
+            message="Fetched events from user itineraries.",
+            status_code=200,
+        )
+    except ItineraryDoesNotExistError as err:
+        return api_response(
+            message=err.message, success=False, status_code=err.status_code
+        )
 
 
 @event_bp.route("", methods=["POST"])
