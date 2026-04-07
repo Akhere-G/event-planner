@@ -5,9 +5,14 @@ import enum
 
 
 class UserRole(enum.Enum):
-    ADMIN = "Admin"
-    EDITOR = "Editor"
-    VIEWER = "Viewer"
+    ADMIN = "admin"
+    EDITOR = "editor"
+    VIEWER = "viewer"
+
+    @classmethod
+    def has_value(cls, value, values: list["UserRole"] = None):
+        values = values or cls
+        return value in [role.value for role in values]
 
 
 class ItineraryUser(Base):
@@ -19,7 +24,9 @@ class ItineraryUser(Base):
     user_id: Mapped[int] = mapped_column(
         ForeignKey("users.id", ondelete="CASCADE"), primary_key=True
     )
-    role: Mapped[UserRole] = mapped_column(Enum(UserRole), default=UserRole.VIEWER)
+    role: Mapped[UserRole] = mapped_column(
+        Enum("admin", "editor", "viewer", name="userrole"), default=UserRole.VIEWER
+    )
 
     user: Mapped["User"] = relationship(back_populates="itinerary_memberships")  # type: ignore  # noqa: F821
     itinerary: Mapped["Itinerary"] = relationship(back_populates="user_memberships")  # type: ignore  # noqa: F821

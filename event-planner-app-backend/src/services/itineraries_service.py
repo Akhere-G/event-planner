@@ -79,7 +79,7 @@ def is_authorised(
     authorised_roles = authorised_roles or [UserRole.ADMIN]
     membership = get_itinerary_membership(user_id, itinerary_id)
 
-    if membership.role not in authorised_roles:
+    if not UserRole.has_value(membership.role, authorised_roles):
         raise UserNotAuthorisedError(message)
 
 

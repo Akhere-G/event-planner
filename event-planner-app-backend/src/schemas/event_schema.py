@@ -1,5 +1,5 @@
 from marshmallow_sqlalchemy import SQLAlchemyAutoSchema, auto_field
-from marshmallow import pre_load, fields
+from marshmallow import pre_load, fields, validate
 from ..models import Event, EventStatus, EventSource
 import re
 
@@ -44,8 +44,19 @@ class EventSchema(SQLAlchemyAutoSchema):
     )
     min_age = auto_field()
 
-    event_source = fields.Enum(EventSource, by_value=True)
-    event_status = fields.Enum(EventStatus, by_value=True)
+    event_status = fields.String(
+        validate=validate.OneOf([e.value for e in EventStatus]),
+        metadata={
+            "description": f"Must be one of: {', '.join([e.value for e in EventStatus])}"
+        },
+    )
+
+    event_source = fields.String(
+        validate=validate.OneOf([e.value for e in EventSource]),
+        metadata={
+            "description": f"Must be one of: {', '.join([e.value for e in EventSource])}"
+        },
+    )
 
     price = auto_field(
         error_messages={

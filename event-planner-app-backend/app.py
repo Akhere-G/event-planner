@@ -1,6 +1,19 @@
 from src.config.config import Config
 from src import create_app
-from src.models import User, Itinerary, ItineraryUser
+from src.models import (
+    User,
+    Itinerary,
+    ItineraryUser,
+    UserRole,
+    User,
+    Itinerary,
+    ItineraryUser,
+    itinerary_events,
+    UserRole,
+    Event,
+    EventSource,
+    EventStatus,
+)
 
 dev_config = Config().dev_config
 app = create_app(config_class=dev_config)

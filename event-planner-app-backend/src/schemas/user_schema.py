@@ -22,7 +22,12 @@ class UserSchema(SQLAlchemyAutoSchema):
 
 
 class UserWithRoleSchema(Schema):
-    role = fields.Enum(UserRole, by_value=True)
+    role = fields.String(
+        validate=validate.OneOf([e.value for e in UserRole]),
+        metadata={
+            "description": f"Must be one of: {', '.join([e.value for e in UserRole])}"
+        },
+    )
     user = fields.Nested(UserSchema, dump_only=True)
 
     @post_dump
@@ -89,9 +94,9 @@ class AddOrUpdateUserRoleSchema(Schema):
     email = fields.Email(
         required=True, error_messages={"required": "Email is required."}
     )
-    role = fields.Enum(
-        UserRole,
-        by_value=True,
-        required=True,
-        error_messages={"required": "Role is required."},
+    role = fields.String(
+        validate=validate.OneOf([e.value for e in UserRole]),
+        metadata={
+            "description": f"Must be one of: {', '.join([e.value for e in UserRole])}"
+        },
     )

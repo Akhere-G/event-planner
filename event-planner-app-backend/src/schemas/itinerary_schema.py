@@ -2,7 +2,7 @@ from marshmallow_sqlalchemy import SQLAlchemyAutoSchema, auto_field
 from ..models import Itinerary
 from marshmallow import pre_load
 import re
-from marshmallow import fields, post_dump, Schema
+from marshmallow import fields, post_dump, Schema, validate
 from ..models import UserRole
 from .event_schema import EventSchema
 from .user_schema import UserWithRoleSchema
@@ -44,7 +44,12 @@ class ItinerarySchema(SQLAlchemyAutoSchema):
 
 class ItineraryWithRoleSchema(Schema):
     itinerary = fields.Nested("ItinerarySchema")
-    role = fields.Enum(UserRole, by_value=True)
+    role = fields.String(
+        validate=validate.OneOf([e.value for e in UserRole]),
+        metadata={
+            "description": f"Must be one of: {', '.join([e.value for e in UserRole])}"
+        },
+    )
 
     @post_dump
     def flatten_output(self, data, many, **kwargs):

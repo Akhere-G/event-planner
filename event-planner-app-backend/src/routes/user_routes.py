@@ -9,8 +9,9 @@ from ..exceptions import (
 )
 from ..utils.format_response import api_response
 from ..schemas.user_schema import UserWithRoleSchema, AddOrUpdateUserRoleSchema
-from ..services.users_service import add_user_to_itinerary
+from ..services.users_service import add_user_to_itinerary, update_user_role
 from marshmallow import ValidationError
+from ..models import UserRole
 
 
 user_bp = Blueprint("user", __name__)
@@ -51,7 +52,11 @@ def add_user_to_itinerary_route(user_id: int, itinerary_id: int):
 
         validated_data = schema.load(request.json)
 
-        membership = add_user_to_itinerary(user_id, itinerary_id, validated_data)
+        membership = add_user_to_itinerary(
+            itinerary_id=itinerary_id,
+            email=validated_data["email"],
+            role=validated_data["role"],
+        )
         return api_response(
             message="Added user.",
             success=True,
@@ -70,6 +75,45 @@ def add_user_to_itinerary_route(user_id: int, itinerary_id: int):
         UserNotAuthorisedError,
         UserDoesNotExistError,
         UserAlreadyExistsError,
+    ) as err:
+        return api_response(
+            message=err.message,
+            success=False,
+            error=err.message,
+            status_code=err.status_code,
+        )
+
+
+@user_bp.route("/<other_user_id>", methods=["PATCH"])
+@login_required
+def update_user_role_route(user_id: int, itinerary_id: int, other_user_id: int):
+    new_role = request.json.get("role")
+    if not new_role or not UserRole.has_value(new_role):
+        return api_response(
+            message="Bad request.",
+            success=False,
+            error="User role must be admin, editor, or viewer.",
+            status_code=400,
+        )
+    try:
+        is_authorised(
+            user_id=user_id,
+            itinerary_id=itinerary_id,
+            message="You must be an admin to update user roles.",
+        )
+
+        user_schema = UserWithRoleSchema()
+        membership = update_user_role(itinerary_id, other_user_id, new_role)
+        return api_response(
+            data=user_schema.dump(membership),
+            success=True,
+            message="Updated membership",
+            status_code=200,
+        )
+    except (
+        ItineraryDoesNotExistError,
+        UserNotAuthorisedError,
+        UserDoesNotExistError,
     ) as err:
         return api_response(
             message=err.message,

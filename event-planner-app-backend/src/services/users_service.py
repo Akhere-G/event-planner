@@ -1,4 +1,4 @@
-from .itineraries_service import get_itinerary_membership
+from .itineraries_service import get_itinerary_membership, get_itinerary
 from ..models import ItineraryUser
 from ..extensions import db
 from sqlalchemy import select
@@ -9,8 +9,11 @@ from ..exceptions import (
 )
 
 
-def get_user(email: str):
-    stmt = select(User).where(User.email == email)
+def get_user(email: str = None, id: str = None):
+    if id:
+        stmt = select(User).where(User.id == id)
+    else:
+        stmt = select(User).where(User.email == email)
     user = db.session.execute(stmt).scalar_one_or_none()
 
     if not user:
@@ -19,10 +22,10 @@ def get_user(email: str):
     return user
 
 
-def add_user_to_itinerary(user_id: int, itinerary_id: int, data: dict):
-    get_itinerary_membership(user_id, itinerary_id)
+def add_user_to_itinerary(itinerary_id: int, email: str, role: str):
+    get_itinerary(itinerary_id)
 
-    user = get_user(data["email"])
+    user = get_user(email)
 
     stmt = (
         select(ItineraryUser)
@@ -35,10 +38,16 @@ def add_user_to_itinerary(user_id: int, itinerary_id: int, data: dict):
     if membership:
         raise UserAlreadyExistsError("User has already been added.")
 
-    membership = ItineraryUser(
-        itinerary_id=itinerary_id, user_id=user.id, role=data["role"]
-    )
+    membership = ItineraryUser(itinerary_id=itinerary_id, user_id=user.id, role=role)
 
     db.session.add(membership)
+    db.session.commit()
+    return membership
+
+
+def update_user_role(itinerary_id: int, user_id: str, new_role: str):
+    get_user(id=user_id)
+    membership = get_itinerary_membership(user_id, itinerary_id)
+    membership.role = new_role
     db.session.commit()
     return membership

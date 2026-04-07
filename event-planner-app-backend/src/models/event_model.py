@@ -7,13 +7,13 @@ import enum
 
 
 class EventStatus(enum.Enum):
-    ACTIVE = "Active"
-    CANCELLED = "Cancelled"
-    POSTPONED = "Postponed"
+    ACTIVE = "active"
+    CANCELLED = "cancelled"
+    POSTPONED = "postponed"
 
 
 class EventSource(enum.Enum):
-    CUSTOM = "Custom"
+    CUSTOM = "custom"
 
 
 class Event(Base):
@@ -27,10 +27,13 @@ class Event(Base):
     category: Mapped[str] = mapped_column(String)
     min_age: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
     event_status: Mapped[EventStatus] = mapped_column(
-        Enum(EventStatus), default=EventStatus.ACTIVE
+        Enum("active", "cancelled", "postponed", name="eventstatus"),
+        default=EventStatus.ACTIVE,
     )
     price: Mapped[float] = mapped_column(Float)
-    event_source: Mapped[EventSource] = mapped_column(Enum(EventSource))
+    event_source: Mapped[EventSource] = mapped_column(
+        Enum("custom", name="eventsource"),
+    )
     image_url: Mapped[Optional[str]] = mapped_column(String(255))
     external_id: Mapped[Optional[str]] = mapped_column(
         String(255), nullable=True, unique=True

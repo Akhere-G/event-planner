@@ -1,7 +1,7 @@
 import os
 from flask import Flask
 from dotenv import load_dotenv
-from .extensions import db, alembic, flask_bcrypt
+from .extensions import db, migrate, flask_bcrypt
 from .config.config import Config
 
 
@@ -25,8 +25,10 @@ def create_app(config_class=None):
     )
     app.secret_key = os.environ.get("FLASK_SECRET_KEY")
 
+    basedir = os.path.abspath(os.path.dirname(app.root_path))
+    migrations_path = os.path.join(basedir, "migrations")
     db.init_app(app)
-    alembic.init_app(app)
+    migrate.init_app(app, db, directory=migrations_path)
     flask_bcrypt.init_app(app)
 
     with app.app_context():
