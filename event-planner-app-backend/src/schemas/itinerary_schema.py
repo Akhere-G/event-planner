@@ -5,6 +5,7 @@ import re
 from marshmallow import fields, post_dump, Schema
 from ..models import UserRole
 from .event_schema import EventSchema
+from .user_schema import UserWithRoleSchema
 
 
 class ItinerarySchema(SQLAlchemyAutoSchema):
@@ -38,6 +39,7 @@ class ItinerarySchema(SQLAlchemyAutoSchema):
     created_at = auto_field(dump_only=True)
 
     events = fields.Nested(EventSchema, many=True, dump_only=True)
+    user_memberships = fields.Nested(UserWithRoleSchema, many=True, dump_only=True)
 
 
 class ItineraryWithRoleSchema(Schema):

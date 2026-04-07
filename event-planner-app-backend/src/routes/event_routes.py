@@ -15,10 +15,10 @@ from ..exceptions import (
     ItineraryDoesNotExistError,
 )
 
-events_bp = Blueprint("events", __name__)
+event_bp = Blueprint("events", __name__)
 
 
-@events_bp.route("")
+@event_bp.route("")
 @login_required
 def get_events_routes(user_id: str, itinerary_id: str):
     schema = EventSchema(many=True)
@@ -32,7 +32,7 @@ def get_events_routes(user_id: str, itinerary_id: str):
     )
 
 
-@events_bp.route("", methods=["POST"])
+@event_bp.route("", methods=["POST"])
 @login_required
 def create_events_route(user_id: int, itinerary_id: int):
     schema = EventSchema()
@@ -59,7 +59,7 @@ def create_events_route(user_id: int, itinerary_id: int):
         )
 
 
-@events_bp.route("<int:event_id>", methods=["PATCH"])
+@event_bp.route("<int:event_id>", methods=["PATCH"])
 @login_required
 def update_event_route(user_id: int, itinerary_id: int, event_id: int):
     schema = EventSchema(partial=True)
@@ -90,7 +90,7 @@ def update_event_route(user_id: int, itinerary_id: int, event_id: int):
         )
 
 
-@events_bp.route("/<int:event_id>", methods=["DELETE"])
+@event_bp.route("/<int:event_id>", methods=["DELETE"])
 @login_required
 def delete_event_route(user_id: int, itinerary_id: int, event_id: int):
     try:
