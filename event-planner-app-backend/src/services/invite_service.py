@@ -55,6 +55,7 @@ def create_invite(data: dict):
         existing_invite.role = data.get("role") or existing_invite.role
         existing_invite.expires_at = datetime.now(timezone.utc) + timedelta(days=7)
         invite = existing_invite
+        invite.updated_by_id = data["updated_by_id"]
     else:
         invite = Invite(**data)
         db.session.add(invite)
@@ -64,14 +65,14 @@ def create_invite(data: dict):
     return invite
 
 
-def revoke_invite(itinerary_id: int, invite_id: int):
+def revoke_invite(user_id: int, itinerary_id: int, invite_id: int):
     invite = get_invite(itinerary_id=itinerary_id, invite_id=invite_id)
 
     if not invite:
         raise InviteNotFoundError()
 
     invite.status = InvitationStatus.REVOKED.value
-
+    invite.updated_by_id = user_id
     db.session.commit()
 
     return invite
@@ -107,6 +108,8 @@ def accept_invite(user_id: int, token: str):
         raise BadRequestError("Invite has been revoked.")
 
     invite.status = InvitationStatus.ACCEPTED.value
+    invite.updated_by_id = user_id
+
     membership = add_user_to_itinerary(invite.itinerary_id, user_id, invite.role)
     db.session.commit()
     return membership
@@ -125,6 +128,7 @@ def decline_invite(user_id: int, token: str):
         raise BadRequestError("Invite has been revoked.")
 
     invite.status = InvitationStatus.DECLINED.value
+    invite.updated_by_id = user_id
 
     db.session.commit()
     return invite

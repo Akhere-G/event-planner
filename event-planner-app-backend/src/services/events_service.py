@@ -1,5 +1,5 @@
 from ..extensions import db
-from ..models import Event, itinerary_events
+from ..models import Event, ItineraryEvent
 from .itineraries_service import get_itinerary
 from ..exceptions import (
     ItineraryDoesNotExistError,
@@ -33,7 +33,14 @@ def create_event(itinerary_id: int, data: dict):
         db.session.add(event)
 
     if event not in itinerary.events:
-        itinerary.events.append(event)
+        db.session.flush()
+        itinerary_event = ItineraryEvent(
+            itinerary_id=itinerary_id,
+            event_id=event.id,
+            created_by_id=data["created_by_id"],
+            updated_by_id=data["updated_by_id"],
+        )
+        db.session.add(itinerary_event)
 
     db.session.commit()
     return event
@@ -59,6 +66,7 @@ def update_event(itinerary_id: int, event_id: int, data: dict):
             "name",
             "price",
             "start_time",
+            "edited_by_id",
         ]:
             setattr(event, k, v)
 
@@ -80,8 +88,8 @@ def delete_event(itinerary_id: int, event_id: int):
 
     count = db.session.execute(
         select(func.count())
-        .select_from(itinerary_events)
-        .where(itinerary_events.c.event_id == event.id)
+        .select_from(ItineraryEvent)
+        .where(ItineraryEvent.event_id == event.id)
     ).scalar()
 
     if count == 0:

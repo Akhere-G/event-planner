@@ -53,6 +53,8 @@ def create_events_route(user_id: int, itinerary_id: int):
             message="You must be an admin or an editor to add events.",
         )
         validated_event = schema.load(request.json)
+        validated_event["created_by_id"] = user_id
+        validated_event["updated_by_id"] = user_id
         new_event = create_event(itinerary_id, validated_event)
         return api_response(
             message="Created new event.",
@@ -86,6 +88,7 @@ def update_event_route(user_id: int, itinerary_id: int, event_id: int):
             message="You must be an admin or an editor to update events.",
         )
         validated_event = schema.load(request.json)
+        validated_event["updated_by_id"] = user_id
         updated_event = update_event(itinerary_id, event_id, validated_event)
         return api_response(
             message="Updated event.",

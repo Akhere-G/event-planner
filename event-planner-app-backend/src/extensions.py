@@ -10,6 +10,6 @@ class Base(DeclarativeBase):
 
 
 db = SQLAlchemy(model_class=Base)
-migrate = Migrate()
+migrate = Migrate(render_as_batch=True)
 
 flask_bcrypt = Bcrypt()

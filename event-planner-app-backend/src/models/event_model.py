@@ -1,8 +1,9 @@
 from ..extensions import Base
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy import Integer, String, DateTime, Enum, Float
 from datetime import datetime, timezone
 from typing import Optional
+from .audit_mixins import AuditMixin
 import enum
 
 
@@ -16,7 +17,7 @@ class EventSource(enum.Enum):
     CUSTOM = "custom"
 
 
-class Event(Base):
+class Event(Base, AuditMixin):
     __tablename__ = "events"
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     name: Mapped[str] = mapped_column(String(255))
@@ -40,4 +41,10 @@ class Event(Base):
     )
     last_sync: Mapped[datetime] = mapped_column(
         DateTime, default=lambda: datetime.now(timezone.utc)
+    )
+    creator: Mapped["User"] = relationship(  # type: ignore  # noqa: F821
+        "User", foreign_keys="[Event.created_by_id]"
+    )
+    last_editor: Mapped["User"] = relationship(  # type: ignore  # noqa: F821
+        "User", foreign_keys="[Event.updated_by_id]"
     )

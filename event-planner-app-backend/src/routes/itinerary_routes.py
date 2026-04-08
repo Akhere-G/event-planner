@@ -61,6 +61,8 @@ def create_itinerary_route(user_id):
     try:
         schema = ItinerarySchema()
         validated_data = schema.load(request.json)
+        validated_data["created_by_id"] = user_id
+        validated_data["updated_by_id"] = user_id
         new_itinerary = create_itinerary(user_id, validated_data)
 
         return api_response(
@@ -87,6 +89,7 @@ def update_itinerary_route(user_id, itinerary_id):
         )
         schema = ItinerarySchema(partial=True)
         validated_data = schema.load(request.json)
+        validated_data["updated_by_id"] = user_id
         updated_itinerary = update_itinerary(itinerary_id, validated_data)
 
         return api_response(

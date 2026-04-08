@@ -36,7 +36,7 @@ def create_app(config_class=None):
             User,
             Itinerary,
             ItineraryUser,
-            itinerary_events,
+            ItineraryEvent,
             UserRole,
             Event,
             EventSource,

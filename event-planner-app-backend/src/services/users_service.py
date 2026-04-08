@@ -37,7 +37,13 @@ def add_user_to_itinerary(itinerary_id: int, user_id: str, role: str):
     if membership:
         raise UserAlreadyExistsError("User has already been added.")
 
-    membership = ItineraryUser(itinerary_id=itinerary_id, user_id=user_id, role=role)
+    membership = ItineraryUser(
+        itinerary_id=itinerary_id,
+        user_id=user_id,
+        role=role,
+        created_by_id=user_id,
+        updated_by_id=user_id,
+    )
 
     db.session.add(membership)
     return membership
@@ -64,6 +70,7 @@ def update_user_role(
             )
 
     membership.role = new_role
+    membership.updated_by_id = user_id
     db.session.commit()
     return membership
 

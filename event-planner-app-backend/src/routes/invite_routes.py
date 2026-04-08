@@ -51,7 +51,8 @@ def create_invite_route(user_id: int, itinerary_id: int):
         validated_invite = schema.load(request.json)
         validated_invite["itinerary_id"] = itinerary_id
         validated_invite["inviter_id"] = user_id
-
+        validated_invite["created_by_id"] = user_id
+        validated_invite["updated_by_id"] = user_id
         invite = create_invite(validated_invite)
 
         return api_response(
@@ -91,7 +92,7 @@ def revoke_invite_route(user_id: int, itinerary_id: int, invite_id: int):
             message="You must be an admin to revoke invites.",
         )
 
-        invite = revoke_invite(itinerary_id, invite_id)
+        invite = revoke_invite(user_id, itinerary_id, invite_id)
 
         return api_response(
             data=schema.dump(invite),

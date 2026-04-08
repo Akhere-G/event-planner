@@ -5,6 +5,7 @@ from .itinerary_user_model import UserRole
 import enum
 from datetime import datetime, timedelta, timezone
 import secrets
+from .audit_mixins import AuditMixin
 
 
 class InvitationStatus(enum.Enum):
@@ -14,7 +15,7 @@ class InvitationStatus(enum.Enum):
     REVOKED = "revoked"
 
 
-class Invite(Base):
+class Invite(Base, AuditMixin):
     __tablename__ = "itinerary_invitations"
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     itinerary_id: Mapped[int] = mapped_column(
@@ -43,3 +44,9 @@ class Invite(Base):
         DateTime, default=lambda: datetime.now(timezone.utc) + timedelta(days=7)
     )
     itinerary: Mapped["Itinerary"] = relationship("Itinerary", back_populates="invites")  # type: ignore  # noqa: F821
+    creator: Mapped["User"] = relationship(  # type: ignore  # noqa: F821
+        "User", foreign_keys="[Invite.created_by_id]"
+    )
+    last_editor: Mapped["User"] = relationship(  # type: ignore  # noqa: F821
+        "User", foreign_keys="[Invite.updated_by_id]"
+    )

@@ -86,7 +86,11 @@ def create_itinerary(user_id: int, data: dict):
     db.session.flush()
 
     new_membership = ItineraryUser(
-        itinerary_id=new_itinerary.id, user_id=user_id, role=UserRole.ADMIN
+        itinerary_id=new_itinerary.id,
+        user_id=user_id,
+        role=UserRole.ADMIN.value,
+        created_by_id=user_id,
+        updated_by_id=user_id,
     )
 
     db.session.add(new_membership)
