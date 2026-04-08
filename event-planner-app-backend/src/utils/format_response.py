@@ -15,9 +15,9 @@ def format_json(data):
     if isinstance(data, dict):
         return {to_camel_case(k): format_json(v) for k, v in data.items()}
     if isinstance(data, date):
-        return data.strftime("%Y-%m-%d")
+        return data.isoformat()
     if isinstance(data, datetime):
-        return data.strftime("%Y-%m-%d %H:%M")
+        return data.isoformat()
     return data
 
 
