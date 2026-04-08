@@ -11,7 +11,6 @@ class InvitationStatus(enum.Enum):
     PENDING = "pending"
     ACCEPTED = "accepted"
     DECLINED = "declined"
-    EXPIRED = "expired"
     REVOKED = "revoked"
 
 
@@ -32,7 +31,6 @@ class Invite(Base):
             "pending",
             "accepted",
             "declined",
-            "expired",
             "revoked",
             name="invitationstatus",
         ),

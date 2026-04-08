@@ -23,15 +23,13 @@ def get_user(email: str = None, id: str = None):
     return user
 
 
-def add_user_to_itinerary(itinerary_id: int, email: str, role: str):
+def add_user_to_itinerary(itinerary_id: int, user_id: str, role: str):
     get_itinerary(itinerary_id)
-
-    user = get_user(email)
 
     stmt = (
         select(ItineraryUser)
         .where(ItineraryUser.itinerary_id == itinerary_id)
-        .where(ItineraryUser.user_id == user.id)
+        .where(ItineraryUser.user_id == user_id)
     )
 
     membership = db.session.execute(stmt).scalar_one_or_none()
@@ -39,10 +37,9 @@ def add_user_to_itinerary(itinerary_id: int, email: str, role: str):
     if membership:
         raise UserAlreadyExistsError("User has already been added.")
 
-    membership = ItineraryUser(itinerary_id=itinerary_id, user_id=user.id, role=role)
+    membership = ItineraryUser(itinerary_id=itinerary_id, user_id=user_id, role=role)
 
     db.session.add(membership)
-    db.session.commit()
     return membership
 
 

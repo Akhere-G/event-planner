@@ -32,6 +32,18 @@ def create_app(config_class=None):
     flask_bcrypt.init_app(app)
 
     with app.app_context():
+        from .models import (
+            User,
+            Itinerary,
+            ItineraryUser,
+            itinerary_events,
+            UserRole,
+            Event,
+            EventSource,
+            EventStatus,
+            Invite,
+            InvitationStatus,
+        )
         from .routes import (
             auth_bp,
             itinerary_bp,

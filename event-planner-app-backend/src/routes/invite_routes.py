@@ -9,7 +9,7 @@ from ..exceptions import (
     InviteNotFoundError,
 )
 from ..utils.format_response import api_response
-from ..schemas.invite_schema import InviteSchema
+from ..schemas.invite_schema import InviteSchemaPrivate
 from marshmallow import ValidationError
 
 itinerary_invites_bp = Blueprint("invite", __name__)
@@ -18,7 +18,7 @@ itinerary_invites_bp = Blueprint("invite", __name__)
 @itinerary_invites_bp.route("")
 @login_required
 def get_invites_route(user_id: int, itinerary_id: int):
-    schema = InviteSchema(many=True)
+    schema = InviteSchemaPrivate(many=True)
     try:
         get_itinerary_membership(user_id, itinerary_id)
         result = get_invites(itinerary_id)
@@ -41,7 +41,7 @@ def get_invites_route(user_id: int, itinerary_id: int):
 @itinerary_invites_bp.route("", methods=["POST"])
 @login_required
 def create_invite_route(user_id: int, itinerary_id: int):
-    schema = InviteSchema()
+    schema = InviteSchemaPrivate()
     try:
         is_authorised(
             user_id=user_id,
@@ -83,7 +83,7 @@ def create_invite_route(user_id: int, itinerary_id: int):
 @itinerary_invites_bp.route("<int:invite_id>", methods=["DELETE"])
 @login_required
 def revoke_invite_route(user_id: int, itinerary_id: int, invite_id: int):
-    schema = InviteSchema()
+    schema = InviteSchemaPrivate()
     try:
         is_authorised(
             user_id=user_id,

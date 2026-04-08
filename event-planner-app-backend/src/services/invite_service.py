@@ -1,9 +1,10 @@
 from ..extensions import db
 from .itineraries_service import get_itinerary
+from .users_service import add_user_to_itinerary
 from ..models import Invite, InvitationStatus, User
 from sqlalchemy import select
 from datetime import datetime, timedelta, timezone
-from ..exceptions import UserAlreadyExistsError, InviteNotFoundError
+from ..exceptions import UserAlreadyExistsError, InviteNotFoundError, BadRequestError
 
 
 def get_invite(itinerary_id: int, invite_id: int = None, email: str = None):
@@ -35,21 +36,6 @@ def get_user_invites(user_id: int):
         .where(User.id == user_id)
         .where(Invite.status == InvitationStatus.PENDING.value)
     ).scalars()
-
-
-def get_user_invite(user_id: int, token: str):
-    invite = db.session.execute(
-        select(Invite)
-        .join(User, User.email == Invite.email)
-        .where(User.id == user_id)
-        .where(Invite.status == InvitationStatus.PENDING.value)
-        .where(Invite.token == token)
-    ).scalar_one_or_none()
-
-    if not invite:
-        raise InviteNotFoundError()
-
-    return invite
 
 
 def get_invites(itinerary_id: int):
@@ -89,3 +75,39 @@ def revoke_invite(itinerary_id: int, invite_id: int):
     db.session.commit()
 
     return invite
+
+
+def get_user_invite(user_id: int, token: str):
+    invite = db.session.execute(
+        select(Invite)
+        .join(User, User.email == Invite.email)
+        .where(User.id == user_id)
+        .where(Invite.status == InvitationStatus.PENDING.value)
+        .where(Invite.token == token)
+    ).scalar_one_or_none()
+
+    if not invite:
+        raise InviteNotFoundError()
+
+    return invite
+
+
+def accept_invite(user_id: int, token: str):
+    invite = get_user_invite(user_id, token)
+
+    if invite.expires_at < datetime.now():
+        raise BadRequestError("Invite is expired.")
+
+    if invite.status == InvitationStatus.ACCEPTED.value:
+        raise BadRequestError("Invite has already been accepted.")
+
+    if invite.status == InvitationStatus.DECLINED.value:
+        raise BadRequestError("Invite has already been declined.")
+
+    if invite.status == InvitationStatus.REVOKED.value:
+        raise BadRequestError("Invite has been revoked.")
+
+    invite.status = InvitationStatus.ACCEPTED.value
+    membership = add_user_to_itinerary(invite.itinerary_id, user_id, invite.role)
+    db.session.commit()
+    return membership

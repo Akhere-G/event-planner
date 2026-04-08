@@ -6,7 +6,7 @@ from marshmallow import fields, post_dump, Schema, validate
 from ..models import UserRole
 from .event_schema import EventSchema
 from .user_schema import UserWithRoleSchema
-from .invite_schema import InviteSchema
+from .invite_schema import InviteSchemaPrivate
 
 
 class ItinerarySchema(SQLAlchemyAutoSchema):
@@ -41,7 +41,7 @@ class ItinerarySchema(SQLAlchemyAutoSchema):
 
     events = fields.Nested(EventSchema, many=True, dump_only=True)
     user_memberships = fields.Nested(UserWithRoleSchema, many=True, dump_only=True)
-    invites = fields.Nested(InviteSchema, many=True, dump_only=True)
+    invites = fields.Nested(InviteSchemaPrivate, many=True, dump_only=True)
 
 
 class ItineraryWithRoleSchema(Schema):
