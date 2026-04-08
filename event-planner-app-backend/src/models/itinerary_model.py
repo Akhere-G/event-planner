@@ -24,3 +24,7 @@ class Itinerary(Base):
     events: Mapped[List["Event"]] = relationship(  # type: ignore  # noqa: F821
         secondary=itinerary_events
     )
+
+    invites: Mapped[List["Invite"]] = relationship(  # type: ignore  # noqa: F821
+        back_populates="itinerary", cascade="all, delete-orphan"
+    )
