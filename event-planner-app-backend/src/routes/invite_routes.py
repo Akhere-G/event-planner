@@ -1,8 +1,13 @@
 from flask import Blueprint, request
 from ..middleware.login_required import login_required
 from ..services.itineraries_service import get_itinerary_membership, is_authorised
-from ..services.invite_service import get_invites, create_invite
-from ..exceptions import ItineraryDoesNotExistError, UserNotAuthorisedError
+from ..services.invite_service import get_invites, create_invite, revoke_invite
+from ..exceptions import (
+    ItineraryDoesNotExistError,
+    UserNotAuthorisedError,
+    UserAlreadyExistsError,
+    InviteNotFoundError,
+)
 from ..utils.format_response import api_response
 from ..schemas.invite_schema import InviteSchema
 from marshmallow import ValidationError
@@ -24,7 +29,7 @@ def get_invites_route(user_id: int, itinerary_id: int):
             message="Fetched invites.",
             status_code=200,
         )
-    except (ItineraryDoesNotExistError,) as err:
+    except ItineraryDoesNotExistError as err:
         return api_response(
             message=err.message,
             success=False,
@@ -55,7 +60,11 @@ def create_invite_route(user_id: int, itinerary_id: int):
             message="Created invite.",
             status_code=201,
         )
-    except (ItineraryDoesNotExistError, UserNotAuthorisedError) as err:
+    except (
+        ItineraryDoesNotExistError,
+        UserNotAuthorisedError,
+        UserAlreadyExistsError,
+    ) as err:
         return api_response(
             message=err.message,
             success=False,
@@ -68,4 +77,36 @@ def create_invite_route(user_id: int, itinerary_id: int):
             success=False,
             error=err.messages,
             status_code=400,
+        )
+
+
+@invite_bp.route("<int:invite_id>", methods=["DELETE"])
+@login_required
+def revoke_invite_route(user_id: int, itinerary_id: int, invite_id: int):
+    schema = InviteSchema()
+    try:
+        is_authorised(
+            user_id=user_id,
+            itinerary_id=itinerary_id,
+            message="You must be an admin to revoke invites.",
+        )
+
+        invite = revoke_invite(itinerary_id, invite_id)
+
+        return api_response(
+            data=schema.dump(invite),
+            success=True,
+            message="Revoked invite.",
+            status_code=200,
+        )
+    except (
+        ItineraryDoesNotExistError,
+        UserNotAuthorisedError,
+        InviteNotFoundError,
+    ) as err:
+        return api_response(
+            message=err.message,
+            success=False,
+            error=err.message,
+            status_code=err.status_code,
         )

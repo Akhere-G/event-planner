@@ -3,7 +3,7 @@ from .itineraries_service import get_itinerary
 from ..models import Invite, InvitationStatus
 from sqlalchemy import select
 from datetime import datetime, timedelta, timezone
-from ..exceptions import UserAlreadyExistsError
+from ..exceptions import UserAlreadyExistsError, InviteNotFoundError
 
 
 def get_invite(itinerary_id: int, invite_id: int = None, email: str = None):
@@ -42,11 +42,25 @@ def create_invite(data):
             raise UserAlreadyExistsError("User has already accepted this invite.")
 
         existing_invite.status = InvitationStatus.PENDING.value
+        existing_invite.role = data.get("role") or existing_invite.role
         existing_invite.expires_at = datetime.now(timezone.utc) + timedelta(days=7)
         invite = existing_invite
     else:
         invite = Invite(**data)
         db.session.add(invite)
+
+    db.session.commit()
+
+    return invite
+
+
+def revoke_invite(itinerary_id, invite_id):
+    invite = get_invite(itinerary_id=itinerary_id, invite_id=invite_id)
+
+    if not invite:
+        raise InviteNotFoundError()
+
+    invite.status = InvitationStatus.REVOKED.value
 
     db.session.commit()
 

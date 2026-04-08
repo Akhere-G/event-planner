@@ -41,3 +41,10 @@ class EventNotFoundError(Exception):
         self.message = message
         self.status_code = 404
         super().__init__(self.message)
+
+
+class InviteNotFoundError(Exception):
+    def __init__(self, message="Invite not found."):
+        self.message = message
+        self.status_code = 404
+        super().__init__(self.message)
