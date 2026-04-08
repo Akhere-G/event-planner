@@ -13,6 +13,7 @@ from src.models import (
     Event,
     EventSource,
     EventStatus,
+    Invite,
 )
 
 dev_config = Config().dev_config

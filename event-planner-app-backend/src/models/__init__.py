@@ -4,6 +4,7 @@ from src.models.itinerary_user_model import ItineraryUser
 from src.models.itinerary_event_model import itinerary_events
 from src.models.itinerary_user_model import UserRole
 from src.models.event_model import Event, EventSource, EventStatus
+from src.models.invite_model import Invite
 
 __all__ = [
     "User",
@@ -14,4 +15,5 @@ __all__ = [
     "Event",
     "EventSource",
     "EventStatus",
+    "Invite",
 ]
