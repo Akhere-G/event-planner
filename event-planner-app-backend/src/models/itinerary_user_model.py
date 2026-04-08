@@ -25,7 +25,8 @@ class ItineraryUser(Base):
         ForeignKey("users.id", ondelete="CASCADE"), primary_key=True
     )
     role: Mapped[UserRole] = mapped_column(
-        Enum("admin", "editor", "viewer", name="userrole"), default=UserRole.VIEWER
+        Enum("admin", "editor", "viewer", name="userrole"),
+        default=UserRole.VIEWER.value,
     )
 
     user: Mapped["User"] = relationship(back_populates="itinerary_memberships")  # type: ignore  # noqa: F821

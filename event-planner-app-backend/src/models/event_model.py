@@ -1,7 +1,7 @@
 from ..extensions import Base
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy import Integer, String, DateTime, Enum, Float
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Optional
 import enum
 
@@ -28,7 +28,7 @@ class Event(Base):
     min_age: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
     event_status: Mapped[EventStatus] = mapped_column(
         Enum("active", "cancelled", "postponed", name="eventstatus"),
-        default=EventStatus.ACTIVE,
+        default=EventStatus.ACTIVE.value,
     )
     price: Mapped[float] = mapped_column(Float)
     event_source: Mapped[EventSource] = mapped_column(
@@ -38,4 +38,6 @@ class Event(Base):
     external_id: Mapped[Optional[str]] = mapped_column(
         String(255), nullable=True, unique=True
     )
-    last_sync: Mapped[datetime] = mapped_column(DateTime, default=datetime.now)
+    last_sync: Mapped[datetime] = mapped_column(
+        DateTime, default=lambda: datetime.now(timezone.utc)
+    )

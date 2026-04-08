@@ -3,7 +3,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy import Integer, String, ForeignKey, Enum, DateTime
 from .itinerary_user_model import UserRole
 import enum
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import secrets
 
 
@@ -42,6 +42,6 @@ class Invite(Base):
         String(100), unique=True, default=lambda: secrets.token_urlsafe(32)
     )
     expires_at: Mapped[datetime] = mapped_column(
-        DateTime, default=lambda: datetime.now() + timedelta(days=7)
+        DateTime, default=lambda: datetime.now(timezone.utc) + timedelta(days=7)
     )
     itinerary: Mapped["Itinerary"] = relationship("Itinerary", back_populates="invites")  # type: ignore  # noqa: F821
