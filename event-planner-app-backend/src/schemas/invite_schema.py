@@ -24,5 +24,4 @@ class InviteSchema(SQLAlchemyAutoSchema):
         dump_only=True,
     )
 
-    created_at = auto_field(dump_only=True)
     expires_at = auto_field(dump_only=True)

@@ -32,7 +32,7 @@ def create_app(config_class=None):
     flask_bcrypt.init_app(app)
 
     with app.app_context():
-        from .routes import auth_bp, itinerary_bp, event_bp, user_bp
+        from .routes import auth_bp, itinerary_bp, event_bp, user_bp, invite_bp
 
         app.register_blueprint(auth_bp, url_prefix="/api/auth")
         app.register_blueprint(itinerary_bp, url_prefix="/api/itineraries")
@@ -42,4 +42,9 @@ def create_app(config_class=None):
         app.register_blueprint(
             user_bp, url_prefix="/api/itineraries/<int:itinerary_id>/users"
         )
+
+        app.register_blueprint(
+            invite_bp, url_prefix="/api/itineraries/<int:itinerary_id>/invites"
+        )
+
         return app
