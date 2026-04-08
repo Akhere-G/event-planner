@@ -23,9 +23,20 @@ class Invite(Base):
     )
     email: Mapped[str] = mapped_column(String)
     inviter_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
-    role: Mapped[UserRole] = mapped_column(Enum(UserRole), default=UserRole.VIEWER)
+    role: Mapped[UserRole] = mapped_column(
+        Enum("admin", "editor", "viewer", name="userrole"),
+        default=UserRole.VIEWER.value,
+    )
     status: Mapped[InvitationStatus] = mapped_column(
-        Enum(InvitationStatus), default=InvitationStatus.PENDING
+        Enum(
+            "pending",
+            "accepted",
+            "declined",
+            "expired",
+            "revoked",
+            name="invitationstatus",
+        ),
+        default=InvitationStatus.PENDING.value,
     )
     token: Mapped[str] = mapped_column(
         String(100), unique=True, default=lambda: secrets.token_urlsafe(32)
