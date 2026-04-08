@@ -2,7 +2,7 @@ from ..extensions import db
 from ..models import Itinerary, ItineraryUser, UserRole
 from sqlalchemy import select
 from ..exceptions import UserNotAuthorisedError, ItineraryDoesNotExistError
-from sqlalchemy.orm import selectinload
+from sqlalchemy.orm import selectinload, contains_eager
 
 
 def get_itinerary_membership(user_id: int, itinerary_id: int):
@@ -10,7 +10,16 @@ def get_itinerary_membership(user_id: int, itinerary_id: int):
         select(ItineraryUser)
         .where(ItineraryUser.itinerary_id == itinerary_id)
         .where(ItineraryUser.user_id == user_id)
-        .options(selectinload(ItineraryUser.itinerary))
+        .options(
+            selectinload(ItineraryUser.user),
+            selectinload(ItineraryUser.itinerary).options(
+                selectinload(Itinerary.events),
+                selectinload(Itinerary.user_memberships).selectinload(
+                    ItineraryUser.user
+                ),
+                selectinload(Itinerary.invites),
+            ),
+        )
     )
 
     membership = db.session.execute(stmt).scalar_one_or_none()
@@ -25,13 +34,29 @@ def get_itinerary_memberships(user_id: int):
     stmt = (
         select(ItineraryUser)
         .where(ItineraryUser.user_id == user_id)
-        .options(selectinload(ItineraryUser.itinerary))
+        .options(
+            selectinload(ItineraryUser.itinerary).options(
+                selectinload(Itinerary.events),
+                selectinload(Itinerary.user_memberships).selectinload(
+                    ItineraryUser.user
+                ),
+                selectinload(Itinerary.invites),
+            )
+        )
     )
     return db.session.execute(stmt).scalars().all()
 
 
 def get_itinerary(itinerary_id: int):
-    stmt = select(Itinerary).where(Itinerary.id == itinerary_id)
+    stmt = (
+        select(Itinerary)
+        .where(Itinerary.id == itinerary_id)
+        .options(
+            selectinload(Itinerary.events),
+            selectinload(Itinerary.user_memberships).selectinload(ItineraryUser.user),
+            selectinload(Itinerary.invites),
+        )
+    )
 
     itinerary = db.session.execute(stmt).scalar_one_or_none()
 
@@ -47,7 +72,7 @@ def get_itineraries(user_id: int):
         .join(Itinerary.user_memberships)
         .where(ItineraryUser.user_id == user_id)
         .options(
-            selectinload(Itinerary.user_memberships).selectinload(ItineraryUser.user),
+            contains_eager(Itinerary.user_memberships).selectinload(ItineraryUser.user),
             selectinload(Itinerary.events),
         )
     )
