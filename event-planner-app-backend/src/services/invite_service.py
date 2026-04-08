@@ -1,6 +1,6 @@
 from ..extensions import db
 from .itineraries_service import get_itinerary
-from ..models import Invite, InvitationStatus
+from ..models import Invite, InvitationStatus, User
 from sqlalchemy import select
 from datetime import datetime, timedelta, timezone
 from ..exceptions import UserAlreadyExistsError, InviteNotFoundError
@@ -28,12 +28,21 @@ def get_invite(itinerary_id: int, invite_id: int = None, email: str = None):
     return db.session.execute(stmt).scalar_one_or_none()
 
 
-def get_invites(itinerary_id):
+def get_user_invites(user_id: int):
+    return db.session.execute(
+        select(Invite)
+        .join(User, User.email == Invite.email)
+        .where(User.id == user_id)
+        .where(Invite.status == InvitationStatus.PENDING.value)
+    ).scalars()
+
+
+def get_invites(itinerary_id: int):
     itinerary = get_itinerary(itinerary_id)
     return itinerary.invites
 
 
-def create_invite(data):
+def create_invite(data: dict):
     existing_invite = get_invite(data["itinerary_id"], email=data["email"])
     invite = None
 
@@ -54,7 +63,7 @@ def create_invite(data):
     return invite
 
 
-def revoke_invite(itinerary_id, invite_id):
+def revoke_invite(itinerary_id: int, invite_id: int):
     invite = get_invite(itinerary_id=itinerary_id, invite_id=invite_id)
 
     if not invite:

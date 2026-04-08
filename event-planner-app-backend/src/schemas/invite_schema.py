@@ -28,3 +28,5 @@ class InviteSchema(SQLAlchemyAutoSchema):
     token = auto_field(dump_only=True)
 
     expires_at = auto_field(dump_only=True)
+
+    itinerary = fields.Nested("ItinerarySchemaNoInvites", dump_only=True)

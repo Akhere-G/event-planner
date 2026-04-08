@@ -12,10 +12,10 @@ from ..utils.format_response import api_response
 from ..schemas.invite_schema import InviteSchema
 from marshmallow import ValidationError
 
-invite_bp = Blueprint("invite", __name__)
+itinerary_invites_bp = Blueprint("invite", __name__)
 
 
-@invite_bp.route("")
+@itinerary_invites_bp.route("")
 @login_required
 def get_invites_route(user_id: int, itinerary_id: int):
     schema = InviteSchema(many=True)
@@ -38,7 +38,7 @@ def get_invites_route(user_id: int, itinerary_id: int):
         )
 
 
-@invite_bp.route("", methods=["POST"])
+@itinerary_invites_bp.route("", methods=["POST"])
 @login_required
 def create_invite_route(user_id: int, itinerary_id: int):
     schema = InviteSchema()
@@ -80,7 +80,7 @@ def create_invite_route(user_id: int, itinerary_id: int):
         )
 
 
-@invite_bp.route("<int:invite_id>", methods=["DELETE"])
+@itinerary_invites_bp.route("<int:invite_id>", methods=["DELETE"])
 @login_required
 def revoke_invite_route(user_id: int, itinerary_id: int, invite_id: int):
     schema = InviteSchema()
