@@ -37,6 +37,21 @@ def get_user_invites(user_id: int):
     ).scalars()
 
 
+def get_user_invite(user_id: int, token: str):
+    invite = db.session.execute(
+        select(Invite)
+        .join(User, User.email == Invite.email)
+        .where(User.id == user_id)
+        .where(Invite.status == InvitationStatus.PENDING.value)
+        .where(Invite.token == token)
+    ).scalar_one_or_none()
+
+    if not invite:
+        raise InviteNotFoundError()
+
+    return invite
+
+
 def get_invites(itinerary_id: int):
     itinerary = get_itinerary(itinerary_id)
     return itinerary.invites
