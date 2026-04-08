@@ -20,7 +20,7 @@ class Invite(Base):
     itinerary_id: Mapped[int] = mapped_column(
         ForeignKey("itineraries.id", ondelete="CASCADE")
     )
-    email: Mapped[str] = mapped_column(String)
+    email: Mapped[str] = mapped_column(String, index=True)
     inviter_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
     role: Mapped[UserRole] = mapped_column(
         Enum("admin", "editor", "viewer", name="userrole"),
@@ -37,7 +37,7 @@ class Invite(Base):
         default=InvitationStatus.PENDING.value,
     )
     token: Mapped[str] = mapped_column(
-        String(100), unique=True, default=lambda: secrets.token_urlsafe(32)
+        String(100), unique=True, default=lambda: secrets.token_urlsafe(32), index=True
     )
     expires_at: Mapped[datetime] = mapped_column(
         DateTime, default=lambda: datetime.now(timezone.utc) + timedelta(days=7)

@@ -36,7 +36,7 @@ class Event(Base):
     )
     image_url: Mapped[Optional[str]] = mapped_column(String(255))
     external_id: Mapped[Optional[str]] = mapped_column(
-        String(255), nullable=True, unique=True
+        String(255), nullable=True, unique=True, index=True
     )
     last_sync: Mapped[datetime] = mapped_column(
         DateTime, default=lambda: datetime.now(timezone.utc)

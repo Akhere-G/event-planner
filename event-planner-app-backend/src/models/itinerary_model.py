@@ -13,7 +13,7 @@ class Itinerary(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     name: Mapped[str] = mapped_column(String(255))
     description: Mapped[Optional[str]] = mapped_column(String(255))
-    start_date: Mapped[date] = mapped_column(Date)
+    start_date: Mapped[date] = mapped_column(Date, index=True)
     end_date: Mapped[date] = mapped_column(Date)
     created_at: Mapped[date] = mapped_column(Date, default=date.today)
 
