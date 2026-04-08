@@ -1,6 +1,11 @@
 from flask import Blueprint
 from ..middleware.login_required import login_required
-from ..services.invite_service import get_user_invites, get_user_invite, accept_invite
+from ..services.invite_service import (
+    get_user_invites,
+    get_user_invite,
+    accept_invite,
+    decline_invite,
+)
 from ..schemas.invite_schema import InviteSchema
 from ..schemas.user_schema import UserWithRoleSchema
 from ..utils.format_response import api_response
@@ -68,6 +73,30 @@ def accept_invite_route(user_id: int, token: str):
         BadRequestError,
         ItineraryDoesNotExistError,
         UserAlreadyExistsError,
+    ) as err:
+        return api_response(
+            message=err.message,
+            success=False,
+            error=err.message,
+            status_code=err.status_code,
+        )
+
+
+@user_invites_bp.route("/<string:token>/decline", methods=["POST"])
+@login_required
+def decline_invite_route(user_id: int, token: str):
+    schema = InviteSchema()
+    try:
+        result = decline_invite(user_id, token)
+        return api_response(
+            data=schema.dump(result),
+            success=True,
+            message="Declined invite.",
+            status_code=200,
+        )
+    except (
+        InviteNotFoundError,
+        BadRequestError,
     ) as err:
         return api_response(
             message=err.message,

@@ -82,7 +82,6 @@ def get_user_invite(user_id: int, token: str):
         select(Invite)
         .join(User, User.email == Invite.email)
         .where(User.id == user_id)
-        .where(Invite.status == InvitationStatus.PENDING.value)
         .where(Invite.token == token)
     ).scalar_one_or_none()
 
@@ -111,3 +110,21 @@ def accept_invite(user_id: int, token: str):
     membership = add_user_to_itinerary(invite.itinerary_id, user_id, invite.role)
     db.session.commit()
     return membership
+
+
+def decline_invite(user_id: int, token: str):
+    invite = get_user_invite(user_id, token)
+
+    if invite.status == InvitationStatus.ACCEPTED.value:
+        raise BadRequestError("Invite has already been accepted.")
+
+    if invite.status == InvitationStatus.DECLINED.value:
+        raise BadRequestError("Invite has already been declined.")
+
+    if invite.status == InvitationStatus.REVOKED.value:
+        raise BadRequestError("Invite has been revoked.")
+
+    invite.status = InvitationStatus.DECLINED.value
+
+    db.session.commit()
+    return invite
