@@ -89,7 +89,7 @@
   
 
   .title {
-    @apply text-2xl  mb-4
+    @apply text-2xl
   }
 
   .form {
@@ -101,7 +101,7 @@
   }
 
   .container { 
-    @apply max-w-5xl mx-auto p-4
+    @apply w-full max-w-7xl mx-auto p-4
   }
 
 
