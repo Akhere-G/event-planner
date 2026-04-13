@@ -37,7 +37,7 @@ def register_user_route():
         return api_response(
             message="Could not register. Try again or try to log in.",
             success=False,
-            error="Could not register. Try again or try to log in.",
+            error={"general": ["Could not register. Try again or try to log in."]},
             status_code=400,
         )
 
@@ -68,7 +68,7 @@ def login_user_route():
         return api_response(
             message="Bad Request.",
             success=False,
-            error="Could not login. Password or email incorrect.",
+            error={"general": ["Could not login. Password or email incorrect."]},
             status_code=401,
         )
 
@@ -86,6 +86,6 @@ def check_auth():
     user_id = session.get("user_id")
     if user_id:
         return api_response(
-            success=True, data={"userId": user_id}, message="User is authenticated."
+            success=True, data={"user_id": user_id}, message="User is authenticated."
         )
     return api_response(success=False, message="Not authenticated.", status_code=401)

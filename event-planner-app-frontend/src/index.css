@@ -91,4 +91,8 @@
   .form {
     @apply flex gap-4 flex-col
   }
+
+  .errorMessage {
+    @apply mt-4 text-error bg-error/10 p-1 pl-4 rounded-md border-l-error border-l-4
+  }
 }

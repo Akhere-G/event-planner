@@ -7,8 +7,11 @@ import { isValidationError } from "../features/api/utils";
 import { useNavigate } from "react-router";
 import { useDispatch } from "react-redux";
 import { setCredentials } from "../features/auth/authSlice";
+import { useState } from "react";
 
 export default function Register() {
+  const [errorMessage, setErrorMessage] = useState("");
+
   const [registerUser, result] = useRegisterUserMutation();
   const { formState, register, handleSubmit, setError } = useForm({
     resolver: yupResolver(registerSchema),
@@ -18,16 +21,18 @@ export default function Register() {
   const dispatch = useDispatch();
 
   const onSubmit = async (formState: RegisterSchema) => {
+    setErrorMessage("");
     try {
-      const payload = await registerUser(formState).unwrap();
-      dispatch(setCredentials(payload.data.userId));
+      const result = await registerUser(formState).unwrap();
+      dispatch(setCredentials(result.data.userId));
 
       navigate("/trips");
     } catch (err) {
       console.log(err);
       if (isValidationError(err)) {
-        console.error(err.data.error);
         const serverErrors = err.data.error;
+
+        setErrorMessage(serverErrors.general?.join(", ") ?? "");
 
         Object.entries(serverErrors).forEach(([key, messages]) => {
           setError(key as keyof RegisterSchema, {
@@ -43,6 +48,8 @@ export default function Register() {
     <div className="card">
       <h1 className="title">Register</h1>
       <form className="form" onSubmit={handleSubmit(onSubmit)}>
+        {errorMessage && <p className="errorMessage">{errorMessage}</p>}
+
         <FormInput
           label="Username"
           {...register("username")}
