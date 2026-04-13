@@ -55,6 +55,7 @@ export default function Login() {
           <FormInput
             errorMessage={formState.errors.password?.message}
             label="Password"
+            type="password"
             {...register("password")}
           />
           <button className="btn-primary" disabled={result.isLoading}>
