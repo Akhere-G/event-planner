@@ -10,7 +10,7 @@ export default function Header({ links }: HeaderProps) {
 
   return (
     <header className="relative w-full">
-      <div className=" bg-surface fixed w-full flex justify-between items-center p-4 shadow-md">
+      <div className=" bg-surface w-full flex justify-between items-center p-4 shadow-md">
         <h1 className="text-3xl font-extrabold tracking-tighter">
           Trip
           <span className="text-brand-primary">Out</span>
