@@ -31,10 +31,7 @@ def get_invite(itinerary_id: int, invite_id: int = None, email: str = None):
 
 def get_user_invites(user_id: int):
     return db.session.execute(
-        select(Invite)
-        .join(User, User.email == Invite.email)
-        .where(User.id == user_id)
-        .where(Invite.status == InvitationStatus.PENDING.value)
+        select(Invite).join(User, User.email == Invite.email).where(User.id == user_id)
     ).scalars()
 
 
