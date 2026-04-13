@@ -72,7 +72,7 @@
   }
 
   .btn-primary {
-    @apply bg-brand-primary text-text-inverse hover:bg-brand-secondary shadow-sm;
+    @apply bg-brand-primary text-text-inverse hover:bg-brand-secondary shadow-sm cursor-pointer;
   }
 
   .btn-primary:disabled {
@@ -80,7 +80,7 @@
 }
 
   .btn-secondary {
-    @apply bg-surface-muted text-text-primary hover:bg-surface-border;
+    @apply bg-surface-muted text-text-primary hover:bg-surface-border cursor-pointer;
   }
 
   .btn-secondary:disabled {
