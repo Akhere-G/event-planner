@@ -71,9 +71,18 @@
     @apply bg-brand-primary text-text-inverse hover:bg-brand-secondary shadow-sm;
   }
 
+  .btn-primary:disabled {
+  @apply grayscale cursor-not-allowed opacity-70;
+}
+
   .btn-secondary {
     @apply bg-surface-muted text-text-primary hover:bg-surface-border;
   }
+
+  .btn-secondary:disabled {
+  @apply grayscale cursor-not-allowed opacity-70;
+}
+  
 
   .title {
     @apply text-2xl  mb-4
