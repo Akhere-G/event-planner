@@ -8,6 +8,7 @@ import {
 } from "./features/auth/authSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { ProtectedRoute } from "./components";
+import { Header } from "./layout";
 
 function App() {
   const isAuthenticated = useSelector(selectIsAuthenticated);
@@ -24,8 +25,16 @@ function App() {
   if (isLoading) {
     return <></>;
   }
+  const authLinks = [{ title: "Trips", url: "/" }];
+
+  const unauthLinks = [
+    { title: "Login", url: "/login" },
+    { title: "Register", url: "/register" },
+  ];
+
   return (
-    <div>
+    <>
+      <Header links={isAuthenticated ? authLinks : unauthLinks} />
       <Routes>
         <Route
           path="/"
@@ -61,7 +70,7 @@ function App() {
         />
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
-    </div>
+    </>
   );
 }
 

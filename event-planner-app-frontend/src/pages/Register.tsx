@@ -4,7 +4,7 @@ import { useForm } from "react-hook-form";
 import { registerSchema, type RegisterSchema } from "../schemas/authSchema";
 import { useRegisterUserMutation } from "../features/auth/authApiSlice";
 import { isValidationError } from "../features/api/utils";
-import { useNavigate } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { useDispatch } from "react-redux";
 import { setCredentials } from "../features/auth/authSlice";
 import { useState } from "react";
@@ -45,37 +45,40 @@ export default function Register() {
   };
 
   return (
-    <div className="card">
-      <h1 className="title">Register</h1>
-      <form className="form" onSubmit={handleSubmit(onSubmit)}>
-        {errorMessage && <p className="errorMessage">{errorMessage}</p>}
+    <div className="container">
+      <div className="card">
+        <h2 className="title">Register</h2>
+        <form className="form" onSubmit={handleSubmit(onSubmit)}>
+          {errorMessage && <p className="errorMessage">{errorMessage}</p>}
 
-        <FormInput
-          label="Username"
-          {...register("username")}
-          errorMessage={formState.errors.username?.message}
-        />
-        <FormInput
-          label="Email"
-          {...register("email")}
-          errorMessage={formState.errors.email?.message}
-        />
-        <FormInput
-          type="password"
-          label="Password"
-          {...register("password")}
-          errorMessage={formState.errors.password?.message}
-        />
-        <FormInput
-          type="password"
-          label="Repeat Password"
-          {...register("repeatPassword")}
-          errorMessage={formState.errors.repeatPassword?.message}
-        />
-        <button className="btn-primary" disabled={result.isLoading}>
-          Register
-        </button>
-      </form>
+          <FormInput
+            label="Username"
+            {...register("username")}
+            errorMessage={formState.errors.username?.message}
+          />
+          <FormInput
+            label="Email"
+            {...register("email")}
+            errorMessage={formState.errors.email?.message}
+          />
+          <FormInput
+            type="password"
+            label="Password"
+            {...register("password")}
+            errorMessage={formState.errors.password?.message}
+          />
+          <FormInput
+            type="password"
+            label="Repeat Password"
+            {...register("repeatPassword")}
+            errorMessage={formState.errors.repeatPassword?.message}
+          />
+          <button className="btn-primary" disabled={result.isLoading}>
+            Register
+          </button>
+          <Link to="/login">Have an account? Login.</Link>
+        </form>
+      </div>
     </div>
   );
 }

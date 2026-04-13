@@ -6,7 +6,7 @@ import { loginSchema, type LoginSchema } from "../schemas/authSchema";
 import { isValidationError } from "../features/api/utils";
 import { useState } from "react";
 import { useDispatch } from "react-redux";
-import { useNavigate } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { setCredentials } from "../features/auth/authSlice";
 
 export default function Login() {
@@ -41,25 +41,28 @@ export default function Login() {
     }
   };
   return (
-    <div className="card">
-      <h1 className="title">Login</h1>
-      <form className="form" onSubmit={handleSubmit(onSubmit)}>
-        {errorMessage && <p className="errorMessage">{errorMessage}</p>}
+    <div className="container">
+      <div className="card">
+        <h2 className="title">Login</h2>
+        <form className="form" onSubmit={handleSubmit(onSubmit)}>
+          {errorMessage && <p className="errorMessage">{errorMessage}</p>}
 
-        <FormInput
-          label="Email"
-          errorMessage={formState.errors.email?.message}
-          {...register("email")}
-        />
-        <FormInput
-          errorMessage={formState.errors.password?.message}
-          label="Password"
-          {...register("password")}
-        />
-        <button className="btn-primary" disabled={result.isLoading}>
-          Login
-        </button>
-      </form>
+          <FormInput
+            label="Email"
+            errorMessage={formState.errors.email?.message}
+            {...register("email")}
+          />
+          <FormInput
+            errorMessage={formState.errors.password?.message}
+            label="Password"
+            {...register("password")}
+          />
+          <button className="btn-primary" disabled={result.isLoading}>
+            Login
+          </button>
+          <Link to="/register">New here? Create an Account.</Link>
+        </form>
+      </div>
     </div>
   );
 }
