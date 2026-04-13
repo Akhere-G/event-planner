@@ -29,7 +29,14 @@ export const authApi = createApi({
         body: credentials,
       }),
     }),
+    checkUser: builder.query<AuthResponse, void>({
+      query: () => ({ url: "/auth/check" }),
+    }),
   }),
 });
 
-export const { useRegisterUserMutation, useLoginUserMutation } = authApi;
+export const {
+  useRegisterUserMutation,
+  useLoginUserMutation,
+  useCheckUserQuery,
+} = authApi;
