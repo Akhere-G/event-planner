@@ -3,6 +3,7 @@ from flask import Flask
 from dotenv import load_dotenv
 from .extensions import db, migrate, flask_bcrypt
 from .config.config import Config
+from flask_cors import CORS
 
 
 load_dotenv()
@@ -10,6 +11,11 @@ load_dotenv()
 
 def create_app(config_class=None):
     app = Flask(__name__)
+    CORS(
+        app,
+        supports_credentials=True,
+        origins=[os.environ.get("FRONTEND_URL")],
+    )
 
     if config_class is None:
         config_obj = Config().dev_config
