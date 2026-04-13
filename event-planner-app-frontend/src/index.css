@@ -36,10 +36,10 @@
   --color-text-secondary: var(--txt-secondary);
   --color-text-inverse: var(--txt-inverse);
   
-  --color-status-success: #10b981;
-  --color-status-error: #ef4444;
-  --color-status-warning: #f59e0b;
-  --color-status-info: #3b82f6;
+  --color-success: #10b981;
+  --color-error: #ef4444;
+  --color-warning: #f59e0b;
+  --color-info: #3b82f6;
 
   --font-sans: 'Inter', sans-serif;
 }
@@ -73,5 +73,13 @@
 
   .btn-secondary {
     @apply bg-surface-muted text-text-primary hover:bg-surface-border;
+  }
+
+  .title {
+    @apply text-2xl  mb-4
+  }
+
+  .form {
+    @apply flex gap-4 flex-col
   }
 }
