@@ -3,6 +3,9 @@ import type { Trip } from "./types";
 
 const baseUrl = import.meta.env.VITE_API_URL;
 
+export interface GetTripsResult {
+  data: { itineraries: Trip[] };
+}
 export const tripsApi = createApi({
   reducerPath: "trips",
   baseQuery: fetchBaseQuery({
@@ -10,7 +13,7 @@ export const tripsApi = createApi({
     credentials: "include",
   }),
   endpoints: (builder) => ({
-    getTrips: builder.query<Trip[], void>({
+    getTrips: builder.query<GetTripsResult, void>({
       query: () => "/itineraries",
     }),
   }),

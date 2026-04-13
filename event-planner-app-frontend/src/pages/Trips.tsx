@@ -1,7 +1,8 @@
+import { TripList } from "../features/trips/components";
 import { useGetTripsQuery } from "../features/trips/tripsApiSlice";
 
 export default function Trips() {
-  const { isLoading, isError } = useGetTripsQuery();
+  const { data, isLoading, isError } = useGetTripsQuery();
 
   if (isLoading) {
     return <div>...loading</div>;
@@ -14,9 +15,9 @@ export default function Trips() {
   return (
     <div className="container">
       <div className="card">
-        <h2 className="title">Trips</h2>
-        <p>Your trips</p>
+        <h2 className="title mb-4">Your Trips</h2>
       </div>
+      {data?.data && <TripList trips={data.data.itineraries} />}
     </div>
   );
 }
