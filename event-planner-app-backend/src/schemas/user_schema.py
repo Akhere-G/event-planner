@@ -7,8 +7,10 @@ from marshmallow import (
     fields,
     ValidationError,
     post_dump,
+    pre_load,
 )
 from ..models import UserRole
+import re
 
 
 class UserSchema(SQLAlchemyAutoSchema):
@@ -54,6 +56,13 @@ class RegisterSchema(SQLAlchemyAutoSchema):
     class Meta:
         model = User
         exclude = ("id",)
+
+    @pre_load
+    def camel_to_snake(self, data, many, partial, **kwargs):
+        return {self._to_snake(k): v for k, v in data.items()}
+
+    def _to_snake(self, s):
+        return re.sub(r"(?<!^)(?=[A-Z])", "_", s).lower()
 
     username = auto_field(
         validate=validate.Length(
