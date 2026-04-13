@@ -88,11 +88,12 @@ def update_user_role_route(user_id: int, itinerary_id: int, other_user_id: int):
 @login_required
 def remove_user_route(user_id: int, itinerary_id: int, other_user_id: int):
     try:
-        is_authorised(
-            user_id=user_id,
-            itinerary_id=itinerary_id,
-            message="You must be an admin to remove users.",
-        )
+        if user_id != other_user_id:
+            is_authorised(
+                user_id=user_id,
+                itinerary_id=itinerary_id,
+                message="You must be an admin to other remove users.",
+            )
         deleted_user_id = remove_user(
             user_id=user_id, itinerary_id=itinerary_id, other_user_id=other_user_id
         )
