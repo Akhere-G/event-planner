@@ -42,7 +42,7 @@ class LoginSchema(Schema):
         required=True,
         error_messages={
             "required": "Email is required.",
-            "email": "Email is not valid.",
+            "invalid": "Please enter a valid email address.",
         },
     )
     password = fields.String(
@@ -57,15 +57,16 @@ class RegisterSchema(SQLAlchemyAutoSchema):
 
     username = auto_field(
         validate=validate.Length(
-            min=3, max=50, error="Username must be between 3 and 50 characters."
+            max=50, error="Username must be less than 50 characters."
         ),
         error_messages={"required": "Username is required."},
     )
-    email = auto_field(
+    email = fields.Email(
+        required=True,
         error_messages={
             "required": "Email is required.",
-            "email": "Email is not valid.",
-        }
+            "invalid": "Please enter a valid email address.",
+        },
     )
     password = auto_field(
         load_only=True,
