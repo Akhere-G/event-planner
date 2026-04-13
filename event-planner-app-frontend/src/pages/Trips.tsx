@@ -1,9 +1,22 @@
-import { useSelector } from "react-redux";
-import { selectCurrentUser } from "../features/auth/authSlice";
-import type { RootState } from "../store";
+import { useGetTripsQuery } from "../features/trips/tripsApiSlice";
 
 export default function Trips() {
-  const userId = useSelector((state: RootState) => selectCurrentUser(state));
-  console.log(userId);
-  return <div>Trips</div>;
+  const { isLoading, isError } = useGetTripsQuery();
+
+  if (isLoading) {
+    return <div>...loading</div>;
+  }
+
+  if (isError) {
+    return <div>Something went wrong</div>;
+  }
+
+  return (
+    <div className="container">
+      <div className="card">
+        <h2 className="title">Trips</h2>
+        <p>Your trips</p>
+      </div>
+    </div>
+  );
 }
