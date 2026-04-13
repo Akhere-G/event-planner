@@ -1,0 +1,77 @@
+@import "tailwindcss";
+
+:root {
+  --bg-canvas: #f8fafc;
+  --bg-surface: #ffffff;
+  --bg-surface-muted: #f1f5f9;
+  --border-surface: #e2e8f0;
+  --txt-primary: #0f172a;
+  --txt-secondary: #64748b;
+  --txt-inverse: #ffffff;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-canvas: #0f172a;
+    --bg-surface: #1e293b;
+    --bg-surface-muted: #334155;
+    --border-surface: #475569;
+    --txt-primary: #f8fafc;
+    --txt-secondary: #cbd5e1;
+    --txt-inverse: #ffffff;
+  }
+}
+
+@theme {
+  --color-brand-primary: #f97316;
+  --color-brand-secondary: #fb923c;
+  --color-brand-accent: #0ea5e9;
+
+  --color-canvas: var(--bg-canvas);
+  --color-surface: var(--bg-surface);
+  --color-surface-muted: var(--bg-surface-muted);
+  --color-surface-border: var(--border-surface);
+
+  --color-text-primary: var(--txt-primary);
+  --color-text-secondary: var(--txt-secondary);
+  --color-text-inverse: var(--txt-inverse);
+  
+  --color-status-success: #10b981;
+  --color-status-error: #ef4444;
+  --color-status-warning: #f59e0b;
+  --color-status-info: #3b82f6;
+
+  --font-sans: 'Inter', sans-serif;
+}
+
+@layer base {
+  body {
+    @apply bg-canvas text-text-primary antialiased;
+  }
+
+  input, select, textarea {
+    @apply w-full px-4 py-2 rounded-xl border border-surface-border bg-surface transition-all outline-none text-text-primary focus:ring-2 focus:ring-brand-primary focus:border-transparent;
+  }
+
+  a {
+    @apply text-brand-primary hover:text-brand-secondary transition-colors no-underline font-medium;
+  }
+
+  button, .btn {
+    @apply px-5 py-2.5 rounded-xl font-semibold transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+}
+
+@layer components {
+  .card {
+    @apply bg-surface border border-surface-border rounded-2xl shadow-sm hover:shadow-md transition-shadow p-4;
+  }
+
+  .btn-primary {
+    @apply bg-brand-primary text-text-inverse hover:bg-brand-secondary shadow-sm;
+  }
+
+  .btn-secondary {
+    @apply bg-surface-muted text-text-primary hover:bg-surface-border;
+  }
+}
