@@ -6,6 +6,7 @@ from ..services.itineraries_service import (
     update_itinerary,
     delete_itinerary,
     is_authorised,
+    get_itinerary_count,
 )
 from ..exceptions import (
     ItineraryDoesNotExistError,
@@ -23,10 +24,19 @@ itinerary_bp = Blueprint("itinerary", __name__)
 @login_required
 def get_itineraries_route(user_id):
     schema = ItineraryWithRoleSchema(many=True)
-    result = get_itinerary_memberships(user_id)
+    limit = request.args.get("limit", type=int)
+    offset = request.args.get("offset", default=0, type=int)
+
+    count = get_itinerary_count(user_id)
+    result = get_itinerary_memberships(user_id, limit, offset)
     itineraries = schema.dump(result)
+
+    has_more = False
+    if limit is not None:
+        has_more = (offset + len(itineraries)) < count
+
     return api_response(
-        data={"itineraries": itineraries},
+        data={"itineraries": itineraries, "has_more": has_more},
         message="Fetched user itineraries.",
         success=True,
         status_code=200,

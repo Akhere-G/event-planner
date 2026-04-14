@@ -1,6 +1,6 @@
 from ..extensions import db
 from ..models import Itinerary, ItineraryUser, UserRole
-from sqlalchemy import select
+from sqlalchemy import select, func
 from ..exceptions import UserNotAuthorisedError, ItineraryDoesNotExistError
 from sqlalchemy.orm import selectinload, contains_eager
 
@@ -30,7 +30,17 @@ def get_itinerary_membership(user_id: int, itinerary_id: int):
     return membership
 
 
-def get_itinerary_memberships(user_id: int):
+def get_itinerary_count(user_id):
+    stmt = (
+        select(func.count())
+        .select_from(ItineraryUser)
+        .where(ItineraryUser.user_id == user_id)
+    )
+
+    return db.session.execute(stmt).scalar()
+
+
+def get_itinerary_memberships(user_id: int, limit: int = None, offset: int = 0):
     stmt = (
         select(ItineraryUser)
         .where(ItineraryUser.user_id == user_id)
@@ -43,6 +53,8 @@ def get_itinerary_memberships(user_id: int):
                 selectinload(Itinerary.invites),
             )
         )
+        .limit(limit)
+        .offset(offset)
     )
     return db.session.execute(stmt).scalars().all()
 

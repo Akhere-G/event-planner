@@ -2,10 +2,19 @@ import { useNavigate } from "react-router";
 import { EmptyState, ErrorState } from "../components";
 import { TripCardSkeleton, TripList } from "../features/trips/components";
 import { useGetTripsQuery } from "../features/trips/tripsApiSlice";
+import { useState } from "react";
+
+const LIMIT = 12;
 
 export default function Trips() {
-  const { data, isLoading, isError } = useGetTripsQuery();
+  const [offset, setOffset] = useState(0);
+  const { data, isLoading, isError } = useGetTripsQuery({
+    limit: LIMIT,
+    offset,
+  });
   const navigate = useNavigate();
+
+  const getMore = () => setOffset((prev) => prev + LIMIT);
 
   let mainContent = <></>;
   if (isLoading) {
@@ -29,7 +38,13 @@ export default function Trips() {
       />
     );
   } else {
-    mainContent = <TripList trips={data.data.itineraries} />;
+    mainContent = (
+      <TripList
+        trips={data.data.itineraries}
+        hasMore={data.data.hasMore}
+        getMore={getMore}
+      />
+    );
   }
 
   return (
