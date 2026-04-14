@@ -58,7 +58,7 @@
   }
 
   button, .btn {
-    @apply px-5 py-2.5 rounded-xl font-semibold transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply px-5 py-2.5 rounded-xl font-semibold transition-all cursor-pointer active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed;
   }
 
   li {
@@ -72,21 +72,12 @@
   }
 
   .btn-primary {
-    @apply bg-brand-primary text-text-inverse hover:bg-brand-secondary shadow-sm cursor-pointer;
+    @apply bg-brand-primary text-text-inverse hover:bg-brand-secondary shadow-sm;
   }
-
-  .btn-primary:disabled {
-  @apply grayscale cursor-not-allowed opacity-70;
-}
 
   .btn-secondary {
-    @apply bg-surface-muted text-text-primary hover:bg-surface-border cursor-pointer;
+    @apply bg-surface-muted text-text-primary hover:bg-surface-border;
   }
-
-  .btn-secondary:disabled {
-  @apply grayscale cursor-not-allowed opacity-70;
-}
-  
 
   .title {
     @apply text-2xl

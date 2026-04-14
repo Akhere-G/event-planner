@@ -1,5 +1,7 @@
+import { Plus } from "lucide-react";
 import type { Trip } from "../types";
 import TripCard from "./TripCard";
+import { Link } from "react-router";
 
 export default function TripList({
   trips,
@@ -16,6 +18,13 @@ export default function TripList({
         {trips.map((trip) => (
           <TripCard key={trip.id} {...trip} />
         ))}
+        <Link
+          to="/addtrip"
+          className="border-brand-primary border-2 h-full w-full rounded-md flex justify-center items-center gap-2 font-bold"
+        >
+          <Plus className="text-brand-primary" />
+          <p className="text-brand-primary">Add new itinerary</p>
+        </Link>
       </div>
       {hasMore && (
         <button className="btn-primary" onClick={getMore}>

@@ -1,5 +1,5 @@
 import { Navigate, Route, Routes } from "react-router";
-import { Login, Register, TripDetails, Trips } from "./pages";
+import { AddTrip, Login, Register, TripDetails, Trips } from "./pages";
 import { useCheckUserQuery } from "./features/auth/authApiSlice";
 import { useEffect } from "react";
 import {
@@ -24,7 +24,10 @@ function App() {
   if (isLoading) {
     return <></>;
   }
-  const authLinks = [{ title: "Trips", url: "/" }];
+  const authLinks = [
+    { title: "Trips", url: "/" },
+    { title: "Add Trip", url: "/addtrip" },
+  ];
 
   const unauthLinks = [
     { title: "Login", url: "/login" },
@@ -40,6 +43,14 @@ function App() {
           element={
             <ProtectedRoute redirect={!isAuthenticated} redirectTo="/login">
               <Trips />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/addtrip"
+          element={
+            <ProtectedRoute redirect={!isAuthenticated} redirectTo="/login">
+              <AddTrip />
             </ProtectedRoute>
           }
         />
