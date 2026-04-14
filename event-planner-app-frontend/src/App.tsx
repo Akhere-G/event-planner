@@ -17,7 +17,6 @@ function App() {
 
   useEffect(() => {
     if (data) {
-      console.log(data);
       dispatch(setCredentials(data.data.userId));
     }
   }, [data, dispatch]);

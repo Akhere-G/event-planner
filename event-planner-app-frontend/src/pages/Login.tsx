@@ -31,7 +31,6 @@ export default function Login() {
         setErrorMessage(serverErrors.general?.join(", ") ?? "");
 
         Object.entries(serverErrors).forEach(([k, messages]) => {
-          console.log("k, v", k, messages);
           setError(k as keyof LoginSchema, {
             type: "server",
             message: messages[0],

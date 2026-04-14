@@ -28,7 +28,6 @@ export default function Register() {
 
       navigate("/trips");
     } catch (err) {
-      console.log(err);
       if (isValidationError(err)) {
         const serverErrors = err.data.error;
 
