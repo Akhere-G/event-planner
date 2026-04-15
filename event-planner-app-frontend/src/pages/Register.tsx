@@ -1,12 +1,15 @@
 import { yupResolver } from "@hookform/resolvers/yup";
 import { FormInput } from "../components";
 import { useForm } from "react-hook-form";
-import { registerSchema, type RegisterSchema } from "../schemas/authSchema";
-import { useRegisterUserMutation } from "../features/auth/authApiSlice";
+import {
+  registerSchema,
+  type RegisterSchema,
+} from "../features/auth/schemas/authSchema";
+import { useRegisterUserMutation } from "../features/auth/services/authApiSlice";
 import { isValidationError } from "../features/api/utils";
 import { Link, useNavigate } from "react-router";
 import { useDispatch } from "react-redux";
-import { setCredentials } from "../features/auth/authSlice";
+import { setCredentials } from "../features/auth/services/authSlice";
 import { useState } from "react";
 
 export default function Register() {

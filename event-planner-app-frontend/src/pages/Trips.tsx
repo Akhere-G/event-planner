@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router";
 import { EmptyState, ErrorState } from "../components";
 import { TripCardSkeleton, TripList } from "../features/trips/components";
-import { useGetTripsQuery } from "../features/trips/tripsApiSlice";
+import { useGetTripsQuery } from "../features/trips/services/tripsApiSlice";
 import { useState } from "react";
 
 const LIMIT = 12;

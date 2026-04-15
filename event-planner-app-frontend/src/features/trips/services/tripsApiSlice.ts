@@ -1,5 +1,5 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import type { Trip } from "./types";
+import type { Trip } from "../types";
 
 const baseUrl = import.meta.env.VITE_API_URL;
 

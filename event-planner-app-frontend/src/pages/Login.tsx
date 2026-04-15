@@ -1,13 +1,16 @@
 import { useForm } from "react-hook-form";
 import { FormInput } from "../components";
-import { useLoginUserMutation } from "../features/auth/authApiSlice";
+import { useLoginUserMutation } from "../features/auth/services/authApiSlice";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { loginSchema, type LoginSchema } from "../schemas/authSchema";
+import {
+  loginSchema,
+  type LoginSchema,
+} from "../features/auth/schemas/authSchema";
 import { isValidationError } from "../features/api/utils";
 import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { Link, useNavigate } from "react-router";
-import { setCredentials } from "../features/auth/authSlice";
+import { setCredentials } from "../features/auth/services/authSlice";
 
 export default function Login() {
   const [errorMessage, setErrorMessage] = useState("");

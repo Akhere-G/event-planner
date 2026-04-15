@@ -1,11 +1,11 @@
 import { Navigate, Route, Routes } from "react-router";
 import { AddTrip, Login, Register, TripDetails, Trips } from "./pages";
-import { useCheckUserQuery } from "./features/auth/authApiSlice";
+import { useCheckUserQuery } from "./features/auth/services/authApiSlice";
 import { useEffect } from "react";
 import {
   selectIsAuthenticated,
   setCredentials,
-} from "./features/auth/authSlice";
+} from "./features/auth/services/authSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { ProtectedRoute } from "./components";
 import { Header } from "./layout";
