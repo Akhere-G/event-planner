@@ -34,6 +34,7 @@ function App() {
     { title: "Register", url: "/register" },
   ];
 
+  const isAuth = !isAuthenticated && !data?.data.userId;
   return (
     <>
       <Header links={isAuthenticated ? authLinks : unauthLinks} />
@@ -41,7 +42,7 @@ function App() {
         <Route
           path="/"
           element={
-            <ProtectedRoute redirect={!isAuthenticated} redirectTo="/login">
+            <ProtectedRoute redirect={isAuth} redirectTo="/login">
               <Trips />
             </ProtectedRoute>
           }
@@ -49,7 +50,7 @@ function App() {
         <Route
           path="/addtrip"
           element={
-            <ProtectedRoute redirect={!isAuthenticated} redirectTo="/login">
+            <ProtectedRoute redirect={isAuth} redirectTo="/login">
               <AddTrip />
             </ProtectedRoute>
           }
@@ -57,7 +58,7 @@ function App() {
         <Route
           path="/trip/:tripId"
           element={
-            <ProtectedRoute redirect={!isAuthenticated} redirectTo="/login">
+            <ProtectedRoute redirect={isAuth} redirectTo="/login">
               <TripDetails />
             </ProtectedRoute>
           }
@@ -65,7 +66,7 @@ function App() {
         <Route
           path="/login"
           element={
-            <ProtectedRoute redirect={isAuthenticated} redirectTo="/">
+            <ProtectedRoute redirect={!isAuth} redirectTo="/">
               <Login />
             </ProtectedRoute>
           }
@@ -73,7 +74,7 @@ function App() {
         <Route
           path="/register"
           element={
-            <ProtectedRoute redirect={isAuthenticated} redirectTo="/">
+            <ProtectedRoute redirect={!isAuth} redirectTo="/">
               <Register />
             </ProtectedRoute>
           }
