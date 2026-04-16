@@ -20,7 +20,7 @@ export default function TripList({
         ))}
         <Link
           to="/addtrip"
-          className="border-brand-primary border-2 h-full w-full rounded-md flex justify-center items-center gap-2 font-bold"
+          className="border-brand-primary border-2 h-full w-full rounded-md flex justify-center items-center gap-2 font-bold min-h-54"
         >
           <Plus className="text-brand-primary" />
           <p className="text-brand-primary">Add new itinerary</p>
