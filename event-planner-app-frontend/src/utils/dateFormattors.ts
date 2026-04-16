@@ -11,11 +11,11 @@ export const formatDateRange = (startAt: string, endAt: string) => {
   const year = !isSameYear(startDate, new Date()) || !sameYear ? " yy" : "";
 
   if (sameDay) {
-    dateStr = `${format(new Date(startAt), `d LLL${year}`)} - ${format(new Date(endAt), "d LLL")}`;
+    dateStr = `${format(new Date(startAt), `d/MM${year}`)} - ${format(new Date(endAt), "d/MM")}`;
   } else if (sameYear) {
-    dateStr = `${format(new Date(startAt), `d LLL${year}`)} - ${format(new Date(endAt), "d LLL")}`;
+    dateStr = `${format(new Date(startAt), `d/MM${year}`)} - ${format(new Date(endAt), "d/MM")}`;
   } else {
-    dateStr = `${format(new Date(startAt), `d LLL${year}`)} - ${format(new Date(endAt), "d LLL, yy")}`;
+    dateStr = `${format(new Date(startAt), `d/MM${year}`)} - ${format(new Date(endAt), "d/MM, yy")}`;
   }
 
   return dateStr;

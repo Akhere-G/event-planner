@@ -1,4 +1,4 @@
-import type { User } from "../auth/types";
+import type { User } from "../users/types";
 import type { Invite } from "../invites/types";
 
 export interface Trip {

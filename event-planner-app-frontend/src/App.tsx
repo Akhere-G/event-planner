@@ -1,5 +1,5 @@
 import { Navigate, Route, Routes } from "react-router";
-import { AddTrip, Login, Register, TripDetails, Trips } from "./pages";
+import { AddTrip, Login, Register, TripPage, Trips } from "./pages";
 import { useCheckUserQuery } from "./features/auth/services/authApiSlice";
 import { useEffect } from "react";
 import {
@@ -56,10 +56,10 @@ function App() {
           }
         />
         <Route
-          path="/trip/:tripId"
+          path="/trips/:tripId"
           element={
             <ProtectedRoute redirect={isAuth} redirectTo="/login">
-              <TripDetails />
+              <TripPage />
             </ProtectedRoute>
           }
         />

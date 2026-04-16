@@ -43,6 +43,9 @@ export const tripsApi = createApi({
         return currentArg?.offset !== previousArg?.offset;
       },
     }),
+    getTrip: builder.query<{ data: Trip }, number, { status: number }>({
+      query: (id) => `itineraries/${id}`,
+    }),
     addTrip: builder.mutation<Trip, TripSchema>({
       query: (newTrip) => ({
         url: "/itineraries",
@@ -54,4 +57,5 @@ export const tripsApi = createApi({
   }),
 });
 
-export const { useGetTripsQuery, useAddTripMutation } = tripsApi;
+export const { useGetTripsQuery, useGetTripQuery, useAddTripMutation } =
+  tripsApi;

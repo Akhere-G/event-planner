@@ -40,8 +40,6 @@ export default function Addtrip() {
       navigate("/");
     } catch (err) {
       if (isValidationError(err)) {
-        console.log("heeere");
-
         const serverErrors = err.data.error;
 
         setErrorMessage(serverErrors.general?.join(", ") ?? "");
