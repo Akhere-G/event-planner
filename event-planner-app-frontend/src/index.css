@@ -95,5 +95,8 @@
     @apply w-full max-w-7xl mx-auto p-4
   }
 
+  .form-input {
+    @apply w-full p-3 rounded-xl border focus:outline-none focus:border-brand-primary bg-surface-muted text-text-primary transition-all placeholder:text-text-secondary/50
+  }
 
 }

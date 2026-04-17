@@ -1,3 +1,5 @@
+import { Tooltip } from "react-tooltip";
+
 export interface FormInputprops {
   label?: string;
   name: string;
@@ -18,6 +20,7 @@ export interface FormInputprops {
   formClassNames?: string;
   textarea?: boolean;
   ref?: React.Ref<HTMLElement>;
+  tooltipErrors?: boolean;
 }
 
 export default function FormInput({
@@ -31,6 +34,7 @@ export default function FormInput({
   options,
   formClassNames = "",
   textarea = false,
+  tooltipErrors = false,
   ref,
   ...props
 }: FormInputprops) {
@@ -39,7 +43,9 @@ export default function FormInput({
       {label && (
         <label
           htmlFor={name}
-          className="group-focus-within:text-accent text-sm font-bold text-text-main mb-2"
+          className={`group-focus-within:text-brand-primary text-xs  text-text-secondary pb-1
+            ${tooltipErrors && errorMessage ? "text-error!" : ""}
+            `}
         >
           {label}
         </label>
@@ -47,7 +53,8 @@ export default function FormInput({
       {!options && !textarea && (
         <input
           id={name}
-          className="w-full p-3 rounded-xl border border-border-light focus:outline-none focus:border-brand bg-bg-secondary text-text-main transition-all placeholder:text-text-sub/50"
+          data-tooltip-id={`${name}-tooltip`}
+          className={`form-input ${tooltipErrors && errorMessage ? "border-error!" : ""}`}
           name={name}
           type={type}
           onChange={onChange}
@@ -58,8 +65,9 @@ export default function FormInput({
       )}
       {options && !textarea && (
         <select
-          className="w-full p-3 rounded-xl border border-border-light focus:outline-none focus:border-brand bg-bg-secondary text-text-main transition-all placeholder:text-text-sub/50"
           id={name}
+          data-tooltip-id={`${name}-tooltip`}
+          className={`form-input ${tooltipErrors && errorMessage ? "border-error!" : ""}`}
           name={name}
           onChange={(e) => onChange(e)}
           onBlur={onBlur}
@@ -73,15 +81,19 @@ export default function FormInput({
       )}
       {textarea && !options && (
         <textarea
-          className="w-full p-3 rounded-xl border border-border-light focus:outline-none focus:border-brand bg-bg-secondary text-text-main transition-all resize-none"
           id={name}
+          data-tooltip-id={`${name}-tooltip`}
+          className={`form-input ${tooltipErrors && errorMessage ? "border-error!" : ""}`}
           name={name}
           onChange={onChange}
           onBlur={onBlur}
           rows={6}
         />
       )}
-      {errorMessage && touched && (
+      {tooltipErrors && errorMessage && touched && (
+        <Tooltip id={`${name}-tooltip`}>{errorMessage}</Tooltip>
+      )}
+      {!tooltipErrors && errorMessage && touched && (
         <p className="errorMessage">{errorMessage}</p>
       )}
     </div>

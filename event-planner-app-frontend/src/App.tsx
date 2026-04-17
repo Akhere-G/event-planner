@@ -9,6 +9,7 @@ import {
 import { useDispatch, useSelector } from "react-redux";
 import { ProtectedRoute } from "./components";
 import { Header } from "./layout";
+import "react-tooltip/dist/react-tooltip.css";
 
 function App() {
   const isAuthenticated = useSelector(selectIsAuthenticated);

@@ -4,6 +4,7 @@ import { Accordion } from "../../../components";
 import { formatDateRelative } from "../../../utils/dateFormattors";
 import { makeDays } from "../utils";
 import EventList from "./EventList";
+import AddEventForm from "./AddEventForm";
 
 export default function DayList({
   startDate,
@@ -18,16 +19,21 @@ export default function DayList({
     () => makeDays(events, startDate, endDate),
     [events, startDate, endDate],
   );
-  console.log(days);
 
   return (
-    <div>
+    <div className="flex flex-col gap-4">
       {days.map((day) => (
-        <Accordion
-          key={day.date}
-          title={<h3>{formatDateRelative(day.date)}</h3>}
-          content={<EventList events={day.events} />}
-        />
+        <div key={day.date} className="card p-0 ">
+          <Accordion
+            title={<h3>{formatDateRelative(day.date)}</h3>}
+            content={
+              <div className="px-4 ">
+                <EventList events={day.events} />
+                <AddEventForm date={day.date} />
+              </div>
+            }
+          />
+        </div>
       ))}
     </div>
   );

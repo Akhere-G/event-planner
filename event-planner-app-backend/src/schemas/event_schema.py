@@ -24,7 +24,7 @@ class EventSchema(SQLAlchemyAutoSchema):
     description = auto_field()
     location = auto_field(
         error_messages={
-            "required": "End date is required.",
+            "required": "Location is required.",
         }
     )
     start_time = auto_field(

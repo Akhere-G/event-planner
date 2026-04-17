@@ -8,8 +8,6 @@ export function makeDays(events: Event[], startStr: string, endStr: string) {
   const startDate = parseISO(startStr);
   const endDate = parseISO(endStr);
 
-  console.log({ startDate, endDate });
-
   if (endDate < startDate) return [];
 
   const daysLookup: Record<string, Event[]> = {};
@@ -23,7 +21,6 @@ export function makeDays(events: Event[], startStr: string, endStr: string) {
   for (const event of events) {
     const startTime = getDate(event.startTime);
 
-    console.log(startTime, startTime in daysLookup);
     if (daysLookup[startTime]) {
       daysLookup[startTime].push(event);
     }
