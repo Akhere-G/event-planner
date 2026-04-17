@@ -15,7 +15,17 @@ export const eventApi = apiSlice.injectEndpoints({
         { type: "Trips", id: tripId },
       ],
     }),
+    deleteEvent: builder.mutation<void, { tripId: number; eventId: number }>({
+      query: ({ tripId, eventId }) => ({
+        url: `/itineraries/${tripId}/events/${eventId}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: (_, __, { tripId }) => [
+        { type: "Trips", id: "LIST" },
+        { type: "Trips", id: tripId },
+      ],
+    }),
   }),
 });
 
-export const { useAddEventMutation } = eventApi;
+export const { useAddEventMutation, useDeleteEventMutation } = eventApi;
