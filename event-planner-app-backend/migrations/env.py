@@ -10,14 +10,8 @@ from src.models import (
     Itinerary,
     ItineraryUser,
     UserRole,
-    User,
-    Itinerary,
-    ItineraryUser,
     ItineraryEvent,
-    UserRole,
     Event,
-    EventSource,
-    EventStatus,
     Invite,
 )
 

@@ -19,10 +19,10 @@ export function makeDays(events: Event[], startStr: string, endStr: string) {
   }
 
   for (const event of events) {
-    const startTime = getDate(event.startTime);
+    const startAt = getDate(event.startAt);
 
-    if (daysLookup[startTime]) {
-      daysLookup[startTime].push(event);
+    if (daysLookup[startAt]) {
+      daysLookup[startAt].push(event);
     }
   }
 

@@ -1,19 +1,11 @@
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import type { Trip } from "../types";
 import { type TripSchema } from "../schemas/tripSchema";
-
-const baseUrl = import.meta.env.VITE_API_URL;
+import { apiSlice } from "../../api/apiSlice";
 
 export interface GetTripsResult {
   data: { itineraries: Trip[]; hasMore: boolean };
 }
-export const tripsApi = createApi({
-  tagTypes: ["Trips"],
-  reducerPath: "trips",
-  baseQuery: fetchBaseQuery({
-    baseUrl,
-    credentials: "include",
-  }),
+export const tripsApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     getTrips: builder.query<GetTripsResult, { limit: number; offset: number }>({
       query: ({ limit, offset }) => ({
@@ -45,6 +37,7 @@ export const tripsApi = createApi({
     }),
     getTrip: builder.query<{ data: Trip }, number, { status: number }>({
       query: (id) => `itineraries/${id}`,
+      providesTags: (result) => [{ type: "Trips", id: result.data.id }],
     }),
     addTrip: builder.mutation<Trip, TripSchema>({
       query: (newTrip) => ({

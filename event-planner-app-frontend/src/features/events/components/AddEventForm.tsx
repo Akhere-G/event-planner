@@ -2,53 +2,85 @@ import { useForm } from "react-hook-form";
 import { FormInput } from "../../../components";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { eventSchema, type EventSchema } from "../schemas/eventSchema";
+import { useAddEventMutation } from "../service/eventApiSlice";
+import { useParams } from "react-router";
+import { isValidationError } from "../../api/utils";
+import { useState } from "react";
+
+const defaultEventValues = {
+  location: "",
+  startAt: "",
+  endAt: "",
+  category: "General",
+};
 
 export default function AddEventForm({ date }: { date: string }) {
-  const { register, formState, handleSubmit } = useForm({
+  const [errorMessage, setErrorMessage] = useState("");
+
+  const { tripId } = useParams();
+  const [addEvent, { isLoading }] = useAddEventMutation();
+  const { register, formState, handleSubmit, setError, setValue } = useForm({
     resolver: yupResolver(eventSchema),
+    defaultValues: defaultEventValues,
   });
-  function onSubmit(formState: EventSchema) {
-    const data = {
+  async function onSubmit(formState: EventSchema) {
+    const event = {
       ...formState,
-      name: formState.location,
-      startTime: `${date} ${formState.startTime}`,
-      endTime: `${date} ${formState.endTime}`,
+      startAt: `${date} ${formState.startAt}`,
+      endAt: `${date} ${formState.endAt}`,
     };
-    console.log(data);
+    setErrorMessage("");
+    try {
+      await addEvent({ tripId: Number(tripId), event }).unwrap();
+      setValue("location", "");
+      setValue("startAt", "");
+      setValue("endAt", "");
+    } catch (err) {
+      if (isValidationError(err)) {
+        const serverErrors = err.data.error;
+
+        setErrorMessage(serverErrors.general?.join(", ") ?? "");
+
+        Object.entries(serverErrors).forEach(([k, messages]) => {
+          setError(k as keyof EventSchema, {
+            type: "server",
+            message: messages[0],
+          });
+        });
+      }
+    }
   }
   return (
-    <form className="flex gap-2 items-end" onSubmit={handleSubmit(onSubmit)}>
-      <FormInput
-        label="Location"
-        {...register("location")}
-        errorMessage={formState.errors.location?.message}
-        formClassNames="flex-[0.7]"
-        tooltipErrors
-      />
-      <FormInput
-        type="time"
-        label="Start Time"
-        {...register("startTime")}
-        errorMessage={formState.errors.startTime?.message}
-        formClassNames="flex-[0.15]"
-        tooltipErrors
-      />
-      <FormInput
-        type="time"
-        label="End Time"
-        {...register("endTime")}
-        errorMessage={formState.errors.endTime?.message}
-        formClassNames="flex-[0.15]"
-        tooltipErrors
-      />
-      <button className="btn-primary h-12">Add</button>
-    </form>
+    <>
+      <form className="flex gap-2 items-end" onSubmit={handleSubmit(onSubmit)}>
+        <FormInput
+          label="Location"
+          {...register("location")}
+          errorMessage={formState.errors.location?.message}
+          formClassNames="flex-[0.7]"
+          tooltipErrors
+        />
+        <FormInput
+          type="time"
+          label="Start Time"
+          {...register("startAt")}
+          errorMessage={formState.errors.startAt?.message}
+          formClassNames="flex-[0.15]"
+          tooltipErrors
+        />
+        <FormInput
+          type="time"
+          label="End Time"
+          {...register("endAt")}
+          errorMessage={formState.errors.endAt?.message}
+          formClassNames="flex-[0.15]"
+          tooltipErrors
+        />
+        <button className="btn-primary h-12" disabled={isLoading}>
+          Add
+        </button>
+      </form>
+      {errorMessage && <p className="mt-2 errorMessage">{errorMessage}</p>}
+    </>
   );
 }
-/*
-name: Mapped[str] = mapped_column(String(255));
-description: Mapped[Optional[str]] = mapped_column(String, (nullable = True));
-location: Mapped[str] = mapped_column(String);
-start_time: Mapped[datetime] = mapped_column(DateTime);
-end_time: Mapped[datetime] = mapped_column(DateTime);
-*/

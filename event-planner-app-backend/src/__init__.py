@@ -45,8 +45,6 @@ def create_app(config_class=None):
             ItineraryEvent,
             UserRole,
             Event,
-            EventSource,
-            EventStatus,
             Invite,
             InvitationStatus,
         )

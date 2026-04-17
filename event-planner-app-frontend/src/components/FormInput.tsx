@@ -23,7 +23,7 @@ export interface FormInputprops {
   tooltipErrors?: boolean;
 }
 
-export default function FormInput({
+const FormInput = ({
   label,
   name,
   type = "text",
@@ -37,7 +37,7 @@ export default function FormInput({
   tooltipErrors = false,
   ref,
   ...props
-}: FormInputprops) {
+}: FormInputprops) => {
   return (
     <div className={"group flex flex-col text-text-main " + formClassNames}>
       {label && (
@@ -98,4 +98,6 @@ export default function FormInput({
       )}
     </div>
   );
-}
+};
+
+export default FormInput;

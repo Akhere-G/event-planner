@@ -1,6 +1,6 @@
 from marshmallow_sqlalchemy import SQLAlchemyAutoSchema, auto_field
-from marshmallow import pre_load, fields, validate
-from ..models import Event, EventStatus, EventSource
+from marshmallow import pre_load
+from ..models import Event
 import re
 
 
@@ -16,23 +16,20 @@ class EventSchema(SQLAlchemyAutoSchema):
         return re.sub(r"(?<!^)(?=[A-Z])", "_", s).lower()
 
     id = auto_field(dump_only=True)
-    name = auto_field(
-        error_messages={
-            "required": "Name is required.",
-        }
-    )
+
     description = auto_field()
+
     location = auto_field(
         error_messages={
             "required": "Location is required.",
-        }
+        },
     )
-    start_time = auto_field(
+    start_at = auto_field(
         error_messages={
             "required": "Start time is required.",
         }
     )
-    end_time = auto_field(
+    end_at = auto_field(
         error_messages={
             "required": "End time is required.",
         }
@@ -42,28 +39,3 @@ class EventSchema(SQLAlchemyAutoSchema):
             "required": "Category is required.",
         }
     )
-    min_age = auto_field()
-
-    event_status = fields.String(
-        validate=validate.OneOf([e.value for e in EventStatus]),
-        metadata={
-            "description": f"Must be one of: {', '.join([e.value for e in EventStatus])}"
-        },
-    )
-
-    event_source = fields.String(
-        validate=validate.OneOf([e.value for e in EventSource]),
-        metadata={
-            "description": f"Must be one of: {', '.join([e.value for e in EventSource])}"
-        },
-    )
-
-    price = auto_field(
-        error_messages={
-            "required": "Price is required.",
-        }
-    )
-
-    image_url = auto_field()
-    external_id = auto_field()
-    last_sync = auto_field()
