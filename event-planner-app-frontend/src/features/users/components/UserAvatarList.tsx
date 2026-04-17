@@ -5,8 +5,8 @@ export default function UserAvatarList({ users }: { users: User[] }) {
   return (
     <div className="flex pr-2">
       {users.map((user) => (
-        <div className="-mr-2">
-          <UserAvatar key={user.id} {...user} />
+        <div key={user.id} className="-mr-2">
+          <UserAvatar {...user} />
         </div>
       ))}
     </div>

@@ -1,5 +1,6 @@
 import type { User } from "../users/types";
 import type { Invite } from "../invites/types";
+import type { Event } from "../events/types";
 
 export interface Trip {
   id: number;
