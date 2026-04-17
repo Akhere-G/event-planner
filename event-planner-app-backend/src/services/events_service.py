@@ -61,7 +61,7 @@ def update_event(itinerary_id: int, event_id: int, data: dict):
         if k in [
             "category",
             "description",
-            "endTime",
+            "end_time",
             "location",
             "name",
             "price",
