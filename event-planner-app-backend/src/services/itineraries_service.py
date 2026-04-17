@@ -125,17 +125,11 @@ def is_authorised(
 
 
 def update_itinerary(itinerary_id: int, data: dict):
-    stmt = (
-        select(ItineraryUser)
-        .where(ItineraryUser.itinerary_id == itinerary_id)
-        .options(selectinload(ItineraryUser.itinerary))
-    )
-    membership = db.session.execute(stmt).scalar_one_or_none()
+    stmt = select(Itinerary).where(Itinerary.id == itinerary_id)
+    itinerary = db.session.execute(stmt).scalar_one_or_none()
 
-    if not membership:
+    if not itinerary:
         raise ItineraryDoesNotExistError()
-
-    itinerary = membership.itinerary
 
     for k, v in data.items():
         if hasattr(itinerary, k):
@@ -146,18 +140,12 @@ def update_itinerary(itinerary_id: int, data: dict):
 
 
 def delete_itinerary(itinerary_id: int):
-    stmt = (
-        select(ItineraryUser)
-        .where(ItineraryUser.itinerary_id == itinerary_id)
-        .options(selectinload(ItineraryUser.itinerary))
-    )
+    stmt = select(Itinerary).where(Itinerary.id == itinerary_id)
 
-    membership = db.session.execute(stmt).scalar_one_or_none()
+    itinerary = db.session.execute(stmt).scalar_one_or_none()
 
-    if not membership:
+    if not itinerary:
         raise ItineraryDoesNotExistError()
-
-    itinerary = membership.itinerary
 
     db.session.delete(itinerary)
     db.session.commit()
