@@ -1,4 +1,4 @@
-import Events from "../../events/components/EventList";
+import { DayList } from "../../events/components";
 import type { Trip } from "../types";
 import TripSummary from "./TripSummary";
 
@@ -8,7 +8,11 @@ export default function TripDetails(props: Trip) {
       <TripSummary {...props} />
       <div>
         <h1 className="title mb-2">Itinerary</h1>
-        <Events events={props.events} />
+        <DayList
+          startDate={props.startDate}
+          endDate={props.endDate}
+          events={props.events}
+        />
       </div>
     </div>
   );
