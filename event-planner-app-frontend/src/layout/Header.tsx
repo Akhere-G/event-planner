@@ -41,6 +41,7 @@ export default function Header({ links }: HeaderProps) {
       <div
         className={`fixed z-30 h-full right-0 bg-surface p-4 shadow-md transition-transform
         md:hidden flex flex-col items-end gap-4 text-end
+        top-0
         ${isSidebarOpen ? "translate-x-0" : "translate-x-full"}`}
       >
         <button
