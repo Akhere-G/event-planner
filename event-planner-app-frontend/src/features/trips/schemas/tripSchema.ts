@@ -1,8 +1,8 @@
 import * as yup from "yup";
 
 export const tripSchema = yup.object({
-  name: yup.string().required("Name is required"),
-  description: yup.string(),
+  name: yup.string().trim().required("Name is required"),
+  description: yup.string().trim(),
   startDate: yup.string().required(),
   endDate: yup
     .string()
