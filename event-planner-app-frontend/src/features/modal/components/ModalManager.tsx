@@ -9,17 +9,17 @@ const MODAL_COMPONENTS = {
 };
 
 export default function ModalManager() {
-  const { modalType, modalProps } = useSelector(selectModal);
+  const { modal } = useSelector(selectModal);
   const dispatch = useDispatch();
 
-  if (!modalType) return null;
+  if (!modal) return null;
 
-  const SpecificModal = MODAL_COMPONENTS[modalType];
+  const SpecificModal = MODAL_COMPONENTS[modal.type];
 
   return (
     <div className="backdrop" onClick={() => dispatch(closeModal())}>
       <div className="modal" onClick={(e) => e.stopPropagation()}>
-        <SpecificModal {...modalProps} />
+        <SpecificModal {...modal.props} />
       </div>
     </div>
   );

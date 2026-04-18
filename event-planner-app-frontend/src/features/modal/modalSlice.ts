@@ -1,32 +1,33 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { type ModalProps } from "./types";
+import { type ModalProps, type ModalState } from "./types";
 
 type ModalDataType =
   | {
       type: "EDIT_TRIP";
-      props: ModalProps[keyof ModalProps];
+      props: ModalProps["EDIT_TRIP"];
     }
   | {
       type: "DELETE_TRIP";
-      props: ModalProps[keyof ModalProps];
+      props: ModalProps["DELETE_TRIP"];
+    }
+  | {
+      type: "VIEW_TRIP";
+      props: ModalProps["VIEW_TRIP"];
     };
 
-export interface ModalState {
-  modalType: ModalDataType["type"] | null;
-  modalProps: ModalDataType["props"] | null;
-}
+const initialState: ModalState = {
+  modal: null,
+};
 
 export const modalSlice = createSlice({
   name: "modal",
-  initialState: { modalType: null, modalProps: {} },
+  initialState,
   reducers: {
     openModal: (state, action: { payload: ModalDataType }) => {
-      state.modalType = action.payload.type;
-      state.modalProps = action.payload.props;
+      state.modal = action.payload as ModalState["modal"];
     },
     closeModal: (state) => {
-      state.modalType = null;
-      state.modalProps = {};
+      state.modal = null;
     },
   },
 });

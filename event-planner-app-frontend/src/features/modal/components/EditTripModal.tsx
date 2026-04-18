@@ -22,7 +22,7 @@ export default function EditTripModal({ trip }: { trip: Trip }) {
 
   return (
     <div className="card">
-      <h1 className="title mb-4">Edit Trip</h1>
+      <h2 className="title mb-4">Edit Trip</h2>
       <TripForm
         submitBtnText="Edit Form"
         submitAction={onSubmit}

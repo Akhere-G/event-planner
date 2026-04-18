@@ -75,6 +75,10 @@
     @apply bg-brand-primary text-text-inverse hover:bg-brand-secondary shadow-sm;
   }
 
+  .btn-error {
+    @apply bg-error text-text-inverse hover:brightness-110 shadow-sm;
+  }
+
   .btn-secondary {
     @apply bg-surface-muted text-text-primary hover:bg-surface-border;
   }
