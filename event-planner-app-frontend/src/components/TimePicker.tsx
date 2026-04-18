@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react";
 
 const getHours = () => {
   const hours: number[] = [];
-  for (let i = 1; i < 24; i++) {
+  for (let i = 0; i < 24; i++) {
     hours.push(i);
   }
 
@@ -53,7 +53,7 @@ export default function TimePicker({
   }, [selectedHour, selectedMinute, scrollToTime]);
 
   return (
-    <div className="flex max-h-34">
+    <div className="flex max-h-54">
       <div className="overflow-y-scroll flex-1" ref={hourContainerRef}>
         {getHours().map((hour) => {
           const hourStr = hour.toString().padStart(2, "0");

@@ -90,7 +90,7 @@ export default function EventCard({
                     endAt: format(newEnd, "yyyy-MM-dd HH:mm"),
                   });
                 }}
-                selectClassName="max-h-40 overflow-y-scroll"
+                selectClassName=" overflow-y-scroll"
                 CustomSelect={({ close }) => {
                   const time = format(eventData.startAt, "HH:mm");
 
@@ -118,7 +118,6 @@ export default function EventCard({
               <EditableSelect
                 selectedValue={format(eventData.endAt, "yyyy-MM-dd HH:mm")}
                 defaultElement={format(end, "p")}
-                selectClassName="max-h-40 overflow-y-scroll"
                 CustomSelect={({ close }) => {
                   const time = format(eventData.endAt, "HH:mm");
 
