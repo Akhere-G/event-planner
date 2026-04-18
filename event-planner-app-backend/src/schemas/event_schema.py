@@ -1,5 +1,5 @@
 from marshmallow_sqlalchemy import SQLAlchemyAutoSchema, auto_field
-from marshmallow import pre_load
+from marshmallow import pre_load, validates_schema, ValidationError
 from ..models import Event
 import re
 
@@ -39,3 +39,13 @@ class EventSchema(SQLAlchemyAutoSchema):
             "required": "Category is required.",
         }
     )
+
+    @validates_schema
+    def validate_times(self, data, **kwargs):
+        start = data.get("start_at")
+        end = data.get("end_at")
+
+        if start and end and end <= start:
+            raise ValidationError(
+                "End time must be after the start time.", field_name="end_at"
+            )

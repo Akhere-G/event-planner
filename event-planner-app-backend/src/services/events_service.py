@@ -3,9 +3,10 @@ from ..models import Event, ItineraryEvent
 from .itineraries_service import get_itinerary
 from ..exceptions import (
     ItineraryDoesNotExistError,
-    UserNotAuthorisedError,
     EventNotFoundError,
 )
+from marshmallow import ValidationError
+
 from sqlalchemy import select, func
 
 
@@ -64,6 +65,13 @@ def update_event(itinerary_id: int, event_id: int, data: dict):
             "edited_by_id",
         ]:
             setattr(event, k, v)
+
+    start = event.start_at
+    end = event.end_at
+
+    if end <= start:
+        db.session.rollback()
+        raise ValidationError({"end_at": ["End time must be after the start time."]})
 
     db.session.commit()
     return event
