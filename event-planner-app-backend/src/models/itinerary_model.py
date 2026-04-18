@@ -21,7 +21,7 @@ class Itinerary(Base, AuditMixin):
     )
 
     events: Mapped[List["Event"]] = relationship(  # type: ignore  # noqa: F821
-        secondary="itinerary_events",
+        secondary="itinerary_events", order_by="Event.start_at"
     )
 
     invites: Mapped[List["Invite"]] = relationship(  # type: ignore  # noqa: F821
