@@ -50,7 +50,7 @@
   }
 
   input, select, textarea {
-    @apply w-full px-4 py-2 rounded-xl border border-surface-border bg-surface transition-all outline-none text-text-primary focus:ring-2 focus:ring-brand-primary focus:border-transparent;
+    @apply w-full px-4 py-2 rounded-xl border border-surface-border bg-surface transition-all outline-none text-text-primary focus:ring-1 focus:ring-brand-primary focus:border-transparent;
   }
 
   a {

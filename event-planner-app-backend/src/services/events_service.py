@@ -54,18 +54,13 @@ def update_event(itinerary_id: int, event_id: int, data: dict):
     if not event:
         raise EventNotFoundError()
 
-    if event.external_id is not None:
-        raise UserNotAuthorisedError("You cannot edit non custom events.")
-
     for k, v in data.items():
         if k in [
             "category",
             "description",
-            "end_time",
+            "end_at",
             "location",
-            "name",
-            "price",
-            "start_time",
+            "start_at",
             "edited_by_id",
         ]:
             setattr(event, k, v)
