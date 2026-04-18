@@ -39,7 +39,11 @@ const FormInput = ({
   ...props
 }: FormInputprops) => {
   return (
-    <div className={"group flex flex-col text-text-main " + formClassNames}>
+    <div
+      className={
+        "relative group flex flex-col text-text-main " + formClassNames
+      }
+    >
       {label && (
         <label
           htmlFor={name}
@@ -94,7 +98,9 @@ const FormInput = ({
         <Tooltip id={`${name}-tooltip`}>{errorMessage}</Tooltip>
       )}
       {!tooltipErrors && errorMessage && touched && (
-        <p className="errorMessage">{errorMessage}</p>
+        <p className="absolute text-xs -bottom-5 left-1 text-error">
+          {errorMessage}
+        </p>
       )}
     </div>
   );

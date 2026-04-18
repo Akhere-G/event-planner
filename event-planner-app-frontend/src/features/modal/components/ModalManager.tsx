@@ -27,7 +27,9 @@ export default function ModalManager() {
       }}
     >
       <div className="modal" onClick={(e) => e.stopPropagation()}>
-        <SpecificModal {...modal.props} />
+        <div className="max-h-[90vh] overflow-y-scroll rounded-md">
+          <SpecificModal {...modal.props} />
+        </div>
       </div>
     </div>
   );

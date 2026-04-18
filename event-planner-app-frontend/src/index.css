@@ -100,7 +100,7 @@
   }
 
   .form-input {
-    @apply w-full p-3 rounded-xl border focus:outline-none focus:border-brand-primary bg-surface-muted text-text-primary transition-all placeholder:text-text-secondary/50
+    @apply w-full p-3 rounded-xl border focus:outline-none focus:border-brand-primary bg-surface-muted text-text-primary transition-all placeholder:text-text-secondary/50 h-11
   }
 
   .backdrop {

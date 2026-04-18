@@ -4,6 +4,6 @@ const baseUrl = import.meta.env.VITE_API_URL;
 export const apiSlice = createApi({
   reducerPath: "api",
   baseQuery: fetchBaseQuery({ baseUrl, credentials: "include" }),
-  tagTypes: ["Trips", "Events"],
+  tagTypes: ["Trips", "Events", "Invites"],
   endpoints: () => ({}),
 });

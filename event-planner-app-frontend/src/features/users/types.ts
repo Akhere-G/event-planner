@@ -6,7 +6,7 @@ export interface User {
 }
 
 export const UserRole = {
-  ADMIN: "admin",
-  EDITOR: "editor",
   VIEWER: "viewer",
+  EDITOR: "editor",
+  ADMIN: "admin",
 };
