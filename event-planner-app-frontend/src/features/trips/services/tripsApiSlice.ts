@@ -47,8 +47,26 @@ export const tripsApi = apiSlice.injectEndpoints({
       }),
       invalidatesTags: [{ type: "Trips", id: "LIST" }],
     }),
+    editTrip: builder.mutation<
+      { data: Trip },
+      { tripId: number; updatedTrip: Partial<TripSchema> }
+    >({
+      query: ({ updatedTrip, tripId }) => ({
+        url: `/itineraries/${tripId}`,
+        body: updatedTrip,
+        method: "PATCH",
+      }),
+      invalidatesTags: (_, __, { tripId }) => [
+        { type: "Trips", id: "LIST" },
+        { type: "Trips", id: tripId },
+      ],
+    }),
   }),
 });
 
-export const { useGetTripsQuery, useGetTripQuery, useAddTripMutation } =
-  tripsApi;
+export const {
+  useGetTripsQuery,
+  useGetTripQuery,
+  useAddTripMutation,
+  useEditTripMutation,
+} = tripsApi;

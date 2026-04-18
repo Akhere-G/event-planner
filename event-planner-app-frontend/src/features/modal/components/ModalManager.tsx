@@ -2,7 +2,6 @@ import { useDispatch, useSelector } from "react-redux";
 import DeleteTripModal from "./DeleteTripModal";
 import EditTripModal from "./EditTripModal";
 import { closeModal, selectModal } from "../modalSlice";
-import type { ModalType } from "../types";
 
 const MODAL_COMPONENTS = {
   DELETE_TRIP: DeleteTripModal,
@@ -15,10 +14,11 @@ export default function ModalManager() {
 
   if (!modalType) return null;
 
-  const SpecificModal = MODAL_COMPONENTS[modalType as keyof typeof ModalType];
+  const SpecificModal = MODAL_COMPONENTS[modalType];
+
   return (
     <div className="backdrop" onClick={() => dispatch(closeModal())}>
-      <div className="modal">
+      <div className="modal" onClick={(e) => e.stopPropagation()}>
         <SpecificModal {...modalProps} />
       </div>
     </div>

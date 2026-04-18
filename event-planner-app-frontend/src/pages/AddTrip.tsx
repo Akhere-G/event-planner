@@ -15,7 +15,7 @@ export default function Addtrip() {
   return (
     <div className="container">
       <div className="card">
-        <h2 className="title">Add Trip</h2>
+        <h2 className="title mb-4">Add Trip</h2>
         <TripForm
           submitAction={onSubmit}
           submitBtnText="Add Trip"
