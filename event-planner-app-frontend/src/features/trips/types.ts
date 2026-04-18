@@ -5,6 +5,7 @@ import type { Event } from "../events/types";
 export interface Trip {
   id: number;
   name: string;
+  role: string;
   description?: string;
   startDate: string;
   endDate: string;

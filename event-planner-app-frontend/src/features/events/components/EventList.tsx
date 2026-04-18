@@ -5,7 +5,13 @@ import EventCard from "./EventCard";
 import { isFetchBaseQueryError } from "../../api/utils";
 import { EmptyState } from "../../../components";
 
-export default function EventList({ events }: { events: Event[] }) {
+export default function EventList({
+  events,
+  role,
+}: {
+  events: Event[];
+  role: string;
+}) {
   const { tripId } = useParams();
   const [deleteEvent] = useDeleteEventMutation();
 
@@ -27,7 +33,12 @@ export default function EventList({ events }: { events: Event[] }) {
     mainContent = (
       <>
         {events.map((event) => (
-          <EventCard key={event.id} event={event} handleDelete={handleDelete} />
+          <EventCard
+            key={event.id}
+            event={event}
+            handleDelete={handleDelete}
+            role={role}
+          />
         ))}
       </>
     );

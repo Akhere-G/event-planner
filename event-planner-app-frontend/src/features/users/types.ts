@@ -4,3 +4,9 @@ export interface User {
   email: string;
   role: string;
 }
+
+export const UserRole = {
+  ADMIN: "admin",
+  EDITOR: "editor",
+  VIEWER: "viewer",
+};

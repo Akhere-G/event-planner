@@ -1,13 +1,19 @@
 import { Clock, Tag, Trash } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import { type Event } from "../types"; // Adjust path as needed
+import { canUserEdit } from "../../users/utils";
 
 interface EventCardProps {
   event: Event;
   handleDelete: (id: number) => void;
+  role: string;
 }
 
-export default function EventCard({ event, handleDelete }: EventCardProps) {
+export default function EventCard({
+  event,
+  handleDelete,
+  role,
+}: EventCardProps) {
   const start = parseISO(event.startAt);
   const end = parseISO(event.endAt);
 
@@ -36,17 +42,19 @@ export default function EventCard({ event, handleDelete }: EventCardProps) {
             </span>
           </div>
 
-          <button
-            className="p-0 group"
-            aria-label="delete event"
-            onClick={() => handleDelete(event.id)}
-          >
-            <Trash
-              size={16}
-              className="group-hover:hover:stroke-error duration-300"
-              aria-hidden
-            />
-          </button>
+          {canUserEdit(role) && (
+            <button
+              className="p-0 group"
+              aria-label="delete event"
+              onClick={() => handleDelete(event.id)}
+            >
+              <Trash
+                size={16}
+                className="group-hover:hover:stroke-error duration-300"
+                aria-hidden
+              />
+            </button>
+          )}
         </div>
       </div>
     </div>

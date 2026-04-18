@@ -5,15 +5,18 @@ import { formatDateRelative } from "../../../utils/dateFormattors";
 import { makeDays } from "../utils";
 import EventList from "./EventList";
 import AddEventForm from "./AddEventForm";
+import { canUserEdit } from "../../users/utils";
 
 export default function DayList({
   startDate,
   endDate,
   events,
+  role,
 }: {
   events: Event[];
   startDate: string;
   endDate: string;
+  role: string;
 }) {
   const days = useMemo(
     () => makeDays(events, startDate, endDate),
@@ -28,8 +31,8 @@ export default function DayList({
             title={<h3 className="text-lg">{formatDateRelative(day.date)}</h3>}
             content={
               <div className="px-4 ">
-                <EventList events={day.events} />
-                <AddEventForm date={day.date} />
+                <EventList events={day.events} role={role} />
+                {canUserEdit(role) && <AddEventForm date={day.date} />}
               </div>
             }
           />
