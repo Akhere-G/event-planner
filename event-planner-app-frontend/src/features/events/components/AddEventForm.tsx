@@ -52,30 +52,35 @@ export default function AddEventForm({ date }: { date: string }) {
   }
   return (
     <>
-      <form className="flex gap-2 items-end" onSubmit={handleSubmit(onSubmit)}>
+      <form
+        className="flex gap-4 md:items-end flex-col md:flex-row"
+        onSubmit={handleSubmit(onSubmit)}
+      >
         <FormInput
           label="Location"
           {...register("location")}
           errorMessage={formState.errors.location?.message}
-          formClassNames="flex-[0.7]"
+          formClassNames="flex-1"
           tooltipErrors
         />
-        <FormInput
-          type="time"
-          label="Start Time"
-          {...register("startAt")}
-          errorMessage={formState.errors.startAt?.message}
-          formClassNames="flex-[0.15]"
-          tooltipErrors
-        />
-        <FormInput
-          type="time"
-          label="End Time"
-          {...register("endAt")}
-          errorMessage={formState.errors.endAt?.message}
-          formClassNames="flex-[0.15]"
-          tooltipErrors
-        />
+        <div className="flex gap-4 items-end">
+          <FormInput
+            type="time"
+            label="Start Time"
+            {...register("startAt")}
+            errorMessage={formState.errors.startAt?.message}
+            formClassNames="flex-1 md:flex-[0.15]"
+            tooltipErrors
+          />
+          <FormInput
+            type="time"
+            label="End Time"
+            {...register("endAt")}
+            errorMessage={formState.errors.endAt?.message}
+            formClassNames="flex-1 md:flex-[0.15]"
+            tooltipErrors
+          />
+        </div>
         <button className="btn-primary h-12" disabled={isLoading}>
           Add
         </button>
