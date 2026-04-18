@@ -1,9 +1,9 @@
 import { Clock, Tag, Trash } from "lucide-react";
 import { format, parseISO } from "date-fns";
-import { type Event } from "../types"; // Adjust path as needed
+import { eventCategories, type Event } from "../types"; // Adjust path as needed
 import { canUserEdit } from "../../users/utils";
 import { useState } from "react";
-import { EditableText } from "../../../components";
+import { EditableSelect, EditableText } from "../../../components";
 
 interface EventCardProps {
   event: Event;
@@ -32,10 +32,20 @@ export default function EventCard({
           <h3 className="font-bold tracking-tight text-text-primary ">
             {eventData.location}
           </h3>
-          <span className="flex items-center gap-1 px-2 py-1 rounded-full bg-brand-primary/10 text-brand-primary text-xs font-semibold uppercase">
-            <Tag size={16} />
-            {eventData.category}
-          </span>
+
+          <EditableSelect
+            defaultElement={
+              <span className="flex items-center gap-1 px-2 py-1 rounded-full bg-brand-primary/10 text-brand-primary text-xs font-semibold uppercase">
+                <Tag size={16} />
+                {eventData.category}
+              </span>
+            }
+            setValue={(category) => {
+              handleEdit(event.id, { category });
+              updateEventData({ category });
+            }}
+            options={eventCategories}
+          />
         </div>
 
         <EditableText
