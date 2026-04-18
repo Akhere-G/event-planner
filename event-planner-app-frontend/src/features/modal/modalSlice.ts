@@ -1,19 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { type ModalProps, type ModalState } from "./types";
-
-type ModalDataType =
-  | {
-      type: "EDIT_TRIP";
-      props: ModalProps["EDIT_TRIP"];
-    }
-  | {
-      type: "DELETE_TRIP";
-      props: ModalProps["DELETE_TRIP"];
-    }
-  | {
-      type: "VIEW_TRIP";
-      props: ModalProps["VIEW_TRIP"];
-    };
+import { type ModalDataType, type ModalState } from "./types";
 
 const initialState: ModalState = {
   modal: null,

@@ -45,6 +45,7 @@ export const tripsApi = apiSlice.injectEndpoints({
         body: newTrip,
         method: "POST",
       }),
+
       invalidatesTags: [{ type: "Trips", id: "LIST" }],
     }),
     editTrip: builder.mutation<
@@ -61,6 +62,16 @@ export const tripsApi = apiSlice.injectEndpoints({
         { type: "Trips", id: tripId },
       ],
     }),
+    deleteTrip: builder.mutation<void, number>({
+      query: (id) => ({
+        url: `/itineraries/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: (_, __, tripId) => [
+        { type: "Trips", id: "LIST" },
+        { type: "Trips", id: tripId },
+      ],
+    }),
   }),
 });
 
@@ -69,4 +80,5 @@ export const {
   useGetTripQuery,
   useAddTripMutation,
   useEditTripMutation,
+  useDeleteTripMutation,
 } = tripsApi;
