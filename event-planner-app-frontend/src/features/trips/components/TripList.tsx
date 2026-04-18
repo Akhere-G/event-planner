@@ -1,7 +1,10 @@
 import { Plus } from "lucide-react";
 import type { Trip } from "../types";
 import TripCard from "./TripCard";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
+import { openModal } from "../../modal/modalSlice";
+import { useDispatch } from "react-redux";
+import { ModalType } from "../../modal/types";
 
 export default function TripList({
   trips,
@@ -12,11 +15,32 @@ export default function TripList({
   getMore: () => void;
   hasMore: boolean;
 }) {
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+
+  const handleCardClick = (id: number) => {
+    navigate(`/trips/${id}`);
+  };
+
+  function openEditTripModal(trip: Trip) {
+    dispatch(openModal({ type: ModalType.EDIT_TRIP, props: { trip } }));
+  }
+
+  function openDeleteTripModal(trip: Trip) {
+    dispatch(openModal({ type: ModalType.DELETE_TRIP, props: { trip } }));
+  }
+
   return (
     <div className="flex flex-col gap-4 justify-stretch md:items-start">
       <div className="w-full grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 ">
         {trips.map((trip) => (
-          <TripCard key={trip.id} {...trip} />
+          <TripCard
+            key={trip.id}
+            trip={trip}
+            handleCardClick={handleCardClick}
+            openDeleteTripModal={openDeleteTripModal}
+            openEditTripModal={openEditTripModal}
+          />
         ))}
         <Link
           to="/addtrip"

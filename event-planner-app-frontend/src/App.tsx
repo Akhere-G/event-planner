@@ -10,6 +10,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { ProtectedRoute } from "./components";
 import { Header } from "./layout";
 import "react-tooltip/dist/react-tooltip.css";
+import ModalManager from "./features/modal/components/ModalManager";
 
 function App() {
   const isAuthenticated = useSelector(selectIsAuthenticated);
@@ -82,6 +83,7 @@ function App() {
         />
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
+      <ModalManager />
     </>
   );
 }

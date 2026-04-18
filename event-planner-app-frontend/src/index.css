@@ -99,4 +99,12 @@
     @apply w-full p-3 rounded-xl border focus:outline-none focus:border-brand-primary bg-surface-muted text-text-primary transition-all placeholder:text-text-secondary/50
   }
 
+  .backdrop {
+    @apply fixed w-full h-full top-0 left-0 inset-0 z-10 bg-black/40 backdrop-blur-sm transition-all flex justify-center items-center
+  }
+
+  .modal {
+    @apply w-full max-w-7xl m-4
+  }
+
 }
