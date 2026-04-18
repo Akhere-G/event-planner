@@ -38,9 +38,14 @@ export default function EventList({
         updatedEvent,
       }).unwrap();
     } catch (err) {
-      if (isFetchBaseQueryError(err) && err.status === 404) {
-        console.log("Event not found");
-        // TODO: Add toast notifcation
+      if (isFetchBaseQueryError(err)) {
+        if (err.status === 404) {
+          console.log("Event not found");
+          // TODO: Add toast notifcation
+        } else if (err.status === 400) {
+          // TODO: Add toast notifcation
+          throw err;
+        }
       }
     }
   }
