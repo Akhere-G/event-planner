@@ -2,6 +2,7 @@ import type { Trip } from "../types";
 import { formatDateRange } from "../../../utils/dateFormattors";
 import { MoreVertical } from "lucide-react";
 import { useState, type MouseEvent } from "react";
+import { isAdmin } from "../../users/utils";
 
 type TripCardProps = {
   trip: Trip;
@@ -45,12 +46,14 @@ export default function TripCard({
       <div className="p-4  bg-linear-to-r from-brand-primary to-brand-secondary h-40">
         <div className="flex items-center justify-between mb-2">
           <h3 className="text-white text-lg  font-bold ">{name}</h3>
-          <button
-            className="-mt-1 -mr-1 p-1 hover:bg-white/20"
-            onClick={handleSettings}
-          >
-            <MoreVertical size={20} className="text-white" />
-          </button>
+          {isAdmin(trip.role) && (
+            <button
+              className="-mt-2 -mr-2 p-2 hover:bg-white/20"
+              onClick={handleSettings}
+            >
+              <MoreVertical size={20} className="text-white" />
+            </button>
+          )}
           {isMenuOpen && (
             <div className="absolute top-8 right-4 mt-2 w-32 bg-white rounded-md shadow-lg z-10 flex flex-col text-sm border border-gray-100">
               <button
