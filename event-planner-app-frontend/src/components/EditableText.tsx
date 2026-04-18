@@ -25,7 +25,9 @@ export default function EditableText({
   }, [ref, isEditing]);
 
   const onFinished = () => {
-    setValue(dirtyValue);
+    if (dirtyValue !== value) {
+      setValue(dirtyValue);
+    }
     setIsEditing(false);
   };
   return (
@@ -43,7 +45,7 @@ export default function EditableText({
         onClick={() => {
           setIsEditing(true);
         }}
-        className={`${isEditing ? "invisible hidden" : "visible block"} p-0 m-0 min-h-5 cursor-text 
+        className={`${isEditing ? "invisible hidden" : "visible block"} p-0 m-0 min-h-5 cursor-text max-w-[70vw] max-h-40   truncate  
         hover:bg-surface-muted duration-300 ${textClassName} ${!value && emptyText ? "text-text-secondary" : ""}`}
       >
         {value || emptyText}
