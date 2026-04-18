@@ -25,7 +25,7 @@ export default function DayList({
       {days.map((day) => (
         <div key={day.date} className="card p-0 ">
           <Accordion
-            title={<h3>{formatDateRelative(day.date)}</h3>}
+            title={<h3 className="text-lg">{formatDateRelative(day.date)}</h3>}
             content={
               <div className="px-4 ">
                 <EventList events={day.events} />

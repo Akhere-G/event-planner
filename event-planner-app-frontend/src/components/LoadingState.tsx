@@ -5,7 +5,7 @@ export default function LoadingState({
 }) {
   return (
     <div className="bg-surface min-h-50 border-slate-300 border-2 rounded-md flex flex-col gap-4 justify-center items-center">
-      <h2 className="text-2xl text-text-secondary">{message}</h2>
+      <h2 className="text-text-secondary">{message}</h2>
       <svg
         aria-hidden="true"
         className="w-15 h-15 text-surface-muted animate-spin fill-brand-primary"

@@ -3,6 +3,7 @@ import { useDeleteEventMutation } from "../service/eventApiSlice";
 import type { Event } from "../types";
 import EventCard from "./EventCard";
 import { isFetchBaseQueryError } from "../../api/utils";
+import { EmptyState } from "../../../components";
 
 export default function EventList({ events }: { events: Event[] }) {
   const { tripId } = useParams();
@@ -18,11 +19,18 @@ export default function EventList({ events }: { events: Event[] }) {
       }
     }
   }
-  return (
-    <div className="flex flex-col gap-2 mb-4">
-      {events.map((event) => (
-        <EventCard key={event.id} event={event} handleDelete={handleDelete} />
-      ))}
-    </div>
-  );
+
+  let mainContent = <></>;
+  if (events.length === 0) {
+    mainContent = <EmptyState message="No Events." height={50} />;
+  } else {
+    mainContent = (
+      <>
+        {events.map((event) => (
+          <EventCard key={event.id} event={event} handleDelete={handleDelete} />
+        ))}
+      </>
+    );
+  }
+  return <div className="flex flex-col gap-2 mb-4">{mainContent}</div>;
 }
