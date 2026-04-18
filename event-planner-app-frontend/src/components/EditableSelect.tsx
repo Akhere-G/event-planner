@@ -14,6 +14,7 @@ interface EditableSelectProps {
   selectClassName?: string;
   selectedValue: string;
   CustomSelect?: (props: CustomSelectProps) => React.JSX.Element;
+  canEdit: boolean;
 }
 
 interface CustomSelectProps {
@@ -26,18 +27,22 @@ export default function EditableSelect({
   selectClassName = "",
   selectedValue,
   CustomSelect,
+  canEdit,
 }: EditableSelectProps) {
   const [isEditing, setIsEditing] = useState(false);
   const firstButtonRef = useRef<HTMLButtonElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    if (!canEdit) return;
+
     if (isEditing && firstButtonRef.current) {
       firstButtonRef.current.focus();
     }
-  }, [isEditing]);
+  }, [isEditing, canEdit]);
 
   useEffect(() => {
+    if (!canEdit) return;
     const handleClickOutside = (event: MouseEvent) => {
       if (
         containerRef.current &&
@@ -54,11 +59,11 @@ export default function EditableSelect({
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [isEditing]);
+  }, [isEditing, canEdit]);
 
   return (
     <div className="relative" ref={containerRef}>
-      {isEditing && (
+      {canEdit && isEditing && (
         <div
           className={`card absolute z-10 left-0 p-2 shadow-xl ${selectClassName}`}
         >
@@ -87,15 +92,17 @@ export default function EditableSelect({
       )}
 
       <div
-        className="cursor-pointer relative group"
+        className={`${canEdit ? "cursor-pointer" : ""} relative group`}
         onClick={(e) => {
           e.stopPropagation();
-          setIsEditing((prev) => !prev);
+          if (canEdit) setIsEditing((prev) => !prev);
         }}
       >
-        <div className="absolute -top-2 -right-2 hidden group-hover:flex ">
-          <Pencil size={10} />
-        </div>
+        {canEdit && (
+          <div className="absolute -top-2 -right-2 hidden group-hover:flex ">
+            <Pencil size={10} />
+          </div>
+        )}
         {defaultElement}
       </div>
     </div>

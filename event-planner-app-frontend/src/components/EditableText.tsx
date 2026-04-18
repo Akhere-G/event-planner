@@ -6,6 +6,7 @@ interface EditableTextProps {
   inputClassName?: string;
   textClassName?: string;
   emptyText?: string;
+  canEdit?: boolean;
 }
 export default function EditableText({
   value,
@@ -13,16 +14,17 @@ export default function EditableText({
   inputClassName = "",
   textClassName = "",
   emptyText = "",
+  canEdit = true,
 }: EditableTextProps) {
   const [dirtyValue, setDirtyValue] = useState(value);
   const [isEditing, setIsEditing] = useState(false);
   const ref = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    if (isEditing && ref.current) {
+    if (canEdit && isEditing && ref.current) {
       ref.current.focus();
     }
-  }, [ref, isEditing]);
+  }, [canEdit, ref, isEditing]);
 
   const onFinished = () => {
     if (dirtyValue !== value) {
@@ -33,7 +35,7 @@ export default function EditableText({
   return (
     <>
       <input
-        className={`${isEditing ? "visible block" : "invisible hidden"} p-0 m-0 min-h-5 rounded-none ${inputClassName}`}
+        className={`${isEditing && canEdit ? "visible block" : "invisible hidden"} p-0 m-0 min-h-5 rounded-none ${inputClassName}`}
         value={dirtyValue ?? ""}
         placeholder={emptyText}
         onChange={(e) => setDirtyValue(e.target.value)}
@@ -45,8 +47,8 @@ export default function EditableText({
         onClick={() => {
           setIsEditing(true);
         }}
-        className={`${isEditing ? "invisible hidden" : "visible block"} p-0 m-0 min-h-5 cursor-text max-w-[70vw]  
-        hover:bg-surface-muted duration-300 ${textClassName} ${!value && emptyText ? "text-text-secondary" : ""}`}
+        className={`${canEdit && isEditing ? "invisible hidden" : "visible block"} p-0 m-0 min-h-5 cursor-text max-w-[70vw]  
+        ${canEdit ? "hover:bg-surface-muted" : ""} duration-300 ${textClassName} ${!value && emptyText ? "text-text-secondary" : ""}`}
       >
         {value || emptyText}
       </p>

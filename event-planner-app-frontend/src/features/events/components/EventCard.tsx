@@ -5,7 +5,7 @@ import {
   format,
   parseISO,
 } from "date-fns";
-import { eventCategories, type Event } from "../types"; // Adjust path as needed
+import { eventCategories, type Event } from "../types";
 import { canUserEdit } from "../../users/utils";
 import { useState } from "react";
 import { EditableSelect, EditableText, TimePicker } from "../../../components";
@@ -47,6 +47,7 @@ export default function EventCard({
 
           <EditableSelect
             selectedValue={eventData.category}
+            canEdit={canUserEdit(role)}
             defaultElement={
               <span className="flex items-center gap-1 px-2 py-1 rounded-full bg-brand-primary/10 text-brand-primary text-xs font-semibold uppercase">
                 <Tag size={16} />
@@ -63,6 +64,7 @@ export default function EventCard({
 
         <EditableText
           value={eventData.description}
+          canEdit={canUserEdit(role)}
           setValue={(description) => {
             updateEventData({ description });
           }}
@@ -78,18 +80,7 @@ export default function EventCard({
               <EditableSelect
                 selectedValue={format(eventData.startAt, "yyyy-MM-dd HH:mm")}
                 defaultElement={format(start, "p")}
-                setValue={(startAt) => {
-                  const newStart = new Date(startAt);
-                  const oldStart = new Date(eventData.startAt);
-                  const oldEnd = new Date(eventData.endAt);
-
-                  const duration = differenceInMilliseconds(oldEnd, oldStart);
-                  const newEnd = addMilliseconds(newStart, duration);
-                  updateEventData({
-                    startAt,
-                    endAt: format(newEnd, "yyyy-MM-dd HH:mm"),
-                  });
-                }}
+                canEdit={canUserEdit(role)}
                 selectClassName=" overflow-y-scroll"
                 CustomSelect={({ close }) => {
                   const time = format(eventData.startAt, "HH:mm");
@@ -118,6 +109,7 @@ export default function EventCard({
               <EditableSelect
                 selectedValue={format(eventData.endAt, "yyyy-MM-dd HH:mm")}
                 defaultElement={format(end, "p")}
+                canEdit={canUserEdit(role)}
                 CustomSelect={({ close }) => {
                   const time = format(eventData.endAt, "HH:mm");
 
