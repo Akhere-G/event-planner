@@ -5,6 +5,7 @@ import type { TripSchema } from "../../trips/schemas/tripSchema";
 import type { Trip } from "../../trips/types";
 import { useDispatch } from "react-redux";
 import { closeModal } from "../modalSlice";
+import { X } from "lucide-react";
 
 export interface EditTripModalProps {
   trip: Trip;
@@ -22,7 +23,16 @@ export default function EditTripModal({ trip }: { trip: Trip }) {
 
   return (
     <div className="card">
-      <h2 className="title mb-4">Edit Trip</h2>
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="title">Edit Trip</h2>
+        <button
+          className="p-0"
+          aria-label="Close edit trip modal."
+          onClick={() => dispatch(closeModal())}
+        >
+          <X size={24} />
+        </button>
+      </div>
       <TripForm
         submitBtnText="Edit Form"
         submitAction={onSubmit}
