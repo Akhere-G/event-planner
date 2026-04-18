@@ -1,3 +1,4 @@
+import React from "react";
 import { Pencil } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
@@ -7,19 +8,24 @@ interface Option {
 }
 
 interface EditableSelectProps {
-  setValue: (str: string) => void;
+  setValue?: (str: string) => void;
   defaultElement: React.ReactNode;
-  options: Option[];
+  options?: Option[];
   selectClassName?: string;
   selectedValue: string;
+  CustomSelect?: (props: CustomSelectProps) => React.JSX.Element;
 }
 
+interface CustomSelectProps {
+  close: () => void;
+}
 export default function EditableSelect({
-  setValue,
+  setValue = () => {},
   defaultElement,
   options,
   selectClassName = "",
   selectedValue,
+  CustomSelect,
 }: EditableSelectProps) {
   const [isEditing, setIsEditing] = useState(false);
   const firstButtonRef = useRef<HTMLButtonElement>(null);
@@ -50,34 +56,35 @@ export default function EditableSelect({
     };
   }, [isEditing]);
 
-  console.log(selectedValue);
   return (
     <div className="relative" ref={containerRef}>
-      <div
-        className={`${isEditing ? "visible block" : "invisible hidden"} 
-          card absolute z-10 left-0 p-2 shadow-xl ${selectClassName}`}
-      >
-        {options.map(({ title, value }, index) => (
-          <button
-            key={value}
-            ref={index === 0 ? firstButtonRef : null}
-            className={`p-1 hover:bg-surface-muted focus:bg-surface-muted
+      {isEditing && (
+        <div
+          className={`card absolute z-10 left-0 p-2 shadow-xl ${selectClassName}`}
+        >
+          {options?.map(({ title, value }, index) => (
+            <button
+              key={value}
+              ref={index === 0 ? firstButtonRef : null}
+              className={`p-1 hover:bg-surface-muted focus:bg-surface-muted
               focus:outline-0! rounded-none transition-colors
               ${selectedValue === value ? "bg-brand-secondary! text-text-inverse!" : ""}
               `}
-            onClick={(e) => {
-              e.stopPropagation();
-              setValue(value);
-              setIsEditing(false);
-            }}
-            onKeyDown={(e) => {
-              if (e.key === "Escape") setIsEditing(false);
-            }}
-          >
-            {title}
-          </button>
-        ))}
-      </div>
+              onClick={(e) => {
+                e.stopPropagation();
+                setValue(value);
+                setIsEditing(false);
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "Escape") setIsEditing(false);
+              }}
+            >
+              {title}
+            </button>
+          ))}
+          {CustomSelect && <CustomSelect close={() => setIsEditing(false)} />}
+        </div>
+      )}
 
       <div
         className="cursor-pointer relative group"

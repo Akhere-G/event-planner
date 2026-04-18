@@ -8,7 +8,7 @@ import {
 import { eventCategories, type Event } from "../types"; // Adjust path as needed
 import { canUserEdit } from "../../users/utils";
 import { useState } from "react";
-import { EditableSelect, EditableText } from "../../../components";
+import { EditableSelect, EditableText, TimePicker } from "../../../components";
 
 interface EventCardProps {
   event: Event;
@@ -17,19 +17,6 @@ interface EventCardProps {
   role: string;
 }
 
-const getTimes = (dateStr: string) => {
-  const date = format(dateStr, "yyyy-MM-dd");
-  const times: { title: string; value: string }[] = [];
-  for (let i = 0; i < 24; i++) {
-    const time = `${i.toString().padStart(2, "0")}:00`;
-    times.push({
-      title: time,
-      value: `${date} ${time}`,
-    });
-  }
-
-  return times;
-};
 export default function EventCard({
   event,
   handleDelete,
@@ -49,8 +36,6 @@ export default function EventCard({
       setEventData(oldData);
     }
   };
-
-  const times = getTimes(eventData.startAt);
 
   return (
     <div className="card hover:shadow-lg transition-shadow border-l-4 border-brand-primary">
@@ -105,18 +90,46 @@ export default function EventCard({
                     endAt: format(newEnd, "yyyy-MM-dd HH:mm"),
                   });
                 }}
-                options={times}
-                selectClassName="max-h-40 overflow-y-scroll grid grid-cols-2 w-24"
+                selectClassName="max-h-40 overflow-y-scroll"
+                CustomSelect={({ close }) => {
+                  const time = format(eventData.startAt, "HH:mm");
+
+                  function onChange(time: string) {
+                    const startAt =
+                      format(eventData.startAt, "yyyy-MM-dd ") + time;
+                    const newStart = new Date(startAt);
+                    const oldStart = new Date(eventData.startAt);
+                    const oldEnd = new Date(eventData.endAt);
+
+                    const duration = differenceInMilliseconds(oldEnd, oldStart);
+                    const newEnd = addMilliseconds(newStart, duration);
+                    const endAt = format(newEnd, "yyyy-MM-dd HH:mm");
+
+                    updateEventData({ startAt, endAt });
+                    close();
+                  }
+
+                  return (
+                    <TimePicker value={time} onChange={onChange} scrollToTime />
+                  );
+                }}
               />
               -
               <EditableSelect
                 selectedValue={format(eventData.endAt, "yyyy-MM-dd HH:mm")}
                 defaultElement={format(end, "p")}
-                setValue={(endAt) => {
-                  updateEventData({ endAt });
+                selectClassName="max-h-40 overflow-y-scroll"
+                CustomSelect={({ close }) => {
+                  const time = format(eventData.endAt, "HH:mm");
+
+                  function onChange(time: string) {
+                    const endAt = format(eventData.endAt, "yyyy-MM-dd ") + time;
+                    updateEventData({ endAt });
+                    close();
+                  }
+
+                  return <TimePicker value={time} onChange={onChange} />;
                 }}
-                options={times}
-                selectClassName="max-h-40 overflow-y-scroll grid grid-cols-2 w-24"
               />
             </div>
           </div>
