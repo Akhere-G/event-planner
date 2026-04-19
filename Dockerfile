@@ -32,6 +32,8 @@ RUN echo '#!/bin/sh\n\
   python src/utils/setup_db.py || true\n\
   gunicorn --workers 2 --threads 4 --bind 0.0.0.0:8080 "app:app"' > /app/start.sh
 
+RUN mkdir -p /app/instance && chmod -R 777 /app/instance
+
 RUN chmod +x /app/start.sh
 
 EXPOSE 8080
