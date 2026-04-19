@@ -12,6 +12,8 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
+      --color-brand-primary: #d75104;
+  --color-brand-secondary: #d9701a;
     --bg-canvas: #0f172a;
     --bg-surface: #1e293b;
     --bg-surface-muted: #334155;
@@ -19,6 +21,10 @@
     --txt-primary: #f8fafc;
     --txt-secondary: #cbd5e1;
     --txt-inverse: #ffffff;
+  }
+
+  a, p, span, label {
+    @apply brightness-110
   }
 }
 

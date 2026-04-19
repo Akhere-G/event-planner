@@ -1,7 +1,8 @@
 import { useMatch } from "react-router";
 import { useGetInvitesQuery } from "../services/inviteApiSlice";
-import { EmptyState, ErrorState, LoadingState } from "../../../components";
+import { ErrorState, LoadingState } from "../../../components";
 import InviteUserForm from "./InviteUserForm";
+import Invites from "./Invites";
 
 export default function InvitesView() {
   const { params } = useMatch("/trips/:tripId");
@@ -14,12 +15,10 @@ export default function InvitesView() {
 
   if (isLoading) {
     mainContent = <LoadingState />;
-  }
-  if (isError) {
+  } else if (isError) {
     mainContent = <ErrorState />;
-  }
-  if (!data || data.data.invites.length === 0) {
-    mainContent = <EmptyState message="No invites" />;
+  } else {
+    mainContent = <Invites invites={data?.data.invites ?? []} />;
   }
 
   return (

@@ -73,8 +73,10 @@ const FormInput = ({
           data-tooltip-id={`${name}-tooltip`}
           className={`form-input ${tooltipErrors && errorMessage ? "border-error!" : ""}`}
           name={name}
-          onChange={(e) => onChange(e)}
+          onChange={onChange}
           onBlur={onBlur}
+          ref={ref as React.Ref<HTMLSelectElement>}
+          {...props}
         >
           {options.map(({ name, value }) => (
             <option key={name} value={value}>
@@ -92,13 +94,15 @@ const FormInput = ({
           onChange={onChange}
           onBlur={onBlur}
           rows={6}
+          ref={ref as React.Ref<HTMLTextAreaElement>}
+          {...props}
         />
       )}
       {tooltipErrors && errorMessage && touched && (
         <Tooltip id={`${name}-tooltip`}>{errorMessage}</Tooltip>
       )}
       {!tooltipErrors && errorMessage && touched && (
-        <p className="absolute text-xs -bottom-5 left-1 text-error">
+        <p className="absolute text-xs -bottom-5 right-1 text-error">
           {errorMessage}
         </p>
       )}

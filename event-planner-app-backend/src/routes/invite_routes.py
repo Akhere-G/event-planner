@@ -69,7 +69,7 @@ def create_invite_route(user_id: int, itinerary_id: int):
         return api_response(
             message=err.message,
             success=False,
-            error=err.message,
+            error={"general": [err.message]},
             status_code=err.status_code,
         )
     except ValidationError as err:

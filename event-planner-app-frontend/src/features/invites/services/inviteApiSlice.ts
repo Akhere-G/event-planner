@@ -1,4 +1,5 @@
 import { apiSlice } from "../../api/apiSlice";
+import type { InviteSchema } from "../schemas/inviteSchema";
 import { type Invite } from "../types";
 
 export const inviteApi = apiSlice.injectEndpoints({
@@ -6,13 +7,29 @@ export const inviteApi = apiSlice.injectEndpoints({
     getInvites: builder.query<{ data: { invites: Invite[] } }, number>({
       query: (tripId) => `/itineraries/${tripId}/invites`,
       providesTags: (result) => [
-        { type: "Invites", id: "List" } as const,
+        { type: "Invites", id: "LIST" } as const,
         ...result.data.invites.map(
           (invite) => ({ type: "Invites", id: invite.id }) as const,
         ),
       ],
     }),
+    createInvite: builder.mutation<
+      { data: Invite },
+      { tripId: number; invite: InviteSchema }
+    >({
+      query: ({ tripId, invite }) => ({
+        url: `itineraries/${tripId}/invites`,
+        method: "POST",
+        body: invite,
+      }),
+      invalidatesTags: (result, _, args) => [
+        { type: "Invites", id: "LIST" },
+        { type: "Trips", id: "LIST" },
+        { type: "Invites", id: result?.data?.id },
+        { type: "Trips", id: args.tripId },
+      ],
+    }),
   }),
 });
 
-export const { useGetInvitesQuery } = inviteApi;
+export const { useGetInvitesQuery, useCreateInviteMutation } = inviteApi;

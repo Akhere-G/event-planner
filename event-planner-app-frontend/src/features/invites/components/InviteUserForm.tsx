@@ -3,14 +3,41 @@ import { FormInput } from "../../../components";
 import { inviteSchema, type InviteSchema } from "../schemas/inviteSchema";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { UserRole } from "../../users/types";
+import { useCreateInviteMutation } from "../services/inviteApiSlice";
+import { useMatch } from "react-router";
+import { isValidationError } from "../../api/utils";
+import { useState } from "react";
 
 export default function InviteUserForm() {
-  const { register, formState, handleSubmit } = useForm({
+  const [errorMessage, setErrorMessage] = useState("");
+
+  const { params } = useMatch("/trips/:tripId");
+  const tripId = Number(params.tripId);
+
+  const [createInvite] = useCreateInviteMutation();
+  const { register, formState, handleSubmit, setError } = useForm({
     resolver: yupResolver(inviteSchema),
   });
 
-  async function onSubmit(formState: InviteSchema) {
-    console.log(formState);
+  async function onSubmit(invite: InviteSchema) {
+    console.log(invite);
+
+    try {
+      createInvite({ tripId, invite }).unwrap();
+    } catch (err) {
+      if (isValidationError(err)) {
+        const serverErrors = err.data.error;
+
+        setErrorMessage(serverErrors.general?.join(", ") ?? "");
+
+        Object.entries(serverErrors).forEach(([key, messages]) => {
+          setError(key as keyof InviteSchema, {
+            type: "server",
+            message: messages[0],
+          });
+        });
+      }
+    }
   }
 
   return (
@@ -18,6 +45,7 @@ export default function InviteUserForm() {
       className="flex gap-4 md:items-end flex-col md:flex-row mb-3"
       onSubmit={handleSubmit(onSubmit)}
     >
+      {errorMessage && <p className="errorMessage">{errorMessage}</p>}
       <FormInput
         label="Email"
         {...register("email")}

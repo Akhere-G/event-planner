@@ -1,8 +1,8 @@
 export interface Invite {
   id: number;
-  itinerary_id: number;
+  itineraryId: number;
   email: string;
-  inviter_id: number;
+  inviterId: number;
   role: string;
   status: string;
   token?: string;
