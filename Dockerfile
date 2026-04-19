@@ -34,6 +34,8 @@ RUN echo '#!/bin/sh\n\
 
 RUN mkdir -p /app/instance && chmod -R 777 /app/instance
 
+RUN chown -R root:root /app/instance
+
 RUN chmod +x /app/start.sh
 
 EXPOSE 8080
