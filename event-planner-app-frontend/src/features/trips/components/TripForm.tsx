@@ -35,14 +35,13 @@ export default function TripForm({
   useEffect(() => {
     const defaultValues: TripSchema = {
       name: "",
-      description: null,
       startDate: "",
       endDate: "",
       ...initialData,
     };
 
     for (const key of Object.keys(defaultValues)) {
-      setValue(key as keyof TripSchema, defaultValues[key]);
+      setValue(key as keyof TripSchema, defaultValues[key as keyof TripSchema]);
     }
   }, [initialData, setValue]);
 

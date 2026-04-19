@@ -11,8 +11,8 @@ import { useState } from "react";
 export default function InviteUserForm() {
   const [errorMessage, setErrorMessage] = useState("");
 
-  const { params } = useMatch("/trips/:tripId");
-  const tripId = Number(params.tripId);
+  const params = useMatch("/trips/:tripId")?.params;
+  const tripId = Number(params?.tripId);
 
   const [createInvite] = useCreateInviteMutation();
   const { register, formState, handleSubmit, setError } = useForm({

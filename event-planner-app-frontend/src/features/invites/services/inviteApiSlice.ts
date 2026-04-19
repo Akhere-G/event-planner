@@ -6,12 +6,15 @@ export const inviteApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     getInvites: builder.query<{ data: { invites: Invite[] } }, number>({
       query: (tripId) => `/itineraries/${tripId}/invites`,
-      providesTags: (result) => [
-        { type: "Invites", id: "LIST" } as const,
-        ...result.data.invites.map(
-          (invite) => ({ type: "Invites", id: invite.id }) as const,
-        ),
-      ],
+      providesTags: (result) => {
+        const value = result
+          ? result.data.invites.map(
+              (invite) => ({ type: "Invites", id: invite.id }) as const,
+            )
+          : [];
+
+        return [{ type: "Invites", id: "LIST" } as const, ...value];
+      },
     }),
     createInvite: builder.mutation<
       { data: Invite },
@@ -46,12 +49,15 @@ export const inviteApi = apiSlice.injectEndpoints({
     }),
     getMyInvites: builder.query<{ data: { invites: Invite[] } }, void>({
       query: () => `/invites`,
-      providesTags: (result) => [
-        { type: "Invites", id: "LIST" } as const,
-        ...result.data.invites.map(
-          (invite) => ({ type: "Invites", id: invite.id }) as const,
-        ),
-      ],
+      providesTags: (result) => {
+        const value = result
+          ? result.data.invites.map(
+              (invite) => ({ type: "Invites", id: invite.id }) as const,
+            )
+          : [];
+
+        return [{ type: "Invites", id: "LIST" } as const, ...value];
+      },
     }),
     acceptInvite: builder.mutation<
       { data: Invite },

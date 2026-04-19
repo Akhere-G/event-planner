@@ -37,7 +37,7 @@ export const tripsApi = apiSlice.injectEndpoints({
     }),
     getTrip: builder.query<{ data: Trip }, number, { status: number }>({
       query: (id) => `itineraries/${id}`,
-      providesTags: (result) => [{ type: "Trips", id: result.data.id }],
+      providesTags: (result) => [{ type: "Trips", id: result?.data?.id }],
     }),
     addTrip: builder.mutation<Trip, TripSchema>({
       query: (newTrip) => ({

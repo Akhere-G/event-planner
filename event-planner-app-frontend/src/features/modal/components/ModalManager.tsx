@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useDispatch, useSelector } from "react-redux";
 import { closeModal, selectModal } from "../modalSlice";
 import { DeleteTripModal, EditTripModal, ViewUsersModal } from "./";
@@ -16,7 +17,9 @@ export default function ModalManager() {
 
   if (!modal) return null;
 
-  const SpecificModal = MODAL_COMPONENTS[modal.type];
+  const SpecificModal = MODAL_COMPONENTS[
+    modal.type
+  ] as React.ComponentType<any>;
 
   return (
     <div
@@ -28,7 +31,7 @@ export default function ModalManager() {
     >
       <div className="modal" onClick={(e) => e.stopPropagation()}>
         <div className="max-h-[90vh] overflow-y-scroll rounded-md">
-          <SpecificModal {...modal.props} />
+          <SpecificModal {...(modal.props ?? {})} />
         </div>
       </div>
     </div>

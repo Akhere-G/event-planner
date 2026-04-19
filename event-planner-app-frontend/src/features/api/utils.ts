@@ -7,6 +7,7 @@ export function isValidationError(err: unknown): err is ValidationError {
     err !== null &&
     "data" in err &&
     typeof err.data === "object" &&
+    err.data !== null &&
     "error" in err.data
   );
 }

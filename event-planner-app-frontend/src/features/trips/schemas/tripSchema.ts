@@ -2,7 +2,7 @@ import * as yup from "yup";
 
 export const tripSchema = yup.object({
   name: yup.string().trim().required("Name is required"),
-  description: yup.string().trim(),
+  description: yup.string().trim().nullable(),
   startDate: yup.string().required(),
   endDate: yup
     .string()

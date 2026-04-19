@@ -5,11 +5,10 @@ import InviteUserForm from "./InviteUserForm";
 import Invites from "./Invites";
 
 export default function InvitesView() {
-  const { params } = useMatch("/trips/:tripId");
+  const params = useMatch("/trips/:tripId")?.params;
+  const tripId = Number(params?.tripId);
 
-  const { data, isLoading, isError } = useGetInvitesQuery(
-    Number(params.tripId),
-  );
+  const { data, isLoading, isError } = useGetInvitesQuery(tripId);
 
   return (
     <div>

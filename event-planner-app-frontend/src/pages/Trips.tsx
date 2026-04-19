@@ -45,7 +45,7 @@ export default function Trips() {
       >
         <TripList
           trips={data?.data.itineraries ?? []}
-          hasMore={data?.data.hasMore}
+          hasMore={!!data?.data.hasMore}
           getMore={getMore}
         />
       </StateGate>

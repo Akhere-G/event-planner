@@ -1,14 +1,7 @@
 import { Navigate, Route, Routes } from "react-router";
-import {
-  AddTrip,
-  InvitesPage,
-  Login,
-  Register,
-  TripPage,
-  Trips,
-} from "./pages";
+
 import { useCheckUserQuery } from "./features/auth/services/authApiSlice";
-import { useEffect } from "react";
+import { lazy, useEffect } from "react";
 import {
   selectIsAuthenticated,
   setCredentials,
@@ -18,6 +11,13 @@ import { ProtectedRoute } from "./components";
 import { Header } from "./layout";
 import "react-tooltip/dist/react-tooltip.css";
 import ModalManager from "./features/modal/components/ModalManager";
+
+const AddTrip = lazy(() => import("./pages/AddTrip"));
+const InvitesPage = lazy(() => import("./pages/InvitesPage"));
+const Login = lazy(() => import("./pages/Login"));
+const Register = lazy(() => import("./pages/Register"));
+const TripPage = lazy(() => import("./pages/TripPage"));
+const Trips = lazy(() => import("./pages/Trips"));
 
 function App() {
   const isAuthenticated = useSelector(selectIsAuthenticated);

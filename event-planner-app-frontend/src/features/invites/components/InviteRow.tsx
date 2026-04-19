@@ -10,8 +10,8 @@ import { isValidationError } from "../../api/utils";
 import { getStatusConfig } from "../utils";
 
 export default function InviteRow({ invite }: { invite: Invite }) {
-  const { params } = useMatch("/trips/:tripId");
-  const tripId = Number(params.tripId);
+  const params = useMatch("/trips/:tripId")?.params;
+  const tripId = Number(params?.tripId);
   const [createInvite] = useCreateInviteMutation();
   const [revokeInvite] = useRevokeInviteMutation();
 

@@ -19,7 +19,7 @@ export default function MyInviteCard({ invite }: { invite: Invite }) {
 
   const acceptInvite = async () => {
     try {
-      await accept({ inviteId: invite.id, token: invite.token }).unwrap();
+      await accept({ inviteId: invite.id, token: invite.token ?? "" }).unwrap();
     } catch (err) {
       if (isFetchBaseQueryError(err)) {
         if (err.status === 404) {
@@ -35,7 +35,10 @@ export default function MyInviteCard({ invite }: { invite: Invite }) {
 
   const declineInvite = async () => {
     try {
-      await decline({ inviteId: invite.id, token: invite.token }).unwrap();
+      await decline({
+        inviteId: invite.id,
+        token: invite.token ?? "",
+      }).unwrap();
     } catch (err) {
       if (isFetchBaseQueryError(err)) {
         if (err.status === 404) {
@@ -56,12 +59,14 @@ export default function MyInviteCard({ invite }: { invite: Invite }) {
       <Accordion
         title={
           <div className=" flex items-center">
-            <h2 className="text-lg">{invite.itinerary.name}</h2>
+            <h2 className="text-lg">{invite.itinerary?.name ?? "Trip"}</h2>
           </div>
         }
         content={
           <div className="p-4 pt-0">
-            <TripSummary trip={invite.itinerary} hideTitle />
+            {invite.itinerary && (
+              <TripSummary trip={invite.itinerary} hideTitle />
+            )}
             <div className="flex justify-between items-end">
               <span
                 className={`inline-flex items-center px-4 py-3 rounded-full border h-10 ${statusStyles}`}

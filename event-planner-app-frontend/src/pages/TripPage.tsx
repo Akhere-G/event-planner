@@ -16,7 +16,7 @@ export default function TripPage() {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    if (searchParams.has("view") && isAdmin(data?.data.role)) {
+    if (searchParams.has("view") && isAdmin(data?.data.role ?? "")) {
       dispatch(openModal({ type: ModalType.VIEW_USERS, props: null }));
     }
   }, [dispatch, searchParams, data?.data.role]);
@@ -35,7 +35,7 @@ export default function TripPage() {
           message: "This trip could not be found.",
         }}
       >
-        <TripDetails {...data?.data} />
+        {data && <TripDetails {...data?.data} />}
       </StateGate>
     </div>
   );
