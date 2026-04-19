@@ -89,6 +89,10 @@
     @apply bg-surface-muted text-text-primary hover:bg-surface-border;
   }
 
+  .btn-menu {
+    @apply hover:bg-surface-muted rounded-none
+  }
+
   .title {
     @apply text-xl
   }
@@ -116,5 +120,6 @@
   .modal {
     @apply w-full max-w-7xl m-4
   }
+
 
 }

@@ -1,12 +1,31 @@
-import { Menu, X } from "lucide-react";
-import { useState } from "react";
+import { Menu, User, X } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router";
+import { useLogoutUserMutation } from "../features/auth/services/authApiSlice";
+import { logOut } from "../features/auth/services/authSlice";
+import { useDispatch } from "react-redux";
 
 interface HeaderProps {
   links: { title: string; url: string }[];
 }
 export default function Header({ links }: HeaderProps) {
+  const [logout] = useLogoutUserMutation();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  const dispatch = useDispatch();
+
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setIsMenuOpen(false);
+      }
+    };
+    if (isMenuOpen) document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [isMenuOpen]);
 
   return (
     <header className="relative w-full">
@@ -16,15 +35,39 @@ export default function Header({ links }: HeaderProps) {
           <span className="text-brand-primary">Out</span>
         </h1>
         {/* Desktop Nav */}
-        <nav className="hidden md:block">
-          <ul className="gap-6 flex">
-            {links.map(({ title, url }) => (
-              <li key={url}>
-                <Link to={url}>{title}</Link>
-              </li>
-            ))}
-          </ul>
-        </nav>
+        <div className="hidden md:flex items-center gap-6 relative">
+          <nav>
+            <ul className="gap-6 flex">
+              {links.map(({ title, url }) => (
+                <li key={url}>
+                  <Link to={url}>{title}</Link>
+                </li>
+              ))}
+            </ul>
+          </nav>
+          <div ref={menuRef}>
+            <button
+              onClick={() => setIsMenuOpen(true)}
+              className="p-2.5 bg-brand-primary rounded-full h-10 w-10 "
+            >
+              <User size={20} />
+            </button>
+            <div
+              className={`card p-0 absolute right-2 -bottom-13 ${isMenuOpen ? "visible opacity-100" : "invisible opacity-0 pointer-events-none"}`}
+            >
+              <button
+                onClick={async () => {
+                  await logout();
+                  dispatch(logOut());
+                  window.location.reload();
+                }}
+                className="btn-menu"
+              >
+                Logout
+              </button>
+            </div>
+          </div>
+        </div>
 
         {/* Mobile Toggle */}
         <button
