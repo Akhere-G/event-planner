@@ -1,14 +1,4 @@
-import {
-  Ban,
-  CheckCircle2,
-  CircleQuestionMark,
-  Clock,
-  Mail,
-  MoreVertical,
-  RotateCcw,
-  ShieldCheck,
-  XCircle,
-} from "lucide-react";
+import { Ban, Mail, MoreVertical, RotateCcw, ShieldCheck } from "lucide-react";
 import type { Invite } from "../types";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -17,6 +7,7 @@ import {
 } from "../services/inviteApiSlice";
 import { useMatch } from "react-router";
 import { isValidationError } from "../../api/utils";
+import { getStatusConfig } from "../utils";
 
 export default function InviteRow({ invite }: { invite: Invite }) {
   const { params } = useMatch("/trips/:tripId");
@@ -26,7 +17,7 @@ export default function InviteRow({ invite }: { invite: Invite }) {
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
-  const { email, role, status } = invite;
+  const { email, role } = invite;
 
   async function reinvite() {
     try {
@@ -65,41 +56,13 @@ export default function InviteRow({ invite }: { invite: Invite }) {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [isMenuOpen]);
 
-  const canResend = ["revoked", "declined", "pending"].includes(status);
-  const canRevoke = status === "pending";
+  const canResend = ["revoked", "declined", "pending"].includes(invite.status);
+  const canRevoke = invite.status === "pending";
 
-  const getStatusConfig = (status: string) => {
-    switch (status) {
-      case "pending":
-        return {
-          statusStyles: "bg-amber-100 text-amber-700 border-amber-200",
-          Icon: Clock,
-        };
-      case "accepted":
-        return {
-          statusStyles: "bg-emerald-100 text-emerald-700 border-emerald-200",
-          Icon: CheckCircle2,
-        };
-      case "declined":
-        return {
-          statusStyles: "bg-rose-100 text-rose-700 border-rose-200",
-          Icon: XCircle,
-        };
-      case "revoked":
-        return {
-          statusStyles:
-            "bg-slate-100 text-slate-700 border-slate-200 opacity-75",
-          Icon: Ban,
-        };
-      default:
-        return {
-          statusStyles: "bg-gray-100 text-gray-700 border-gray-200",
-          Icon: CircleQuestionMark,
-        };
-    }
-  };
-
-  const { statusStyles, Icon } = getStatusConfig(status);
+  const { statusStyles, Icon, status } = getStatusConfig(
+    invite.status,
+    new Date(invite.expiresAt),
+  );
 
   return (
     <tr className="group hover:bg-surface-muted/30 transition-colors">

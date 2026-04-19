@@ -1,3 +1,5 @@
+import type { Trip } from "../trips/types";
+
 export interface Invite {
   id: number;
   itineraryId: number;
@@ -6,5 +8,6 @@ export interface Invite {
   role: string;
   status: string;
   token?: string;
-  expires_at: string;
+  expiresAt: string;
+  itinerary?: Trip;
 }

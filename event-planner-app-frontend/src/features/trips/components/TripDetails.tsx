@@ -5,7 +5,9 @@ import TripSummary from "./TripSummary";
 export default function TripDetails(trip: Trip) {
   return (
     <div className="flex flex-col gap-6">
-      <TripSummary {...trip} />
+      <div className="card">
+        <TripSummary trip={trip} showActions />
+      </div>
       <div>
         <h1 className="title mb-2 ml-4">Itinerary</h1>
         <DayList

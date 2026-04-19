@@ -1,6 +1,6 @@
 import { useParams, useSearchParams } from "react-router";
 import { useGetTripQuery } from "../features/trips/services/tripsApiSlice";
-import { EmptyState, ErrorState, LoadingState, StateGate } from "../components";
+import { StateGate } from "../components";
 import { isFetchBaseQueryError } from "../features/api/utils";
 import { TripDetails } from "../features/trips/components";
 import { openModal } from "../features/modal/modalSlice";

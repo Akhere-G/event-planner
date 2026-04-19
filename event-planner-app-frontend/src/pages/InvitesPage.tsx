@@ -11,15 +11,21 @@ export default function InvitesPage() {
         <h2 className="title mb-4">Invites</h2>
       </div>
       <StateGate
-        isLoading={isLoading}
-        isError={isError}
+        loadingStateProps={{
+          isLoading,
+
+          message: "Loading Invites",
+        }}
+        errorStateProps={{
+          isError,
+
+          message: "Could not get invites.",
+        }}
         emptyStateProps={{
           isEmpty: !data?.data.invites.length,
           message: "No trips",
           height: 50,
         }}
-        loadingText="Loading Invites"
-        errorText="Could not get invites."
       >
         <MyInvites invites={data?.data.invites ?? []} />
       </StateGate>
