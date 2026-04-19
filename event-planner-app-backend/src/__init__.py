@@ -25,10 +25,16 @@ def create_app(config_class=None):
     else:
         config_obj = config_class
 
+    basedir = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
+    instance_dir = os.path.join(basedir, "instance")
+    db_path = os.path.join(instance_dir, "database.db")
+
+    os.makedirs(instance_dir, exist_ok=True)
+
     app.config.from_mapping(
         ENV=config_obj.ENV,
         DEBUG=config_obj.DEBUG,
-        SQLALCHEMY_DATABASE_URI=os.environ.get("SQLALCHEMY_DATABASE_URI"),
+        SQLALCHEMY_DATABASE_URI=f"sqlite:////{db_path}",
         SQLALCHEMY_TRACK_MODIFICATIONS=False,
         ALEMBIC_CONTEXT={"render_as_batch": True},
     )
