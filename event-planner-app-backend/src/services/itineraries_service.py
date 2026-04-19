@@ -1,8 +1,40 @@
 from ..extensions import db
 from ..models import Itinerary, ItineraryUser, UserRole
 from sqlalchemy import select, func
-from ..exceptions import UserNotAuthorisedError, ItineraryDoesNotExistError
+from ..exceptions import (
+    UserNotAuthorisedError,
+    ItineraryDoesNotExistError,
+    UserDoesNotExistError,
+)
 from sqlalchemy.orm import selectinload, contains_eager
+from .users_service import get_user
+
+
+def get_membership_by_email(email: str, itinerary_id: int):
+    try:
+        user = get_user(email=email)
+
+        stmt = (
+            select(ItineraryUser)
+            .where(ItineraryUser.itinerary_id == itinerary_id)
+            .where(ItineraryUser.user_id == user.id)
+            .options(
+                selectinload(ItineraryUser.user),
+                selectinload(ItineraryUser.itinerary).options(
+                    selectinload(Itinerary.events),
+                    selectinload(Itinerary.user_memberships).selectinload(
+                        ItineraryUser.user
+                    ),
+                    selectinload(Itinerary.invites),
+                ),
+            )
+        )
+
+        membership = db.session.execute(stmt).scalar_one_or_none()
+
+        return membership
+    except UserDoesNotExistError:
+        return None
 
 
 def get_itinerary_membership(user_id: int, itinerary_id: int):

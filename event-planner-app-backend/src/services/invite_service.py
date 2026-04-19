@@ -5,6 +5,7 @@ from ..models import Invite, InvitationStatus, User
 from sqlalchemy import select
 from datetime import datetime, timedelta, timezone
 from ..exceptions import UserAlreadyExistsError, InviteNotFoundError, BadRequestError
+from .itineraries_service import get_membership_by_email
 
 
 def get_invite(itinerary_id: int, invite_id: int = None, email: str = None):
@@ -41,6 +42,11 @@ def get_invites(itinerary_id: int):
 
 
 def create_invite(data: dict):
+    membership = get_membership_by_email(data["email"], data["itinerary_id"])
+
+    if membership:
+        raise UserAlreadyExistsError("This user is already part of this itinerary!")
+
     existing_invite = get_invite(data["itinerary_id"], email=data["email"])
     invite = None
 
