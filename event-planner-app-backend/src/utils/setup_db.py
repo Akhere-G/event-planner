@@ -1,4 +1,16 @@
 from ..extensions import db
+from ..models import (
+    AuditMixin,
+    User,
+    Itinerary,
+    ItineraryUser,
+    ItineraryEvent,
+    UserRole,
+    Event,
+    Invite,
+    InvitationStatus,
+)
+
 from .. import create_app
 
 
