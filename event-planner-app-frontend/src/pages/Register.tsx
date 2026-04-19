@@ -75,7 +75,7 @@ export default function Register() {
             {...register("repeatPassword")}
             errorMessage={formState.errors.repeatPassword?.message}
           />
-          <button className="btn-primary" disabled={result.isLoading}>
+          <button className="btn-primary mt-2" disabled={result.isLoading}>
             Register
           </button>
           <Link to="/login">Have an account? Login.</Link>

@@ -60,7 +60,7 @@ export default function Login() {
             type="password"
             {...register("password")}
           />
-          <button className="btn-primary" disabled={result.isLoading}>
+          <button className="btn-primary mt-2" disabled={result.isLoading}>
             Login
           </button>
           <Link to="/register">New here? Create an Account.</Link>

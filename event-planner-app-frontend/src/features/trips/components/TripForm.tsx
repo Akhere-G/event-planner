@@ -123,7 +123,7 @@ export default function TripForm({
         {...register("endDate")}
         errorMessage={formState.errors.endDate?.message}
       />
-      <button className="btn-primary" disabled={isLoading}>
+      <button className="btn-primary mt-2" disabled={isLoading}>
         {submitBtnText}
       </button>
     </form>
