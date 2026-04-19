@@ -1,4 +1,4 @@
-from ..extensions import db
+from src.extensions import db
 
 
 def create_database(app):
