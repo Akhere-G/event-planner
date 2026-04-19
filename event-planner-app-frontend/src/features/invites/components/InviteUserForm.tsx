@@ -20,8 +20,6 @@ export default function InviteUserForm() {
   });
 
   async function onSubmit(invite: InviteSchema) {
-    console.log(invite);
-
     try {
       createInvite({ tripId, invite }).unwrap();
     } catch (err) {

@@ -13,7 +13,6 @@ export default function ViewUsersModal() {
     window.addEventListener(
       "popstate",
       function () {
-        console.log("pop!!");
         setSearchParams({});
 
         dispatch(closeModal());

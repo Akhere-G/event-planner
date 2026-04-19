@@ -29,7 +29,26 @@ export const inviteApi = apiSlice.injectEndpoints({
         { type: "Trips", id: args.tripId },
       ],
     }),
+    revokeInvite: builder.mutation<
+      { data: Invite },
+      { tripId: number; inviteId: number }
+    >({
+      query: ({ tripId, inviteId }) => ({
+        url: `itineraries/${tripId}/invites/${inviteId}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: (result, _, args) => [
+        { type: "Invites", id: "LIST" },
+        { type: "Trips", id: "LIST" },
+        { type: "Invites", id: result?.data?.id },
+        { type: "Trips", id: args.tripId },
+      ],
+    }),
   }),
 });
 
-export const { useGetInvitesQuery, useCreateInviteMutation } = inviteApi;
+export const {
+  useGetInvitesQuery,
+  useCreateInviteMutation,
+  useRevokeInviteMutation,
+} = inviteApi;
