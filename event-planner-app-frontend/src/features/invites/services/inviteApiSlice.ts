@@ -44,6 +44,15 @@ export const inviteApi = apiSlice.injectEndpoints({
         { type: "Trips", id: args.tripId },
       ],
     }),
+    getMyInvites: builder.query<{ data: { invites: Invite[] } }, void>({
+      query: () => `/invites`,
+      providesTags: (result) => [
+        { type: "Invites", id: "LIST" } as const,
+        ...result.data.invites.map(
+          (invite) => ({ type: "Invites", id: invite.id }) as const,
+        ),
+      ],
+    }),
   }),
 });
 
@@ -51,4 +60,5 @@ export const {
   useGetInvitesQuery,
   useCreateInviteMutation,
   useRevokeInviteMutation,
+  useGetMyInvitesQuery,
 } = inviteApi;

@@ -7,3 +7,4 @@ export { default as Accordion } from "./Accordion";
 export { default as EditableText } from "./EditableText";
 export { default as EditableSelect } from "./EditableSelect";
 export { default as TimePicker } from "./TimePicker";
+export { default as StateGate } from "./StateGate";
