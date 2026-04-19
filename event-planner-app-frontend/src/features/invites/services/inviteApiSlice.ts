@@ -53,6 +53,32 @@ export const inviteApi = apiSlice.injectEndpoints({
         ),
       ],
     }),
+    acceptInvite: builder.mutation<
+      { data: Invite },
+      { token: string; inviteId: number }
+    >({
+      query: ({ token }) => ({
+        url: `/invites/${token}/accept`,
+        method: "POST",
+      }),
+      invalidatesTags: (_, __, args) => [
+        { type: "Invites", id: "LIST" },
+        { type: "Invites", id: args.inviteId },
+      ],
+    }),
+    declineInvite: builder.mutation<
+      { data: Invite },
+      { token: string; inviteId: number }
+    >({
+      query: ({ token }) => ({
+        url: `/invites/${token}/decline`,
+        method: "POST",
+      }),
+      invalidatesTags: (_, __, args) => [
+        { type: "Invites", id: "LIST" },
+        { type: "Invites", id: args.inviteId },
+      ],
+    }),
   }),
 });
 
@@ -61,4 +87,6 @@ export const {
   useCreateInviteMutation,
   useRevokeInviteMutation,
   useGetMyInvitesQuery,
+  useAcceptInviteMutation,
+  useDeclineInviteMutation,
 } = inviteApi;

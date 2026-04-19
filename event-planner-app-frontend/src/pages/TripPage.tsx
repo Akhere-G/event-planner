@@ -7,6 +7,7 @@ import { openModal } from "../features/modal/modalSlice";
 import { ModalType } from "../features/modal/types";
 import { useDispatch } from "react-redux";
 import { useEffect } from "react";
+import { isAdmin } from "../features/users/utils";
 
 export default function TripPage() {
   const { tripId } = useParams();
@@ -15,10 +16,10 @@ export default function TripPage() {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    if (searchParams.has("view")) {
+    if (searchParams.has("view") && isAdmin(data?.data.role)) {
       dispatch(openModal({ type: ModalType.VIEW_USERS, props: null }));
     }
-  }, [dispatch, searchParams]);
+  }, [dispatch, searchParams, data?.data.role]);
 
   return (
     <div className="container">

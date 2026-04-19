@@ -1,14 +1,56 @@
 import { Accordion } from "../../../components";
+import { isFetchBaseQueryError } from "../../api/utils";
 import TripSummary from "../../trips/components/TripSummary";
+import {
+  useAcceptInviteMutation,
+  useDeclineInviteMutation,
+} from "../services/inviteApiSlice";
 import type { Invite } from "../types";
 import { getStatusConfig } from "../utils";
 
 export default function MyInviteCard({ invite }: { invite: Invite }) {
-  console.log(invite.status);
+  const [accept, { isLoading: isAcceptLoading }] = useAcceptInviteMutation();
+  const [decline, { isLoading: isDeclineLoading }] = useDeclineInviteMutation();
+
   const { Icon, statusStyles, status } = getStatusConfig(
     invite.status,
     new Date(invite.expiresAt),
   );
+
+  const acceptInvite = async () => {
+    try {
+      await accept({ inviteId: invite.id, token: invite.token }).unwrap();
+    } catch (err) {
+      if (isFetchBaseQueryError(err)) {
+        if (err.status === 404) {
+          console.log("Invite not found");
+          // TODO: Add toast notifcation
+        } else if (err.status === 400) {
+          console.log("Can accept invite.");
+          // TODO: Add toast notifcation
+        }
+      }
+    }
+  };
+
+  const declineInvite = async () => {
+    try {
+      await decline({ inviteId: invite.id, token: invite.token }).unwrap();
+    } catch (err) {
+      if (isFetchBaseQueryError(err)) {
+        if (err.status === 404) {
+          console.log("Invite not found");
+          // TODO: Add toast notifcation
+        } else if (err.status === 400) {
+          console.log("Cannot decline invite.");
+          // TODO: Add toast notifcation
+        }
+      }
+    }
+  };
+
+  const canAcceptOrDecline = ["pending", "expired"].includes(status);
+
   return (
     <div className="card p-0">
       <Accordion
@@ -27,12 +69,24 @@ export default function MyInviteCard({ invite }: { invite: Invite }) {
                 <Icon size={12} className="mr-1" />
                 {status}
               </span>
-              <div className="flex justify-end gap-4 mt-4">
-                <button className="btn-primary">Accept</button>
-                <button className="btn-secondary hover:bg-error">
-                  Decline
-                </button>
-              </div>
+              {canAcceptOrDecline && (
+                <div className="flex justify-end gap-4 mt-4">
+                  <button
+                    onClick={acceptInvite}
+                    disabled={isAcceptLoading || isDeclineLoading}
+                    className="btn-primary"
+                  >
+                    Accept
+                  </button>
+                  <button
+                    onClick={declineInvite}
+                    disabled={isAcceptLoading || isDeclineLoading}
+                    className="btn-secondary hover:bg-error"
+                  >
+                    Decline
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         }

@@ -1,4 +1,5 @@
 import { DayList } from "../../events/components";
+import { isAdmin } from "../../users/utils";
 import type { Trip } from "../types";
 import TripSummary from "./TripSummary";
 
@@ -6,7 +7,7 @@ export default function TripDetails(trip: Trip) {
   return (
     <div className="flex flex-col gap-6">
       <div className="card">
-        <TripSummary trip={trip} showActions />
+        <TripSummary trip={trip} showActions={isAdmin(trip.role)} />
       </div>
       <div>
         <h1 className="title mb-2 ml-4">Itinerary</h1>
