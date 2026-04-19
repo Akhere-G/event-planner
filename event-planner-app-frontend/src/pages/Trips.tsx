@@ -50,7 +50,7 @@ export default function Trips() {
   return (
     <div className="container flex flex-col gap-6">
       <div className="card">
-        <h2 className="title mb-4">Your Trips</h2>
+        <h2 className="title">Your Trips</h2>
       </div>
       {mainContent}
     </div>

@@ -49,7 +49,7 @@ export default function Register() {
   return (
     <div className="container">
       <div className="card">
-        <h2 className="title mb-4">Register</h2>
+        <h2 className="title mb-6">Register</h2>
         <form className="form" onSubmit={handleSubmit(onSubmit)}>
           {errorMessage && <p className="errorMessage">{errorMessage}</p>}
 
