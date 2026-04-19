@@ -6,7 +6,7 @@ import {
 import type { Event } from "../types";
 import EventCard from "./EventCard";
 import { isFetchBaseQueryError } from "../../api/utils";
-import { EmptyState } from "../../../components";
+import { StateGate } from "../../../components";
 
 export default function EventList({
   events,
@@ -50,23 +50,27 @@ export default function EventList({
     }
   }
 
-  let mainContent = <></>;
-  if (events.length === 0) {
-    mainContent = <EmptyState message="No Events." height={50} />;
-  } else {
-    mainContent = (
-      <>
-        {events.map((event) => (
-          <EventCard
-            key={event.id}
-            event={event}
-            handleDelete={handleDelete}
-            handleEdit={handleEdit}
-            role={role}
-          />
-        ))}
-      </>
-    );
-  }
-  return <div className="flex flex-col gap-2 mb-4">{mainContent}</div>;
+  return (
+    <div className="flex flex-col gap-2 mb-4">
+      <StateGate
+        emptyStateProps={{
+          isEmpty: events.length === 0,
+          height: 50,
+          message: "No events on this day.",
+        }}
+      >
+        <>
+          {events.map((event) => (
+            <EventCard
+              key={event.id}
+              event={event}
+              handleDelete={handleDelete}
+              handleEdit={handleEdit}
+              role={role}
+            />
+          ))}
+        </>
+      </StateGate>
+    </div>
+  );
 }

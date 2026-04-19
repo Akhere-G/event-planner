@@ -1,12 +1,14 @@
+export interface EmptyStateProps {
+  message?: string;
+  height?: number;
+  action?: { text: string; onClick: () => void };
+}
+
 export default function EmptyState({
   message = "No data found.",
   height = 200,
   action,
-}: {
-  message?: string;
-  height?: number;
-  action?: { text: string; onClick: () => void };
-}) {
+}: EmptyStateProps) {
   return (
     <div
       style={{ height: height + "px" }}

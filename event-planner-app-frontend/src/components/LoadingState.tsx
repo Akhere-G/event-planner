@@ -1,8 +1,10 @@
+export interface LoadingStateProps {
+  message?: string;
+}
+
 export default function LoadingState({
   message = "Loading...",
-}: {
-  message?: string;
-}) {
+}: LoadingStateProps) {
   return (
     <div className="bg-surface min-h-50 border-slate-300 border-2 rounded-md flex flex-col gap-4 justify-center items-center">
       <h2 className="text-text-secondary">{message}</h2>

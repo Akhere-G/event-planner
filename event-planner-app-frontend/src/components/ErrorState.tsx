@@ -1,10 +1,12 @@
+export interface ErrorStateProps {
+  message?: string;
+  showReload?: boolean;
+}
+
 export default function ErrorState({
   message = "Sorry... something went wrong.",
   showReload,
-}: {
-  message?: string;
-  showReload?: boolean;
-}) {
+}: ErrorStateProps) {
   return (
     <div className="bg-error/10 min-h-50 border-dashed border-error/50 border-2 rounded-md flex flex-col gap-4 justify-center items-center">
       <h2 className="text-error">{message}</h2>

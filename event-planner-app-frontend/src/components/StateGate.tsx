@@ -1,32 +1,45 @@
 import React from "react";
-import LoadingState from "./LoadingState";
-import ErrorState from "./ErrorState";
-import EmptyState from "./EmptyState";
+import LoadingState, { type LoadingStateProps } from "./LoadingState";
+import ErrorState, { type ErrorStateProps } from "./ErrorState";
+import EmptyState, { type EmptyStateProps } from "./EmptyState";
+
+interface LoadingProps extends LoadingStateProps {
+  customSkeleton?: React.ReactNode;
+  isLoading?: boolean;
+}
+
+interface ErrorProps extends ErrorStateProps {
+  isError?: boolean;
+}
+interface EmptyProps extends EmptyStateProps {
+  isEmpty?: boolean;
+}
 
 interface Props {
-  isLoading?: boolean;
-  isError?: boolean;
-  isEmpty?: boolean;
-  loadingText?: string;
-  errorText?: string;
-  emptyText?: string;
+  emptyStateProps?: EmptyProps;
+  loadingStateProps?: LoadingProps;
+  errorStateProps?: ErrorProps;
   children: React.ReactNode;
 }
 export default function StateGate({
-  isLoading,
-  isError,
-  isEmpty,
-  loadingText,
-  errorText,
-  emptyText,
+  loadingStateProps,
+  errorStateProps,
+  emptyStateProps,
   children,
 }: Props) {
-  if (isLoading) {
-    return <LoadingState message={loadingText} />;
-  } else if (isError) {
-    return <ErrorState message={errorText} />;
-  } else if (isEmpty) {
-    return <EmptyState message={emptyText} />;
+  if (loadingStateProps?.isLoading) {
+    if (loadingStateProps?.customSkeleton)
+      return loadingStateProps?.customSkeleton;
+    return <LoadingState message={loadingStateProps.message} />;
+  } else if (errorStateProps?.isError) {
+    return (
+      <ErrorState
+        message={errorStateProps?.message}
+        showReload={errorStateProps?.showReload}
+      />
+    );
+  } else if (emptyStateProps?.isEmpty) {
+    return <EmptyState {...emptyStateProps} />;
   }
   return children;
 }

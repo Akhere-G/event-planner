@@ -1,6 +1,6 @@
 import { useParams, useSearchParams } from "react-router";
 import { useGetTripQuery } from "../features/trips/services/tripsApiSlice";
-import { EmptyState, ErrorState, LoadingState } from "../components";
+import { EmptyState, ErrorState, LoadingState, StateGate } from "../components";
 import { isFetchBaseQueryError } from "../features/api/utils";
 import { TripDetails } from "../features/trips/components";
 import { openModal } from "../features/modal/modalSlice";
@@ -20,15 +20,22 @@ export default function TripPage() {
     }
   }, [dispatch, searchParams]);
 
-  let mainContent = <></>;
-  if (isLoading) {
-    mainContent = <LoadingState />;
-  } else if (isFetchBaseQueryError(error) && error.status === 404) {
-    mainContent = <EmptyState message="This trip could not be found." />;
-  } else if (isError) {
-    mainContent = <ErrorState showReload />;
-  } else {
-    mainContent = <TripDetails {...data.data} />;
-  }
-  return <div className="container">{mainContent}</div>;
+  return (
+    <div className="container">
+      <StateGate
+        loadingStateProps={{ isLoading }}
+        errorStateProps={{
+          isError:
+            isError && !(isFetchBaseQueryError(error) && error.status === 404),
+          showReload: true,
+        }}
+        emptyStateProps={{
+          isEmpty: isFetchBaseQueryError(error) && error.status === 404,
+          message: "This trip could not be found.",
+        }}
+      >
+        <TripDetails {...data?.data} />
+      </StateGate>
+    </div>
+  );
 }

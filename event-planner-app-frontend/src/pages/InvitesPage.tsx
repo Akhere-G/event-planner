@@ -13,7 +13,11 @@ export default function InvitesPage() {
       <StateGate
         isLoading={isLoading}
         isError={isError}
-        isEmpty={!data?.data.invites.length}
+        emptyStateProps={{
+          isEmpty: !data?.data.invites.length,
+          message: "No trips",
+          height: 50,
+        }}
         loadingText="Loading Invites"
         errorText="Could not get invites."
       >
