@@ -5,6 +5,8 @@ from .extensions import db, migrate, flask_bcrypt
 from flask_cors import CORS
 from .config.dev_config import DevConfig
 from .config.production_config import ProductionConfig
+from flask import send_from_directory
+
 
 load_dotenv()
 
@@ -83,5 +85,13 @@ def create_app():
             user_invites_bp,
             url_prefix="/api/invites",
         )
+
+        @app.route("/")
+        def serve():
+            return send_from_directory(app.static_folder, "index.html")
+
+        @app.errorhandler(404)
+        def not_found(e):
+            return send_from_directory(app.static_folder, "index.html")
 
         return app
