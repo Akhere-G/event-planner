@@ -34,7 +34,12 @@ class UserWithRoleSchema(Schema):
 
     @post_dump
     def flatten_output(self, data, many, **kwargs):
+        if data is None:
+            return None
+
         user_data = data.pop("user")
+        if user_data is None:
+            return None
         user_data["role"] = data["role"]
         return user_data
 
