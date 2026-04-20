@@ -2,14 +2,14 @@ import os
 from flask import Flask
 from dotenv import load_dotenv
 from .extensions import db, migrate, flask_bcrypt
-from .config.config import Config
 from flask_cors import CORS
-
+from .config.dev_config import DevConfig
+from .config.production_config import ProductionConfig
 
 load_dotenv()
 
 
-def create_app(config_class=None):
+def create_app():
     current_dir = os.path.dirname(os.path.abspath(__file__))
     static_path = os.path.join(current_dir, "..", "static")
     app = Flask(__name__, static_folder=static_path, static_url_path="/")
@@ -20,10 +20,10 @@ def create_app(config_class=None):
         origins=[os.environ.get("FRONTEND_URL")],
     )
 
-    if config_class is None:
-        config_obj = Config().dev_config
+    if os.environ.get("ENVIRONMENT") == "DEV":
+        app.config.from_object(DevConfig())
     else:
-        config_obj = config_class
+        app.config.from_object(ProductionConfig())
 
     basedir = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
     instance_dir = os.path.join(basedir, "instance")
@@ -32,8 +32,7 @@ def create_app(config_class=None):
     os.makedirs(instance_dir, exist_ok=True)
 
     app.config.from_mapping(
-        ENV=config_obj.ENV,
-        DEBUG=config_obj.DEBUG,
+        DEBUG=os.getenv("FLASK_DEBUG") == "True",
         SQLALCHEMY_DATABASE_URI=f"sqlite:////{db_path}",
         SQLALCHEMY_TRACK_MODIFICATIONS=False,
         ALEMBIC_CONTEXT={"render_as_batch": True},

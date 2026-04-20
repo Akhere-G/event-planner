@@ -1,10 +1,8 @@
-from src.config.config import Config
 from src import create_app
 from flask import send_from_directory
+import os
 
-
-dev_config = Config().dev_config
-app = create_app(config_class=dev_config)
+app = create_app()
 
 
 @app.route("/")
@@ -18,4 +16,8 @@ def not_found(e):
 
 
 if __name__ == "__main__":
-    app.run(host=dev_config.HOST, port=dev_config.PORT, debug=dev_config.DEBUG)
+    app.run(
+        host=os.getenv("FLASK_HOST"),
+        port=os.getenv("FLASK_PORT"),
+        debug=os.getenv("FLASK_DEBUG") == "True",
+    )
