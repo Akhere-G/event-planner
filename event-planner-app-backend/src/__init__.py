@@ -12,6 +12,10 @@ load_dotenv()
 
 
 def create_app():
+    cert_path = os.getenv("DB_CA_CERT_PATH", "/app/certs/ca.pem")
+
+    db_url = os.getenv("DATABASE_URL")
+
     current_dir = os.path.dirname(os.path.abspath(__file__))
     static_path = os.path.join(current_dir, "..", "static")
     app = Flask(__name__, static_folder=static_path, static_url_path="/")
@@ -27,18 +31,14 @@ def create_app():
     else:
         app.config.from_object(ProductionConfig())
 
-    basedir = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
-    instance_dir = os.path.join(basedir, "instance")
-    db_path = os.path.join(instance_dir, "database.db")
-
-    os.makedirs(instance_dir, exist_ok=True)
-
     app.config.from_mapping(
         DEBUG=os.getenv("FLASK_DEBUG") == "True",
-        SQLALCHEMY_DATABASE_URI=f"sqlite:////{db_path}",
         SQLALCHEMY_TRACK_MODIFICATIONS=False,
+        SQLALCHEMY_DATABASE_URI=db_url,
+        SQLALCHEMY_ENGINE_OPTIONS={"connect_args": {"ssl": {"ca": cert_path}}},
         ALEMBIC_CONTEXT={"render_as_batch": True},
     )
+
     app.secret_key = os.environ.get("FLASK_SECRET_KEY")
 
     basedir = os.path.abspath(os.path.dirname(app.root_path))

@@ -55,13 +55,7 @@ class ItineraryWithRoleSchema(Schema):
 
     @post_dump
     def flatten_output(self, data, many, **kwargs):
-        if data is None:
-            return None
-
         itinerary_data = data.pop("itinerary")
-
-        if itinerary_data is None:
-            return None
         itinerary_data["role"] = data["role"]
         return itinerary_data
 
