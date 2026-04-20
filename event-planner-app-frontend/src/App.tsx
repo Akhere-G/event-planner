@@ -11,6 +11,7 @@ import { ProtectedRoute } from "./components";
 import { Header } from "./layout";
 import "react-tooltip/dist/react-tooltip.css";
 import ModalManager from "./features/modal/components/ModalManager";
+import { syncDOM } from "./features/theme/themeSlice";
 
 const AddTrip = lazy(() => import("./pages/AddTrip"));
 const InvitesPage = lazy(() => import("./pages/InvitesPage"));
@@ -24,6 +25,10 @@ function App() {
   const isAuthenticated = useSelector(selectIsAuthenticated);
   const { isLoading, data } = useCheckUserQuery();
   const dispatch = useDispatch();
+
+  useEffect(() => {
+    dispatch(syncDOM());
+  }, [dispatch]);
 
   useEffect(() => {
     if (data) {
