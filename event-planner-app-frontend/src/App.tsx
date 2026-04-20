@@ -18,6 +18,7 @@ const Login = lazy(() => import("./pages/Login"));
 const Register = lazy(() => import("./pages/Register"));
 const TripPage = lazy(() => import("./pages/TripPage"));
 const Trips = lazy(() => import("./pages/Trips"));
+const Settings = lazy(() => import("./pages/Settings"));
 
 function App() {
   const isAuthenticated = useSelector(selectIsAuthenticated);
@@ -44,7 +45,7 @@ function App() {
     { title: "Register", url: "/register" },
   ];
 
-  const isAuth = !isAuthenticated && !data?.data.userId;
+  const isAuth = isAuthenticated || !!data?.data.userId;
   return (
     <>
       <Header links={isAuthenticated ? authLinks : unauthLinks} />
@@ -52,7 +53,7 @@ function App() {
         <Route
           path="/"
           element={
-            <ProtectedRoute redirect={isAuth} redirectTo="/login">
+            <ProtectedRoute redirect={!isAuth} redirectTo="/login">
               <Trips />
             </ProtectedRoute>
           }
@@ -60,7 +61,7 @@ function App() {
         <Route
           path="/addtrip"
           element={
-            <ProtectedRoute redirect={isAuth} redirectTo="/login">
+            <ProtectedRoute redirect={!isAuth} redirectTo="/login">
               <AddTrip />
             </ProtectedRoute>
           }
@@ -68,7 +69,7 @@ function App() {
         <Route
           path="/trips/:tripId"
           element={
-            <ProtectedRoute redirect={isAuth} redirectTo="/login">
+            <ProtectedRoute redirect={!isAuth} redirectTo="/login">
               <TripPage />
             </ProtectedRoute>
           }
@@ -76,15 +77,23 @@ function App() {
         <Route
           path="/invites"
           element={
-            <ProtectedRoute redirect={isAuth} redirectTo="/login">
+            <ProtectedRoute redirect={!isAuth} redirectTo="/login">
               <InvitesPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/settings"
+          element={
+            <ProtectedRoute redirect={!isAuth} redirectTo="/login">
+              <Settings />
             </ProtectedRoute>
           }
         />
         <Route
           path="/login"
           element={
-            <ProtectedRoute redirect={!isAuth} redirectTo="/">
+            <ProtectedRoute redirect={isAuth} redirectTo="/">
               <Login />
             </ProtectedRoute>
           }
@@ -92,7 +101,7 @@ function App() {
         <Route
           path="/register"
           element={
-            <ProtectedRoute redirect={!isAuth} redirectTo="/">
+            <ProtectedRoute redirect={isAuth} redirectTo="/">
               <Register />
             </ProtectedRoute>
           }

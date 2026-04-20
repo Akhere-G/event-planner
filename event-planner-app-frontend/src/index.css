@@ -35,9 +35,174 @@
 @variant dark (&:where(.dark, .dark *));
 
 @layer base {
+  /* --- 1. Emerald Forest Theme --- */
+  .theme-emerald {
+    --color-canvas: var(--color-emerald-50); 
+    --color-surface: var(--color-white); 
+    --color-surface-muted: var(--color-emerald-100);
+    --color-brand-primary: var(--color-emerald-600);
+    --color-brand-secondary: var(--color-teal-500);
+  }
+
+  /* --- 2. Rose Gold Theme --- */
+  .theme-rose {
+    --color-canvas: var(--color-rose-50); 
+    --color-surface: var(--color-white); 
+    --color-surface-muted: var(--color-rose-100);
+    --color-brand-primary: var(--color-rose-500);
+    --color-brand-secondary: var(--color-pink-400);
+  }
+
+  /* --- 3. Bubblegum Theme --- */
+  .theme-bubblegum {
+    --color-canvas: var(--color-pink-50); 
+    --color-surface: var(--color-white); 
+    --color-surface-muted: var(--color-pink-100);
+    --color-brand-primary: var(--color-pink-500);
+    --color-brand-secondary: var(--color-pink-400);
+  }
+
+  /* --- 4. Ocean Blue Theme --- */
+  .theme-ocean {
+    --color-canvas: var(--color-blue-50); 
+    --color-surface: var(--color-white); 
+    --color-surface-muted: var(--color-blue-100);
+    --color-brand-primary: var(--color-blue-600);
+    --color-brand-secondary: var(--color-sky-500);
+  }
+
+  /* --- 5. Amber Sunset Theme --- */
+  .theme-amber {
+    --color-canvas: var(--color-amber-50); 
+    --color-surface: var(--color-white); 
+    --color-surface-muted: var(--color-amber-100);
+    --color-brand-primary: var(--color-amber-600);
+    --color-brand-secondary: var(--color-orange-500);
+  }
+
+  /* --- 6. Slate Professional Theme --- */
+  .theme-slate {
+    --color-canvas: var(--color-slate-100); 
+    --color-surface: var(--color-white); 
+    --color-surface-muted: var(--color-slate-200);
+    --color-brand-primary: var(--color-slate-500);
+    --color-brand-secondary: var(--color-slate-400);
+  }
+
+  /* --- 7. Midnight Theme --- */
+  .theme-midnight { 
+    --color-canvas: #0f172a; 
+    --color-surface: #1e293b; 
+    --color-surface-muted: #334155; 
+    --color-brand-primary: #6366f1; 
+    --color-brand-secondary: #8588f3; 
+    --color-text-primary: var(--color-white);     
+    --color-text-secondary: var(--color-slate-300); 
+  }
+
+  /* --- 8. Sandstone Theme --- */
+  .theme-sandstone { 
+    --color-canvas: #fdf6e3; 
+    --color-surface: #fbf1c7; 
+    --color-surface-muted: #ebdbb2; 
+    --color-brand-primary: #d65d0e; 
+    --color-brand-secondary: #e76e1f; 
+  }
+
+  /* --- 9. Vaporwave Theme --- */
+  .theme-vaporwave {
+    --color-canvas: color-mix(in srgb, #240046, #000 20%); 
+    --color-surface: color-mix(in srgb, #3c096c, #000 5%);
+    --color-surface-muted:  color-mix(in srgb, #5a189a, #000 20%);
+    --color-brand-primary:  color-mix(in srgb, #ff00ea, #000 5%); 
+    --color-brand-secondary: color-mix(in srgb, #00f2ff, #fff 70%); 
+    --color-text-primary:  color-mix(in srgb, #e0aaff, #fff 70%);
+    --color-text-inverse: black;
+  }
+
+  /* --- 10. Volcanic Theme (High-Contrast Red/Black) --- */
+  .theme-volcanic { 
+    --color-canvas: #1c1917; 
+    --color-surface: #292524; 
+    --color-surface-muted: #44403c; 
+    --color-brand-primary: #ef4444; 
+    --color-brand-secondary: #f97316;
+    --color-text-primary: var(--color-white);     
+    --color-text-secondary: var(--color-slate-300);  
+  }
+
+  /* --- 11. Lavender Theme (Soft Purple) --- */
+  .theme-lavender { 
+    --color-canvas: #faf5ff; 
+    --color-surface: #ffffff; 
+    --color-surface-muted: #f3e8ff; 
+    --color-brand-primary: #7e22ce; 
+    --color-brand-secondary: #9333ea; 
+  }
+
+  /* --- 12. Arctic Theme (Cool Cyan) --- */
+  .theme-arctic { 
+    --color-canvas: #ecfeff; 
+    --color-surface: #ffffff; 
+    --color-surface-muted: #cffafe; 
+    --color-brand-primary: #0891b2; 
+    --color-brand-secondary: #06b6d4; 
+  }
+
+  /* --- 13. Chocolate Pistachio Theme --- */
+  .theme-chocolate-pistachio {
+    --color-canvas: #ddead7; 
+    --color-surface: #ffffff; 
+    --color-surface-muted: #f2ede4;
+    --color-brand-primary: #6c390a;
+    --color-brand-secondary: #66c860;
+  }
+
+  /* --- 14. Timber Dark Theme --- */
+  .theme-timber-dark {
+    --color-canvas: #f5f1e8; 
+    --color-surface: #faf9f6; 
+    --color-surface-muted: #e9e2d5;
+    --color-brand-primary: #ab825b;
+    --color-brand-secondary: #c3a380;
+  }
+
+  /* --- 15. Radioactive Theme --- */
+  .theme-radioactive {
+    --color-canvas: #000000;
+    --color-surface: #1a1a1a;
+    --color-surface-muted: #333333;
+    --color-brand-primary: #05bb00; /* Radioactive Green */
+    --color-brand-secondary: #d4d400; /* Toxic Yellow */
+    --color-text-primary: #c0f4b3;
+    --color-text-inverse: black;
+    --color-text-secondary: #ccc;  
+  }
+
+  /* --- 16. Cosmic Void (Stellar purple/blue gradients) --- */
+  .theme-cosmic {
+    --color-canvas: #0f172a;
+    --color-surface: #1e1b4b;
+    --color-surface-muted: #312e81;
+    --color-brand-primary: #e68d0c; /* Golden Star */
+    --color-brand-secondary: #ec4899; /* Nebula Pink */
+    --color-text-primary: #f8fafc;
+    --color-text-inverse: black;
+  }
+
+  /* --- 17. Midnight Gold (Luxury/Premium) --- */
+  .theme-midnight-gold { 
+    --color-canvas: #0a0a0a;       /* Deep Obsidian */
+    --color-surface: #171717;      /* Matte Charcoal */
+    --color-surface-muted: #262626; /* Refined dark grey */
+    --color-brand-primary: #d4af37;        /* Metallic Champagne Gold */
+    --color-brand-secondary: #ebc23c;       /* Soft Highlight Gold */
+    --color-text-primary: #fff;  
+    --color-text-secondary: #ccc;  
+    --color-text-inverse: black;
+  }
+  
   .dark {
-      --color-brand-primary: #f97316;
-      --color-brand-secondary: #fb923c;
       --color-canvas: #0f172a;
       --color-surface: #1e293b;
       --color-surface-muted: #334155;
@@ -47,9 +212,7 @@
     --color-text-secondary: #cbd5e1;
     --color-text-inverse: #111;
     
-    a, p, span, label {
-      @apply brightness-110
-    }
+   
   }
 
   body {

@@ -1,7 +1,7 @@
 import type { Trip } from "../types";
 import { formatDateRange } from "../../../utils/dateFormattors";
 import { MoreVertical } from "lucide-react";
-import { useState, type MouseEvent } from "react";
+import { useEffect, useRef, useState, type MouseEvent } from "react";
 import { isAdmin } from "../../users/utils";
 
 type TripCardProps = {
@@ -20,6 +20,18 @@ export default function TripCard({
   const { id, name, description, startDate, endDate } = trip;
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: globalThis.MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setIsMenuOpen(false);
+      }
+    };
+    if (isMenuOpen) document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [isMenuOpen]);
 
   const handleSettings = (e: MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
@@ -42,6 +54,7 @@ export default function TripCard({
     <article
       className="relative rounded-md bg-surface shadow-md overflow-hidden cursor-pointer"
       onClick={() => handleCardClick(id)}
+      ref={menuRef}
     >
       <div className="p-4  bg-linear-to-r from-brand-primary to-brand-secondary h-40">
         <div className="flex items-center justify-between mb-2">
@@ -56,22 +69,18 @@ export default function TripCard({
           )}
           {isMenuOpen && (
             <div className="absolute top-8 right-4 mt-2 w-32 bg-surface rounded-md shadow-lg z-10 flex flex-col text-sm">
-              <button
-                onClick={handleEdit}
-                className="px-4 py-2 text-left hover:bg-gray-50 text-text-primary"
-              >
+              <button onClick={handleEdit} className="btn-menu">
                 Edit
               </button>
-              <button
-                onClick={handleDelete}
-                className="px-4 py-2 text-left hover:bg-gray-50 text-error"
-              >
+              <button onClick={handleDelete} className="btn-menu text-error">
                 Delete
               </button>
             </div>
           )}
         </div>
-        <p className="text-text-secondary truncate">{description}</p>
+        <p className="text-surface-muted dark:text-text-secondary truncate">
+          {description}
+        </p>
       </div>
       <p className="p-4 text-text-primary">
         {formatDateRange(startDate, endDate)}

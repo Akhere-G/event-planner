@@ -57,8 +57,14 @@ export default function Header({ links }: HeaderProps) {
               <User size={20} />
             </button>
             <div
-              className={`flex flex-col w-40 card p-0  absolute right-2 top-full ${isMenuOpen ? "visible opacity-100" : "invisible opacity-0 pointer-events-none"}`}
+              className={`flex flex-col w-40 card p-0 z-10 absolute right-2 top-full ${isMenuOpen ? "visible opacity-100" : "invisible opacity-0 pointer-events-none"}`}
             >
+              <Link
+                to="/settings"
+                className="pt-3 pb-2 hover:bg-surface-muted text-center"
+              >
+                Settings
+              </Link>
               <button
                 onClick={async () => {
                   await logout();
@@ -123,6 +129,14 @@ export default function Header({ links }: HeaderProps) {
               </li>
             ))}
           </ul>
+          <div className="mt-1">
+            <Link
+              to="/settings"
+              className=" hover:bg-surface-muted text-center"
+            >
+              Settings
+            </Link>
+          </div>
           <button
             onClick={() => dispatch(toggleDarkMode())}
             className="flex text-sm items-center gap-2 mt-2 p-0 w-full justify-end"
