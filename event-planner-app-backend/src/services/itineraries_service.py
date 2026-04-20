@@ -14,6 +14,8 @@ def get_membership_by_email(email: str, itinerary_id: int):
         stmt = select(User).where(User.email == email)
         user = db.session.execute(stmt).scalar_one_or_none()
 
+        if user is None:
+            return None
         stmt = (
             select(ItineraryUser)
             .where(ItineraryUser.itinerary_id == itinerary_id)
