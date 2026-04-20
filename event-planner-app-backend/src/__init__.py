@@ -1,4 +1,8 @@
 import os
+import pymysql
+
+pymysql.install_as_MySQLdb()
+
 from flask import Flask
 from dotenv import load_dotenv
 from .extensions import db, migrate, flask_bcrypt
