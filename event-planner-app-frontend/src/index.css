@@ -10,24 +10,6 @@
   --txt-inverse: #ffffff;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-      --color-brand-primary: #d75104;
-  --color-brand-secondary: #d9701a;
-    --bg-canvas: #0f172a;
-    --bg-surface: #1e293b;
-    --bg-surface-muted: #334155;
-    --border-surface: #475569;
-    --txt-primary: #f8fafc;
-    --txt-secondary: #cbd5e1;
-    --txt-inverse: #ffffff;
-  }
-
-  a, p, span, label {
-    @apply brightness-110
-  }
-}
-
 @theme {
   --color-brand-primary: #f97316;
   --color-brand-secondary: #fb923c;
@@ -50,7 +32,26 @@
   --font-sans: 'Inter', sans-serif;
 }
 
+@variant dark (&:where(.dark, .dark *));
+
 @layer base {
+  .dark {
+      --color-brand-primary: #f97316;
+      --color-brand-secondary: #fb923c;
+      --color-canvas: #0f172a;
+      --color-surface: #1e293b;
+      --color-surface-muted: #334155;
+      --color-surface-border: #475569;
+
+    --color-text-primary: #f8fafc;
+    --color-text-secondary: #cbd5e1;
+    --color-text-inverse: #111;
+    
+    a, p, span, label {
+      @apply brightness-110
+    }
+  }
+
   body {
     @apply bg-canvas text-text-primary antialiased;
   }
@@ -70,9 +71,15 @@
   li {
     @apply list-none
   }
+
+  * {
+    @apply transition-all! duration-200!
+  }
 }
 
 @layer components {
+  
+  
   .card {
     @apply bg-surface border border-surface-border rounded-md shadow-sm hover:shadow-md transition-shadow p-4;
   }

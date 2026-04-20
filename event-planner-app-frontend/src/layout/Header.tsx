@@ -1,14 +1,18 @@
-import { Menu, User, X } from "lucide-react";
+import { Menu, Moon, Sun, User, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router";
 import { useLogoutUserMutation } from "../features/auth/services/authApiSlice";
 import { logOut } from "../features/auth/services/authSlice";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { toggleDarkMode } from "../features/theme/themeSlice";
+import type { RootState } from "../store";
 
 interface HeaderProps {
   links: { title: string; url: string }[];
 }
 export default function Header({ links }: HeaderProps) {
+  const { darkMode } = useSelector((state: RootState) => state.theme);
+  const { isAuthenticated } = useSelector((state: RootState) => state.auth);
   const [logout] = useLogoutUserMutation();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -53,7 +57,7 @@ export default function Header({ links }: HeaderProps) {
               <User size={20} />
             </button>
             <div
-              className={`card p-0 absolute right-2 -bottom-13 ${isMenuOpen ? "visible opacity-100" : "invisible opacity-0 pointer-events-none"}`}
+              className={`flex flex-col w-40 card p-0  absolute right-2 top-full ${isMenuOpen ? "visible opacity-100" : "invisible opacity-0 pointer-events-none"}`}
             >
               <button
                 onClick={async () => {
@@ -64,6 +68,17 @@ export default function Header({ links }: HeaderProps) {
                 className="btn-menu"
               >
                 Logout
+              </button>
+
+              <button
+                onClick={() => dispatch(toggleDarkMode())}
+                className="p-2 pb-3 flex hover:bg-surface-muted rounded-lg transition-colors"
+                aria-label="Toggle Dark Mode"
+              >
+                <span className="w-29">
+                  {darkMode ? "Light Mode" : "Dark Mode"}
+                </span>
+                {darkMode ? <Sun size={20} /> : <Moon size={20} />}
               </button>
             </div>
           </div>
@@ -83,18 +98,21 @@ export default function Header({ links }: HeaderProps) {
       {/* Mobile Sidebar */}
       <div
         className={`fixed z-30 h-full right-0 bg-surface p-4 shadow-md transition-transform
-        md:hidden flex flex-col items-end gap-4 text-end
+        md:hidden flex flex-col items-start text-left  gap-4 text-end
         top-0
         ${isSidebarOpen ? "translate-x-0" : "translate-x-full"}`}
       >
-        <button
-          className="btn-secondary md:hidden p-2"
-          aria-expanded={isSidebarOpen}
-          aria-label="Close Menu"
-          onClick={() => setIsSidebarOpen(false)}
-        >
-          <X size={24} />
-        </button>
+        <div className="flex justify-between items-center w-full">
+          <p>Menu</p>
+          <button
+            className="btn-secondary md:hidden p-2 "
+            aria-expanded={isSidebarOpen}
+            aria-label="Close Menu"
+            onClick={() => setIsSidebarOpen(false)}
+          >
+            <X size={24} />
+          </button>
+        </div>
         <nav>
           <ul className="flex flex-col gap-2">
             {links.map(({ title, url }) => (
@@ -105,6 +123,27 @@ export default function Header({ links }: HeaderProps) {
               </li>
             ))}
           </ul>
+          <button
+            onClick={() => dispatch(toggleDarkMode())}
+            className="flex text-sm items-center gap-2 mt-2 p-0 w-full justify-end"
+          >
+            <span className="w-19">
+              {darkMode ? "Light Mode" : "Dark Mode"}
+            </span>
+            {darkMode ? <Sun size={16} /> : <Moon size={16} />}
+          </button>
+          {isAuthenticated && (
+            <button
+              onClick={async () => {
+                await logout();
+                dispatch(logOut());
+                window.location.reload();
+              }}
+              className="btn-menu p-0 pt-2 text-sm"
+            >
+              Logout
+            </button>
+          )}
         </nav>
       </div>
       {/* Overlay/Backdrop */}
