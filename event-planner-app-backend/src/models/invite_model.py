@@ -21,7 +21,7 @@ class Invite(Base, AuditMixin):
     itinerary_id: Mapped[int] = mapped_column(
         ForeignKey("itineraries.id", ondelete="CASCADE")
     )
-    email: Mapped[str] = mapped_column(String, index=True)
+    email: Mapped[str] = mapped_column(String(255), index=True)
     inviter_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
     role: Mapped[UserRole] = mapped_column(
         Enum("admin", "editor", "viewer", name="userrole"),
