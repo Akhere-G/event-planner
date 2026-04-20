@@ -1,5 +1,5 @@
 export const THEMES = [
-  { id: "", name: "Default (Indigo)" },
+  { id: "", name: "Default (Orange)" },
   { id: "theme-lavender", name: "Soft Lavender" },
   { id: "theme-ocean", name: "Ocean Blue" },
   { id: "theme-arctic", name: "Arctic Cyan" },

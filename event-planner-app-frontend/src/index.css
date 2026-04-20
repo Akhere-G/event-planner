@@ -97,7 +97,7 @@
     --color-brand-primary: #6366f1; 
     --color-brand-secondary: #8588f3; 
     --color-text-primary: var(--color-white);     
-    --color-text-secondary: var(--color-slate-300); 
+    --color-text-secondary: var(--color-slate-200); 
   }
 
   /* --- 8. Sandstone Theme --- */
@@ -117,6 +117,7 @@
     --color-brand-primary:  color-mix(in srgb, #ff00ea, #000 5%); 
     --color-brand-secondary: color-mix(in srgb, #00f2ff, #fff 70%); 
     --color-text-primary:  color-mix(in srgb, #e0aaff, #fff 70%);
+    --color-text-secondary:  color-mix(in srgb, #e0aaff, #eee 70%);
     --color-text-inverse: black;
   }
 
@@ -128,7 +129,7 @@
     --color-brand-primary: #ef4444; 
     --color-brand-secondary: #f97316;
     --color-text-primary: var(--color-white);     
-    --color-text-secondary: var(--color-slate-300);  
+    --color-text-secondary: var(--color-slate-200);  
   }
 
   /* --- 11. Lavender Theme (Soft Purple) --- */
@@ -172,9 +173,10 @@
     --color-canvas: #000000;
     --color-surface: #1a1a1a;
     --color-surface-muted: #333333;
-    --color-brand-primary: #05bb00; /* Radioactive Green */
+    --color-brand-primary: #27dd22; /* Radioactive Green */
     --color-brand-secondary: #d4d400; /* Toxic Yellow */
-    --color-text-primary: #c0f4b3;
+    --color-text-primary: #e2f6d5;
+    --color-text-secondary: #d1f5c4;
     --color-text-inverse: black;
     --color-text-secondary: #ccc;  
   }
@@ -187,6 +189,7 @@
     --color-brand-primary: #e68d0c; /* Golden Star */
     --color-brand-secondary: #ec4899; /* Nebula Pink */
     --color-text-primary: #f8fafc;
+    --color-text-secondary: #e7e9eb;
     --color-text-inverse: black;
   }
 
@@ -198,7 +201,7 @@
     --color-brand-primary: #d4af37;        /* Metallic Champagne Gold */
     --color-brand-secondary: #ebc23c;       /* Soft Highlight Gold */
     --color-text-primary: #fff;  
-    --color-text-secondary: #ccc;  
+    --color-text-secondary: #ddd;  
     --color-text-inverse: black;
   }
   
@@ -212,7 +215,6 @@
     --color-text-secondary: #cbd5e1;
     --color-text-inverse: #111;
     
-   
   }
 
   body {

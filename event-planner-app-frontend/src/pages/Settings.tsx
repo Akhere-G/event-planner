@@ -27,10 +27,10 @@ export default function SettingsPage() {
                 aria-label={`Set Theme to ${t.name}`}
                 key={t.name}
                 onClick={() => dispatch(setTheme(t.id))}
-                className={`py-2 rounded-lg border text-sm transition-all cursor-pointer ${
+                className={`py-2 rounded-lg border text-sm transition-all cursor-pointer  ${
                   theme === t.id
-                    ? "border-brand bg-brand/10 font-bold text-brand"
-                    : "border-slate-200 hover:border-brand/50 dark:border-slate-700"
+                    ? "border-brand-primary bg-brand/10 text-brand-primary font-bold"
+                    : "border-slate-200 hover:border-brand/50 font-medium dark:border-slate-700"
                 }`}
               >
                 {t.name}

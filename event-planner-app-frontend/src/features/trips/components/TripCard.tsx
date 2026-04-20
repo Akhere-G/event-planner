@@ -78,7 +78,7 @@ export default function TripCard({
             </div>
           )}
         </div>
-        <p className="text-surface-muted dark:text-text-secondary truncate">
+        <p className="text-slate-200 dark:text-text-secondary truncate">
           {description}
         </p>
       </div>
