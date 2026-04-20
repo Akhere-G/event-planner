@@ -30,7 +30,7 @@ COPY --from=frontend-builder /build/dist /app/static
 
 RUN echo '#!/bin/sh\n\
   flask db upgrade\n\
-  gunicorn --workers 2 --threads 4 --bind 0.0.0.0:8080 "app:app"' > /app/start.sh
+  gunicorn --workers 2 --threads 4 --bind 0.0.0.0:8080 "src:create_app()"' > /app/start.sh
 
 RUN mkdir -p /app/instance && chmod -R 777 /app/instance
 
