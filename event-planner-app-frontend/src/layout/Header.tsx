@@ -59,12 +59,14 @@ export default function Header({ links }: HeaderProps) {
             <div
               className={`flex flex-col w-40 card p-0 z-10 absolute right-2 top-full ${isMenuOpen ? "visible opacity-100" : "invisible opacity-0 pointer-events-none"}`}
             >
-              <Link
-                to="/settings"
-                className="pt-3 pb-2 hover:bg-surface-muted text-center"
-              >
-                Settings
-              </Link>
+              {isAuthenticated && (
+                <Link
+                  to="/settings"
+                  className="pt-3 pb-2 hover:bg-surface-muted text-center"
+                >
+                  Settings
+                </Link>
+              )}
               <button
                 onClick={async () => {
                   await logout();
@@ -104,7 +106,7 @@ export default function Header({ links }: HeaderProps) {
       {/* Mobile Sidebar */}
       <div
         className={`fixed z-30 h-full right-0 bg-surface p-4 shadow-md transition-transform
-        md:hidden flex flex-col items-start text-left  gap-4 text-end
+        md:hidden flex flex-col items-start  gap-4 text-end
         top-0
         ${isSidebarOpen ? "translate-x-0" : "translate-x-full"}`}
       >
@@ -130,12 +132,14 @@ export default function Header({ links }: HeaderProps) {
             ))}
           </ul>
           <div className="mt-1">
-            <Link
-              to="/settings"
-              className=" hover:bg-surface-muted text-center"
-            >
-              Settings
-            </Link>
+            {isAuthenticated && (
+              <Link
+                to="/settings"
+                className=" hover:bg-surface-muted text-center"
+              >
+                Settings
+              </Link>
+            )}
           </div>
           <button
             onClick={() => dispatch(toggleDarkMode())}
