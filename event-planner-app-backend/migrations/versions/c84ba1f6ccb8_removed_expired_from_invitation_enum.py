@@ -30,7 +30,7 @@ def upgrade():
                 name="invitationstatus",
             ),
             type_=sa.Enum(
-                "PENDING", "ACCEPTED", "DECLINED", "REVOKED", name="invitationstatus"
+                "pending", "accepted", "declined", "revoked", name="invitationstatus"
             ),
             existing_nullable=False,
         )
@@ -41,7 +41,7 @@ def downgrade():
         batch_op.alter_column(
             "status",
             existing_type=sa.Enum(
-                "PENDING", "ACCEPTED", "DECLINED", "REVOKED", name="invitationstatus"
+                "pending", "accepted", "declined", "revoked", name="invitationstatus"
             ),
             type_=sa.Enum(
                 "PENDING",
