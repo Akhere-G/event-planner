@@ -51,6 +51,8 @@ function App() {
   ];
 
   const isAuth = isAuthenticated || !!data?.data.userId;
+
+  console.log("In App", import.meta.env.VITE_GOOGLE_MAPS_API_KEY);
   return (
     <>
       <Header links={isAuthenticated ? authLinks : unauthLinks} />
