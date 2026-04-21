@@ -24,7 +24,7 @@ export default function SettingsPage() {
           <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3">
             {THEMES.map((t) => (
               <button
-                aria-label={`Set Theme to ${t.name}`}
+                aria-label={`Change Theme to ${t.name}`}
                 key={t.name}
                 onClick={() => dispatch(setTheme(t.id))}
                 className={`py-2 rounded-lg border text-sm transition-all cursor-pointer  ${

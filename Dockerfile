@@ -5,8 +5,13 @@ COPY event-planner-app-frontend/package*.json ./
 RUN npm install --legacy-peer-deps
 
 COPY event-planner-app-frontend/ .
+
 ARG _VITE_API_URL
+ARG _VITE_GOOGLE_MAPS_API_KEY
+
 ENV VITE_API_URL=$_VITE_API_URL
+ENV VITE_GOOGLE_MAPS_API_KEY=$_VITE_GOOGLE_MAPS_API_KEY
+
 RUN npm run build
 
 FROM python:3.11-slim
