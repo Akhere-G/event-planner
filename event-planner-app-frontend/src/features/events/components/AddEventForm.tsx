@@ -1,18 +1,11 @@
 import { useForm } from "react-hook-form";
-import { FormInput } from "../../../components";
+import { FormInput, LocationInput } from "../../../components";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { eventSchema, type EventSchema } from "../schemas/eventSchema";
 import { useAddEventMutation } from "../service/eventApiSlice";
 import { useParams } from "react-router";
 import { isValidationError } from "../../api/utils";
 import { useState } from "react";
-
-const defaultEventValues = {
-  location: "",
-  startAt: "",
-  endAt: "",
-  category: "General",
-};
 
 export default function AddEventForm({ date }: { date: string }) {
   const [errorMessage, setErrorMessage] = useState("");
@@ -21,8 +14,11 @@ export default function AddEventForm({ date }: { date: string }) {
   const [addEvent, { isLoading }] = useAddEventMutation();
   const { register, formState, handleSubmit, setError, setValue } = useForm({
     resolver: yupResolver(eventSchema),
-    defaultValues: defaultEventValues,
   });
+
+  const addressInputProps = register("address");
+  const [key, setKey] = useState(0);
+
   async function onSubmit(formState: EventSchema) {
     const event = {
       ...formState,
@@ -32,9 +28,13 @@ export default function AddEventForm({ date }: { date: string }) {
     setErrorMessage("");
     try {
       await addEvent({ tripId: Number(tripId), event }).unwrap();
-      setValue("location", "");
+      setValue("address", "");
+      setValue("name", "");
+      setValue("longitude", 0);
+      setValue("latitude", 0);
       setValue("startAt", "");
       setValue("endAt", "");
+      setKey((prev) => prev + 1);
     } catch (err) {
       if (isValidationError(err)) {
         const serverErrors = err.data.error;
@@ -50,17 +50,25 @@ export default function AddEventForm({ date }: { date: string }) {
       }
     }
   }
+
   return (
     <>
       <form
         className="flex gap-4 md:items-end flex-col md:flex-row mb-2"
         onSubmit={handleSubmit(onSubmit)}
       >
-        <FormInput
-          label="Location"
-          {...register("location")}
-          errorMessage={formState.errors.location?.message}
-          formClassNames="flex-1"
+        <LocationInput
+          key={key}
+          label="Address"
+          {...addressInputProps}
+          errorMessage={formState.errors.address?.message}
+          classNames="flex-1"
+          onPlaceSelect={(place) => {
+            setValue("address", place.formatted_address ?? "");
+            setValue("name", place.name ?? "");
+            setValue("latitude", place.geometry?.location?.lat() ?? 0);
+            setValue("longitude", place.geometry?.location?.lng() ?? 0);
+          }}
         />
         <div className="flex gap-4 items-end">
           <FormInput
@@ -70,6 +78,7 @@ export default function AddEventForm({ date }: { date: string }) {
             errorMessage={formState.errors.startAt?.message}
             formClassNames="flex-1 md:flex-[0.15]"
           />
+
           <FormInput
             type="time"
             label="End Time"

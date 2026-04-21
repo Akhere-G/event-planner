@@ -1,6 +1,6 @@
 from ..extensions import Base
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from sqlalchemy import Integer, String, DateTime
+from sqlalchemy import Integer, String, DateTime, Float
 from datetime import datetime
 from typing import Optional
 from .audit_mixins import AuditMixin
@@ -9,7 +9,10 @@ from .audit_mixins import AuditMixin
 class Event(Base, AuditMixin):
     __tablename__ = "events"
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    location: Mapped[str] = mapped_column(String(255))
+    name: Mapped[str] = mapped_column(String(255))
+    address: Mapped[str] = mapped_column(String(255))
+    latitude: Mapped[float] = mapped_column(Float)
+    longitude: Mapped[float] = mapped_column(Float)
     description: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
     start_at: Mapped[datetime] = mapped_column(DateTime)
     end_at: Mapped[datetime] = mapped_column(DateTime)

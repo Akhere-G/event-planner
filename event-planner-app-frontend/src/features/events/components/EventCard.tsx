@@ -41,8 +41,8 @@ export default function EventCard({
     <div className="card hover:shadow-lg transition-shadow border-l-4 border-brand-primary">
       <div className="flex flex-col">
         <div className="flex justify-between items-center ">
-          <h3 className="font-bold tracking-tight text-text-primary ">
-            {eventData.location}
+          <h3 className="font-bold tracking-tight text-text-primary flex flex-col">
+            <span>{eventData.name}</span>
           </h3>
 
           <EditableSelect

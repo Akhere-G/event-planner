@@ -5,12 +5,18 @@ import App from "./App.tsx";
 import { BrowserRouter } from "react-router";
 import { Provider } from "react-redux";
 import { store } from "./store.ts";
+import { APIProvider } from "@vis.gl/react-google-maps";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <BrowserRouter>
       <Provider store={store}>
-        <App />
+        <APIProvider
+          apiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY}
+          libraries={["places"]}
+        >
+          <App />
+        </APIProvider>
       </Provider>
     </BrowserRouter>
   </StrictMode>,

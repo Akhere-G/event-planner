@@ -30,16 +30,18 @@ def create_app():
         origins=[os.environ.get("FRONTEND_URL")],
     )
 
+    engine_options = {}
     if os.environ.get("ENVIRONMENT") == "DEV":
         app.config.from_object(DevConfig())
     else:
         app.config.from_object(ProductionConfig())
+        engine_options = {"connect_args": {"ssl": {"ca": cert_path}}}
 
     app.config.from_mapping(
         DEBUG=os.getenv("FLASK_DEBUG") == "True",
         SQLALCHEMY_TRACK_MODIFICATIONS=False,
         SQLALCHEMY_DATABASE_URI=db_url,
-        SQLALCHEMY_ENGINE_OPTIONS={"connect_args": {"ssl": {"ca": cert_path}}},
+        SQLALCHEMY_ENGINE_OPTIONS=engine_options,
         ALEMBIC_CONTEXT={"render_as_batch": True},
     )
 

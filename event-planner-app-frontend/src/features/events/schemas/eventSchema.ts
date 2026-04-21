@@ -1,7 +1,10 @@
 import * as yup from "yup";
 
 export const eventSchema = yup.object({
-  location: yup.string().trim().required("Required."),
+  address: yup.string().trim().required("Required."),
+  name: yup.string().trim().required("Required."),
+  longitude: yup.number().required("Required."),
+  latitude: yup.number().required("Required."),
 
   startAt: yup
     .string()
@@ -19,7 +22,7 @@ export const eventSchema = yup.object({
       return value > startAt;
     }),
 
-  category: yup.string().default("General"),
+  category: yup.string().default("general"),
 });
 
 export type EventSchema = yup.InferType<typeof eventSchema>;

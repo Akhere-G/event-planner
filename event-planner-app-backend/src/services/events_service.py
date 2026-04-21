@@ -19,29 +19,18 @@ def get_events(itinerary_id: int):
 
 
 def create_event(itinerary_id: int, data: dict):
-    itinerary = get_itinerary(itinerary_id)
+    event = Event(**data)
+    db.session.add(event)
+    db.session.flush()
 
-    external_id = data.get("external_id")
-    event = None
+    itinerary_event = ItineraryEvent(
+        itinerary_id=itinerary_id,
+        event_id=event.id,
+        created_by_id=data["created_by_id"],
+        updated_by_id=data["updated_by_id"],
+    )
 
-    if external_id:
-        event = db.session.execute(
-            select(Event).where(Event.external_id == external_id)
-        ).scalar_one_or_none()
-
-    if not event:
-        event = Event(**data)
-        db.session.add(event)
-
-    if event not in itinerary.events:
-        db.session.flush()
-        itinerary_event = ItineraryEvent(
-            itinerary_id=itinerary_id,
-            event_id=event.id,
-            created_by_id=data["created_by_id"],
-            updated_by_id=data["updated_by_id"],
-        )
-        db.session.add(itinerary_event)
+    db.session.add(itinerary_event)
 
     db.session.commit()
     return event
@@ -60,7 +49,6 @@ def update_event(itinerary_id: int, event_id: int, data: dict):
             "category",
             "description",
             "end_at",
-            "location",
             "start_at",
             "edited_by_id",
         ]:
@@ -95,6 +83,7 @@ def delete_event(itinerary_id: int, event_id: int):
         .where(ItineraryEvent.event_id == event.id)
     ).scalar()
 
+    # TODO: remove count query and removing from itinerary and always just delete the event
     if count == 0:
         db.session.delete(event)
     db.session.commit()

@@ -19,11 +19,30 @@ class EventSchema(SQLAlchemyAutoSchema):
 
     description = auto_field()
 
-    location = auto_field(
+    address = auto_field(
         error_messages={
-            "required": "Location is required.",
+            "required": "Address is required.",
         },
     )
+
+    name = auto_field(
+        error_messages={
+            "required": "Name is required.",
+        },
+    )
+
+    longitude = auto_field(
+        error_messages={
+            "required": "Longitude is required.",
+        },
+    )
+
+    latitude = auto_field(
+        error_messages={
+            "required": "Latitude is required.",
+        },
+    )
+
     start_at = auto_field(
         error_messages={
             "required": "Start time is required.",
