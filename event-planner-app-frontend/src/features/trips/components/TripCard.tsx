@@ -58,7 +58,7 @@ export default function TripCard({
     >
       <div className="p-4  bg-linear-to-r from-brand-primary to-brand-secondary h-40">
         <div className="flex items-center justify-between mb-2">
-          <h3 className="text-white text-lg  font-bold ">{name}</h3>
+          <h3 className="text-white text-lg font-bold">{name}</h3>
           {isAdmin(trip.role) && (
             <button
               className="-mt-2 -mr-2 p-2 hover:bg-white/20"
