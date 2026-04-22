@@ -5,7 +5,7 @@ import {
   isValid,
   parseISO,
 } from "date-fns";
-import { FormInput } from "../../../components";
+import { FormInput, LocationInput } from "../../../components";
 import { isValidationError } from "../../api/utils";
 import { tripSchema, type TripSchema } from "../schemas/tripSchema";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -47,8 +47,11 @@ export default function TripForm({
 
   const onSubmit = async (formState: TripSchema) => {
     const formattedData = {
-      name: formState.name.trim(),
-      description: formState.description ? formState.description.trim() : null,
+      name: formState.name,
+      destination: formState.destination,
+      description: formState.description,
+      latitude: formState.latitude,
+      longitude: formState.longitude,
       startDate: format(formState.startDate, "yyyy-MM-dd"),
       endDate: format(formState.endDate, "yyyy-MM-dd"),
     };
@@ -100,10 +103,18 @@ export default function TripForm({
     <form className="form" onSubmit={handleSubmit(onSubmit)}>
       {errorMessage && <p className="errorMessage">{errorMessage}</p>}
 
-      <FormInput
-        label="Name"
-        {...register("name")}
-        errorMessage={formState.errors.name?.message}
+      <LocationInput
+        label="Destination"
+        errorMessage={formState.errors.destination?.message}
+        searchTypes={["political"]}
+        onPlaceSelect={(place) => {
+          console.log(place);
+          if (!place.formatted_address || !place.geometry?.location) return;
+          setValue("destination", place.formatted_address);
+          setValue("name", `To ${place.name}`);
+          setValue("latitude", place.geometry.location.lat());
+          setValue("longitude", place.geometry.location.lng());
+        }}
       />
       <FormInput
         label="Description"

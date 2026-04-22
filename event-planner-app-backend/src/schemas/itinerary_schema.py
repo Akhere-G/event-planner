@@ -26,6 +26,21 @@ class ItinerarySchema(SQLAlchemyAutoSchema):
             "required": "Name is required.",
         }
     )
+    destination = auto_field(
+        error_messages={
+            "required": "Destination is required.",
+        }
+    )
+    latitude = auto_field(
+        error_messages={
+            "required": "Latitude is required.",
+        }
+    )
+    longitude = auto_field(
+        error_messages={
+            "required": "longitude is required.",
+        }
+    )
     description = auto_field()
     start_date = auto_field(
         error_messages={

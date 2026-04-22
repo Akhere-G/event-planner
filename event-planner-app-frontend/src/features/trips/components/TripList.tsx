@@ -47,7 +47,7 @@ export default function TripList({
           className="border-brand-primary border-2 h-full w-full rounded-md flex justify-center items-center gap-2 font-bold min-h-54"
         >
           <Plus className="text-brand-primary" />
-          <p className="text-brand-primary">Add new itinerary</p>
+          <p className="text-brand-primary">Add new trip</p>
         </Link>
       </div>
       {hasMore && (

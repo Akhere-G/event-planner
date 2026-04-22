@@ -1,6 +1,6 @@
 from ..extensions import Base
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from sqlalchemy import Integer, String, Date
+from sqlalchemy import Integer, String, Date, Float
 from datetime import date
 from typing import Optional
 from typing import List
@@ -12,6 +12,9 @@ class Itinerary(Base, AuditMixin):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     name: Mapped[str] = mapped_column(String(255))
+    destination: Mapped[str] = mapped_column(String(255))
+    latitude: Mapped[float] = mapped_column(Float)
+    longitude: Mapped[float] = mapped_column(Float)
     description: Mapped[Optional[str]] = mapped_column(String(255))
     start_date: Mapped[date] = mapped_column(Date, index=True)
     end_date: Mapped[date] = mapped_column(Date)

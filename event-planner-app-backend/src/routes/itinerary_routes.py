@@ -97,6 +97,7 @@ def update_itinerary_route(user_id, itinerary_id):
             itinerary_id=itinerary_id,
             message="You must be an admin to update this itinerary.",
         )
+        print("in route")
         schema = ItinerarySchema(partial=True)
         validated_data = schema.load(request.json)
         validated_data["updated_by_id"] = user_id
