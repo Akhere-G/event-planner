@@ -16,30 +16,49 @@ interface EmptyProps extends EmptyStateProps {
 }
 
 interface Props {
+  containerClasses?: string;
   emptyStateProps?: EmptyProps;
   loadingStateProps?: LoadingProps;
   errorStateProps?: ErrorProps;
   children: React.ReactNode;
 }
 export default function StateGate({
+  containerClasses = "",
   loadingStateProps,
   errorStateProps,
   emptyStateProps,
   children,
 }: Props) {
+  let mainContent: React.ReactNode = <></>;
+
   if (loadingStateProps?.isLoading) {
-    if (loadingStateProps?.customSkeleton)
-      return loadingStateProps?.customSkeleton;
-    return <LoadingState message={loadingStateProps.message} />;
+    if (loadingStateProps?.customSkeleton) {
+      mainContent = loadingStateProps?.customSkeleton;
+    } else {
+      mainContent = (
+        <div className={containerClasses}>
+          <LoadingState message={loadingStateProps.message} />
+        </div>
+      );
+    }
   } else if (errorStateProps?.isError) {
-    return (
-      <ErrorState
-        message={errorStateProps?.message}
-        showReload={errorStateProps?.showReload}
-      />
+    mainContent = (
+      <div className={containerClasses}>
+        <ErrorState
+          message={errorStateProps?.message}
+          showReload={errorStateProps?.showReload}
+        />
+      </div>
     );
   } else if (emptyStateProps?.isEmpty) {
-    return <EmptyState {...emptyStateProps} />;
+    mainContent = (
+      <div className={containerClasses}>
+        <EmptyState {...emptyStateProps} />
+      </div>
+    );
+  } else {
+    mainContent = children;
   }
-  return children;
+
+  return mainContent;
 }

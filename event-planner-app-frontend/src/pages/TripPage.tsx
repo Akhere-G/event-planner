@@ -25,6 +25,7 @@ export default function TripPage() {
 
   return (
     <StateGate
+      containerClasses="container"
       loadingStateProps={{ isLoading }}
       errorStateProps={{
         isError:
