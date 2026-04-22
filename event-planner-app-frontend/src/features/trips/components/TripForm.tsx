@@ -35,8 +35,12 @@ export default function TripForm({
   useEffect(() => {
     const defaultValues: TripSchema = {
       name: "",
+      destination: "",
       startDate: "",
       endDate: "",
+      description: "",
+      latitude: 0,
+      longitude: 0,
       ...initialData,
     };
 
