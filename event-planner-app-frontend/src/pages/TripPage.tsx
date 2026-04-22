@@ -40,16 +40,19 @@ export default function TripPage() {
       {data && (
         <div className="flex relative">
           <div
-            className={`absolute w-full ${isMapView ? "translate-x-[-200%] invisible" : "visible"} md:static md:translate-x-0 visible`}
+            className={`absolute w-full shadow-md ${isMapView ? "translate-x-[-200%] invisible" : "visible"} md:static md:translate-x-0 visible`}
           >
-            <div className="container h-[86.25vh] overflow-y-scroll">
+            <div className="container z-1 h-auto md:h-[calc(100vh-4.6rem)] overflow-y-scroll">
               <TripDetails {...data?.data} />
             </div>
           </div>
           <div
-            className={`absolute w-full ${isMapView ? "visible" : "translate-x-[200%] invisible"} md:static md:translate-x-0 visible`}
+            className={`md:h-[calc(100vh-4.6rem)] overflow-clip absolute  w-full ${isMapView ? "visible" : "translate-x-[200%] invisible"} md:static md:translate-x-0 visible`}
           >
-            <TripMap />
+            <TripMap
+              latitude={data.data.latitude}
+              longitude={data.data.longitude}
+            />
           </div>
           <button
             onClick={() => setIsMapView((prev) => !prev)}
