@@ -41,7 +41,7 @@ export default function TripPage() {
           <div
             className={`absolute w-full ${isMapView ? "translate-x-[-200%] invisible" : "visible"} md:static md:translate-x-0 visible`}
           >
-            <div className="container">
+            <div className="container h-[86.25vh] overflow-y-scroll">
               <TripDetails {...data?.data} />
             </div>
           </div>
