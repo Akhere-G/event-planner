@@ -40,14 +40,14 @@ export default function TripPage() {
       {data && (
         <div className="flex relative overflow-x-clip">
           <div
-            className={`flex-1 z-1 min-w-100 max-h-screen absolute w-full md:shadow-[20px_0_30px_-10px_rgba(0,0,0,0.3)] ${isMapView ? "translate-x-[-200%] invisible" : "visible"} md:static md:translate-x-0 md:visible`}
+            className={`flex-1 z-1 max-h-screen absolute w-full md:shadow-[20px_0_30px_-10px_rgba(0,0,0,0.3)] transition-transform duration-300 ${isMapView ? "translate-x-[-200%] invisible" : "visible"} md:static md:translate-x-0 md:visible`}
           >
-            <div className="container   h-[calc(100vh-4.6rem)] overflow-y-scroll">
+            <div className="container   h-[93.5vh] overflow-y-scroll">
               <TripDetails {...data?.data} />
             </div>
           </div>
           <div
-            className={`flex-1 md:h-[calc(100vh-4.6rem)] overflow-clip absolute  w-full ${isMapView ? "visible" : "translate-x-[200%] invisible"} md:static md:translate-x-0 md:visible`}
+            className={`flex-1 overflow-clip absolute w-full transition-transform duration-300 ${isMapView ? "visible" : "translate-x-[200%] invisible"} md:static md:translate-x-0 md:visible`}
           >
             <TripMap
               latitude={data.data.latitude}

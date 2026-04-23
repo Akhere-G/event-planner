@@ -87,7 +87,7 @@ export default function AddEventForm({ date }: { date: string }) {
             formClassNames="flex-1 lg:flex-[0.15]"
           />
         </div>
-        <button className="btn-primary h-12" disabled={isLoading}>
+        <button className="btn-primary h-12 mt-2" disabled={isLoading}>
           Add
         </button>
       </form>
