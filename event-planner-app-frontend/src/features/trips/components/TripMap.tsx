@@ -22,12 +22,41 @@ const permissionEnum = {
   LOADING: "LOADING",
 } as const;
 
+const DEFAULT_PADDING = 200;
+
 const getDaysWithFilter = (
   events: Event[],
   startDate: string,
   endDate: string,
 ): Day[] =>
   makeDays(events, startDate, endDate).map((day) => ({ ...day, show: true }));
+
+const getBoundsForEvents = (events: Event[]) => {
+  let north = -Infinity;
+  let east = -Infinity;
+  let south = Infinity;
+  let west = Infinity;
+
+  events.forEach((event) => {
+    if (event.latitude > north) {
+      north = event.latitude;
+    }
+
+    if (event.latitude < south) {
+      south = event.latitude;
+    }
+
+    if (event.longitude > east) {
+      east = event.longitude;
+    }
+
+    if (event.longitude < west) {
+      west = event.longitude;
+    }
+  });
+
+  return { north, east, south, west };
+};
 export default function TripMap({ trip }: { trip: Trip }) {
   const {
     latitude,
@@ -56,6 +85,19 @@ export default function TripMap({ trip }: { trip: Trip }) {
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
 
   const map = useMap();
+
+  const selectedEvents = days
+    .filter((day) => day.show)
+    .flatMap((day) => day.events);
+
+  useEffect(() => {
+    if (selectedEvents.length < 2) return;
+
+    const bounds = getBoundsForEvents(selectedEvents);
+
+    console.log(bounds);
+    map?.fitBounds(bounds, DEFAULT_PADDING);
+  }, [map, selectedEvents]);
 
   useEffect(() => {
     setEvents(defaultEvents);
@@ -109,10 +151,6 @@ export default function TripMap({ trip }: { trip: Trip }) {
       onPermissionDenied,
     );
   };
-
-  const selectedEvents = days
-    .filter((day) => day.show)
-    .flatMap((day) => day.events);
 
   const renderedMarkers = selectedEvents.map((event) => (
     <EventMarker
