@@ -1,8 +1,8 @@
-import { Map, useMap } from "@vis.gl/react-google-maps";
-import { useState } from "react";
+import { AdvancedMarker, Map, useMap } from "@vis.gl/react-google-maps";
+import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import type { RootState } from "../../../store";
-import { Minus, Plus, X } from "lucide-react";
+import { LocateIcon, Minus, Plus, X } from "lucide-react";
 import type { Event } from "../../events/types";
 import { EventCard, EventMarker } from "../../events/components";
 
@@ -11,6 +11,12 @@ import { useUpdateEvent } from "../hooks";
 const MAX_ZOOM = 17;
 const MIN_ZOOM = 10;
 const DEFAULT_ZOOM = 12;
+
+const permissionEnum = {
+  GRANTED: "GRANTED",
+  DENIED: "DENIED",
+  LOADING: "LOADING",
+} as const;
 
 export default function TripMap({
   latitude,
@@ -26,6 +32,12 @@ export default function TripMap({
   tripId: number;
 }) {
   const [events] = useState(defaultEvents);
+  const [, setPermission] = useState<keyof typeof permissionEnum>(
+    permissionEnum.LOADING,
+  );
+  const [userCoords, setUserCoords] = useState<GeolocationCoordinates | null>(
+    null,
+  );
   const darkMode = useSelector((state: RootState) => state.theme.darkMode);
   const { handleDelete, handleEdit } = useUpdateEvent({
     tripId,
@@ -35,6 +47,24 @@ export default function TripMap({
 
   const map = useMap();
 
+  useEffect(() => {
+    if (!navigator.geolocation) return;
+
+    const watchId = navigator.geolocation.watchPosition(
+      (position) => {
+        setUserCoords(position.coords);
+        setPermission(permissionEnum.GRANTED);
+      },
+      (error) => {
+        console.error(error);
+        setPermission(permissionEnum.DENIED);
+      },
+      { enableHighAccuracy: true },
+    );
+
+    return () => navigator.geolocation.clearWatch(watchId);
+  }, []);
+
   const zoomIn = () => {
     if (map)
       map.setZoom(Math.min((map.getZoom() || DEFAULT_ZOOM) + 1, MAX_ZOOM));
@@ -42,6 +72,24 @@ export default function TripMap({
   const zoomOut = () => {
     if (map)
       map.setZoom(Math.max((map.getZoom() || DEFAULT_ZOOM) - 1, MIN_ZOOM));
+  };
+
+  const zoomToUser = () => {
+    const onPermissionGranted = (position: GeolocationPosition) => {
+      map?.setCenter({
+        lat: position.coords.latitude,
+        lng: position.coords.longitude,
+      });
+      setUserCoords(position.coords);
+    };
+    const onPermissionDenied = (positionError: GeolocationPositionError) => {
+      console.error(positionError.message);
+      // TODO: Add notification
+    };
+    navigator.geolocation.getCurrentPosition(
+      onPermissionGranted,
+      onPermissionDenied,
+    );
   };
 
   const renderedMarkers = events.map((event) => (
@@ -68,21 +116,34 @@ export default function TripMap({
         gestureHandling="greedy"
       >
         {renderedMarkers}
+        {userCoords && (
+          <AdvancedMarker
+            position={{ lat: userCoords.latitude, lng: userCoords.longitude }}
+          >
+            <div className="w-6 h-6 rounded-full bg-blue-400/70 flex items-center justify-center">
+              <div className="w-4 h-4 rounded-full bg-white flex items-center justify-center">
+                <div className="w-3 h-3 rounded-full bg-blue-600"></div>
+              </div>
+            </div>
+          </AdvancedMarker>
+        )}
       </Map>
-      <button
-        onClick={zoomIn}
-        className="z-10 p-2 bottom-17 right-1 absolute btn-primary"
-      >
-        <Plus size={20} />
-      </button>
-      <button
-        onClick={zoomOut}
-        className=" z-10 p-2 bottom-7 right-1 absolute btn-primary"
-      >
-        <Minus size={20} />
-      </button>
+      <div className="absolute bottom-4 right-2 flex flex-col gap-2">
+        <button onClick={zoomToUser} className="p-2 btn-primary">
+          <LocateIcon size={20} />
+        </button>
+        <button onClick={zoomIn} className="p-2 btn-primary">
+          <Plus size={20} />
+        </button>
+        <button onClick={zoomOut} className="p-2 btn-primary">
+          <Minus size={20} />
+        </button>
+      </div>
       {selectedEvent && (
-        <div className="z-10 absolute bottom-14 md:bottom-5 flex w-[140%] pt-2 pl-4 pr-14 scale-75 left-0 -translate-x-[18vw] md:w-[130%] md:-translate-x-[8vw]">
+        <div
+          className={`z-10 absolute bottom-14 md:bottom-2 flex w-[140%] pt-2 pl-4 
+          pr-14 scale-75 left-0 -translate-x-[18vw] md:w-[130%] md:-translate-x-[8vw]`}
+        >
           <button
             onClick={() => setSelectedEvent(null)}
             className="absolute btn-secondary p-1 right-11 -top-2"
