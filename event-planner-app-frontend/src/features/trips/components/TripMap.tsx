@@ -15,16 +15,17 @@ const DEFAULT_ZOOM = 12;
 export default function TripMap({
   latitude,
   longitude,
-  events,
+  defaultEvents,
   role,
   tripId,
 }: {
   latitude: number;
   longitude: number;
-  events: Event[];
+  defaultEvents: Event[];
   role: string;
   tripId: number;
 }) {
+  const [events] = useState(defaultEvents);
   const darkMode = useSelector((state: RootState) => state.theme.darkMode);
   const { handleDelete, handleEdit } = useUpdateEvent({
     tripId,
@@ -53,7 +54,7 @@ export default function TripMap({
   ));
 
   return (
-    <div className="relative w-full h-[93.5vh] isolate will-change-transform">
+    <div className="relative w-full h-[93.5vh] 2xl:h-[96vh] isolate will-change-transform">
       <Map
         mapId="e74fd7bd6c063337caf66343"
         maxZoom={MAX_ZOOM}
@@ -81,7 +82,7 @@ export default function TripMap({
         <Minus size={20} />
       </button>
       {selectedEvent && (
-        <div className="z-10 absolute bottom-14 md:bottom-5 flex w-[150%] pt-2 pl-4 pr-14 scale-75 left-0 -translate-x-1/7">
+        <div className="z-10 absolute bottom-14 md:bottom-5 flex w-[140%] pt-2 pl-4 pr-14 scale-75 left-0 -translate-x-[18vw] md:w-[130%] md:-translate-x-[8vw]">
           <button
             onClick={() => setSelectedEvent(null)}
             className="absolute btn-secondary p-1 right-11 -top-2"

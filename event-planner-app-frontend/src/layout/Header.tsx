@@ -32,8 +32,8 @@ export default function Header({ links }: HeaderProps) {
   }, [isMenuOpen]);
 
   return (
-    <header className="relative w-full z-2 h-[6.5vh]">
-      <div className="z-2 bg-surface w-full flex justify-between items-center p-4 shadow-md">
+    <header className="relative w-full z-2 ">
+      <div className="z-2 bg-surface min-h-12 max-h-24 h-[6.5vh] w-full flex justify-between items-center p-4 shadow-md">
         <h1 className="text-2xl font-extrabold tracking-tighter">
           Trip
           <span className="text-brand-secondary">Track</span>

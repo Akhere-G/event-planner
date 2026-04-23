@@ -42,7 +42,7 @@ export default function TripPage() {
           <div
             className={`flex-1 z-1 max-h-screen absolute w-full md:shadow-[20px_0_30px_-10px_rgba(0,0,0,0.3)] transition-transform duration-300 ${isMapView ? "translate-x-[-200%] invisible" : "visible"} md:static md:translate-x-0 md:visible`}
           >
-            <div className="container   h-[93.5vh] overflow-y-scroll">
+            <div className="container   h-[93.5vh] 2xl:h-[96vh] overflow-y-scroll">
               <TripDetails {...data?.data} />
             </div>
           </div>
@@ -52,7 +52,7 @@ export default function TripPage() {
             <TripMap
               latitude={data.data.latitude}
               longitude={data.data.longitude}
-              events={data.data.events}
+              defaultEvents={data.data.events}
               role={data.data.role}
               tripId={data.data.id}
             />
