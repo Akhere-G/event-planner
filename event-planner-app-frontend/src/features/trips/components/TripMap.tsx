@@ -31,7 +31,7 @@ export default function TripMap({
   role: string;
   tripId: number;
 }) {
-  const [events] = useState(defaultEvents);
+  const [events, setEvents] = useState(defaultEvents);
   const [, setPermission] = useState<keyof typeof permissionEnum>(
     permissionEnum.LOADING,
   );
@@ -46,6 +46,10 @@ export default function TripMap({
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
 
   const map = useMap();
+
+  useEffect(() => {
+    setEvents(defaultEvents);
+  }, [defaultEvents]);
 
   useEffect(() => {
     if (!navigator.geolocation) return;
