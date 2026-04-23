@@ -1,10 +1,10 @@
 export interface Event {
   id: number;
-  description: string;
+  description?: string;
   name: string;
   address: string;
-  longitude: number;
   latitude: number;
+  longitude: number;
   startAt: string;
   endAt: string;
   category: string;

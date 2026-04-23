@@ -54,7 +54,7 @@ export default function AddEventForm({ date }: { date: string }) {
   return (
     <>
       <form
-        className="flex gap-4 md:items-end flex-col md:flex-row mb-2"
+        className="flex gap-4 lg:items-end flex-col lg:flex-row mb-2"
         onSubmit={handleSubmit(onSubmit)}
       >
         <LocationInput
@@ -76,7 +76,7 @@ export default function AddEventForm({ date }: { date: string }) {
             label="Start Time"
             {...register("startAt")}
             errorMessage={formState.errors.startAt?.message}
-            formClassNames="flex-1 md:flex-[0.15]"
+            formClassNames="flex-1 lg:flex-[0.15]"
           />
 
           <FormInput
@@ -84,7 +84,7 @@ export default function AddEventForm({ date }: { date: string }) {
             label="End Time"
             {...register("endAt")}
             errorMessage={formState.errors.endAt?.message}
-            formClassNames="flex-1 md:flex-[0.15]"
+            formClassNames="flex-1 lg:flex-[0.15]"
           />
         </div>
         <button className="btn-primary h-12" disabled={isLoading}>

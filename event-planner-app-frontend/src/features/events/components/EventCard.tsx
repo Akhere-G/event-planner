@@ -12,15 +12,15 @@ import { EditableSelect, EditableText, TimePicker } from "../../../components";
 
 interface EventCardProps {
   event: Event;
-  handleDelete: (id: number) => Promise<void>;
-  handleEdit: (eventId: number, updatedEvent: Partial<Event>) => Promise<void>;
+  handleDelete?: (id: number) => Promise<void>;
+  handleEdit?: (eventId: number, updatedEvent: Partial<Event>) => Promise<void>;
   role: string;
 }
 
 export default function EventCard({
   event,
-  handleDelete,
-  handleEdit,
+  handleDelete = async () => {},
+  handleEdit = async () => {},
   role,
 }: EventCardProps) {
   const [eventData, setEventData] = useState(event);
@@ -38,7 +38,7 @@ export default function EventCard({
   };
 
   return (
-    <div className="card hover:shadow-lg transition-shadow border-l-4 border-brand-primary">
+    <div className="card flex-1 hover:shadow-lg transition-shadow border-l-4 border-brand-primary">
       <div className="flex flex-col">
         <div className="flex justify-between items-center ">
           <h3 className="font-bold tracking-tight text-text-primary flex flex-col">
@@ -63,7 +63,7 @@ export default function EventCard({
         </div>
 
         <EditableText
-          value={eventData.description}
+          value={eventData?.description ?? ""}
           canEdit={canUserEdit(role)}
           setValue={(description) => {
             updateEventData({ description });

@@ -112,7 +112,6 @@ export default function TripForm({
         errorMessage={formState.errors.destination?.message}
         searchTypes={["political"]}
         onPlaceSelect={(place) => {
-          console.log(place);
           if (!place.formatted_address || !place.geometry?.location) return;
           setValue("destination", place.formatted_address);
           setValue("name", `To ${place.name}`);
