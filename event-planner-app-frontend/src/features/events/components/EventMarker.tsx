@@ -50,6 +50,7 @@ const EventMarker = memo(
           background={eventColor}
           glyphColor={"var(--color-text-inverse)"}
           borderColor={"var(--color-surface-border)"}
+          glyphText={day.toString()}
         />
       </AdvancedMarker>
     );
