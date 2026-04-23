@@ -237,9 +237,7 @@
     @apply list-none
   }
 
-  * {
-    @apply transition-all! duration-200!
-  }
+ 
 }
 
 @layer components {

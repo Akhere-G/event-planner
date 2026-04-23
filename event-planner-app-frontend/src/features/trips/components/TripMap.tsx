@@ -1,15 +1,10 @@
-import { Map } from "@vis.gl/react-google-maps";
-import {
-  type MapCameraChangedEvent,
-  type MapCameraProps,
-} from "@vis.gl/react-google-maps";
-import { useCallback, useState } from "react";
+import { Map, useMap } from "@vis.gl/react-google-maps";
+import { useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import type { RootState } from "../../../store";
 import { Minus, Plus, X } from "lucide-react";
 import type { Event } from "../../events/types";
 import { EventCard, EventMarker } from "../../events/components";
-import { useBreakpoint } from "../../../hooks/useBreakpoint";
 import {
   useDeleteEventMutation,
   useUpdateEventMutation,
@@ -18,6 +13,7 @@ import { isFetchBaseQueryError } from "../../api/utils";
 
 const MAX_ZOOM = 17;
 const MIN_ZOOM = 10;
+const DEFAULT_ZOOM = 12;
 
 export default function TripMap({
   latitude,
@@ -32,32 +28,21 @@ export default function TripMap({
   role: string;
   tripId: number;
 }) {
-  const { darkMode } = useSelector((state: RootState) => state.theme);
+  const darkMode = useSelector((state: RootState) => state.theme.darkMode);
   const [deleteEvent] = useDeleteEventMutation();
   const [updateEvent] = useUpdateEventMutation();
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
-  const [cameraProps, setCameraProps] = useState<MapCameraProps>({
-    center: { lat: latitude, lng: longitude },
-    zoom: 12,
-  });
-  const breakpoint = useBreakpoint();
-  const isSmallScreen = ["xs", "sm"].includes(breakpoint);
 
-  const handleCameraChange = useCallback(
-    (ev: MapCameraChangedEvent) => setCameraProps(ev.detail),
-    [],
-  );
+  const map = useMap();
 
-  const zoomIn = () =>
-    setCameraProps((prev) => ({
-      ...prev,
-      zoom: Math.min(prev.zoom + 1, MAX_ZOOM),
-    }));
-  const zoomOut = () =>
-    setCameraProps((prev) => ({
-      ...prev,
-      zoom: Math.max(prev.zoom - 1, MIN_ZOOM),
-    }));
+  const zoomIn = () => {
+    if (map)
+      map.setZoom(Math.min((map.getZoom() || DEFAULT_ZOOM) + 1, MAX_ZOOM));
+  };
+  const zoomOut = () => {
+    if (map)
+      map.setZoom(Math.max((map.getZoom() || DEFAULT_ZOOM) - 1, MIN_ZOOM));
+  };
 
   async function handleDelete(eventId: number) {
     try {
@@ -91,30 +76,33 @@ export default function TripMap({
     }
   }
 
+  const renderedMarkers = useMemo(() => {
+    return events.map((event) => (
+      <EventMarker
+        key={event.id}
+        event={event}
+        position={{ lat: event.latitude, lng: event.longitude }}
+        onSelect={setSelectedEvent}
+      />
+    ));
+  }, [events]);
+
+  console.log("render");
   return (
-    <div className="relative">
+    <div className="relative w-1/2 md:w-full h-[90vh] isolate will-change-transform">
       <Map
         mapId="e74fd7bd6c063337caf66343"
         maxZoom={MAX_ZOOM}
         minZoom={MIN_ZOOM}
-        style={{ width: isSmallScreen ? "100vw" : "50vw", height: "90vh" }}
-        {...cameraProps}
-        gestureHandling="greedy"
+        className="w-full h-full"
+        defaultCenter={{ lat: latitude, lng: longitude }}
+        defaultZoom={DEFAULT_ZOOM}
         disableDefaultUI
-        onCameraChanged={handleCameraChange}
         reuseMaps
         colorScheme={darkMode ? "DARK" : "LIGHT"}
+        gestureHandling="greedy"
       >
-        {events.map((event) => (
-          <EventMarker
-            key={event.id}
-            event={event}
-            position={{ lat: event.latitude, lng: event.longitude }}
-            onSelect={(event) => {
-              setSelectedEvent(event);
-            }}
-          />
-        ))}
+        {renderedMarkers}
       </Map>
       <button
         onClick={zoomIn}

@@ -40,14 +40,14 @@ export default function TripPage() {
       {data && (
         <div className="flex relative overflow-x-clip">
           <div
-            className={`flex-1 min-w-100 max-h-screen absolute w-full shadow-md ${isMapView ? "translate-x-[-200%] invisible" : "visible"} md:static md:translate-x-0 visible`}
+            className={`flex-1 z-1 min-w-100 max-h-screen absolute w-full md:shadow-[20px_0_30px_-10px_rgba(0,0,0,0.3)] ${isMapView ? "translate-x-[-200%] invisible" : "visible"} md:static md:translate-x-0 md:visible`}
           >
-            <div className="container z-1  h-[calc(100vh-4.6rem)] overflow-y-scroll">
+            <div className="container   h-[calc(100vh-4.6rem)] overflow-y-scroll">
               <TripDetails {...data?.data} />
             </div>
           </div>
           <div
-            className={`flex-1 md:h-[calc(100vh-4.6rem)] overflow-clip absolute  w-full ${isMapView ? "visible" : "translate-x-[200%] invisible"} md:static md:translate-x-0 visible`}
+            className={`flex-1 md:h-[calc(100vh-4.6rem)] overflow-clip absolute  w-full ${isMapView ? "visible" : "translate-x-[200%] invisible"} md:static md:translate-x-0 md:visible`}
           >
             <TripMap
               latitude={data.data.latitude}
@@ -59,7 +59,7 @@ export default function TripPage() {
           </div>
           <button
             onClick={() => setIsMapView((prev) => !prev)}
-            className="btn-primary w-44 shadow-2xl fixed bottom-4 right-1/2 translate-x-1/2 flex gap-2 justify-center md:hidden"
+            className="z-1 btn-primary w-44 shadow-2xl fixed bottom-4 right-1/2 translate-x-1/2 flex gap-2 justify-center md:hidden"
           >
             {isMapView ? (
               <>

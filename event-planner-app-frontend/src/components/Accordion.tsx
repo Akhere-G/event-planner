@@ -24,7 +24,7 @@ export default function Accordion({
 
         <ChevronDown
           size={20}
-          className={`transition-transform duration-300 ${isOpen ? "rotate-180" : "rotate-0"}`}
+          className={`transition-all duration-300 ${isOpen ? "rotate-180" : "rotate-0"}`}
         />
       </header>
 
@@ -33,7 +33,11 @@ export default function Accordion({
           isOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
         }`}
       >
-        <div className={isOpen ? "" : "overflow-y-hidden"}>
+        <div
+          className={
+            "transition-all duration-300 " + (isOpen ? "" : "overflow-y-hidden")
+          }
+        >
           <div className="pb-4 text-sm">{content}</div>
         </div>
       </div>

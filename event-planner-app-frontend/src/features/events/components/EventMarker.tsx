@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { memo, useState } from "react";
 import {
   AdvancedMarker,
   InfoWindow,
@@ -13,11 +13,7 @@ interface EventMarkerProps {
   onSelect: (event: Event) => void;
 }
 
-export default function EventMarker({
-  event,
-  position,
-  onSelect,
-}: EventMarkerProps) {
+const EventMarker = memo(({ event, position, onSelect }: EventMarkerProps) => {
   const [markerRef, marker] = useAdvancedMarkerRef();
   const [showInfo, setShowInfo] = useState(false);
   return (
@@ -27,6 +23,7 @@ export default function EventMarker({
       onClick={() => onSelect(event)}
       onMouseEnter={() => setShowInfo(true)}
       onMouseLeave={() => setShowInfo(false)}
+      collisionBehavior="OPTIONAL_AND_HIDES_LOWER_PRIORITY"
     >
       {showInfo && (
         <InfoWindow
@@ -48,4 +45,6 @@ export default function EventMarker({
       />
     </AdvancedMarker>
   );
-}
+});
+
+export default EventMarker;
