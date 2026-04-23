@@ -7,6 +7,9 @@ import type { Event } from "../../events/types";
 import { EventCard, EventMarker } from "../../events/components";
 
 import { useUpdateEvent } from "../hooks";
+// import { makeDays } from "../../events/utils";
+import type { Trip } from "../types";
+import { differenceInDays } from "date-fns";
 
 const MAX_ZOOM = 17;
 const MIN_ZOOM = 10;
@@ -18,19 +21,16 @@ const permissionEnum = {
   LOADING: "LOADING",
 } as const;
 
-export default function TripMap({
-  latitude,
-  longitude,
-  defaultEvents,
-  role,
-  tripId,
-}: {
-  latitude: number;
-  longitude: number;
-  defaultEvents: Event[];
-  role: string;
-  tripId: number;
-}) {
+export default function TripMap({ trip }: { trip: Trip }) {
+  const {
+    latitude,
+    longitude,
+    role,
+    startDate,
+    // endDate,
+    events: defaultEvents,
+    id: tripId,
+  } = trip;
   const [events, setEvents] = useState(defaultEvents);
   const [, setPermission] = useState<keyof typeof permissionEnum>(
     permissionEnum.LOADING,
@@ -46,6 +46,8 @@ export default function TripMap({
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
 
   const map = useMap();
+
+  // const days = makeDays(events, startDate, endDate);
 
   useEffect(() => {
     setEvents(defaultEvents);
@@ -98,6 +100,7 @@ export default function TripMap({
 
   const renderedMarkers = events.map((event) => (
     <EventMarker
+      day={differenceInDays(event.startAt, startDate)}
       key={event.id}
       event={event}
       position={{ lat: event.latitude, lng: event.longitude }}
@@ -118,6 +121,7 @@ export default function TripMap({
         reuseMaps
         colorScheme={darkMode ? "DARK" : "LIGHT"}
         gestureHandling="greedy"
+        onClick={(a) => console.log("click", a)}
       >
         {renderedMarkers}
         {userCoords && (

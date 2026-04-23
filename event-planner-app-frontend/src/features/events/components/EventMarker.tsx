@@ -6,45 +6,54 @@ import {
   useAdvancedMarkerRef,
 } from "@vis.gl/react-google-maps";
 import type { Event } from "../types";
+import { getDayColor } from "../utils";
 
 interface EventMarkerProps {
   event: Event;
   position: google.maps.LatLngLiteral;
   onSelect: (event: Event) => void;
+  day: number;
 }
 
-const EventMarker = memo(({ event, position, onSelect }: EventMarkerProps) => {
-  const [markerRef, marker] = useAdvancedMarkerRef();
-  const [showInfo, setShowInfo] = useState(false);
-  return (
-    <AdvancedMarker
-      ref={markerRef}
-      position={position}
-      onClick={() => onSelect(event)}
-      onMouseEnter={() => setShowInfo(true)}
-      onMouseLeave={() => setShowInfo(false)}
-      collisionBehavior="OPTIONAL_AND_HIDES_LOWER_PRIORITY"
-    >
-      {showInfo && (
-        <InfoWindow
-          anchor={marker}
-          onCloseClick={() => setShowInfo(false)}
-          disableAutoPan
-          headerDisabled
-        >
-          <p className="text-xs font-bold text-brand-secondary whitespace-nowrap">
-            {event.name}
-          </p>
-        </InfoWindow>
-      )}
+const EventMarker = memo(
+  ({ event, position, day, onSelect }: EventMarkerProps) => {
+    const [markerRef, marker] = useAdvancedMarkerRef();
+    const [showInfo, setShowInfo] = useState(false);
 
-      <Pin
-        background={"var(--color-brand-primary)"}
-        glyphColor={"var(--color-text-inverse)"}
-        borderColor={"var(--color-surface-border)"}
-      />
-    </AdvancedMarker>
-  );
-});
+    const eventColor = getDayColor(day);
+
+    return (
+      <AdvancedMarker
+        ref={markerRef}
+        position={position}
+        onClick={() => onSelect(event)}
+        onMouseEnter={() => setShowInfo(true)}
+        onMouseLeave={() => setShowInfo(false)}
+      >
+        {showInfo && (
+          <InfoWindow
+            anchor={marker}
+            onCloseClick={() => setShowInfo(false)}
+            disableAutoPan
+            headerDisabled
+          >
+            <p
+              style={{ color: eventColor }}
+              className="text-xs font-bold t whitespace-nowrap"
+            >
+              {event.name}
+            </p>
+          </InfoWindow>
+        )}
+
+        <Pin
+          background={eventColor}
+          glyphColor={"var(--color-text-inverse)"}
+          borderColor={"var(--color-surface-border)"}
+        />
+      </AdvancedMarker>
+    );
+  },
+);
 
 export default EventMarker;

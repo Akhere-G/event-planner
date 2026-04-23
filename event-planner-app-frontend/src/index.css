@@ -311,6 +311,15 @@
     @apply hidden!;
   }
 
+  .gm-title {
+    @apply  text-text-primary! mb-1!
+  }
+  .gm-style-iw-c * {
+    @apply bg-surface! text-text-secondary! p-0!
+  }
 
+  .view-link * {
+    @apply text-brand-accent!
+  }
 }
 

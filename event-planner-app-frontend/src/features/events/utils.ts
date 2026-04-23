@@ -31,3 +31,29 @@ export function makeDays(events: Event[], startStr: string, endStr: string) {
     events,
   }));
 }
+
+export const getDayColor = (day: number) => {
+  const brandPrimaries = [
+    "#f97316", // Orange (Default)
+    "#0ea5e9", // Sky Blue (Accent)
+    "#10b981", // Emerald
+    "#ef4444", // Red (Volcanic)
+    "#7e22ce", // Lavender
+    "#d65d0e", // Sandstone
+    "#0891b2", // Arctic
+    "#6c390a", // Chocolate
+    "#ab825b", // Timber
+    "#27dd22", // Radioactive
+    "#d4af37", // Midnight Gold
+  ];
+
+  if (day >= 0 && day < brandPrimaries.length) {
+    return brandPrimaries[day];
+  }
+
+  // Golden Ratio offset to ensure maximum distinction between neighbors
+  const goldenRatioConjugate = 0.618033988749895;
+  const hue = (day * goldenRatioConjugate * 360) % 360;
+
+  return `hsl(${hue}, 75%, 55%)`;
+};

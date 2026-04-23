@@ -49,13 +49,7 @@ export default function TripPage() {
           <div
             className={`flex-1 overflow-clip absolute w-full transition-transform duration-300 ${isMapView ? "visible" : "translate-x-[200%] invisible"} md:static md:translate-x-0 md:visible`}
           >
-            <TripMap
-              latitude={data.data.latitude}
-              longitude={data.data.longitude}
-              defaultEvents={data.data.events}
-              role={data.data.role}
-              tripId={data.data.id}
-            />
+            <TripMap trip={data.data} />
           </div>
           <button
             onClick={() => setIsMapView((prev) => !prev)}
