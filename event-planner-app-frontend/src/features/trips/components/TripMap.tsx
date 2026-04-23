@@ -22,7 +22,7 @@ const permissionEnum = {
   LOADING: "LOADING",
 } as const;
 
-const DEFAULT_PADDING = 200;
+const DEFAULT_PADDING = 50;
 
 const getDaysWithFilter = (
   events: Event[],
@@ -95,7 +95,6 @@ export default function TripMap({ trip }: { trip: Trip }) {
 
     const bounds = getBoundsForEvents(selectedEvents);
 
-    console.log(bounds);
     map?.fitBounds(bounds, DEFAULT_PADDING);
   }, [map, selectedEvents]);
 
@@ -135,21 +134,12 @@ export default function TripMap({ trip }: { trip: Trip }) {
   };
 
   const zoomToUser = () => {
-    const onPermissionGranted = (position: GeolocationPosition) => {
-      map?.setCenter({
-        lat: position.coords.latitude,
-        lng: position.coords.longitude,
-      });
-      setUserCoords(position.coords);
-    };
-    const onPermissionDenied = (positionError: GeolocationPositionError) => {
-      console.error(positionError.message);
-      // TODO: Add notification
-    };
-    navigator.geolocation.getCurrentPosition(
-      onPermissionGranted,
-      onPermissionDenied,
-    );
+    if (!userCoords || !map) return;
+
+    map.setCenter({
+      lat: userCoords.latitude,
+      lng: userCoords.longitude,
+    });
   };
 
   const renderedMarkers = selectedEvents.map((event) => (
