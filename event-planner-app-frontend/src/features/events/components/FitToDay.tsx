@@ -30,7 +30,7 @@ export default function FitToDay({
   }
 
   return (
-    <div className="bg-surface rounded-md">
+    <div className="bg-surface rounded-xl">
       {expanded ? (
         <div className="card bg-brand-secondary/20 w-35">
           <div className="flex items-center justify-between gap-2 mb-2 ">
