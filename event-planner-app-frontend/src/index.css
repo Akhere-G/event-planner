@@ -37,29 +37,39 @@
 @layer base {
 /* --- Bali Jungle --- */
   .theme-bali-jungle {
-    --color-canvas: #f0f4f0; 
-    --color-surface: #ffffff; 
-    --color-surface-muted: #dce7dc;
-    --color-brand-primary: #065f46; 
-    --color-brand-secondary: #a7f3d0; 
+    --color-canvas: #8edfce; 
+    --color-surface: #287f68;  
+    --color-surface-muted: #176e57;
+    --color-brand-primary: #a7f3d0; 
+    --color-surface-border: #055e46; 
+    --color-brand-secondary: #b8f4e1; 
+    --color-text-primary: #f8f8f8;
   }
 
   /* --- Icelandic Glacier --- */
   .theme-icelandic-glacier {
-    --color-canvas: #f1f5f9; 
-    --color-surface: #ffffff; 
-    --color-surface-muted: #e2e8f0;
-    --color-brand-primary: #334155; 
-    --color-brand-secondary: #94a3b8;
+        /* A deep, midnight-plum canvas */
+    --color-canvas: #1a0b2e; 
+    --color-surface: #2d1b4d; 
+    --color-surface-muted: #3d2b5e;
+    --color-surface-border: #5a3e8c;
+
+    --color-brand-primary: #ffcc00;  /* Alchemist Gold */
+    --color-brand-secondary: #ec4899; /* Bohemian Pink */
+    
+    /* Text needs to pop against the dark plum */
+    --color-text-primary: #f5f3ff;
+    --color-text-secondary: #c4b5fd;
+    --color-text-inverse: #1a0b2e;
   }
 
   /* --- Sahara Dusk --- */
   .theme-sahara-dusk {
-    --color-canvas: #fff7ed; 
+    --color-canvas: #f8f2dc; 
     --color-surface: #ffffff; 
     --color-surface-muted: #ffedd5;
     --color-brand-primary: #9a3412; 
-    --color-brand-secondary: #431407; 
+    --color-brand-secondary: #76473a; 
   }
 
   /* --- Amalfi Coast --- */
@@ -84,11 +94,12 @@
 
   /* --- Havana Retro --- */
   .theme-havana-retro {
-    --color-canvas: #f5f5f4; 
+    --color-canvas: #55bdec; 
     --color-surface: #ffffff; 
     --color-surface-muted: #e7e5e4;
     --color-brand-primary: #0d9488; 
-    --color-brand-secondary: #fb7185; 
+    --color-brand-secondary: #ff698c; 
+    --color-brand-accent: #ff9a81;
   }
 
   /* --- London Fog --- */
@@ -98,23 +109,27 @@
     --color-surface-muted: #e2e8f0;
     --color-brand-primary: #C0090d; 
     --color-brand-secondary: #D01A1E; 
+
   }
 
   /* --- NYC Taxi --- */
   .theme-nyc-taxi {
     --color-canvas: #f8fafc;
     --color-surface: #ffffff;
-    --color-brand-primary: #facc15; 
-    --color-brand-secondary: #facc15; 
+    --color-brand-primary: #f9bb04; 
+    --color-brand-secondary: #f9bb04; 
     --color-text-inverse: #000000;
   }
 
   /* --- Australian Outback --- */
   .theme-outback {
     --color-canvas: #fff7ed;
-    --color-surface: #ffffff;
-    --color-brand-primary: #9a3412; 
-    --color-brand-secondary: #3f6212; 
+    --color-surface: #de7856;
+    --color-surface-muted: #cd6745;
+    --color-brand-primary: #781200; 
+    --color-brand-secondary: #2e6201; 
+    --color-text-primary: #f8f8f8; 
+    --color-text-secondary: #f0f0f0; 
   }
 
   /* --- Kenyan Savanna --- */
@@ -136,8 +151,8 @@
 
   /* --- Cape Winelands --- */
   .theme-cape-winelands {
-    --color-canvas: #fafaf9;
-    --color-surface: #ffffff;
+    --color-canvas: #ffeffe;
+    --color-surface: #fafaf9;
     --color-brand-primary: #701a75; 
     --color-brand-secondary: #166534; 
   }
@@ -145,9 +160,14 @@
   /* --- Egyptian Dune --- */
   .theme-egyptian-dune {
     --color-canvas: #fdf6e3;
-    --color-surface: #ffffff;
-    --color-brand-primary: #b45309; 
-    --color-brand-secondary: #0e7490; 
+    --color-surface: #bc6542;
+    --color-surface-border: #b06040;
+    --color-surface-muted: #eca582;
+    --color-brand-primary: #943305; 
+    --color-brand-secondary: #0eaef8; 
+    --color-text-primary: #f8fafc;
+    --color-text-secondary: #94a3b8;
+    --color-text-inverse: #111;
   }
 
   /* --- Seoul Night --- */
@@ -207,9 +227,10 @@
 
   /* --- Tulum Cenote (Tropical & Earthy) --- */
   .theme-tulum-cenote {
-    --color-canvas: #f0fdf4; 
-    --color-surface: #ffffff; 
-    --color-brand-primary: #0f766e; /* Deep Cenote Water */
+    --color-canvas: #e0f4fd; 
+    --color-surface: #f4fafe; 
+    --color-surface-border: #e0fdf4; 
+    --color-brand-primary: #0f6e76; /* Deep Cenote Water */
     --color-brand-secondary: #d97706; /* Woven Rattan */
   }
 
@@ -223,47 +244,55 @@
 
  /* --- Dubai Lux (Desert Gold & Obsidian) --- */
   .theme-dubai-lux {
-    --color-canvas: #fdfaf5;        /* Fine White Sand */
-    --color-surface: #ffffff; 
-    --color-surface-muted: #f3ece0; /* Sand Ripple */
-    --color-brand-primary: #af8936;  /* Polished Gold */
-    --color-brand-secondary: #171717; /* Obsidian/Titanium */
-    --color-text-primary: #262626;
+    --color-canvas: #0a0a0a;       /* Deep Obsidian */
+    --color-surface: #171717;      /* Matte Charcoal */
+    --color-surface-muted: #262626; /* Refined dark grey */
+    --color-brand-primary: #d4af37;        /* Metallic Champagne Gold */
+    --color-brand-secondary: #e5bf48;        /* Metallic Champagne Gold */
+    --color-accent: #ebc23c;       /* Soft Highlight Gold */
+    --color-text-primary: #fff;  
+    --color-text-secondary: #ccc;  
+    --color-text-inverse: black
   }
 
   /* --- Alpine Frost (Crisp Swiss Mountains) --- */
   .theme-alpine-frost {
-    --color-canvas: #f8fafc; 
-    --color-surface: #ffffff; 
-    --color-surface-muted: #e2e8f0;
+    --color-canvas: #d0e8f8; 
+    --color-surface: #6888b8; 
+    --color-surface-muted: #469;
+    --color-surface-border: #527394;
     --color-brand-primary: #0f172a; /* Rocky Peak */
     --color-brand-secondary: #38bdf8; /* Glacial Ice */
+    --color-text-primary: #f8fafc;
+    --color-text-secondary: #94a3b8;
+    --color-text-inverse: #111;
   }
 
   /* --- Bangkok Market (Vibrant & Energetic) --- */
   .theme-bangkok-market {
     --color-canvas: #fffbeb; 
-    --color-surface: #ffffff; 
-    --color-brand-primary: #ea580c; /* Papaya & Spice */
-    --color-brand-secondary: #16a34a; /* Pandan Leaf */
+    --color-surface: #ea580c; 
+    --color-surface-muted: #d9470b; 
+    --color-brand-primary: #620004; /* Papaya & Spice */
+    --color-brand-secondary: #a3e0a6; /* Pandan Leaf */
+
+    --color-text-primary: #f8fafc;
+    --color-text-secondary: #94a3b8;
+    --color-text-inverse: #111;
   }
 
   /* --- Bohemian Gothic (Prague & Budapest) --- */
   .theme-bohemian-gothic {
     /* A deep, midnight-plum canvas */
-    --color-canvas: #1a0b2e; 
-    --color-surface: #2d1b4d; 
-    --color-surface-muted: #3d2b5e;
-    --color-surface-border: #5a3e8c;
+    --color-canvas: #ffe8bf; 
+    --color-surface: #efc69f; 
+    --color-surface-muted: #deb58e;
+    --color-surface-border: #e0c090;
 
-    /* The "Crazy" part: Radioactive Gold & Neon Magenta */
-    --color-brand-primary: #ffcc00;  /* Alchemist Gold */
-    --color-brand-secondary: #ec4899; /* Bohemian Pink */
+    --color-brand-primary: #aF3434;  
+    --color-brand-secondary: #BF4545; 
+    --color-accent: #eA4740; 
     
-    /* Text needs to pop against the dark plum */
-    --color-text-primary: #f5f3ff;
-    --color-text-secondary: #c4b5fd;
-    --color-text-inverse: #1a0b2e;
   }
 
 
@@ -300,8 +329,6 @@
   li {
     @apply list-none
   }
-
- 
 }
 
 @layer components {

@@ -1,7 +1,7 @@
 export const THEMES = [
   { id: "", name: "Default (Orange)" },
   { id: "theme-bali-jungle", name: "Bali Jungle" },
-  { id: "theme-icelandic-glacier", name: "Icelandic Glacier" },
+  { id: "theme-icelandic-glacier", name: "Icelandic Aurora" },
   { id: "theme-sahara-dusk", name: "Sahara Dusk" },
   { id: "theme-amalfi-coast", name: "Amalfi Coast" },
   { id: "theme-tokyo-neon", name: "Tokyo Neon" },
