@@ -24,6 +24,7 @@ export const THEMES = [
   { id: "theme-dubai-lux", name: "Dubai Lux" }, // UAE
   { id: "theme-alpine-frost", name: "Alpine Frost" }, // Switzerland
   { id: "theme-bangkok-market", name: "Bangkok Market" }, // Thailand
+  { id: "theme-bohemian-gothic", name: "Bohemian Gothic (Prague)" },
 ] as const;
 
 export type ThemeId = (typeof THEMES)[number]["id"];

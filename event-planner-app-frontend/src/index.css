@@ -248,6 +248,24 @@
     --color-brand-secondary: #16a34a; /* Pandan Leaf */
   }
 
+  /* --- Bohemian Gothic (Prague & Budapest) --- */
+  .theme-bohemian-gothic {
+    /* A deep, midnight-plum canvas */
+    --color-canvas: #1a0b2e; 
+    --color-surface: #2d1b4d; 
+    --color-surface-muted: #3d2b5e;
+    --color-surface-border: #5a3e8c;
+
+    /* The "Crazy" part: Radioactive Gold & Neon Magenta */
+    --color-brand-primary: #ffcc00;  /* Alchemist Gold */
+    --color-brand-secondary: #ec4899; /* Bohemian Pink */
+    
+    /* Text needs to pop against the dark plum */
+    --color-text-primary: #f5f3ff;
+    --color-text-secondary: #c4b5fd;
+    --color-text-inverse: #1a0b2e;
+  }
+
 
 
   
