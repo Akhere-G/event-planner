@@ -18,19 +18,21 @@ export default function FitToDay({
   if (daysWithEvents.length === 0) return;
   if (daysWithEvents.length === 1) {
     return (
-      <button
-        className="bg-surface border-surface-border border py-2 px-4 text-sm w-35 max-h-30 overflow-y-scroll"
-        onClick={() => fitToDay(daysWithEvents[0].date)}
-      >
-        Fit to day {daysWithEvents[0].day}
-      </button>
+      <div className="bg-surface rounded-md">
+        <button
+          className="bg-brand-secondary/20 border-surface-border border py-2 px-4 text-sm w-35 max-h-30 overflow-y-scroll"
+          onClick={() => fitToDay(daysWithEvents[0].date)}
+        >
+          Fit to day {daysWithEvents[0].day}
+        </button>
+      </div>
     );
   }
 
   return (
-    <div>
+    <div className="bg-surface rounded-md">
       {expanded ? (
-        <div className="card w-35">
+        <div className="card bg-brand-secondary/20 w-35">
           <div className="flex items-center justify-between gap-2 mb-2 ">
             <h3 className="">Fit to day</h3>
             <button
@@ -56,7 +58,10 @@ export default function FitToDay({
           </div>
         </div>
       ) : (
-        <button className="btn-secondary p-2" onClick={() => setExpanded(true)}>
+        <button
+          className="bg-brand-secondary/20 btn-secondary p-2"
+          onClick={() => setExpanded(true)}
+        >
           <Maximize size={20} />
         </button>
       )}

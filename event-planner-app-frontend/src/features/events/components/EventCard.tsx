@@ -49,7 +49,7 @@ export default function EventCard({
             selectedValue={eventData.category}
             canEdit={canUserEdit(role)}
             defaultElement={
-              <span className="flex items-center gap-1 px-2 py-1 rounded-full bg-brand-primary/10 text-brand-primary text-xs font-semibold uppercase">
+              <span className="flex items-center gap-1 px-2 py-1 rounded-full bg-brand-secondary/10 text-brand-secondary text-xs font-semibold uppercase">
                 <Tag size={16} />
                 {eventData.category}
               </span>
