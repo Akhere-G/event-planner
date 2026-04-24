@@ -197,11 +197,12 @@
   }
 
   /* --- Parisian Café (Elegant & Muted) --- */
-  .theme-parisian-cafe {
-    --color-canvas: #faf9f6; 
+.theme-parisian-cafe {
+    --color-canvas: #f5f4ef;        /* Haussmann Limestone */
     --color-surface: #ffffff; 
-    --color-brand-primary: #831843; /* Bordeaux Wine */
-    --color-brand-secondary: #b45309; /* Fresh Croissant */
+    --color-surface-muted: #e5e2d9; 
+    --color-brand-primary: #1e293b;  /* Parisian Navy */
+    --color-brand-secondary: #71717a; /* Zinc Rooftops */
   }
 
   /* --- Tulum Cenote (Tropical & Earthy) --- */
@@ -220,12 +221,14 @@
     --color-brand-secondary: #f59e0b; /* Marigold */
   }
 
-  /* --- Dubai Lux (Desert Sand & Modern Gold) --- */
+ /* --- Dubai Lux (Desert Gold & Obsidian) --- */
   .theme-dubai-lux {
-    --color-canvas: #fbf8f3; 
+    --color-canvas: #fdfaf5;        /* Fine White Sand */
     --color-surface: #ffffff; 
-    --color-brand-primary: #b45309; /* Matte Gold */
-    --color-brand-secondary: #0f172a; /* Night Skyline */
+    --color-surface-muted: #f3ece0; /* Sand Ripple */
+    --color-brand-primary: #af8936;  /* Polished Gold */
+    --color-brand-secondary: #171717; /* Obsidian/Titanium */
+    --color-text-primary: #262626;
   }
 
   /* --- Alpine Frost (Crisp Swiss Mountains) --- */
