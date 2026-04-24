@@ -16,6 +16,14 @@ export const THEMES = [
   { id: "theme-seoul-night", name: "Seoul Night" },
   { id: "theme-spanish-fiesta", name: "Spanish Fiesta" },
   { id: "theme-amazonian-rainforest", name: "Amazonian Rainforest" },
+  { id: "theme-santorini-azure", name: "Santorini Azure" }, // Greece
+  { id: "theme-kyoto-moss", name: "Kyoto Moss" }, // Japan (Traditional)
+  { id: "theme-parisian-cafe", name: "Parisian Café" }, // France
+  { id: "theme-tulum-cenote", name: "Tulum Cenote" }, // Mexico
+  { id: "theme-jaipur-palace", name: "Jaipur Palace" }, // India
+  { id: "theme-dubai-lux", name: "Dubai Lux" }, // UAE
+  { id: "theme-alpine-frost", name: "Alpine Frost" }, // Switzerland
+  { id: "theme-bangkok-market", name: "Bangkok Market" }, // Thailand
 ] as const;
 
 export type ThemeId = (typeof THEMES)[number]["id"];

@@ -179,6 +179,72 @@
     --color-brand-secondary: #eab308; 
   }
 
+  /* --- Santorini Azure (Stark White & Deep Sea) --- */
+  .theme-santorini-azure {
+    --color-canvas: #ffffff; 
+    --color-surface: #f8fafc; 
+    --color-surface-muted: #e0f2fe;
+    --color-brand-primary: #0284c7; /* Aegean Blue */
+    --color-brand-secondary: #0ea5e9; /* Dome Blue */
+  }
+
+  /* --- Kyoto Moss (Traditional Zen Gardens) --- */
+  .theme-kyoto-moss {
+    --color-canvas: #f4f5f0; 
+    --color-surface: #ffffff; 
+    --color-brand-primary: #4d7c0f; /* Bamboo & Moss */
+    --color-brand-secondary: #be123c; /* Temple Red / Sakura */
+  }
+
+  /* --- Parisian Café (Elegant & Muted) --- */
+  .theme-parisian-cafe {
+    --color-canvas: #faf9f6; 
+    --color-surface: #ffffff; 
+    --color-brand-primary: #831843; /* Bordeaux Wine */
+    --color-brand-secondary: #b45309; /* Fresh Croissant */
+  }
+
+  /* --- Tulum Cenote (Tropical & Earthy) --- */
+  .theme-tulum-cenote {
+    --color-canvas: #f0fdf4; 
+    --color-surface: #ffffff; 
+    --color-brand-primary: #0f766e; /* Deep Cenote Water */
+    --color-brand-secondary: #d97706; /* Woven Rattan */
+  }
+
+  /* --- Jaipur Palace (The Pink City) --- */
+  .theme-jaipur-palace {
+    --color-canvas: #fff1f2; 
+    --color-surface: #ffffff; 
+    --color-brand-primary: #be185d; /* Terracotta Pink */
+    --color-brand-secondary: #f59e0b; /* Marigold */
+  }
+
+  /* --- Dubai Lux (Desert Sand & Modern Gold) --- */
+  .theme-dubai-lux {
+    --color-canvas: #fbf8f3; 
+    --color-surface: #ffffff; 
+    --color-brand-primary: #b45309; /* Matte Gold */
+    --color-brand-secondary: #0f172a; /* Night Skyline */
+  }
+
+  /* --- Alpine Frost (Crisp Swiss Mountains) --- */
+  .theme-alpine-frost {
+    --color-canvas: #f8fafc; 
+    --color-surface: #ffffff; 
+    --color-surface-muted: #e2e8f0;
+    --color-brand-primary: #0f172a; /* Rocky Peak */
+    --color-brand-secondary: #38bdf8; /* Glacial Ice */
+  }
+
+  /* --- Bangkok Market (Vibrant & Energetic) --- */
+  .theme-bangkok-market {
+    --color-canvas: #fffbeb; 
+    --color-surface: #ffffff; 
+    --color-brand-primary: #ea580c; /* Papaya & Spice */
+    --color-brand-secondary: #16a34a; /* Pandan Leaf */
+  }
+
 
 
   
