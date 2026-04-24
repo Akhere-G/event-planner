@@ -12,11 +12,13 @@ export default function DayList({
   endDate,
   events,
   role,
+  destination,
 }: {
   events: Event[];
   startDate: string;
   endDate: string;
   role: string;
+  destination: { latitude: number; longitude: number };
 }) {
   const days = useMemo(
     () => makeDays(events, startDate, endDate),
@@ -32,7 +34,9 @@ export default function DayList({
             content={
               <div className="px-4 ">
                 <EventList events={day.events} role={role} />
-                {canUserEdit(role) && <AddEventForm date={day.date} />}
+                {canUserEdit(role) && (
+                  <AddEventForm date={day.date} destination={destination} />
+                )}
               </div>
             }
           />

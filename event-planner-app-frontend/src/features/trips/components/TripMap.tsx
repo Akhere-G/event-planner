@@ -20,6 +20,7 @@ import type { Day } from "../../events/components/DayFilter";
 const MAX_ZOOM = 17;
 const MIN_ZOOM = 10;
 const DEFAULT_ZOOM = 12;
+const CITY_RADIUS = 0.06;
 
 const permissionEnum = {
   GRANTED: "GRANTED",
@@ -96,19 +97,26 @@ export default function TripMap({ trip }: { trip: Trip }) {
     .flatMap((day) => day.events);
 
   useEffect(() => {
-    if (selectedEvents.length === 0) return;
-    if (selectedEvents.length === 1) {
+    let bounds;
+    if (selectedEvents.length === 0) {
+      bounds = {
+        north: latitude + CITY_RADIUS,
+        south: latitude - CITY_RADIUS,
+        east: longitude + CITY_RADIUS,
+        west: longitude - CITY_RADIUS,
+      };
+    } else if (selectedEvents.length === 1) {
       map?.panTo({
         lat: selectedEvents[0].latitude,
         lng: selectedEvents[0].longitude,
       });
       return;
+    } else {
+      bounds = getBoundsForEvents(selectedEvents);
     }
 
-    const bounds = getBoundsForEvents(selectedEvents);
-
     map?.fitBounds(bounds, DEFAULT_PADDING);
-  }, [map, selectedEvents]);
+  }, [map, selectedEvents, latitude, longitude]);
 
   useEffect(() => {
     setEvents(defaultEvents);
@@ -180,6 +188,7 @@ export default function TripMap({ trip }: { trip: Trip }) {
 
     map?.fitBounds(bounds, DEFAULT_PADDING);
   };
+
   const fitToDay = (date: string) => {
     const selectedEvents = days.find((day) => day.date === date)?.events;
     if (!selectedEvents) {

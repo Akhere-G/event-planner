@@ -7,7 +7,13 @@ import { useParams } from "react-router";
 import { isValidationError } from "../../api/utils";
 import { useState } from "react";
 
-export default function AddEventForm({ date }: { date: string }) {
+export default function AddEventForm({
+  date,
+  destination,
+}: {
+  date: string;
+  destination: { latitude: number; longitude: number };
+}) {
   const [errorMessage, setErrorMessage] = useState("");
 
   const { tripId } = useParams();
@@ -51,6 +57,15 @@ export default function AddEventForm({ date }: { date: string }) {
     }
   }
 
+  const { latitude, longitude } = destination;
+
+  const cityBounds = {
+    north: latitude + 0.1,
+    south: latitude - 0.1,
+    east: longitude + 0.1,
+    west: longitude - 0.1,
+  };
+
   return (
     <>
       <form
@@ -63,6 +78,7 @@ export default function AddEventForm({ date }: { date: string }) {
           {...addressInputProps}
           errorMessage={formState.errors.address?.message}
           classNames="flex-1"
+          cityBounds={cityBounds}
           onPlaceSelect={(place) => {
             setValue("address", place.formatted_address ?? "");
             setValue("name", place.name ?? "");

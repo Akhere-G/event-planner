@@ -41,7 +41,7 @@ export default function DayFilter({
   return (
     <div className="rounded-xl bg-surface">
       {expanded ? (
-        <div className="card bg-brand-secondary/20 w-35">
+        <div className="card bg-brand-secondary/20 rounded-xl w-35">
           <div className="flex items-center justify-between gap-2 mb-2">
             <h3 className="">Filter</h3>
             <button
