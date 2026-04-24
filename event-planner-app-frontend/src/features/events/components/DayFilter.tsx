@@ -39,9 +39,9 @@ export default function DayFilter({
   };
 
   return (
-    <div className="absolute top-4 right-2">
+    <div>
       {expanded ? (
-        <div className="card">
+        <div className="card w-35">
           <div className="flex items-center justify-between gap-2 mb-2">
             <h3 className="">Filter</h3>
             <button

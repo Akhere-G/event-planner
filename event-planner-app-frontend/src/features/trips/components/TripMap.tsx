@@ -4,7 +4,12 @@ import { useSelector } from "react-redux";
 import type { RootState } from "../../../store";
 import { LocateIcon, Minus, Plus, X } from "lucide-react";
 import type { Event } from "../../events/types";
-import { DayFilter, EventCard, EventMarker } from "../../events/components";
+import {
+  DayFilter,
+  EventCard,
+  EventMarker,
+  FitToDay,
+} from "../../events/components";
 
 import { useUpdateEvent } from "../hooks";
 import { makeDays } from "../../events/utils";
@@ -91,7 +96,14 @@ export default function TripMap({ trip }: { trip: Trip }) {
     .flatMap((day) => day.events);
 
   useEffect(() => {
-    if (selectedEvents.length < 2) return;
+    if (selectedEvents.length === 0) return;
+    if (selectedEvents.length === 1) {
+      map?.panTo({
+        lat: selectedEvents[0].latitude,
+        lng: selectedEvents[0].longitude,
+      });
+      return;
+    }
 
     const bounds = getBoundsForEvents(selectedEvents);
 
@@ -136,7 +148,7 @@ export default function TripMap({ trip }: { trip: Trip }) {
   const zoomToUser = () => {
     if (!userCoords || !map) return;
 
-    map.setCenter({
+    map.panTo({
       lat: userCoords.latitude,
       lng: userCoords.longitude,
     });
@@ -144,13 +156,49 @@ export default function TripMap({ trip }: { trip: Trip }) {
 
   const renderedMarkers = selectedEvents.map((event) => (
     <EventMarker
-      day={differenceInDays(event.startAt, startDate)}
+      day={differenceInDays(event.startAt, startDate) + 1}
       key={event.id}
       event={event}
       position={{ lat: event.latitude, lng: event.longitude }}
       onSelect={setSelectedEvent}
     />
   ));
+
+  const fitToAll = () => {
+    if (selectedEvents.length === 0) {
+      return;
+    }
+
+    if (selectedEvents.length === 1) {
+      map?.panTo({
+        lat: events[0].latitude,
+        lng: events[0].longitude,
+      });
+      return;
+    }
+    const bounds = getBoundsForEvents(selectedEvents);
+
+    map?.fitBounds(bounds, DEFAULT_PADDING);
+  };
+  const fitToDay = (date: string) => {
+    const selectedEvents = days.find((day) => day.date === date)?.events;
+    if (!selectedEvents) {
+      console.error("Could not find events for this date");
+      return;
+    }
+    if (selectedEvents.length === 0) return;
+    if (selectedEvents.length === 1) {
+      map?.panTo({
+        lat: selectedEvents[0].latitude,
+        lng: selectedEvents[0].longitude,
+      });
+      return;
+    }
+
+    const bounds = getBoundsForEvents(selectedEvents);
+
+    map?.fitBounds(bounds, DEFAULT_PADDING);
+  };
 
   return (
     <div className="relative w-full h-[93.5vh] 2xl:h-[96vh] isolate will-change-transform">
@@ -179,7 +227,10 @@ export default function TripMap({ trip }: { trip: Trip }) {
           </AdvancedMarker>
         )}
       </Map>
-      <DayFilter days={days} setDays={setDays} />
+      <div className="absolute top-4 right-2 flex flex-col gap-2 items-end">
+        <DayFilter days={days} setDays={setDays} />
+        <FitToDay days={days} fitToAll={fitToAll} fitToDay={fitToDay} />
+      </div>
       <div className="absolute bottom-4 right-2 flex flex-col gap-2">
         <button onClick={zoomToUser} className="p-2 btn-primary">
           <LocateIcon size={20} />
