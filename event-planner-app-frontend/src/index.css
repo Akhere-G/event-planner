@@ -37,13 +37,14 @@
 @layer base {
 /* --- Bali Jungle --- */
   .theme-bali-jungle {
-    --color-canvas: #8edfce; 
-    --color-surface: #287f68;  
+    --color-canvas: #6ebfae; 
+    --color-surface: #186f58;  
     --color-surface-muted: #176e57;
-    --color-brand-primary: #a7f3d0; 
+    --color-brand-primary: #77c3a0; 
     --color-surface-border: #055e46; 
-    --color-brand-secondary: #b8f4e1; 
+    --color-brand-secondary: #a8e4d1; 
     --color-text-primary: #f8f8f8;
+    --color-text-secondary: #f0f0f0;
   }
 
   /* --- Icelandic Glacier --- */
@@ -67,6 +68,7 @@
   .theme-sahara-dusk {
     --color-canvas: #f8f2dc; 
     --color-surface: #ffffff; 
+    --color-surface-border: #e8e2cc; 
     --color-surface-muted: #ffedd5;
     --color-brand-primary: #9a3412; 
     --color-brand-secondary: #76473a; 
@@ -76,6 +78,7 @@
   .theme-amalfi-coast {
     --color-canvas: #f0f9ff; 
     --color-surface: #ffffff; 
+    --color-surface-border: #e0e8ee; 
     --color-surface-muted: #e0f2fe;
     --color-brand-primary: #0369a1; 
     --color-brand-secondary: #facc15; 
@@ -127,17 +130,17 @@
     --color-surface: #de7856;
     --color-surface-muted: #cd6745;
     --color-brand-primary: #781200; 
-    --color-brand-secondary: #2e6201; 
+    --color-brand-secondary: #1d5100; 
     --color-text-primary: #f8f8f8; 
     --color-text-secondary: #f0f0f0; 
   }
 
   /* --- Kenyan Savanna --- */
   .theme-kenyan-savanna {
-    --color-canvas: #fefce8;
-    --color-surface: #ffffff;
-    --color-brand-primary: #854d0e; 
-    --color-brand-secondary: #ca8a04; 
+    --color-canvas: #fbe8d1 ;
+    --color-surface: #fff;
+    --color-brand-primary: #a15f3e; 
+    --color-brand-secondary: #e99d56; 
   }
 
   /* --- Nigerian Royal --- */
@@ -151,22 +154,26 @@
 
   /* --- Cape Winelands --- */
   .theme-cape-winelands {
-    --color-canvas: #ffeffe;
-    --color-surface: #fafaf9;
-    --color-brand-primary: #701a75; 
-    --color-brand-secondary: #166534; 
+    --color-canvas: #bf6eae; 
+    --color-surface: #6f1858;  
+    --color-surface-muted: #6e1757;
+    --color-brand-primary: #d377b0; 
+    --color-surface-border: #5e0546; 
+    --color-brand-secondary: #e4a8d1; 
+    --color-text-primary: #f8f8f8;
+    --color-text-secondary: #f0f0f0;
   }
 
   /* --- Egyptian Dune --- */
   .theme-egyptian-dune {
     --color-canvas: #fdf6e3;
-    --color-surface: #bc6542;
+    --color-surface: #8c3512;
     --color-surface-border: #b06040;
     --color-surface-muted: #eca582;
-    --color-brand-primary: #943305; 
+    --color-brand-primary: #f6a577; 
     --color-brand-secondary: #0eaef8; 
     --color-text-primary: #f8fafc;
-    --color-text-secondary: #94a3b8;
+    --color-text-secondary: #e8eaec;
     --color-text-inverse: #111;
   }
 
@@ -185,18 +192,24 @@
 
   /* --- Spanish Fiesta --- */
   .theme-spanish-fiesta {
-    --color-canvas: #fffbeb;
-    --color-surface: #ffffff;
-    --color-brand-primary: #dc2626; 
-    --color-brand-secondary: #fbbf24; 
+    --color-canvas: #F1BF00; 
+    --color-surface: #fff;  
+    --color-surface-muted: #F1BF00;
+    --color-brand-primary: #AA151B; 
+    --color-brand-secondary: #AA151B; 
   }
 
   /* --- Amazonian Rainforest --- */
   .theme-amazonian-rainforest {
-    --color-canvas: #ecfdf5;
-    --color-surface: #ffffff;
-    --color-brand-primary: #15803d; 
-    --color-brand-secondary: #eab308; 
+    --color-canvas: #243;
+    --color-surface: #486;
+    --color-surface-border: #387858;
+    --color-surface-muted: #307050;
+    --color-brand-primary: var(--color-teal-300); 
+    --color-brand-secondary: #fdd50c;
+    --color-text-primary: #f8f8f8;
+    --color-text-secondary: #f0f0f0; 
+    --color-text-inverse: #000
   }
 
   /* --- Santorini Azure (Stark White & Deep Sea) --- */
@@ -227,19 +240,24 @@
 
   /* --- Tulum Cenote (Tropical & Earthy) --- */
   .theme-tulum-cenote {
-    --color-canvas: #e0f4fd; 
-    --color-surface: #f4fafe; 
-    --color-surface-border: #e0fdf4; 
-    --color-brand-primary: #0f6e76; /* Deep Cenote Water */
-    --color-brand-secondary: #d97706; /* Woven Rattan */
+    --color-canvas: #96e7d2; 
+    --color-surface: #fafbf6; 
+    --color-surface-border: #76d7e2; 
+    --color-brand-primary: #062a2e; /* Deep Cenote Water */
+    --color-brand-secondary: #158265; /* Woven Rattan */
   }
 
   /* --- Jaipur Palace (The Pink City) --- */
   .theme-jaipur-palace {
-    --color-canvas: #fff1f2; 
-    --color-surface: #ffffff; 
-    --color-brand-primary: #be185d; /* Terracotta Pink */
-    --color-brand-secondary: #f59e0b; /* Marigold */
+    --color-canvas: #F5aCa9; 
+    --color-surface: #d04C49; 
+    --color-surface-muted: #c02C29; 
+    --color-surface-border: #d04C4988; 
+    --color-brand-primary: #ffaacd; /* Terracotta Pink */
+    --color-brand-secondary: #ffff5f; /* Marigold */
+    --color-text-primary: #f8f8f8;
+    --color-text-secondary: #f0f0f0; 
+    --color-text-inverse: #000
   }
 
  /* --- Dubai Lux (Desert Gold & Obsidian) --- */
@@ -257,42 +275,42 @@
 
   /* --- Alpine Frost (Crisp Swiss Mountains) --- */
   .theme-alpine-frost {
-    --color-canvas: #d0e8f8; 
-    --color-surface: #6888b8; 
-    --color-surface-muted: #469;
-    --color-surface-border: #527394;
-    --color-brand-primary: #0f172a; /* Rocky Peak */
-    --color-brand-secondary: #38bdf8; /* Glacial Ice */
-    --color-text-primary: #f8fafc;
-    --color-text-secondary: #94a3b8;
-    --color-text-inverse: #111;
+    --color-canvas: #6eaebf; 
+    --color-surface: #18586f;  
+    --color-surface-muted: #17576e;
+    --color-brand-primary: #77b0d3; 
+    --color-surface-border: #05465e; 
+    --color-brand-secondary: #a8d1e4; 
+    --color-text-primary: #f8f8f8;
+    --color-text-secondary: #f0f0f0;
   }
 
   /* --- Bangkok Market (Vibrant & Energetic) --- */
   .theme-bangkok-market {
     --color-canvas: #fffbeb; 
-    --color-surface: #ea580c; 
+    --color-surface: #df6020; 
     --color-surface-muted: #d9470b; 
-    --color-brand-primary: #620004; /* Papaya & Spice */
+    --color-brand-primary: #420004; /* Papaya & Spice */
     --color-brand-secondary: #a3e0a6; /* Pandan Leaf */
 
     --color-text-primary: #f8fafc;
-    --color-text-secondary: #94a3b8;
-    --color-text-inverse: #111;
+    --color-text-secondary: #f8fafc;
   }
 
   /* --- Bohemian Gothic (Prague & Budapest) --- */
   .theme-bohemian-gothic {
-    /* A deep, midnight-plum canvas */
-    --color-canvas: #ffe8bf; 
-    --color-surface: #efc69f; 
-    --color-surface-muted: #deb58e;
-    --color-surface-border: #e0c090;
+    --color-canvas: #f2e9d9; 
+    --color-surface: #ffffff; 
+    --color-surface-muted: #eaddca;
+    --color-surface-border: #d4c5b0;
 
-    --color-brand-primary: #aF3434;  
-    --color-brand-secondary: #BF4545; 
-    --color-accent: #eA4740; 
+    --color-brand-primary: #8b1a1a;  /* Bohemian Garnet / Red Wine */
+    --color-brand-secondary: #5c1111; 
+    --color-brand-accent: #b48e4d;   /* Tarnished Brass / Gold Leaf */
     
+    --color-text-primary: #1a1614;   /* Ironwork Charcoal */
+    --color-text-secondary: #5e5449;
+    --color-text-inverse: #ffffff;
   }
 
 

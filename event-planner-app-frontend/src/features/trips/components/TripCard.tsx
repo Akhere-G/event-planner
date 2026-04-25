@@ -78,9 +78,7 @@ export default function TripCard({
             </div>
           )}
         </div>
-        <p className="text-slate-200 dark:text-text-secondary truncate">
-          {description}
-        </p>
+        <p className="text-text-inverse/85 truncate">{description}</p>
       </div>
       <p className="p-4 text-text-primary">
         {formatDateRange(startDate, endDate)}
