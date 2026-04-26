@@ -431,7 +431,7 @@
   }
 
   .btn-secondary {
-    @apply bg-surface-muted text-text-primary hover:brightness-90;
+    @apply bg-surface-muted text-text-primary hover:brightness-110;
   }
 
   .btn-menu {

@@ -10,7 +10,6 @@ import { canUserEdit } from "../../users/utils";
 import {
   setDays,
   setSearchEvents,
-  setSearchIndex,
   setSelectedEvent,
 } from "../../maps/service/mapSlice";
 import { fitToBounds, getDaysWithFilter } from "../../maps/utils";
@@ -20,7 +19,6 @@ import {
   MAX_ZOOM,
   MIN_ZOOM,
 } from "../../maps/constants";
-import type { EventSearchResult } from "../../maps/types";
 import {
   EventMarker,
   EventSearchMarker,
@@ -113,12 +111,6 @@ export default function TripMap({ trip }: { trip: Trip }) {
     });
   };
 
-  const onSelectSearchMarker = (event: EventSearchResult) => {
-    const index = searchEvents.findIndex((e) => e.placeId === event.placeId);
-    if (index === -1) return;
-    dispatch(setSearchIndex(index));
-  };
-
   const eventMarkers = selectedEvents.map((event) => (
     <EventMarker
       day={differenceInDays(event.startAt, startDate) + 1}
@@ -130,11 +122,7 @@ export default function TripMap({ trip }: { trip: Trip }) {
   ));
 
   const searchEventMarkers = searchEvents.map((event) => (
-    <EventSearchMarker
-      key={event.placeId}
-      place={event}
-      onSelect={onSelectSearchMarker}
-    />
+    <EventSearchMarker key={event.placeId} event={event} />
   ));
 
   const onDelete = () => {

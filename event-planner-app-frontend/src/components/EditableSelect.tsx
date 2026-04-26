@@ -16,6 +16,7 @@ interface EditableSelectProps {
   CustomSelect?: (props: CustomSelectProps) => React.JSX.Element;
   canEdit: boolean;
   isLoading?: boolean;
+  showEditIcon?: boolean;
 }
 
 interface CustomSelectProps {
@@ -30,6 +31,7 @@ export default function EditableSelect({
   CustomSelect,
   canEdit,
   isLoading = false,
+  showEditIcon = true,
 }: EditableSelectProps) {
   const [isEditing, setIsEditing] = useState(false);
   const firstButtonRef = useRef<HTMLButtonElement>(null);
@@ -101,7 +103,7 @@ export default function EditableSelect({
           if (canEdit && !isLoading) setIsEditing((prev) => !prev);
         }}
       >
-        {canEdit && !isLoading && (
+        {canEdit && showEditIcon && !isLoading && (
           <div className="absolute -top-2 -right-2 hidden group-hover:flex ">
             <Pencil size={10} />
           </div>

@@ -32,7 +32,9 @@ export function EventSearchResultCard({
           <span className="truncate">{name}</span>
         </h3>
 
-        <p className="text-sm text-text-secondary">{address}</p>
+        <p className="text-sm text-text-secondary h-9 line-clamp-2">
+          {address}
+        </p>
 
         <div className="mt-2 flex gap-4 justify-between text-xs text-text-secondary">
           {/*
@@ -66,11 +68,12 @@ export function EventSearchResultCard({
                 }
                 selectClassName={`top-auto bottom-0 right-auto left-0 grid grid-cols-4 w-40`}
                 selectedValue=""
+                showEditIcon={false}
                 defaultElement={
                   <div
                     tabIndex={0}
                     role="button"
-                    className="group btn-secondary flex gap-2"
+                    className="group btn-secondary px-3 py-1 rounded-md flex gap-2"
                   >
                     <Plus size={16} aria-hidden />
                     Add
