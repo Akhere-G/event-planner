@@ -34,7 +34,7 @@ export function EventSearchResultList({
     setIndex(newIndex);
   };
   return (
-    <div className="relative">
+    <div className="relative z-1">
       <div className="card p-1  text-xs flex items-center justify-center gap-1 absolute bottom-full rounded-md mb-2">
         <button onClick={prevSearchResult} className="btn-secondary p-1">
           <ChevronLeft size={12} />

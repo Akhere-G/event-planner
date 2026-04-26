@@ -163,7 +163,7 @@ export default function TripMap({ trip }: { trip: Trip }) {
           destination={{ latitude: trip.latitude, longitude: trip.longitude }}
         />
       )}
-      <div className="absolute z-10 top-4 right-2 flex flex-col gap-2 items-end">
+      <div className="absolute top-4 right-2 flex flex-col gap-2 items-end">
         <DayFilter />
         <FitToDay />
       </div>
@@ -198,10 +198,10 @@ export default function TripMap({ trip }: { trip: Trip }) {
         </div>
       )}
       {canUserEdit(trip.role) && searchEvents.length > 0 && (
-        <div className="absolute z-10 bottom-4 w-full px-4 ">
+        <div className="absolute bottom-4 w-full px-4 ">
           <button
             onClick={() => dispatch(setSearchEvents([]))}
-            className="absolute z-1 btn-secondary p-1 right-1 -top-3"
+            className="absolute z-2 btn-secondary p-1 right-1 -top-3"
           >
             <X size={20} />
           </button>

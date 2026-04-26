@@ -62,6 +62,7 @@ export default function Header({ links }: HeaderProps) {
               {isAuthenticated && (
                 <Link
                   to="/settings"
+                  onClick={() => setIsSidebarOpen(false)}
                   className="pt-3 pb-2 hover:bg-surface-muted text-center"
                 >
                   Settings
@@ -105,27 +106,31 @@ export default function Header({ links }: HeaderProps) {
 
       {/* Mobile Sidebar */}
       <div
-        className={`fixed z-30 h-full right-0 bg-surface p-4 shadow-md transition-transform
+        className={`fixed  z-50 h-full right-0 bg-surface shadow-md transition-transform
         md:hidden flex flex-col items-start  gap-4 text-start
         top-0
         ${isSidebarOpen ? "translate-x-0" : "translate-x-full"}`}
       >
-        <div className="flex justify-between items-center w-full">
+        <div className="flex pl-2 pt-2 justify-between items-center w-full">
           <p>Menu</p>
           <button
-            className="btn-secondary md:hidden p-2 "
+            className="btn-secondary md:hidden p-2 mr-2 "
             aria-expanded={isSidebarOpen}
             aria-label="Close Menu"
             onClick={() => setIsSidebarOpen(false)}
           >
-            <X size={24} />
+            <X size={16} />
           </button>
         </div>
         <nav>
-          <ul className="flex flex-col gap-2">
+          <ul>
             {links.map(({ title, url }) => (
               <li key={url}>
-                <Link to={url} onClick={() => setIsSidebarOpen(false)}>
+                <Link
+                  className="block py-2 pl-2 text-left hover:bg-surface-muted"
+                  to={url}
+                  onClick={() => setIsSidebarOpen(false)}
+                >
                   {title}
                 </Link>
               </li>
@@ -135,7 +140,8 @@ export default function Header({ links }: HeaderProps) {
             {isAuthenticated && (
               <Link
                 to="/settings"
-                className=" hover:bg-surface-muted text-center"
+                onClick={() => setIsSidebarOpen(false)}
+                className="block py-2 pl-2 text-left hover:bg-surface-muted"
               >
                 Settings
               </Link>
@@ -143,7 +149,7 @@ export default function Header({ links }: HeaderProps) {
           </div>
           <button
             onClick={() => dispatch(toggleDarkMode())}
-            className="flex text-sm items-center gap-2 mt-2 p-0 w-full justify-end"
+            className="flex text-sm items-center gap-2 py-2 pl-2 w-full justify-end hover:bg-surface-muted rounded-none"
           >
             <span className="w-19">
               {darkMode ? "Light Mode" : "Dark Mode"}
@@ -157,7 +163,7 @@ export default function Header({ links }: HeaderProps) {
                 dispatch(logOut());
                 window.location.reload();
               }}
-              className="btn-menu p-0 pt-2 text-sm"
+              className="btn-menu py-2 pl-3 w-full text-left text-sm"
             >
               Logout
             </button>
