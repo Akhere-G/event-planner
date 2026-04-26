@@ -39,7 +39,7 @@
   .theme-bali-jungle {
     --color-canvas: #6ebfae; 
     --color-surface: #186f58;  
-    --color-surface-muted: #176e57;
+    --color-surface-muted: #085f48;
     --color-brand-primary: #77c3a0; 
     --color-surface-border: #055e46; 
     --color-brand-secondary: #a8e4d1; 
@@ -74,6 +74,12 @@
     --color-brand-secondary: #76473a; 
   }
 
+  .dark.theme-sahara-dusk {
+    --color-brand-primary: #da7452; 
+    --color-brand-secondary: #96675a; 
+
+  }
+
   /* --- Amalfi Coast --- */
   .theme-amalfi-coast {
     --color-canvas: #f0f9ff; 
@@ -84,16 +90,23 @@
     --color-brand-secondary: #facc15; 
   }
 
+  .dark.theme-amalfi-coast {
+    --color-brand-primary: #43a9e1; 
+
+  }
+
   /* --- Tokyo Neon --- */
   .theme-tokyo-neon {
     --color-canvas: #09090b; 
     --color-surface: #18181b; 
+    --color-surface-border: #404044; 
     --color-surface-muted: #27272a;
     --color-brand-primary: #d946ef; 
     --color-brand-secondary: #22d3ee; 
     --color-text-primary: #ffffff;
     --color-text-secondary: #a1a1aa;
   }
+
 
   /* --- Havana Retro --- */
   .theme-havana-retro {
@@ -105,6 +118,10 @@
     --color-brand-accent: #ff9a81;
   }
 
+  .dark.theme-havana-retro {
+    --color-brand-primary: #4dd4c8; 
+  }
+
   /* --- London Fog --- */
   .theme-london-fog {
     --color-canvas: #f1f5f9; 
@@ -112,6 +129,11 @@
     --color-surface-muted: #e2e8f0;
     --color-brand-primary: #C0090d; 
     --color-brand-secondary: #D01A1E; 
+
+  }
+
+  .dark.theme-london-fog {
+    --color-brand-primary: #E0292d; 
 
   }
 
@@ -128,6 +150,7 @@
   .theme-outback {
     --color-canvas: #fff7ed;
     --color-surface: #de7856;
+    --color-surface-border: #bc5634;
     --color-surface-muted: #cd6745;
     --color-brand-primary: #781200; 
     --color-brand-secondary: #1d5100; 
@@ -135,6 +158,10 @@
     --color-text-secondary: #f0f0f0; 
   }
 
+  .dark.theme-outback { 
+    --color-brand-primary: #b85240; 
+    --color-brand-secondary: #5d8140; 
+  }
   /* --- Kenyan Savanna --- */
   .theme-kenyan-savanna {
     --color-canvas: #fbe8d1 ;
@@ -152,13 +179,18 @@
     --color-surface-muted: #dcfce7;
   }
 
+  .dark.theme-nigerian-royal {
+    --color-brand-primary: #569574; 
+
+  }
+
   /* --- Cape Winelands --- */
   .theme-cape-winelands {
     --color-canvas: #bf6eae; 
     --color-surface: #6f1858;  
-    --color-surface-muted: #6e1757;
+    --color-surface-muted: #5f0848;
     --color-brand-primary: #d377b0; 
-    --color-surface-border: #5e0546; 
+    --color-surface-border: #4e0036; 
     --color-brand-secondary: #e4a8d1; 
     --color-text-primary: #f8f8f8;
     --color-text-secondary: #f0f0f0;
@@ -168,8 +200,8 @@
   .theme-egyptian-dune {
     --color-canvas: #fdf6e3;
     --color-surface: #8c3512;
-    --color-surface-border: #b06040;
-    --color-surface-muted: #eca582;
+    --color-surface-border: #6f1f00;
+    --color-surface-muted: #7c2502;
     --color-brand-primary: #f6a577; 
     --color-brand-secondary: #0eaef8; 
     --color-text-primary: #f8fafc;
@@ -181,6 +213,7 @@
   .theme-seoul-night {
     --color-canvas: #020617;
     --color-surface: #0f172a;
+    --color-surface-border: #2f374a;
     --color-brand-primary: #3b82f6; 
     --color-brand-secondary: #f472b6; 
     --color-text-primary: #f8fafc;
@@ -199,11 +232,15 @@
     --color-brand-secondary: #AA151B; 
   }
 
+  .theme-spanish-fiesta {
+    --color-brand-primary: #eA555B; 
+  }
+
   /* --- Amazonian Rainforest --- */
   .theme-amazonian-rainforest {
     --color-canvas: #243;
     --color-surface: #486;
-    --color-surface-border: #387858;
+    --color-surface-border: #286848;
     --color-surface-muted: #307050;
     --color-brand-primary: var(--color-teal-300); 
     --color-brand-secondary: #fdd50c;
@@ -234,17 +271,25 @@
     --color-canvas: #f5f4ef;        /* Haussmann Limestone */
     --color-surface: #ffffff; 
     --color-surface-muted: #e5e2d9; 
-    --color-brand-primary: #1e298b;  /* Parisian Navy */
-    --color-brand-secondary: #2f3a9c; /* Zinc Rooftops */
+    --color-brand-primary: #3e49ab;  /* Parisian Navy */
+    --color-brand-secondary: #4e59bb; /* Zinc Rooftops */
+  }
+
+  .dark.theme-parisian-cafe {
+    --color-brand-primary: #7e89eb;
   }
 
   /* --- Tulum Cenote (Tropical & Earthy) --- */
   .theme-tulum-cenote {
     --color-canvas: #96e7d2; 
     --color-surface: #fafbf6; 
-    --color-surface-border: #76d7e2; 
+    --color-surface-border: #eaebe6; 
     --color-brand-primary: #062a2e; /* Deep Cenote Water */
     --color-brand-secondary: #158265; /* Woven Rattan */
+  }
+
+  .dark.theme-tulum-cenote {
+    --color-brand-primary: #86aaae;
   }
 
   /* --- Jaipur Palace (The Pink City) --- */
@@ -252,7 +297,7 @@
     --color-canvas: #F5aCa9; 
     --color-surface: #d04C49; 
     --color-surface-muted: #c02C29; 
-    --color-surface-border: #d04C4988; 
+    --color-surface-border: #b02C29; 
     --color-brand-primary: #ffaacd; /* Terracotta Pink */
     --color-brand-secondary: #ffff5f; /* Marigold */
     --color-text-primary: #f8f8f8;
@@ -264,6 +309,7 @@
   .theme-dubai-lux {
     --color-canvas: #0a0a0a;       /* Deep Obsidian */
     --color-surface: #171717;      /* Matte Charcoal */
+    --color-surface-border: #373737;      /* Matte Charcoal */
     --color-surface-muted: #262626; /* Refined dark grey */
     --color-brand-primary: #d4af37;        /* Metallic Champagne Gold */
     --color-brand-secondary: #e5bf48;        /* Metallic Champagne Gold */
@@ -276,10 +322,10 @@
   /* --- Alpine Frost (Crisp Swiss Mountains) --- */
   .theme-alpine-frost {
     --color-canvas: #6eaebf; 
-    --color-surface: #18586f;  
-    --color-surface-muted: #17576e;
+    --color-surface: #105068;  
+    --color-surface-muted: #004058;
     --color-brand-primary: #77b0d3; 
-    --color-surface-border: #05465e; 
+    --color-surface-border: #307088; 
     --color-brand-secondary: #a8d1e4; 
     --color-text-primary: #f8f8f8;
     --color-text-secondary: #f0f0f0;
@@ -289,12 +335,17 @@
   .theme-bangkok-market {
     --color-canvas: #fffbeb; 
     --color-surface: #df6020; 
+    --color-surface-border: #bf4000;
     --color-surface-muted: #d9470b; 
     --color-brand-primary: #420004; /* Papaya & Spice */
     --color-brand-secondary: #a3e0a6; /* Pandan Leaf */
 
     --color-text-primary: #f8fafc;
     --color-text-secondary: #f8fafc;
+  }
+
+  .dark.theme-bangkok-market {
+    --color-brand-primary: #c26064;
   }
 
   /* --- Bohemian Gothic (Prague & Budapest) --- */
@@ -313,20 +364,26 @@
     --color-text-inverse: #ffffff;
   }
 
-
-
+    .dark.theme-bohemian-gothic {
+    --color-brand-primary: #cb3a3a;  
+    --color-brand-secondary: #db5a5a; 
+  }
   
   .dark {
-      --color-canvas: #0f172a;
-      --color-surface: #1e293b;
+      --color-canvas: #0a0f1c;
+      --color-surface: #161d2a;
       --color-surface-muted: #334155;
       --color-surface-border: #475569;
 
     --color-text-primary: #f8fafc;
     --color-text-secondary: #cbd5e1;
     --color-text-inverse: #111;
+
+  
     
   }
+
+
 
   body {
     @apply bg-canvas text-text-primary antialiased;
@@ -336,6 +393,9 @@
     @apply w-full px-4 py-2 rounded-xl border border-surface-border bg-surface transition-all outline-none text-text-primary focus:ring-1 focus:ring-brand-primary focus:border-transparent;
   }
 
+  p, span {
+    @apply bg-blend-exclusion
+  }
   a {
     @apply text-brand-primary hover:text-brand-secondary transition-colors no-underline font-medium;
   }
@@ -353,7 +413,7 @@
   
   
   .card {
-    @apply bg-surface border border-surface-border rounded-md shadow-sm hover:shadow-md transition-shadow p-4;
+    @apply bg-surface border border-surface-border md:rounded-md shadow-sm hover:shadow-md transition-shadow p-4;
   }
 
   .btn-primary {
@@ -365,7 +425,7 @@
   }
 
   .btn-secondary {
-    @apply bg-surface-muted text-text-primary hover:bg-surface-border;
+    @apply bg-surface-muted text-text-primary hover:brightness-90;
   }
 
   .btn-menu {
@@ -385,7 +445,7 @@
   }
 
   .container { 
-    @apply w-full max-w-7xl mx-auto p-6
+    @apply w-full max-w-7xl mx-auto py-6 md:px-6
   }
 
   .form-input {

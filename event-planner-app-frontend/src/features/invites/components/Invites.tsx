@@ -3,17 +3,17 @@ import InviteRow from "./InviteRow";
 
 export default function Invites({ invites }: { invites: Invite[] }) {
   return (
-    <div className="rounded-md border  bg-surface shadow-sm">
+    <div className="rounded-md border bg-surface shadow-sm overflow-x-scroll">
       <table className="w-full text-left border-collapse">
         <thead>
           <tr className="border-b bg-surface-muted/50">
-            <th className="px-6 py-4 text-sm text-text-secondary">
+            <th className="px-2 py-2 md:px-6 md:py-2 text-sm text-text-secondary">
               Email Address
             </th>
-            <th className="px-6 py-4 text-sm text-text-secondary text-center">
+            <th className="px-2 py-2 md:px-6 md:py-2 text-sm text-text-secondary text-center">
               Role
             </th>
-            <th className="px-6 py-4 text-sm text-text-secondary text-center">
+            <th className="px-2 py-2 md:px-6 md:py-2 text-sm text-text-secondary text-center">
               Status
             </th>
             <th></th>

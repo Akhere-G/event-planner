@@ -65,30 +65,30 @@ export default function InviteRow({ invite }: { invite: Invite }) {
   );
 
   return (
-    <tr className="group hover:bg-surface-muted/30 transition-colors">
-      <td className="px-6 py-4">
+    <tr className="group hover:bg-surface-muted/30 transition-colors text-sm md:text-current">
+      <td className="px-2 py-2 md:px-6 md:py-2">
         <div className="flex items-center gap-3">
-          <div className="p-2 rounded-full bg-brand-primary/10 text-brand-primary">
+          <div className="p-2 hidden md:block rounded-full bg-brand-primary/10 text-brand-primary">
             <Mail size={16} />
           </div>
           <span>{email}</span>
         </div>
       </td>
-      <td className="px-6 py-4">
+      <td className="px-2 py-2 md:px-6 md:py-2">
         <div className="flex items-center justify-center gap-1.5 text-sm text-text-secondary capitalize">
-          <ShieldCheck size={14} />
+          <ShieldCheck className="hidden md:flex" size={14} />
           {role}
         </div>
       </td>
-      <td className="px-6 py-4 text-right">
+      <td className="px-2 py-2 md:px-6 md:py-2 text-right">
         <span
           className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs border  ${statusStyles}`}
         >
-          <Icon size={12} className="mr-1" />
+          <Icon size={12} className="hidden md:block md:mr-1" />
           {status}
         </span>
       </td>
-      <td className="px-4 py-4 text-right relative">
+      <td className="px-2 py-2 md:px-4 md:py-2 text-right relative">
         <button
           onClick={() => setIsMenuOpen(!isMenuOpen)}
           className="p-1 hover:bg-surface-muted rounded-full transition-colors"
