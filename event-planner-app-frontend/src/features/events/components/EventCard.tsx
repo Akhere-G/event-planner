@@ -11,6 +11,9 @@ import { useState } from "react";
 import { EditableSelect, EditableText, TimePicker } from "../../../components";
 import { eventCategories } from "../constants";
 
+import { useParams } from "react-router";
+import { useUpdateEvent } from "../../trips/hooks";
+
 interface EventCardProps {
   event: Event;
   handleDelete?: (id: number) => Promise<void>;
@@ -18,7 +21,7 @@ interface EventCardProps {
   role: string;
 }
 
-export default function EventCard({
+export function EventCard({
   event,
   handleDelete = async () => {},
   handleEdit = async () => {},
@@ -142,5 +145,34 @@ export default function EventCard({
         </div>
       </div>
     </div>
+  );
+}
+
+export default function EventCardConnected({
+  role,
+  event,
+  onDelete = () => {},
+  onEdit = () => {},
+}: {
+  role: string;
+  event: Event;
+  onDelete?: () => void;
+  onEdit?: () => void;
+}) {
+  const tripId = Number(useParams()?.tripId);
+
+  const { handleDelete, handleEdit } = useUpdateEvent({
+    tripId,
+    onEdit,
+    onDelete,
+  });
+
+  return (
+    <EventCard
+      role={role}
+      event={event}
+      handleDelete={handleDelete}
+      handleEdit={handleEdit}
+    />
   );
 }

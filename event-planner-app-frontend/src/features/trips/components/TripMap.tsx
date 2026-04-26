@@ -11,10 +11,9 @@ import {
   EventSearch,
   FitToDay,
   SearchEventMarker,
-  SearchEvents,
+  EventSearchResultList,
 } from "../../events/components";
 
-import { useUpdateEvent } from "../hooks";
 import type { Trip } from "../types";
 import { differenceInDays } from "date-fns";
 import { canUserEdit } from "../../users/utils";
@@ -38,17 +37,9 @@ const permissionEnum = {
 } as const;
 
 export default function TripMap({ trip }: { trip: Trip }) {
-  const {
-    latitude,
-    longitude,
-    role,
-    startDate,
-    endDate,
-    events,
-    id: tripId,
-  } = trip;
+  const { latitude, longitude, role, startDate, endDate, events } = trip;
   const dispatch = useDispatch();
-  const { searchEvents, searchIndex, selectedEvent, days } = useSelector(
+  const { searchEvents, selectedEvent, days } = useSelector(
     (state: RootState) => state.map,
   );
   const darkMode = useSelector((state: RootState) => state.theme.darkMode);
@@ -60,11 +51,6 @@ export default function TripMap({ trip }: { trip: Trip }) {
   const [, setPermission] = useState<keyof typeof permissionEnum>(
     permissionEnum.LOADING,
   );
-
-  const { handleDelete, handleEdit } = useUpdateEvent({
-    tripId,
-    onDelete: () => dispatch(setSelectedEvent(null)),
-  });
 
   const map = useMap();
 
@@ -150,16 +136,8 @@ export default function TripMap({ trip }: { trip: Trip }) {
     />
   ));
 
-  const onEventAdded = () => {
-    const result = searchEvents[searchIndex];
-
-    dispatch(
-      setSearchEvents(
-        searchEvents.map((e) =>
-          e.placeId === result.placeId ? { ...e, isAdded: true } : e,
-        ),
-      ),
-    );
+  const onDelete = () => {
+    dispatch(setSelectedEvent(null));
   };
 
   return (
@@ -190,7 +168,7 @@ export default function TripMap({ trip }: { trip: Trip }) {
           </AdvancedMarker>
         )}
       </Map>
-      <div className="absolute top-4 right-2 flex flex-col gap-2 items-end">
+      <div className="absolute z-10 top-4 right-2 flex flex-col gap-2 items-end">
         <EventSearch
           destination={{ latitude: trip.latitude, longitude: trip.longitude }}
         />
@@ -210,7 +188,7 @@ export default function TripMap({ trip }: { trip: Trip }) {
       </div>
       {selectedEvent && (
         <div
-          className={`z-10 absolute bottom-14 md:bottom-2 flex w-[140%] pt-2 pl-4 
+          className={`absolute bottom-14 md:bottom-2 flex w-[140%] pt-2 pl-4 
           pr-14 scale-75 left-0 -translate-x-[18vw] md:w-[130%] md:-translate-x-[8vw]`}
         >
           <button
@@ -220,11 +198,10 @@ export default function TripMap({ trip }: { trip: Trip }) {
             <X size={20} />
           </button>
           <EventCard
+            event={selectedEvent}
             key={selectedEvent.name}
             role={role}
-            event={selectedEvent}
-            handleDelete={handleDelete}
-            handleEdit={handleEdit}
+            onDelete={onDelete}
           />
         </div>
       )}
@@ -236,12 +213,7 @@ export default function TripMap({ trip }: { trip: Trip }) {
           >
             <X size={20} />
           </button>
-          <SearchEvents
-            searchEvents={searchEvents}
-            index={searchIndex}
-            setIndex={(index) => dispatch(setSearchIndex(index))}
-            onEventAdded={onEventAdded}
-          />
+          <EventSearchResultList />
         </div>
       )}
     </div>

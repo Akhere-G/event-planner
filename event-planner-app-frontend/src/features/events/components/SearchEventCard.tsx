@@ -2,6 +2,13 @@ import { Check, Plus } from "lucide-react";
 import { EditableSelect } from "../../../components";
 import type { EventSchema } from "../schemas/eventSchema";
 import type { EventSearchResult } from "../types";
+import type { RootState } from "../../../store";
+import { useDispatch, useSelector } from "react-redux";
+import { useAddEventMutation } from "../service/eventApiSlice";
+import { isFetchBaseQueryError } from "../../api/utils";
+import { setSearchEvents } from "../../maps/service/mapSlice";
+import { useParams } from "react-router";
+import { formatDateRelative } from "../../../utils/dateFormattors";
 
 interface SearchEventCardProps {
   event: EventSearchResult;
@@ -10,7 +17,7 @@ interface SearchEventCardProps {
   isLoading: boolean;
 }
 
-export default function SearchEventCard({
+export function EventSearchResultCard({
   event,
   handleSave,
   dates,
@@ -75,5 +82,53 @@ export default function SearchEventCard({
         </div>
       </div>
     </div>
+  );
+}
+
+export default function EventSearchResultCardConnected() {
+  const { tripId } = useParams();
+  const { searchEvents, searchIndex, days } = useSelector(
+    (state: RootState) => state.map,
+  );
+  const dispatch = useDispatch();
+
+  const [addEvent, { isLoading: isAddEventLoading }] = useAddEventMutation();
+
+  const currentEvent = searchEvents[searchIndex];
+
+  const updateSearchResults = () => {
+    dispatch(
+      setSearchEvents(
+        searchEvents.map((e) =>
+          e.placeId === currentEvent.placeId ? { ...e, isAdded: true } : e,
+        ),
+      ),
+    );
+  };
+
+  const handleSave = async (event: EventSchema) => {
+    try {
+      await addEvent({ tripId: Number(tripId), event }).unwrap();
+      updateSearchResults();
+    } catch (err) {
+      if (isFetchBaseQueryError(err)) {
+        console.error(err);
+        // TODO: Add notification
+      }
+    }
+  };
+
+  const dates = days.map((day) => ({
+    title: formatDateRelative(day.date),
+    value: day.date,
+  }));
+
+  return (
+    <EventSearchResultCard
+      event={currentEvent}
+      dates={dates}
+      handleSave={handleSave}
+      isLoading={isAddEventLoading}
+    />
   );
 }
