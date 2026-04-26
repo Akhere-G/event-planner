@@ -69,6 +69,7 @@ export const inviteApi = apiSlice.injectEndpoints({
       }),
       invalidatesTags: (_, __, args) => [
         { type: "Invites", id: "LIST" },
+        { type: "Trips", id: "LIST" },
         { type: "Invites", id: args.inviteId },
       ],
     }),
@@ -82,6 +83,7 @@ export const inviteApi = apiSlice.injectEndpoints({
       }),
       invalidatesTags: (_, __, args) => [
         { type: "Invites", id: "LIST" },
+        { type: "Trips", id: "LIST" },
         { type: "Invites", id: args.inviteId },
       ],
     }),
