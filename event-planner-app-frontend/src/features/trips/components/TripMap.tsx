@@ -130,7 +130,7 @@ export default function TripMap({ trip }: { trip: Trip }) {
   };
 
   return (
-    <div className="relative w-full h-[93.5vh] 2xl:h-[96vh] isolate will-change-transform">
+    <div className="relative w-full h-[93.5vh] 2xl:h-[96vh] ">
       <Map
         mapId="e74fd7bd6c063337caf66343"
         maxZoom={MAX_ZOOM}
@@ -142,6 +142,7 @@ export default function TripMap({ trip }: { trip: Trip }) {
         reuseMaps
         colorScheme={darkMode ? "DARK" : "LIGHT"}
         gestureHandling="greedy"
+        onClick={(e) => console.log(e)}
       >
         {eventMarkers}
         {searchEventMarkers}
@@ -157,10 +158,12 @@ export default function TripMap({ trip }: { trip: Trip }) {
           </AdvancedMarker>
         )}
       </Map>
-      <div className="absolute z-10 top-4 right-2 flex flex-col gap-2 items-end">
+      {canUserEdit(trip.role) && (
         <EventSearch
           destination={{ latitude: trip.latitude, longitude: trip.longitude }}
         />
+      )}
+      <div className="absolute z-10 top-4 right-2 flex flex-col gap-2 items-end">
         <DayFilter />
         <FitToDay />
       </div>
@@ -195,7 +198,7 @@ export default function TripMap({ trip }: { trip: Trip }) {
         </div>
       )}
       {canUserEdit(trip.role) && searchEvents.length > 0 && (
-        <div className="absolute z-30 bottom-20 w-full px-4 ">
+        <div className="absolute z-10 bottom-4 w-full px-4 ">
           <button
             onClick={() => dispatch(setSearchEvents([]))}
             className="absolute z-1 btn-secondary p-1 right-1 -top-3"

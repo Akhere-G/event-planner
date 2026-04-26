@@ -5,8 +5,9 @@ import { LocationInput } from "../../../components";
 import { useMap, useMapsLibrary } from "@vis.gl/react-google-maps";
 import { fitToBounds } from "../../maps/utils";
 import { setSearchEvents } from "../../maps/service/mapSlice";
-import { useDispatch } from "react-redux";
-import { DEFAULT_ZOOM, SEARCH_RADIUS } from "../../maps/constants";
+import { useDispatch, useSelector } from "react-redux";
+import { searchTags } from "../../maps/constants";
+import type { RootState } from "../../../store";
 
 export function EventSearch({
   destination,
@@ -15,9 +16,13 @@ export function EventSearch({
   destination: { latitude: number; longitude: number };
   onPlaceSelect: (eventSearchResult: EventSearchResult[]) => void;
 }) {
-  const [expanded, setExpanded] = useState(false);
-
   const { latitude, longitude } = destination;
+
+  const [expanded, setExpanded] = useState(false);
+  const [query, setQuery] = useState<string | null>(null);
+
+  const { searchEvents } = useSelector((state: RootState) => state.map);
+  const dispatch = useDispatch();
 
   const map = useMap();
   const placesLibrary = useMapsLibrary("places");
@@ -44,18 +49,13 @@ export function EventSearch({
 
   const handlePlaceQuery = (query: string) => {
     if (!query || !map || !placesLibrary) return;
-
+    setQuery(query);
     const service = new placesLibrary.PlacesService(map);
 
-    const radius = (map.getZoom() ?? DEFAULT_ZOOM) * SEARCH_RADIUS;
-    const center = map.getCenter();
+    const bounds = map.getBounds();
     const request: google.maps.places.TextSearchRequest = {
       query,
-      location: new google.maps.LatLng(
-        center?.lat() ?? destination.latitude,
-        center?.lng() ?? destination.longitude,
-      ),
-      radius,
+      bounds,
     };
 
     service.textSearch(request, (results, status) => {
@@ -67,10 +67,35 @@ export function EventSearch({
     });
   };
 
+  if (query && searchEvents.length > 0) {
+    return (
+      <div className="absolute top-4 left-1/2 -translate-x-1/2 flex flex-col gap-2 items-center ">
+        <button
+          className="z-1 absolute -right-3 -top-2 bg-brand-primary p-1 text-sm"
+          onClick={() => {
+            setQuery(null);
+            dispatch(setSearchEvents([]));
+          }}
+        >
+          <X size={16} />
+        </button>
+        <p className="bg-surface px-4 py-2 rounded-full text-sm">
+          Searching: {query}
+        </p>
+        <button
+          onClick={() => handlePlaceQuery(query)}
+          className="btn-secondary px-6 py-2 text-xs"
+        >
+          Search here
+        </button>
+      </div>
+    );
+  }
+
   return (
-    <div className="rounded-xl bg-surface">
+    <div className="rounded-xl absolute top-4 left-4">
       {expanded ? (
-        <div className="w-70 relative">
+        <div className="max-w-100 relative">
           <button
             className="z-1 absolute -right-1 -top-2 bg-brand-primary p-1"
             onClick={() => setExpanded(false)}
@@ -83,15 +108,29 @@ export function EventSearch({
               onPlaceQuery={handlePlaceQuery}
               cityBounds={cityBounds}
             />
+            <div className="flex gap-2 overflow-x-scroll py-2 rounded-md">
+              {searchTags.map(({ label, query, Icon }) => (
+                <button
+                  onClick={() => handlePlaceQuery(query)}
+                  key={label}
+                  className="btn-secondary px-3 py-2 text-xs flex gap-2 items-center w-full text-nowrap"
+                >
+                  <Icon size={16} />
+                  <span className="flex-1">{label}</span>
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       ) : (
-        <button
-          className="btn-secondary bg-brand-secondary/20 p-2"
-          onClick={() => setExpanded(true)}
-        >
-          <Search size={20} />
-        </button>
+        <div className="bg-surface rounded-xl">
+          <button
+            className="btn-secondary bg-brand-secondary/20 p-2"
+            onClick={() => setExpanded(true)}
+          >
+            <Search size={20} />
+          </button>
+        </div>
       )}
     </div>
   );
