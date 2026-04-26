@@ -27,7 +27,7 @@ export const formatDateRange = (startAt: string, endAt: string) => {
   return dateStr;
 };
 
-export const formatDateRelative = (date = "") => {
+export const formatDateRelative = (date: string | number | Date) => {
   const dateVal = new Date(date);
   const today = new Date();
   const yesterday = isYesterday(dateVal);

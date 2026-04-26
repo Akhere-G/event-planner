@@ -10,6 +10,15 @@ export interface Event {
   category: string;
 }
 
+export interface EventSearchResult {
+  placeId: string;
+  name: string;
+  address: string;
+  latitude: number;
+  longitude: number;
+  isAdded: boolean;
+}
+
 export const eventCategories = [
   { title: "Dining", value: "dining" },
   { title: "Sightseeing", value: "sightseeing" },

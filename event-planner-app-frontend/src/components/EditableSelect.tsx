@@ -15,6 +15,7 @@ interface EditableSelectProps {
   selectedValue: string;
   CustomSelect?: (props: CustomSelectProps) => React.JSX.Element;
   canEdit: boolean;
+  isLoading?: boolean;
 }
 
 interface CustomSelectProps {
@@ -28,6 +29,7 @@ export default function EditableSelect({
   selectedValue,
   CustomSelect,
   canEdit,
+  isLoading = false,
 }: EditableSelectProps) {
   const [isEditing, setIsEditing] = useState(false);
   const firstButtonRef = useRef<HTMLButtonElement>(null);
@@ -71,6 +73,7 @@ export default function EditableSelect({
             <button
               key={value}
               ref={index === 0 ? firstButtonRef : null}
+              disabled={isLoading}
               className={`p-1 hover:bg-surface-muted focus:bg-surface-muted
               focus:outline-0! rounded-none transition-colors
               ${selectedValue === value ? "bg-brand-secondary! text-text-inverse!" : ""}
@@ -95,10 +98,10 @@ export default function EditableSelect({
         className={`${canEdit ? "cursor-pointer" : ""} relative group`}
         onClick={(e) => {
           e.stopPropagation();
-          if (canEdit) setIsEditing((prev) => !prev);
+          if (canEdit && !isLoading) setIsEditing((prev) => !prev);
         }}
       >
-        {canEdit && (
+        {canEdit && !isLoading && (
           <div className="absolute -top-2 -right-2 hidden group-hover:flex ">
             <Pencil size={10} />
           </div>

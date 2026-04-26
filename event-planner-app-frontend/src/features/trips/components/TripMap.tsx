@@ -3,12 +3,15 @@ import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import type { RootState } from "../../../store";
 import { LocateIcon, Minus, Plus, X } from "lucide-react";
-import type { Event } from "../../events/types";
+import type { Event, EventSearchResult } from "../../events/types";
 import {
   DayFilter,
   EventCard,
   EventMarker,
+  EventSearch,
   FitToDay,
+  SearchEventMarker,
+  SearchEvents,
 } from "../../events/components";
 
 import { useUpdateEvent } from "../hooks";
@@ -16,6 +19,7 @@ import { makeDays } from "../../events/utils";
 import type { Trip } from "../types";
 import { differenceInDays } from "date-fns";
 import type { Day } from "../../events/components/DayFilter";
+import { canUserEdit } from "../../users/utils";
 
 const MAX_ZOOM = 17;
 const MIN_ZOOM = 10;
@@ -74,6 +78,8 @@ export default function TripMap({ trip }: { trip: Trip }) {
     id: tripId,
   } = trip;
   const [events, setEvents] = useState(defaultEvents);
+  const [searchEvents, setSearchEvents] = useState<EventSearchResult[]>([]);
+  const [searchIndex, setSearchIndex] = useState(0);
   const [days, setDays] = useState<Day[]>(
     getDaysWithFilter(defaultEvents, startDate, endDate),
   );
@@ -116,7 +122,8 @@ export default function TripMap({ trip }: { trip: Trip }) {
     }
 
     map?.fitBounds(bounds, DEFAULT_PADDING);
-  }, [map, selectedEvents, latitude, longitude]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [map, latitude, longitude]);
 
   useEffect(() => {
     setEvents(defaultEvents);
@@ -162,7 +169,13 @@ export default function TripMap({ trip }: { trip: Trip }) {
     });
   };
 
-  const renderedMarkers = selectedEvents.map((event) => (
+  const onSelectSearchMarker = (event: EventSearchResult) => {
+    const index = searchEvents.findIndex((e) => e.placeId === event.placeId);
+    if (index === -1) return;
+    setSearchIndex(index);
+  };
+
+  const eventMarkers = selectedEvents.map((event) => (
     <EventMarker
       day={differenceInDays(event.startAt, startDate) + 1}
       key={event.id}
@@ -172,6 +185,13 @@ export default function TripMap({ trip }: { trip: Trip }) {
     />
   ));
 
+  const searchEventMarkers = searchEvents.map((event) => (
+    <SearchEventMarker
+      key={event.placeId}
+      place={event}
+      onSelect={onSelectSearchMarker}
+    />
+  ));
   const fitToAll = () => {
     if (selectedEvents.length === 0) {
       return;
@@ -209,6 +229,28 @@ export default function TripMap({ trip }: { trip: Trip }) {
     map?.fitBounds(bounds, DEFAULT_PADDING);
   };
 
+  const onPlaceSelect = (places: EventSearchResult[]) => {
+    if (!map) return;
+    if (places.length === 1) {
+      map.panTo({
+        lat: places[0].latitude,
+        lng: places[0].longitude,
+      });
+      map.setZoom(15);
+    }
+    setSearchEvents(places);
+  };
+
+  const onEventAdded = () => {
+    const result = searchEvents[searchIndex];
+
+    setSearchEvents((prev) =>
+      prev.map((e) =>
+        e.placeId === result.placeId ? { ...e, isAdded: true } : e,
+      ),
+    );
+  };
+
   return (
     <div className="relative w-full h-[93.5vh] 2xl:h-[96vh] isolate will-change-transform">
       <Map
@@ -223,7 +265,8 @@ export default function TripMap({ trip }: { trip: Trip }) {
         colorScheme={darkMode ? "DARK" : "LIGHT"}
         gestureHandling="greedy"
       >
-        {renderedMarkers}
+        {eventMarkers}
+        {searchEventMarkers}
         {userCoords && (
           <AdvancedMarker
             position={{ lat: userCoords.latitude, lng: userCoords.longitude }}
@@ -237,6 +280,10 @@ export default function TripMap({ trip }: { trip: Trip }) {
         )}
       </Map>
       <div className="absolute top-4 right-2 flex flex-col gap-2 items-end">
+        <EventSearch
+          onPlaceSelect={onPlaceSelect}
+          destination={{ latitude: trip.latitude, longitude: trip.longitude }}
+        />
         <DayFilter days={days} setDays={setDays} />
         <FitToDay days={days} fitToAll={fitToAll} fitToDay={fitToDay} />
       </div>
@@ -268,6 +315,22 @@ export default function TripMap({ trip }: { trip: Trip }) {
             event={selectedEvent}
             handleDelete={handleDelete}
             handleEdit={handleEdit}
+          />
+        </div>
+      )}
+      {canUserEdit(trip.role) && searchEvents.length > 0 && (
+        <div className="absolute z-30 bottom-20 w-full px-4 ">
+          <button
+            onClick={() => setSearchEvents([])}
+            className="absolute btn-secondary p-1 right-1 -top-3"
+          >
+            <X size={20} />
+          </button>
+          <SearchEvents
+            searchEvents={searchEvents}
+            index={searchIndex}
+            setIndex={setSearchIndex}
+            onEventAdded={onEventAdded}
           />
         </div>
       )}
