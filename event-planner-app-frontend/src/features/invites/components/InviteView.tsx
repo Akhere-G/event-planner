@@ -20,7 +20,9 @@ export default function InvitesView() {
       </StateGate>
       {!isError && !isLoading && (
         <div>
-          <h2 className="title mt-4 mb-2">Invite user</h2>
+          <h2 id="invite-user-heading" className="title mt-4 mb-2">
+            Invite user
+          </h2>
           <InviteUserForm />
         </div>
       )}
