@@ -1,4 +1,4 @@
-import { useState, type Dispatch, type SetStateAction } from "react";
+import { useState } from "react";
 import type { Event } from "../types";
 import { Layers3, X } from "lucide-react";
 
@@ -14,7 +14,7 @@ export default function DayFilter({
   setDays,
 }: {
   days: Day[];
-  setDays: Dispatch<SetStateAction<Day[]>>;
+  setDays: (days: Day[]) => void;
 }) {
   const [expanded, setExpanded] = useState(false);
   const daysWithEvents = days.filter((day) => day.events.length > 0);
@@ -23,19 +23,19 @@ export default function DayFilter({
   const noneChecked = daysWithEvents.every((day) => !day.show);
 
   const toggleDay = (date: string) => {
-    setDays((prev) =>
-      prev.map((day) =>
+    setDays(
+      days.map((day) =>
         day.date === date ? { ...day, show: !day.show } : day,
       ),
     );
   };
 
   const selectAllDays = () => {
-    setDays((prev) => prev.map((day) => ({ ...day, show: true })));
+    setDays(days.map((day) => ({ ...day, show: true })));
   };
 
   const deselectAllDays = () => {
-    setDays((prev) => prev.map((day) => ({ ...day, show: false })));
+    setDays(days.map((day) => ({ ...day, show: false })));
   };
 
   return (

@@ -3,6 +3,7 @@ import { authSlice } from "./features/auth/services/authSlice";
 import { apiSlice } from "./features/api/apiSlice";
 import { modalSlice } from "./features/modal/modalSlice";
 import { themeSlice } from "./features/theme/themeSlice";
+import { mapSlice } from "./features/maps/mapSlice";
 
 export const store = configureStore({
   reducer: {
@@ -10,6 +11,7 @@ export const store = configureStore({
     [authSlice.name]: authSlice.reducer,
     [modalSlice.name]: modalSlice.reducer,
     [themeSlice.name]: themeSlice.reducer,
+    [mapSlice.name]: mapSlice.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().concat([apiSlice.middleware]),

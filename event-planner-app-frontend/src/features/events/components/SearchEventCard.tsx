@@ -21,8 +21,8 @@ export default function SearchEventCard({
   return (
     <div className="card flex-1 hover:shadow-lg transition-shadow border-l-4 border-brand-primary">
       <div className="flex flex-col">
-        <h3 className="font-bold tracking-tight text-text-primary flex flex-col">
-          <span>{name}</span>
+        <h3 className="text-sm truncate font-bold tracking-tight text-text-primary flex flex-col">
+          <span className="truncate">{name}</span>
         </h3>
 
         <p className="text-sm text-text-secondary">{address}</p>

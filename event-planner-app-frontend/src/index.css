@@ -13,7 +13,7 @@
 @theme {
   --color-brand-primary: #f97316;
   --color-brand-secondary: #fb923c;
-  --color-brand-accent: #0ea5e9;
+  --color-brand-accent: #3ed5f9;
 
   --color-canvas: var(--bg-canvas);
   --color-surface: var(--bg-surface);
@@ -468,17 +468,17 @@
 
   /* The main container */
   .gm-style-iw-c {
-    @apply bg-text-primary! shadow-xl! p-2!;
+    @apply bg-surface! text-text-primary! shadow-xl! p-2!;
   }
 
   /* The content wrapper */
   .gm-style-iw-d {
-    @apply bg-text-primary! overflow-hidden!;
+    @apply bg-surface! text-text-primary! overflow-hidden!;
   }
 
   /* The tail/pointer (This is usually the 'white box' on top or bottom) */
   .gm-style-iw-tc::after {
-    @apply bg-text-primary!;
+    @apply bg-surface! text-text-primary!;
   }
 
   /* Hide the default close button if it's clashing */
@@ -487,11 +487,11 @@
   }
 
   .gm-style-iw-c * {
-    @apply bg-text-primary! p-0!
+    @apply bg-surface! text-text-primary! p-0!
   }
 
   .address * {
-    @apply text-text-secondary!
+    @apply bg-text-inverse text-text-secondary!
   }
   .view-link * {
     @apply text-brand-accent!

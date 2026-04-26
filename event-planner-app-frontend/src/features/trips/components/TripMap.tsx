@@ -1,6 +1,6 @@
 import { AdvancedMarker, Map, useMap } from "@vis.gl/react-google-maps";
 import { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import type { RootState } from "../../../store";
 import { LocateIcon, Minus, Plus, X } from "lucide-react";
 import type { Event, EventSearchResult } from "../../events/types";
@@ -20,6 +20,12 @@ import type { Trip } from "../types";
 import { differenceInDays } from "date-fns";
 import type { Day } from "../../events/components/DayFilter";
 import { canUserEdit } from "../../users/utils";
+import {
+  setDays,
+  setSearchEvents,
+  setSearchIndex,
+  setSelectedEvent,
+} from "../../maps/mapSlice";
 
 const MAX_ZOOM = 17;
 const MIN_ZOOM = 10;
@@ -76,27 +82,27 @@ export default function TripMap({ trip }: { trip: Trip }) {
     role,
     startDate,
     endDate,
-    events: defaultEvents,
+    events,
     id: tripId,
   } = trip;
-  const [events, setEvents] = useState(defaultEvents);
-  const [searchEvents, setSearchEvents] = useState<EventSearchResult[]>([]);
-  const [searchIndex, setSearchIndex] = useState(0);
-  const [days, setDays] = useState<Day[]>(
-    getDaysWithFilter(defaultEvents, startDate, endDate),
+  const dispatch = useDispatch();
+  const { searchEvents, searchIndex, selectedEvent, days } = useSelector(
+    (state: RootState) => state.map,
   );
+  const darkMode = useSelector((state: RootState) => state.theme.darkMode);
+
+  const [userCoords, setUserCoords] = useState<{
+    latitude: number;
+    longitude: number;
+  } | null>(null);
   const [, setPermission] = useState<keyof typeof permissionEnum>(
     permissionEnum.LOADING,
   );
-  const [userCoords, setUserCoords] = useState<GeolocationCoordinates | null>(
-    null,
-  );
-  const darkMode = useSelector((state: RootState) => state.theme.darkMode);
+
   const { handleDelete, handleEdit } = useUpdateEvent({
     tripId,
-    onDelete: () => setSelectedEvent(null),
+    onDelete: () => dispatch(setSelectedEvent(null)),
   });
-  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
 
   const map = useMap();
 
@@ -128,12 +134,8 @@ export default function TripMap({ trip }: { trip: Trip }) {
   }, [map, latitude, longitude]);
 
   useEffect(() => {
-    setEvents(defaultEvents);
-  }, [defaultEvents]);
-
-  useEffect(() => {
-    setDays(getDaysWithFilter(events, startDate, endDate));
-  }, [events, startDate, endDate]);
+    dispatch(setDays(getDaysWithFilter(events, startDate, endDate)));
+  }, [events, startDate, endDate, dispatch]);
 
   useEffect(() => {
     if (!navigator.geolocation) return;
@@ -151,7 +153,7 @@ export default function TripMap({ trip }: { trip: Trip }) {
     );
 
     return () => navigator.geolocation.clearWatch(watchId);
-  }, []);
+  }, [dispatch]);
 
   const zoomIn = () => {
     if (map)
@@ -174,7 +176,7 @@ export default function TripMap({ trip }: { trip: Trip }) {
   const onSelectSearchMarker = (event: EventSearchResult) => {
     const index = searchEvents.findIndex((e) => e.placeId === event.placeId);
     if (index === -1) return;
-    setSearchIndex(index);
+    dispatch(setSearchIndex(index));
   };
 
   const eventMarkers = selectedEvents.map((event) => (
@@ -183,7 +185,7 @@ export default function TripMap({ trip }: { trip: Trip }) {
       key={event.id}
       event={event}
       position={{ lat: event.latitude, lng: event.longitude }}
-      onSelect={setSelectedEvent}
+      onSelect={(event) => dispatch(setSelectedEvent(event))}
     />
   ));
 
@@ -229,15 +231,17 @@ export default function TripMap({ trip }: { trip: Trip }) {
   const onPlaceSelect = (places: EventSearchResult[]) => {
     if (!map) return;
     fitToBounds(places);
-    setSearchEvents(places);
+    dispatch(setSearchEvents(places));
   };
 
   const onEventAdded = () => {
     const result = searchEvents[searchIndex];
 
-    setSearchEvents((prev) =>
-      prev.map((e) =>
-        e.placeId === result.placeId ? { ...e, isAdded: true } : e,
+    dispatch(
+      setSearchEvents(
+        searchEvents.map((e) =>
+          e.placeId === result.placeId ? { ...e, isAdded: true } : e,
+        ),
       ),
     );
   };
@@ -255,6 +259,7 @@ export default function TripMap({ trip }: { trip: Trip }) {
         reuseMaps
         colorScheme={darkMode ? "DARK" : "LIGHT"}
         gestureHandling="greedy"
+        onClick={(e) => console.log(e)}
       >
         {eventMarkers}
         {searchEventMarkers}
@@ -275,7 +280,7 @@ export default function TripMap({ trip }: { trip: Trip }) {
           onPlaceSelect={onPlaceSelect}
           destination={{ latitude: trip.latitude, longitude: trip.longitude }}
         />
-        <DayFilter days={days} setDays={setDays} />
+        <DayFilter days={days} setDays={(days) => dispatch(setDays(days))} />
         <FitToDay days={days} fitToAll={fitToAll} fitToDay={fitToDay} />
       </div>
       <div className="absolute bottom-4 right-2 flex flex-col gap-2">
@@ -295,7 +300,7 @@ export default function TripMap({ trip }: { trip: Trip }) {
           pr-14 scale-75 left-0 -translate-x-[18vw] md:w-[130%] md:-translate-x-[8vw]`}
         >
           <button
-            onClick={() => setSelectedEvent(null)}
+            onClick={() => dispatch(setSelectedEvent(null))}
             className="absolute btn-secondary p-1 right-11 -top-2"
           >
             <X size={20} />
@@ -312,7 +317,7 @@ export default function TripMap({ trip }: { trip: Trip }) {
       {canUserEdit(trip.role) && searchEvents.length > 0 && (
         <div className="absolute z-30 bottom-20 w-full px-4 ">
           <button
-            onClick={() => setSearchEvents([])}
+            onClick={() => dispatch(setSearchEvents([]))}
             className="absolute z-1 btn-secondary p-1 right-1 -top-3"
           >
             <X size={20} />
@@ -320,7 +325,7 @@ export default function TripMap({ trip }: { trip: Trip }) {
           <SearchEvents
             searchEvents={searchEvents}
             index={searchIndex}
-            setIndex={setSearchIndex}
+            setIndex={(index) => dispatch(setSearchIndex(index))}
             onEventAdded={onEventAdded}
           />
         </div>
