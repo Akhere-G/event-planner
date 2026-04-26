@@ -41,7 +41,9 @@ const getDaysWithFilter = (
 ): Day[] =>
   makeDays(events, startDate, endDate).map((day) => ({ ...day, show: true }));
 
-const getBoundsForEvents = (events: Event[]) => {
+const getBoundsForEvents = (
+  events: { latitude: number; longitude: number }[],
+) => {
   let north = -Infinity;
   let east = -Infinity;
   let south = Infinity;
@@ -192,21 +194,27 @@ export default function TripMap({ trip }: { trip: Trip }) {
       onSelect={onSelectSearchMarker}
     />
   ));
-  const fitToAll = () => {
-    if (selectedEvents.length === 0) {
+
+  const fitToBounds = (events: { latitude: number; longitude: number }[]) => {
+    if (events.length === 0) {
       return;
     }
 
-    if (selectedEvents.length === 1) {
+    if (events.length === 1) {
       map?.panTo({
         lat: events[0].latitude,
         lng: events[0].longitude,
       });
       return;
     }
-    const bounds = getBoundsForEvents(selectedEvents);
+
+    const bounds = getBoundsForEvents(events);
 
     map?.fitBounds(bounds, DEFAULT_PADDING);
+  };
+
+  const fitToAll = () => {
+    fitToBounds(selectedEvents);
   };
 
   const fitToDay = (date: string) => {
@@ -215,29 +223,12 @@ export default function TripMap({ trip }: { trip: Trip }) {
       console.error("Could not find events for this date");
       return;
     }
-    if (selectedEvents.length === 0) return;
-    if (selectedEvents.length === 1) {
-      map?.panTo({
-        lat: selectedEvents[0].latitude,
-        lng: selectedEvents[0].longitude,
-      });
-      return;
-    }
-
-    const bounds = getBoundsForEvents(selectedEvents);
-
-    map?.fitBounds(bounds, DEFAULT_PADDING);
+    fitToBounds(selectedEvents);
   };
 
   const onPlaceSelect = (places: EventSearchResult[]) => {
     if (!map) return;
-    if (places.length === 1) {
-      map.panTo({
-        lat: places[0].latitude,
-        lng: places[0].longitude,
-      });
-      map.setZoom(15);
-    }
+    fitToBounds(places);
     setSearchEvents(places);
   };
 
@@ -322,7 +313,7 @@ export default function TripMap({ trip }: { trip: Trip }) {
         <div className="absolute z-30 bottom-20 w-full px-4 ">
           <button
             onClick={() => setSearchEvents([])}
-            className="absolute btn-secondary p-1 right-1 -top-3"
+            className="absolute z-1 btn-secondary p-1 right-1 -top-3"
           >
             <X size={20} />
           </button>

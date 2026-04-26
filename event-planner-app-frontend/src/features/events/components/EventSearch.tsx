@@ -2,6 +2,7 @@ import { useState } from "react";
 import type { Event, EventSearchResult } from "../types";
 import { Search, X } from "lucide-react";
 import { LocationInput } from "../../../components";
+import { useMap, useMapsLibrary } from "@vis.gl/react-google-maps";
 
 export type Day = {
   date: string;
@@ -21,6 +22,9 @@ export default function EventSearch({
 
   const { latitude, longitude } = destination;
 
+  const map = useMap();
+  const placesLibrary = useMapsLibrary("places");
+
   const cityBounds = {
     north: latitude + 0.1,
     south: latitude - 0.1,
@@ -28,18 +32,37 @@ export default function EventSearch({
     west: longitude - 0.1,
   };
 
+  const formatPlace = (place: google.maps.places.PlaceResult) => ({
+    name: place.name ?? "",
+    address: place.formatted_address ?? "",
+    latitude: place.geometry?.location?.lat() ?? 0,
+    longitude: place.geometry?.location?.lng() ?? 0,
+    placeId: place.place_id ?? "",
+    isAdded: false,
+  });
   const handlePlaceSelect = (place: google.maps.places.PlaceResult) => {
-    onPlaceSelect([
-      {
-        name: place.name ?? "",
-        address: place.formatted_address ?? "",
-        latitude: place.geometry?.location?.lat() ?? 0,
-        longitude: place.geometry?.location?.lng() ?? 0,
-        placeId: place.place_id ?? "",
-        isAdded: false,
-      },
-    ]);
+    onPlaceSelect([formatPlace(place)]);
     setExpanded(false);
+  };
+
+  const handlePlaceQuery = (query: string) => {
+    if (!query || !map || !placesLibrary) return;
+
+    const service = new placesLibrary.PlacesService(map);
+
+    const request: google.maps.places.TextSearchRequest = {
+      query,
+      location: new google.maps.LatLng(latitude, longitude),
+      radius: 10000,
+    };
+
+    service.textSearch(request, (results, status) => {
+      if (status === placesLibrary.PlacesServiceStatus.OK && results) {
+        onPlaceSelect(results.map(formatPlace));
+      } else {
+        console.error("Place search failed:", status);
+      }
+    });
   };
 
   return (
@@ -55,6 +78,7 @@ export default function EventSearch({
           <div className="flex flex-col gap-1">
             <LocationInput
               onPlaceSelect={handlePlaceSelect}
+              onPlaceQuery={handlePlaceQuery}
               cityBounds={cityBounds}
             />
           </div>

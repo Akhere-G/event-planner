@@ -9,6 +9,8 @@ import { formatDateRelative } from "../../../utils/dateFormattors";
 import { useAddEventMutation } from "../service/eventApiSlice";
 import type { EventSchema } from "../schemas/eventSchema";
 import { isFetchBaseQueryError } from "../../api/utils";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useMap } from "@vis.gl/react-google-maps";
 
 interface Option {
   title: string;
@@ -19,6 +21,7 @@ export default function SearchEvents({
   searchEvents,
   index,
   onEventAdded,
+  setIndex,
 }: {
   searchEvents: EventSearchResult[];
   index: number;
@@ -28,6 +31,8 @@ export default function SearchEvents({
   const { tripId } = useParams();
   const { data, isLoading, isError } = useGetTripQuery(Number(tripId));
   const [addEvent, { isLoading: isAddEventLoading }] = useAddEventMutation();
+
+  const map = useMap();
 
   let dates: Option[] = [];
 
@@ -62,14 +67,39 @@ export default function SearchEvents({
 
   const currentEvent = searchEvents[index];
 
+  const prevSearchResult = () => {
+    const newIndex = (index - 1 + searchEvents.length) % searchEvents.length;
+    const event = searchEvents[newIndex];
+
+    map?.panTo({ lat: event.latitude, lng: event.longitude });
+    setIndex(newIndex);
+  };
+  const nextSearchResult = () => {
+    const newIndex = (index + 1) % searchEvents.length;
+    const event = searchEvents[newIndex];
+
+    map?.panTo({ lat: event.latitude, lng: event.longitude });
+    setIndex(newIndex);
+  };
   return (
     <StateGate loadingStateProps={{ isLoading }} errorStateProps={{ isError }}>
-      <SearchEventCard
-        event={currentEvent}
-        dates={dates}
-        handleSave={handleSave}
-        isLoading={isAddEventLoading}
-      />
+      <div className="relative">
+        <div className="card p-1  text-xs flex items-center justify-center gap-1 absolute bottom-full rounded-md mb-2">
+          <button onClick={prevSearchResult} className="btn-secondary p-1">
+            <ChevronLeft size={12} />
+          </button>
+          {index + 1} of {searchEvents.length}
+          <button onClick={nextSearchResult} className="btn-secondary p-1">
+            <ChevronRight size={12} />
+          </button>
+        </div>
+        <SearchEventCard
+          event={currentEvent}
+          dates={dates}
+          handleSave={handleSave}
+          isLoading={isAddEventLoading}
+        />
+      </div>
     </StateGate>
   );
 }

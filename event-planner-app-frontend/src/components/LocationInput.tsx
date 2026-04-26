@@ -9,6 +9,7 @@ interface LocationInputProps extends React.InputHTMLAttributes<HTMLInputElement>
   onPlaceSelect: (place: google.maps.places.PlaceResult) => void;
   searchTypes?: string[];
   cityBounds?: { north: number; east: number; south: number; west: number };
+  onPlaceQuery?: (query: string) => void;
 }
 
 export default function LocationInput({
@@ -17,6 +18,7 @@ export default function LocationInput({
   classNames = "",
   onPlaceSelect,
   cityBounds,
+  onPlaceQuery,
   searchTypes = ["establishment"],
   ...rest
 }: LocationInputProps) {
@@ -33,10 +35,9 @@ export default function LocationInput({
       types: searchTypes,
     };
 
-    // If city bounds are provided, tell the map to strictly prefer that area
     if (cityBounds) {
       options.bounds = cityBounds;
-      options.strictBounds = true; // Set to false if you want 'bias' instead of 'restriction'
+      options.strictBounds = false;
     }
 
     const instance = new placesLibrary.Autocomplete(inputRef.current, options);
@@ -72,6 +73,11 @@ export default function LocationInput({
             type="text"
             className="form-input w-full"
             placeholder="Search for a location..."
+            onKeyDown={(e) => {
+              if (e.key == "Enter" && inputRef.current && onPlaceQuery) {
+                onPlaceQuery(inputRef.current?.value);
+              }
+            }}
           />
 
           {errorMessage && (
