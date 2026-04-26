@@ -23,7 +23,9 @@
   --color-text-primary: var(--txt-primary);
   --color-text-secondary: var(--txt-secondary);
   --color-text-inverse: var(--txt-inverse);
+  --color-text-canvas: var(--color-text-primary);
   
+
   --color-success: #10b981;
   --color-error: #ef4444;
   --color-warning: #f59e0b;
@@ -149,6 +151,7 @@
   /* --- Australian Outback --- */
   .theme-outback {
     --color-canvas: #fff7ed;
+    --color-text-canvas: #222; 
     --color-surface: #de7856;
     --color-surface-border: #bc5634;
     --color-surface-muted: #cd6745;
@@ -225,14 +228,14 @@
 
   /* --- Spanish Fiesta --- */
   .theme-spanish-fiesta {
-    --color-canvas: #F1BF00; 
+    --color-canvas: #F1BF00;
     --color-surface: #fff;  
     --color-surface-muted: #F1BF00;
     --color-brand-primary: #AA151B; 
     --color-brand-secondary: #AA151B; 
   }
 
-  .theme-spanish-fiesta {
+  .dark.theme-spanish-fiesta {
     --color-brand-primary: #eA555B; 
   }
 
@@ -282,8 +285,9 @@
   /* --- Tulum Cenote (Tropical & Earthy) --- */
   .theme-tulum-cenote {
     --color-canvas: #96e7d2; 
-    --color-surface: #fafbf6; 
-    --color-surface-border: #eaebe6; 
+    --color-surface: #FEF6F2; 
+    --color-surface-muted: #EEE6E2; 
+    --color-surface-border: #dfdfde; 
     --color-brand-primary: #062a2e; /* Deep Cenote Water */
     --color-brand-secondary: #158265; /* Woven Rattan */
   }
@@ -295,6 +299,7 @@
   /* --- Jaipur Palace (The Pink City) --- */
   .theme-jaipur-palace {
     --color-canvas: #F5aCa9; 
+    --color-text-canvas: #500C09; 
     --color-surface: #d04C49; 
     --color-surface-muted: #c02C29; 
     --color-surface-border: #b02C29; 
@@ -334,11 +339,12 @@
   /* --- Bangkok Market (Vibrant & Energetic) --- */
   .theme-bangkok-market {
     --color-canvas: #fffbeb; 
+    --color-text-canvas: #222; 
     --color-surface: #df6020; 
     --color-surface-border: #bf4000;
-    --color-surface-muted: #d9470b; 
-    --color-brand-primary: #420004; /* Papaya & Spice */
-    --color-brand-secondary: #a3e0a6; /* Pandan Leaf */
+    --color-surface-muted: #ef7030; 
+    --color-brand-primary: #82302f; /* Papaya & Spice */
+    --color-brand-secondary: #93d096; /* Pandan Leaf */
 
     --color-text-primary: #f8fafc;
     --color-text-secondary: #f8fafc;
@@ -417,7 +423,7 @@
   }
 
   .btn-primary {
-    @apply bg-brand-primary text-text-inverse hover:bg-brand-secondary shadow-sm;
+    @apply bg-brand-primary text-text-inverse hover:brightness-110 shadow-sm;
   }
 
   .btn-error {
