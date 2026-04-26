@@ -5,10 +5,11 @@ import {
   format,
   parseISO,
 } from "date-fns";
-import { eventCategories, type Event } from "../types";
+import { type Event } from "../types";
 import { canUserEdit } from "../../users/utils";
 import { useState } from "react";
 import { EditableSelect, EditableText, TimePicker } from "../../../components";
+import { eventCategories } from "../constants";
 
 interface EventCardProps {
   event: Event;

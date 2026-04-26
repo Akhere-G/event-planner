@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Maximize, X } from "lucide-react";
-import type { Day } from "./DayFilter";
+import type { Day } from "../types";
 
 export default function FitToDay({
   days,

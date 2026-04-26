@@ -1,15 +1,11 @@
 import { addDays, differenceInDays, format, parseISO } from "date-fns";
-import type { Event } from "./types";
+import type { Day, Event } from "./types";
 
-export type Day = {
-  date: string;
-  events: Event[];
-  day: number;
-};
 export function makeDays(
   events: Event[],
   startStr: string,
   endStr: string,
+  show = true,
 ): Day[] {
   function getDate(dateStr: Date | string) {
     return format(dateStr, "yyyy-MM-dd");
@@ -39,6 +35,7 @@ export function makeDays(
     date,
     events,
     day: differenceInDays(date, startDate) + 1,
+    show,
   }));
 }
 

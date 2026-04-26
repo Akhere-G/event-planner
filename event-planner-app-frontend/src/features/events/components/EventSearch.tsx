@@ -1,15 +1,8 @@
 import { useState } from "react";
-import type { Event, EventSearchResult } from "../types";
+import type { EventSearchResult } from "../types";
 import { Search, X } from "lucide-react";
 import { LocationInput } from "../../../components";
 import { useMap, useMapsLibrary } from "@vis.gl/react-google-maps";
-
-export type Day = {
-  date: string;
-  events: Event[];
-  day: number;
-  show: boolean;
-};
 
 export default function EventSearch({
   destination,

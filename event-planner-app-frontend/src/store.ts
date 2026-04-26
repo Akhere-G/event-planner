@@ -3,7 +3,7 @@ import { authSlice } from "./features/auth/services/authSlice";
 import { apiSlice } from "./features/api/apiSlice";
 import { modalSlice } from "./features/modal/modalSlice";
 import { themeSlice } from "./features/theme/themeSlice";
-import { mapSlice } from "./features/maps/mapSlice";
+import { mapSlice } from "./features/maps/service/mapSlice";
 
 export const store = configureStore({
   reducer: {

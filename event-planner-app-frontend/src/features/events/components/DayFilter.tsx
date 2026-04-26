@@ -1,13 +1,6 @@
 import { useState } from "react";
-import type { Event } from "../types";
+import type { Day } from "../types";
 import { Layers3, X } from "lucide-react";
-
-export type Day = {
-  date: string;
-  events: Event[];
-  day: number;
-  show: boolean;
-};
 
 export default function DayFilter({
   days,

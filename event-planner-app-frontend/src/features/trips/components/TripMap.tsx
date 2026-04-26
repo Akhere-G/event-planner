@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import type { RootState } from "../../../store";
 import { LocateIcon, Minus, Plus, X } from "lucide-react";
-import type { Event, EventSearchResult } from "../../events/types";
+import type { EventSearchResult } from "../../events/types";
 import {
   DayFilter,
   EventCard,
@@ -15,17 +15,16 @@ import {
 } from "../../events/components";
 
 import { useUpdateEvent } from "../hooks";
-import { makeDays } from "../../events/utils";
 import type { Trip } from "../types";
 import { differenceInDays } from "date-fns";
-import type { Day } from "../../events/components/DayFilter";
 import { canUserEdit } from "../../users/utils";
 import {
   setDays,
   setSearchEvents,
   setSearchIndex,
   setSelectedEvent,
-} from "../../maps/mapSlice";
+} from "../../maps/service/mapSlice";
+import { getBoundsForEvents, getDaysWithFilter } from "../../maps/utils";
 
 const MAX_ZOOM = 17;
 const MIN_ZOOM = 10;
@@ -40,41 +39,6 @@ const permissionEnum = {
 
 const DEFAULT_PADDING = 50;
 
-const getDaysWithFilter = (
-  events: Event[],
-  startDate: string,
-  endDate: string,
-): Day[] =>
-  makeDays(events, startDate, endDate).map((day) => ({ ...day, show: true }));
-
-const getBoundsForEvents = (
-  events: { latitude: number; longitude: number }[],
-) => {
-  let north = -Infinity;
-  let east = -Infinity;
-  let south = Infinity;
-  let west = Infinity;
-
-  events.forEach((event) => {
-    if (event.latitude > north) {
-      north = event.latitude;
-    }
-
-    if (event.latitude < south) {
-      south = event.latitude;
-    }
-
-    if (event.longitude > east) {
-      east = event.longitude;
-    }
-
-    if (event.longitude < west) {
-      west = event.longitude;
-    }
-  });
-
-  return { north, east, south, west };
-};
 export default function TripMap({ trip }: { trip: Trip }) {
   const {
     latitude,
