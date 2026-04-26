@@ -32,7 +32,27 @@ export const userApiSlice = apiSlice.injectEndpoints({
         { type: "Users", id: userId },
       ],
     }),
+    updateUser: builder.mutation<
+      void,
+      { tripId: number; userId: number; newUserData: Partial<User> }
+    >({
+      query: ({ tripId, userId, newUserData }) => ({
+        url: `/itineraries/${tripId}/users/${userId}`,
+        method: "PATCH",
+        body: newUserData,
+      }),
+      invalidatesTags: (_, __, { tripId, userId }) => [
+        { type: "Trips", id: "LIST" },
+        { type: "Trips", id: tripId },
+        { type: "Users", id: "LIST" },
+        { type: "Users", id: userId },
+      ],
+    }),
   }),
 });
 
-export const { useGetUsersQuery, useRemoveUserMutation } = userApiSlice;
+export const {
+  useGetUsersQuery,
+  useRemoveUserMutation,
+  useUpdateUserMutation,
+} = userApiSlice;

@@ -1,23 +1,30 @@
 import { Mail, ShieldCheck, Trash, User as UserIcon, X } from "lucide-react";
-import type { User } from "../types";
+import { UserRole, type User } from "../types";
 import { useEffect, useRef, useState } from "react";
 
 import { useMatch } from "react-router";
-import { isValidationError } from "../../api/utils";
-import { useRemoveUserMutation } from "../usersApiSlice";
+import { isFetchBaseQueryError, isValidationError } from "../../api/utils";
+import { useRemoveUserMutation, useUpdateUserMutation } from "../usersApiSlice";
+import { EditableSelect } from "../../../components";
 
 export default function UserRow({ user }: { user: User }) {
+  const [userRole, setUserRole] = useState(user.role);
   const [removeUser, { isLoading: removeIsLoading }] = useRemoveUserMutation();
+  const [updateUser] = useUpdateUserMutation();
   const params = useMatch("/trips/:tripId")?.params;
   const tripId = Number(params?.tripId);
 
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isDeleteModal, setIsDeleteModalOpen] = useState(false);
   const menuRef = useRef<HTMLTableCellElement>(null);
-  const { username, email, role } = user;
+  const { username, email } = user;
+
+  useEffect(() => {
+    setUserRole(user.role);
+  }, [user]);
 
   async function remove() {
     try {
-      removeUser({ tripId, userId: user.id }).unwrap();
+      await removeUser({ tripId, userId: user.id }).unwrap();
     } catch (err) {
       if (isValidationError(err)) {
         const serverErrors = err.data.error;
@@ -32,17 +39,46 @@ export default function UserRow({ user }: { user: User }) {
     }
   }
 
+  async function updateRole(role: string) {
+    const oldRole = userRole;
+    try {
+      setUserRole(role);
+      await updateUser({
+        tripId,
+        userId: user.id,
+        newUserData: { role },
+      }).unwrap();
+    } catch (err) {
+      setUserRole(oldRole);
+      if (isFetchBaseQueryError(err)) {
+        // TODO: Add toast notifications
+        switch (err.status) {
+          case 400:
+            console.error("Bad Request");
+            break;
+          case 404:
+            console.error("Not found");
+            break;
+          case 403:
+            console.error("Not authorised");
+            break;
+        }
+      }
+    }
+  }
+
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-        setIsMenuOpen(false);
+        setIsDeleteModalOpen(false);
       }
     };
-    if (isMenuOpen) document.addEventListener("mousedown", handleClickOutside);
+    if (isDeleteModal)
+      document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [isMenuOpen]);
+  }, [isDeleteModal]);
 
-  const closeModal = () => setIsMenuOpen(false);
+  const closeDeleteModal = () => setIsDeleteModalOpen(false);
   return (
     <tr className="group hover:bg-surface-muted/30 transition-colors text-sm md:text-current">
       <td className="px-2 pl-4 md:px-6 py-4">
@@ -64,20 +100,30 @@ export default function UserRow({ user }: { user: User }) {
       <td className="px-2 md:px-6 py-4">
         <div className="flex items-center justify-center gap-1.5 text-sm text-text-secondary capitalize">
           <ShieldCheck className="hidden md:flex" size={14} />
-          {role}
+          <EditableSelect
+            canEdit
+            defaultElement={<p>{userRole}</p>}
+            selectedValue={userRole}
+            options={Object.values(UserRole).map((value) => ({
+              title: value[0].toUpperCase() + value.substring(1),
+              value,
+            }))}
+            selectClassName="flex gap-2"
+            setValue={updateRole}
+          />
         </div>
       </td>
 
-      <td ref={menuRef} className="pr-4  py-4 text-right relative">
+      <td ref={menuRef} className="pr-4  py-4 text-right ">
         <button
-          onClick={() => setIsMenuOpen(!isMenuOpen)}
+          onClick={() => setIsDeleteModalOpen(!isDeleteModal)}
           className="p-1 hover:bg-surface-muted rounded-full transition-colors"
         >
           <Trash size={18} className="text-text-secondary" />
         </button>
 
-        {isMenuOpen && (
-          <div className="backdrop" onClick={closeModal}>
+        {isDeleteModal && (
+          <div className="backdrop" onClick={closeDeleteModal}>
             <div
               className="modal flex items-center justify-center"
               onClick={(e) => e.stopPropagation()}
@@ -86,13 +132,16 @@ export default function UserRow({ user }: { user: User }) {
                 <div>
                   <div className="p-4 bg-brand-primary flex gap-2 items-center justify-between">
                     <h3 className="title">Remove {username}?</h3>
-                    <button onClick={closeModal} className="btn p-2">
+                    <button onClick={closeDeleteModal} className="btn p-2">
                       <X size={20} />
                     </button>
                   </div>
 
                   <div className="p-4 mt-4 flex justify-end gap-2">
-                    <button onClick={closeModal} className="btn-secondary">
+                    <button
+                      onClick={closeDeleteModal}
+                      className="btn-secondary"
+                    >
                       Cancel
                     </button>
                     <button

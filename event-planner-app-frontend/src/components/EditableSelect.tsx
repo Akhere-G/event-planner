@@ -65,7 +65,7 @@ export default function EditableSelect({
     <div className="relative" ref={containerRef}>
       {canEdit && isEditing && (
         <div
-          className={`card absolute z-10 left-0 p-2 shadow-xl ${selectClassName}`}
+          className={`card absolute z-10 -top-2 -right-6 p-2 shadow-xl ${selectClassName}`}
         >
           {options?.map(({ title, value }, index) => (
             <button

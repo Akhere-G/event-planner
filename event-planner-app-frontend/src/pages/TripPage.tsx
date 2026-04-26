@@ -40,7 +40,7 @@ export default function TripPage() {
       {data && (
         <div className="flex relative overflow-x-clip">
           <div
-            className={`flex-1 z-1 max-h-screen absolute w-full md:shadow-[20px_0_30px_-10px_rgba(0,0,0,0.3)] transition-transform duration-300 ${isMapView ? "translate-x-[-200%] invisible" : "visible"} md:static md:translate-x-0 md:visible`}
+            className={`flex-1 max-h-screen absolute w-full md:shadow-[20px_0_30px_-10px_rgba(0,0,0,0.3)] transition-transform duration-300 ${isMapView ? "translate-x-[-200%] invisible" : "visible"} md:static md:translate-x-0 md:visible`}
           >
             <div className="container  h-[93.5vh] 2xl:h-[96vh] overflow-y-scroll">
               <TripDetails {...data?.data} />
@@ -54,7 +54,7 @@ export default function TripPage() {
           <div className="fixed z-1 rounded-xl bg-surface bottom-4 right-1/2 translate-x-1/2 md:hidden">
             <button
               onClick={() => setIsMapView((prev) => !prev)}
-              className="z-1 btn-secondary bg-brand-secondary/20 hover:brightness-140 border-surface-border border w-44 shadow-2xl  flex gap-2 justify-center "
+              className="btn-secondary bg-brand-secondary/20 hover:brightness-140 border-surface-border border w-44 shadow-2xl  flex gap-2 justify-center "
             >
               {isMapView ? (
                 <>

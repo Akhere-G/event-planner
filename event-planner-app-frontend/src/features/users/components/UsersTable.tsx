@@ -3,7 +3,7 @@ import UserRow from "./UserRow";
 
 export default function UsersTable({ users }: { users: User[] }) {
   return (
-    <div className="relative rounded-md border bg-surface shadow-sm overflow-x-scroll">
+    <div className="rounded-md border bg-surface shadow-sm overflow-x-scroll">
       <table className="w-full text-left border-collapse">
         <thead>
           <tr className="border-b bg-surface-muted/50">

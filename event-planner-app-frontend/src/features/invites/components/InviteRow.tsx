@@ -98,7 +98,7 @@ export default function InviteRow({ invite }: { invite: Invite }) {
         </button>
 
         {isMenuOpen && (
-          <div className="card absolute z-20 right-8 top-4 w-32 p-0.5 flex flex-col shadow-xl bg-surface ">
+          <div className="card absolute z-20 right-8 top-1 w-32 p-0.5 flex flex-col shadow-xl bg-surface ">
             {canResend && (
               <button
                 onClick={() => {
