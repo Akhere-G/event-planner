@@ -2,7 +2,7 @@ from .itineraries_service import get_itinerary_membership, get_itinerary
 from ..models import ItineraryUser
 from ..extensions import db
 from sqlalchemy import select, func
-from ..models import User, UserRole
+from ..models import User, UserRole, Invite, InvitationStatus
 from ..exceptions import (
     UserDoesNotExistError,
     UserAlreadyExistsError,
@@ -91,6 +91,13 @@ def remove_user(user_id: int, itinerary_id: int, other_user_id: int):
             raise UserNotAuthorisedError(
                 "You cannot remove yourself when there is only one admin. Appoint another first."
             )
+    stmt = (
+        select(Invite)
+        .where(Invite.itinerary_id == itinerary_id)
+        .where(Invite.email == membership.user.email)
+    )
+    invite = db.session.execute(stmt).scalar_one_or_none()
+    invite.status = InvitationStatus.REVOKED.value
 
     db.session.delete(membership)
     db.session.commit()
