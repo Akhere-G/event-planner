@@ -1,5 +1,6 @@
 import type { Day, Event } from "../events/types";
 import { makeDays } from "../events/utils";
+import { DEFAULT_PADDING } from "./constants";
 
 export const getDaysWithFilter = (
   events: Event[],
@@ -35,4 +36,40 @@ export const getBoundsForEvents = (
   });
 
   return { north, east, south, west };
+};
+
+export const fitToBounds = ({
+  map,
+  events,
+  defaultCenter,
+  defaultBounds,
+}: {
+  map: google.maps.Map;
+  events: { latitude: number; longitude: number }[];
+  defaultCenter?: { latitude: number; longitude: number };
+  defaultBounds?: { north: number; east: number; south: number; west: number };
+}) => {
+  if (events.length === 0) {
+    if (defaultCenter) {
+      map.panTo({
+        lat: defaultCenter.latitude,
+        lng: defaultCenter.longitude,
+      });
+    } else if (defaultBounds) {
+      map.fitBounds(defaultBounds, DEFAULT_PADDING);
+    }
+    return;
+  }
+
+  if (events.length === 1) {
+    map.panTo({
+      lat: events[0].latitude,
+      lng: events[0].longitude,
+    });
+    return;
+  }
+
+  const bounds = getBoundsForEvents(events);
+
+  map.fitBounds(bounds, DEFAULT_PADDING);
 };

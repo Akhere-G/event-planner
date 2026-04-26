@@ -24,7 +24,7 @@ import {
   setSearchIndex,
   setSelectedEvent,
 } from "../../maps/service/mapSlice";
-import { getBoundsForEvents, getDaysWithFilter } from "../../maps/utils";
+import { fitToBounds, getDaysWithFilter } from "../../maps/utils";
 
 const MAX_ZOOM = 17;
 const MIN_ZOOM = 10;
@@ -36,8 +36,6 @@ const permissionEnum = {
   DENIED: "DENIED",
   LOADING: "LOADING",
 } as const;
-
-const DEFAULT_PADDING = 50;
 
 export default function TripMap({ trip }: { trip: Trip }) {
   const {
@@ -75,25 +73,16 @@ export default function TripMap({ trip }: { trip: Trip }) {
     .flatMap((day) => day.events);
 
   useEffect(() => {
-    let bounds;
-    if (selectedEvents.length === 0) {
-      bounds = {
-        north: latitude + CITY_RADIUS,
-        south: latitude - CITY_RADIUS,
-        east: longitude + CITY_RADIUS,
-        west: longitude - CITY_RADIUS,
-      };
-    } else if (selectedEvents.length === 1) {
-      map?.panTo({
-        lat: selectedEvents[0].latitude,
-        lng: selectedEvents[0].longitude,
-      });
-      return;
-    } else {
-      bounds = getBoundsForEvents(selectedEvents);
-    }
+    if (!map) return;
 
-    map?.fitBounds(bounds, DEFAULT_PADDING);
+    const defaultBounds = {
+      north: latitude + CITY_RADIUS,
+      south: latitude - CITY_RADIUS,
+      east: longitude + CITY_RADIUS,
+      west: longitude - CITY_RADIUS,
+    };
+    fitToBounds({ map, events: selectedEvents, defaultBounds });
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [map, latitude, longitude]);
 
@@ -161,40 +150,9 @@ export default function TripMap({ trip }: { trip: Trip }) {
     />
   ));
 
-  const fitToBounds = (events: { latitude: number; longitude: number }[]) => {
-    if (events.length === 0) {
-      return;
-    }
-
-    if (events.length === 1) {
-      map?.panTo({
-        lat: events[0].latitude,
-        lng: events[0].longitude,
-      });
-      return;
-    }
-
-    const bounds = getBoundsForEvents(events);
-
-    map?.fitBounds(bounds, DEFAULT_PADDING);
-  };
-
-  const fitToAll = () => {
-    fitToBounds(selectedEvents);
-  };
-
-  const fitToDay = (date: string) => {
-    const selectedEvents = days.find((day) => day.date === date)?.events;
-    if (!selectedEvents) {
-      console.error("Could not find events for this date");
-      return;
-    }
-    fitToBounds(selectedEvents);
-  };
-
   const onPlaceSelect = (places: EventSearchResult[]) => {
     if (!map) return;
-    fitToBounds(places);
+    fitToBounds({ map, events: places });
     dispatch(setSearchEvents(places));
   };
 
@@ -223,7 +181,6 @@ export default function TripMap({ trip }: { trip: Trip }) {
         reuseMaps
         colorScheme={darkMode ? "DARK" : "LIGHT"}
         gestureHandling="greedy"
-        onClick={(e) => console.log(e)}
       >
         {eventMarkers}
         {searchEventMarkers}
@@ -245,7 +202,7 @@ export default function TripMap({ trip }: { trip: Trip }) {
           destination={{ latitude: trip.latitude, longitude: trip.longitude }}
         />
         <DayFilter days={days} setDays={(days) => dispatch(setDays(days))} />
-        <FitToDay days={days} fitToAll={fitToAll} fitToDay={fitToDay} />
+        <FitToDay />
       </div>
       <div className="absolute bottom-4 right-2 flex flex-col gap-2">
         <button onClick={zoomToUser} className="p-2 btn-primary">

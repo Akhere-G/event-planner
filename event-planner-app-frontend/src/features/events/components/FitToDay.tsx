@@ -1,8 +1,12 @@
 import { useState } from "react";
 import { Maximize, X } from "lucide-react";
 import type { Day } from "../types";
+import { useSelector } from "react-redux";
+import type { RootState } from "../../../store";
+import { useMap } from "@vis.gl/react-google-maps";
+import { fitToBounds } from "../../maps/utils";
 
-export default function FitToDay({
+export function FitToDay({
   days,
   fitToDay,
   fitToAll,
@@ -72,4 +76,28 @@ export default function FitToDay({
       )}
     </div>
   );
+}
+
+export default function FitToDayConnected() {
+  const { days } = useSelector((state: RootState) => state.map);
+  const map = useMap();
+
+  const selectedEvents = days
+    .filter((day) => day.show)
+    .flatMap((day) => day.events);
+
+  const fitToAll = () => {
+    if (map) fitToBounds({ map, events: selectedEvents });
+  };
+
+  const fitToDay = (date: string) => {
+    const selectedEvents = days.find((day) => day.date === date)?.events;
+    if (!selectedEvents) {
+      console.error("Could not find events for this date");
+      return;
+    }
+    if (map) fitToBounds({ map, events: selectedEvents });
+  };
+
+  return <FitToDay days={days} fitToAll={fitToAll} fitToDay={fitToDay} />;
 }
