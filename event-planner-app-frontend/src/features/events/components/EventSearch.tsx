@@ -6,6 +6,7 @@ import { useMap, useMapsLibrary } from "@vis.gl/react-google-maps";
 import { fitToBounds } from "../../maps/utils";
 import { setSearchEvents } from "../../maps/service/mapSlice";
 import { useDispatch } from "react-redux";
+import { DEFAULT_ZOOM, SEARCH_RADIUS } from "../../maps/constants";
 
 export function EventSearch({
   destination,
@@ -46,10 +47,15 @@ export function EventSearch({
 
     const service = new placesLibrary.PlacesService(map);
 
+    const radius = (map.getZoom() ?? DEFAULT_ZOOM) * SEARCH_RADIUS;
+    const center = map.getCenter();
     const request: google.maps.places.TextSearchRequest = {
       query,
-      location: new google.maps.LatLng(latitude, longitude),
-      radius: 10000,
+      location: new google.maps.LatLng(
+        center?.lat() ?? destination.latitude,
+        center?.lng() ?? destination.longitude,
+      ),
+      radius,
     };
 
     service.textSearch(request, (results, status) => {

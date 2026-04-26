@@ -24,11 +24,12 @@ import {
   setSelectedEvent,
 } from "../../maps/service/mapSlice";
 import { fitToBounds, getDaysWithFilter } from "../../maps/utils";
-
-const MAX_ZOOM = 17;
-const MIN_ZOOM = 10;
-const DEFAULT_ZOOM = 12;
-const CITY_RADIUS = 0.06;
+import {
+  CITY_RADIUS,
+  DEFAULT_ZOOM,
+  MAX_ZOOM,
+  MIN_ZOOM,
+} from "../../maps/constants";
 
 const permissionEnum = {
   GRANTED: "GRANTED",
