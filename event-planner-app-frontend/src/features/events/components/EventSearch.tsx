@@ -3,8 +3,11 @@ import type { EventSearchResult } from "../types";
 import { Search, X } from "lucide-react";
 import { LocationInput } from "../../../components";
 import { useMap, useMapsLibrary } from "@vis.gl/react-google-maps";
+import { fitToBounds } from "../../maps/utils";
+import { setSearchEvents } from "../../maps/service/mapSlice";
+import { useDispatch } from "react-redux";
 
-export default function EventSearch({
+export function EventSearch({
   destination,
   onPlaceSelect,
 }: {
@@ -85,5 +88,24 @@ export default function EventSearch({
         </button>
       )}
     </div>
+  );
+}
+
+export default function EventSearchConnected({
+  destination,
+}: {
+  destination: { latitude: number; longitude: number };
+}) {
+  const map = useMap();
+  const dispatch = useDispatch();
+
+  const onPlaceSelect = (places: EventSearchResult[]) => {
+    if (!map) return;
+    fitToBounds({ map, events: places });
+    dispatch(setSearchEvents(places));
+  };
+
+  return (
+    <EventSearch onPlaceSelect={onPlaceSelect} destination={destination} />
   );
 }

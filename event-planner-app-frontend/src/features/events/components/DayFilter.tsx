@@ -1,8 +1,11 @@
 import { useState } from "react";
 import type { Day } from "../types";
 import { Layers3, X } from "lucide-react";
+import { useDispatch, useSelector } from "react-redux";
+import type { RootState } from "../../../store";
+import { setDays } from "../../maps/service/mapSlice";
 
-export default function DayFilter({
+export function DayFilter({
   days,
   setDays,
 }: {
@@ -91,4 +94,10 @@ export default function DayFilter({
       )}
     </div>
   );
+}
+
+export default function DayFilterConnected() {
+  const { days } = useSelector((state: RootState) => state.map);
+  const dispatch = useDispatch();
+  return <DayFilter days={days} setDays={(days) => dispatch(setDays(days))} />;
 }

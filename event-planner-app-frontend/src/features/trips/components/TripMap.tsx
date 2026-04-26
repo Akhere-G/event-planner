@@ -150,12 +150,6 @@ export default function TripMap({ trip }: { trip: Trip }) {
     />
   ));
 
-  const onPlaceSelect = (places: EventSearchResult[]) => {
-    if (!map) return;
-    fitToBounds({ map, events: places });
-    dispatch(setSearchEvents(places));
-  };
-
   const onEventAdded = () => {
     const result = searchEvents[searchIndex];
 
@@ -198,10 +192,9 @@ export default function TripMap({ trip }: { trip: Trip }) {
       </Map>
       <div className="absolute top-4 right-2 flex flex-col gap-2 items-end">
         <EventSearch
-          onPlaceSelect={onPlaceSelect}
           destination={{ latitude: trip.latitude, longitude: trip.longitude }}
         />
-        <DayFilter days={days} setDays={(days) => dispatch(setDays(days))} />
+        <DayFilter />
         <FitToDay />
       </div>
       <div className="absolute bottom-4 right-2 flex flex-col gap-2">
