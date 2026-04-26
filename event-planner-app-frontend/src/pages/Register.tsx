@@ -23,10 +23,14 @@ export default function Register() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  const onSubmit = async (formState: RegisterSchema) => {
+  const onSubmit = async (formData: RegisterSchema) => {
     setErrorMessage("");
     try {
-      const result = await registerUser(formState).unwrap();
+      const formattedFormData = {
+        ...formData,
+        email: formData.email.toLowerCase(),
+      };
+      const result = await registerUser(formattedFormData).unwrap();
       dispatch(setCredentials(result.data.userId));
 
       navigate("/trips");

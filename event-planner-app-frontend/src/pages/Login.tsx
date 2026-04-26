@@ -24,7 +24,11 @@ export default function Login() {
   const onSubmit = async (formData: LoginSchema) => {
     setErrorMessage("");
     try {
-      const result = await loginUser(formData).unwrap();
+      const formattedFormData = {
+        ...formData,
+        email: formData.email.toLowerCase(),
+      };
+      const result = await loginUser(formattedFormData).unwrap();
       dispatch(setCredentials(result.data.userId));
       navigate("/");
     } catch (err) {

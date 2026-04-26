@@ -20,8 +20,12 @@ export default function InviteUserForm() {
   });
 
   async function onSubmit(invite: InviteSchema) {
+    const formattedInvite = {
+      ...invite,
+      email: invite.email.toLowerCase(),
+    };
     try {
-      createInvite({ tripId, invite }).unwrap();
+      createInvite({ tripId, invite: formattedInvite }).unwrap();
     } catch (err) {
       if (isValidationError(err)) {
         const serverErrors = err.data.error;

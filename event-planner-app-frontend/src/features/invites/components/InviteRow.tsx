@@ -23,7 +23,7 @@ export default function InviteRow({ invite }: { invite: Invite }) {
     try {
       createInvite({
         tripId,
-        invite: { email: invite.email, role: invite.role },
+        invite: { email: email.toLowerCase(), role },
       }).unwrap();
     } catch (err) {
       if (isValidationError(err)) {
