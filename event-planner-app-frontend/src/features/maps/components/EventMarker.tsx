@@ -5,27 +5,28 @@ import {
   Pin,
   useAdvancedMarkerRef,
 } from "@vis.gl/react-google-maps";
-import type { EventSearchResult } from "../types";
+import type { Event } from "../../events/types";
+import { getDayColor } from "../../events/utils";
 
-interface SearchEventMarkerProps {
-  place: EventSearchResult;
-  onSelect: (event: EventSearchResult) => void;
+interface EventMarkerProps {
+  event: Event;
+  position: google.maps.LatLngLiteral;
+  onSelect: (event: Event) => void;
+  day: number;
 }
 
-const SearchEventMarker = memo(
-  ({ place, onSelect }: SearchEventMarkerProps) => {
+const EventMarker = memo(
+  ({ event, position, day, onSelect }: EventMarkerProps) => {
     const [markerRef, marker] = useAdvancedMarkerRef();
     const [showInfo, setShowInfo] = useState(false);
 
-    const { name, latitude, longitude } = place;
+    const eventColor = getDayColor(day);
+
     return (
       <AdvancedMarker
         ref={markerRef}
-        position={{
-          lat: latitude,
-          lng: longitude,
-        }}
-        onClick={() => onSelect(place)}
+        position={position}
+        onClick={() => onSelect(event)}
         onMouseEnter={() => setShowInfo(true)}
         onMouseLeave={() => setShowInfo(false)}
       >
@@ -36,20 +37,24 @@ const SearchEventMarker = memo(
             disableAutoPan
             headerDisabled
           >
-            <p className="text-xs font-bold text-brand-primary whitespace-nowrap">
-              {name}
+            <p
+              style={{ color: eventColor }}
+              className="text-xs font-bold t whitespace-nowrap"
+            >
+              {event.name}
             </p>
           </InfoWindow>
         )}
 
         <Pin
-          background={"var(--color-surface)"}
+          background={eventColor}
           glyphColor={"var(--color-text-inverse)"}
           borderColor={"var(--color-surface-border)"}
+          glyphText={day.toString()}
         />
       </AdvancedMarker>
     );
   },
 );
 
-export default SearchEventMarker;
+export default EventMarker;

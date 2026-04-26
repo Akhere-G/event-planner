@@ -1,9 +1,9 @@
 import { useState } from "react";
-import type { Day } from "../types";
 import { Layers3, X } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import type { RootState } from "../../../store";
 import { setDays } from "../../maps/service/mapSlice";
+import type { Day } from "../../events/types";
 
 export function DayFilter({
   days,

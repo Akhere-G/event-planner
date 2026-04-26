@@ -1,14 +1,14 @@
 import { Check, Plus } from "lucide-react";
 import { EditableSelect } from "../../../components";
-import type { EventSchema } from "../schemas/eventSchema";
 import type { EventSearchResult } from "../types";
 import type { RootState } from "../../../store";
 import { useDispatch, useSelector } from "react-redux";
-import { useAddEventMutation } from "../service/eventApiSlice";
 import { isFetchBaseQueryError } from "../../api/utils";
 import { setSearchEvents } from "../../maps/service/mapSlice";
 import { useParams } from "react-router";
 import { formatDateRelative } from "../../../utils/dateFormattors";
+import type { EventSchema } from "../../events/schemas/eventSchema";
+import { useAddEventMutation } from "../../events/service/eventApiSlice";
 
 interface SearchEventCardProps {
   event: EventSearchResult;

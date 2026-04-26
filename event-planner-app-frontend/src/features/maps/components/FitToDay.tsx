@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { Maximize, X } from "lucide-react";
-import type { Day } from "../types";
 import { useSelector } from "react-redux";
 import type { RootState } from "../../../store";
 import { useMap } from "@vis.gl/react-google-maps";
 import { fitToBounds } from "../../maps/utils";
+import type { Day } from "../../events/types";
 
 export function FitToDay({
   days,

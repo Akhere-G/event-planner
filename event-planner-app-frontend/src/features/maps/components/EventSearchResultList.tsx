@@ -1,10 +1,10 @@
 import type { EventSearchResult } from "../types";
-import SearchEventCard from "./SearchEventCard";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useMap } from "@vis.gl/react-google-maps";
 import { useDispatch, useSelector } from "react-redux";
 import type { RootState } from "../../../store";
 import { setSearchIndex } from "../../maps/service/mapSlice";
+import EventSearchResultCard from "./EventSearchResult";
 
 export function EventSearchResultList({
   searchEvents,
@@ -44,7 +44,7 @@ export function EventSearchResultList({
           <ChevronRight size={12} />
         </button>
       </div>
-      <SearchEventCard />
+      <EventSearchResultCard />
     </div>
   );
 }

@@ -5,28 +5,27 @@ import {
   Pin,
   useAdvancedMarkerRef,
 } from "@vis.gl/react-google-maps";
-import type { Event } from "../types";
-import { getDayColor } from "../utils";
+import type { EventSearchResult } from "../types";
 
-interface EventMarkerProps {
-  event: Event;
-  position: google.maps.LatLngLiteral;
-  onSelect: (event: Event) => void;
-  day: number;
+interface EventSearchMarkerProps {
+  place: EventSearchResult;
+  onSelect: (event: EventSearchResult) => void;
 }
 
-const EventMarker = memo(
-  ({ event, position, day, onSelect }: EventMarkerProps) => {
+const EventSearchMarker = memo(
+  ({ place, onSelect }: EventSearchMarkerProps) => {
     const [markerRef, marker] = useAdvancedMarkerRef();
     const [showInfo, setShowInfo] = useState(false);
 
-    const eventColor = getDayColor(day);
-
+    const { name, latitude, longitude } = place;
     return (
       <AdvancedMarker
         ref={markerRef}
-        position={position}
-        onClick={() => onSelect(event)}
+        position={{
+          lat: latitude,
+          lng: longitude,
+        }}
+        onClick={() => onSelect(place)}
         onMouseEnter={() => setShowInfo(true)}
         onMouseLeave={() => setShowInfo(false)}
       >
@@ -37,24 +36,20 @@ const EventMarker = memo(
             disableAutoPan
             headerDisabled
           >
-            <p
-              style={{ color: eventColor }}
-              className="text-xs font-bold t whitespace-nowrap"
-            >
-              {event.name}
+            <p className="text-xs font-bold text-brand-primary whitespace-nowrap">
+              {name}
             </p>
           </InfoWindow>
         )}
 
         <Pin
-          background={eventColor}
+          background={"var(--color-surface)"}
           glyphColor={"var(--color-text-inverse)"}
           borderColor={"var(--color-surface-border)"}
-          glyphText={day.toString()}
         />
       </AdvancedMarker>
     );
   },
 );
 
-export default EventMarker;
+export default EventSearchMarker;

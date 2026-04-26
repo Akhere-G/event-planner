@@ -3,16 +3,6 @@ import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import type { RootState } from "../../../store";
 import { LocateIcon, Minus, Plus, X } from "lucide-react";
-import type { EventSearchResult } from "../../events/types";
-import {
-  DayFilter,
-  EventCard,
-  EventMarker,
-  EventSearch,
-  FitToDay,
-  SearchEventMarker,
-  EventSearchResultList,
-} from "../../events/components";
 
 import type { Trip } from "../types";
 import { differenceInDays } from "date-fns";
@@ -30,6 +20,16 @@ import {
   MAX_ZOOM,
   MIN_ZOOM,
 } from "../../maps/constants";
+import type { EventSearchResult } from "../../maps/types";
+import {
+  EventMarker,
+  EventSearchMarker,
+  EventSearch,
+  DayFilter,
+  EventSearchResultList,
+  FitToDay,
+} from "../../maps/components";
+import { EventCard } from "../../events/components";
 
 const permissionEnum = {
   GRANTED: "GRANTED",
@@ -130,7 +130,7 @@ export default function TripMap({ trip }: { trip: Trip }) {
   ));
 
   const searchEventMarkers = searchEvents.map((event) => (
-    <SearchEventMarker
+    <EventSearchMarker
       key={event.placeId}
       place={event}
       onSelect={onSelectSearchMarker}

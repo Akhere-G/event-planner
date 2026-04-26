@@ -1,5 +1,6 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
-import type { Day, Event, EventSearchResult } from "../../events/types";
+import type { Day, Event } from "../../events/types";
+import type { EventSearchResult } from "../types";
 
 interface MapState {
   searchEvents: EventSearchResult[];
