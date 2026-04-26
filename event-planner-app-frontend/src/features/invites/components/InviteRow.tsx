@@ -16,7 +16,7 @@ export default function InviteRow({ invite }: { invite: Invite }) {
   const [revokeInvite] = useRevokeInviteMutation();
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const menuRef = useRef<HTMLDivElement>(null);
+  const menuRef = useRef<HTMLTableCellElement>(null);
   const { email, role } = invite;
 
   async function reinvite() {
@@ -66,7 +66,7 @@ export default function InviteRow({ invite }: { invite: Invite }) {
 
   return (
     <tr className="group hover:bg-surface-muted/30 transition-colors text-sm md:text-current">
-      <td className="px-2 py-2 md:px-6 md:py-2">
+      <td className="px-2 md:px-6 py-4">
         <div className="flex items-center gap-3">
           <div className="p-2 hidden md:block rounded-full bg-brand-primary/10 text-brand-primary">
             <Mail size={16} />
@@ -74,13 +74,13 @@ export default function InviteRow({ invite }: { invite: Invite }) {
           <span>{email}</span>
         </div>
       </td>
-      <td className="px-2 py-2 md:px-6 md:py-2">
+      <td className="px-2 md:px-6 py-4">
         <div className="flex items-center justify-center gap-1.5 text-sm text-text-secondary capitalize">
           <ShieldCheck className="hidden md:flex" size={14} />
           {role}
         </div>
       </td>
-      <td className="px-2 py-2 md:px-6 md:py-2 text-right">
+      <td className="px-2 md:px-6 py-4 text-right">
         <span
           className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs border  ${statusStyles}`}
         >
@@ -88,7 +88,8 @@ export default function InviteRow({ invite }: { invite: Invite }) {
           {status}
         </span>
       </td>
-      <td className="px-2 py-2 md:px-4 md:py-2 text-right relative">
+
+      <td ref={menuRef} className="z-10 px-2 md:px-4 py-4 text-right relative">
         <button
           onClick={() => setIsMenuOpen(!isMenuOpen)}
           className="p-1 hover:bg-surface-muted rounded-full transition-colors"
@@ -97,17 +98,14 @@ export default function InviteRow({ invite }: { invite: Invite }) {
         </button>
 
         {isMenuOpen && (
-          <div
-            ref={menuRef}
-            className="card absolute z-20 right-4 top-12 w-32 p-1 flex flex-col shadow-xl bg-surface"
-          >
+          <div className="card absolute z-20 right-8 top-4 w-32 p-0.5 flex flex-col shadow-xl bg-surface ">
             {canResend && (
               <button
                 onClick={() => {
                   reinvite();
                   setIsMenuOpen(false);
                 }}
-                className="rounded-none flex items-center gap-2 p-2 text-sm hover:bg-surface-muted"
+                className="rounded-none flex items-center gap-2 p-1 text-xs hover:bg-surface-muted"
               >
                 <RotateCcw size={14} /> Resend
               </button>
@@ -119,7 +117,7 @@ export default function InviteRow({ invite }: { invite: Invite }) {
                   revoke();
                   setIsMenuOpen(false);
                 }}
-                className="rounded-none flex items-center gap-2 p-2 text-sm hover:bg-surface-muted text-error"
+                className="rounded-none flex items-center gap-2 p-1 text-xs hover:bg-surface-muted text-error"
               >
                 <Ban size={14} /> Revoke
               </button>
