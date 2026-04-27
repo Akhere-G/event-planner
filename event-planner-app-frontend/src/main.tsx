@@ -7,6 +7,10 @@ import { Provider } from "react-redux";
 import { store } from "./store.ts";
 import { APIProvider } from "@vis.gl/react-google-maps";
 
+window.addEventListener("vite:preloadError", () => {
+  window.location.reload();
+});
+
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <BrowserRouter>
