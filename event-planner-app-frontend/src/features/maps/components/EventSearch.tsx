@@ -95,7 +95,7 @@ export function EventSearch({
   return (
     <div className="rounded-xl absolute top-4 left-4">
       {expanded ? (
-        <div className="max-w-100 relative">
+        <div className="max-w-[77vw] md:max-w-[40vw] relative">
           <button
             className="z-1 absolute -right-1 -top-2 bg-brand-primary p-1"
             onClick={() => setExpanded(false)}
