@@ -51,30 +51,23 @@ export const fitToBounds = ({
 }) => {
   if (events.length === 0) {
     if (defaultCenter) {
-      console.log("default center");
       map.panTo({
         lat: defaultCenter.latitude,
         lng: defaultCenter.longitude,
       });
     } else if (defaultBounds) {
-      console.log("default bounds");
-
       map.fitBounds(defaultBounds, DEFAULT_PADDING);
     }
     return;
   }
 
   if (events.length === 1) {
-    console.log("single event");
-
     map.panTo({
       lat: events[0].latitude,
       lng: events[0].longitude,
     });
     return;
   }
-
-  console.log("many events");
 
   const bounds = getBoundsForEvents(events);
 

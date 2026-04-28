@@ -57,12 +57,12 @@ export default function MyInviteCard({ invite }: { invite: Invite }) {
   return (
     <div className="card p-0">
       <Accordion
-        title={
+        TitleComponent={() => (
           <div className=" flex items-center">
             <h2 className="text-lg">{invite.itinerary?.name ?? "Trip"}</h2>
           </div>
-        }
-        content={
+        )}
+        ContentComponent={() => (
           <div className="p-4 pt-0">
             {invite.itinerary && (
               <TripSummary trip={invite.itinerary} hideTitle />
@@ -94,7 +94,7 @@ export default function MyInviteCard({ invite }: { invite: Invite }) {
               )}
             </div>
           </div>
-        }
+        )}
       />
     </div>
   );

@@ -93,6 +93,11 @@ export default function TripMap({ trip }: { trip: Trip }) {
     return () => navigator.geolocation.clearWatch(watchId);
   }, [dispatch]);
 
+  useEffect(() => {
+    return () => {
+      dispatch(setSearchEvents([]));
+    };
+  }, [dispatch]);
   const zoomIn = () => {
     if (map)
       map.setZoom(Math.min((map.getZoom() || DEFAULT_ZOOM) + 1, MAX_ZOOM));

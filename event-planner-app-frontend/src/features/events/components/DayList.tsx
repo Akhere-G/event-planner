@@ -30,15 +30,17 @@ export default function DayList({
       {days.map((day) => (
         <div key={day.date} className="card p-0 ">
           <Accordion
-            title={<h3 className="text-lg">{formatDateRelative(day.date)}</h3>}
-            content={
+            TitleComponent={() => (
+              <h3 className="text-lg">{formatDateRelative(day.date)}</h3>
+            )}
+            ContentComponent={() => (
               <div className="px-4 ">
                 <EventList events={day.events} role={role} />
                 {canUserEdit(role) && (
                   <AddEventForm date={day.date} destination={destination} />
                 )}
               </div>
-            }
+            )}
           />
         </div>
       ))}

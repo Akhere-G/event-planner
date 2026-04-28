@@ -50,7 +50,7 @@ const EventSearchMarker = ({
       )}
 
       <Pin
-        background={"var(--color-surface)"}
+        background={"var(--color-brand-primary)"}
         glyphColor={"var(--color-text-inverse)"}
         borderColor={"var(--color-surface-border)"}
         scale={scale}
