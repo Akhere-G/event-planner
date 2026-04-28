@@ -4,7 +4,7 @@ import type { EventSearchResult, Tag } from "../types";
 import type { RootState } from "../../../store";
 import { useDispatch, useSelector } from "react-redux";
 import { isFetchBaseQueryError } from "../../api/utils";
-import { setSearchEvents } from "../../maps/service/mapSlice";
+import { updateSearchEvents } from "../../maps/service/mapSlice";
 import { useParams } from "react-router";
 import { formatDateRelative } from "../../../utils/dateFormattors";
 import type { EventSchema } from "../../events/schemas/eventSchema";
@@ -57,7 +57,7 @@ export function EventSearchResultCard({
           {address}
         </p>
         {tags.length > 0 && (
-          <div className="flex gap-2 flex-wrap">
+          <div className="flex gap-2 flex-wrap mt-2">
             {tags.map((tag) => (
               <TagChip key={tag.text} {...tag} />
             ))}
@@ -109,7 +109,7 @@ export function EventSearchResultCard({
                   endAt: `${date} 13:00`,
                 })
               }
-              selectClassName={`top-auto bottom-0 right-auto left-0 grid grid-cols-4 w-40`}
+              selectClassName={`top-auto bottom-0 right-0 left-auto grid grid-cols-4 w-40`}
               selectedValue=""
               showEditIcon={false}
               defaultElement={
@@ -143,10 +143,8 @@ export default function EventSearchResultCardConnected() {
 
   const updateSearchResults = () => {
     dispatch(
-      setSearchEvents(
-        searchEvents.map((e) =>
-          e.placeId === currentEvent.placeId ? { ...e, isAdded: true } : e,
-        ),
+      updateSearchEvents((e) =>
+        e.placeId === currentEvent.placeId ? { ...e, isAdded: true } : e,
       ),
     );
   };

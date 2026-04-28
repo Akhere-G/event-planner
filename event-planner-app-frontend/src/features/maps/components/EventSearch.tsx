@@ -4,7 +4,10 @@ import { Search, X } from "lucide-react";
 import { LocationInput } from "../../../components";
 import { useMap, useMapsLibrary } from "@vis.gl/react-google-maps";
 import { fitToBounds } from "../../maps/utils";
-import { setSearchEvents } from "../../maps/service/mapSlice";
+import {
+  setSearchEvents,
+  clearSearchEvents,
+} from "../../maps/service/mapSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { searchTags } from "../../maps/constants";
 import type { RootState } from "../../../store";
@@ -97,7 +100,7 @@ export function EventSearch({
           className="z-1 absolute -right-3 -top-2 bg-brand-primary p-1 text-sm"
           onClick={() => {
             setQuery(null);
-            dispatch(setSearchEvents([]));
+            dispatch(clearSearchEvents());
           }}
         >
           <X size={16} />

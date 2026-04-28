@@ -9,8 +9,8 @@ import { differenceInDays } from "date-fns";
 import { canUserEdit } from "../../users/utils";
 import {
   setDays,
-  setSearchEvents,
   setSelectedEvent,
+  clearSearchEvents,
 } from "../../maps/service/mapSlice";
 import { fitToBounds, getDaysWithFilter } from "../../maps/utils";
 import {
@@ -95,7 +95,7 @@ export default function TripMap({ trip }: { trip: Trip }) {
 
   useEffect(() => {
     return () => {
-      dispatch(setSearchEvents([]));
+      dispatch(clearSearchEvents());
     };
   }, [dispatch]);
   const zoomIn = () => {
@@ -204,7 +204,7 @@ export default function TripMap({ trip }: { trip: Trip }) {
       {canUserEdit(trip.role) && searchEvents.length > 0 && (
         <div className="absolute bottom-4 w-full px-4 ">
           <button
-            onClick={() => dispatch(setSearchEvents([]))}
+            onClick={() => dispatch(clearSearchEvents())}
             className="absolute z-2 btn-secondary p-1 right-1 -top-3"
           >
             <X size={20} />

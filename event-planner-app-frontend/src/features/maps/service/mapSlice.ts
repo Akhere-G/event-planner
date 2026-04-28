@@ -16,6 +16,7 @@ const initialState: MapState = {
   days: [],
 };
 
+type UpdateFunc = (event: EventSearchResult) => EventSearchResult;
 export const mapSlice = createSlice({
   name: "map",
   initialState,
@@ -26,6 +27,9 @@ export const mapSlice = createSlice({
     setSearchEvents: (state, action: PayloadAction<EventSearchResult[]>) => {
       state.searchEvents = action.payload;
       state.searchIndex = 0; // Reset index on new search
+    },
+    updateSearchEvents: (state, action: PayloadAction<UpdateFunc>) => {
+      state.searchEvents = state.searchEvents.map(action.payload);
     },
     setSearchIndex: (state, action: PayloadAction<number>) => {
       state.searchIndex = action.payload;
@@ -39,7 +43,7 @@ export const mapSlice = createSlice({
         state.searchEvents[state.searchIndex].isAdded = true;
       }
     },
-    clearSearch: (state) => {
+    clearSearchEvents: (state) => {
       state.searchEvents = [];
       state.searchIndex = 0;
     },
@@ -52,7 +56,8 @@ export const {
   setSearchIndex,
   setSelectedEvent,
   markEventAsAdded,
-  clearSearch,
+  clearSearchEvents,
+  updateSearchEvents,
 } = mapSlice.actions;
 
 export default mapSlice.reducer;
