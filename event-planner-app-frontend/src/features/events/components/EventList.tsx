@@ -2,13 +2,7 @@ import type { Event } from "../types";
 import EventCard from "./EventCard";
 import { StateGate } from "../../../components";
 
-export default function EventList({
-  events,
-  role,
-}: {
-  events: Event[];
-  role: string;
-}) {
+export default function EventList({ events }: { events: Event[] }) {
   return (
     <div className="flex flex-col gap-2 mb-4">
       <StateGate
@@ -20,7 +14,7 @@ export default function EventList({
       >
         <>
           {events.map((event) => (
-            <EventCard key={event.id} event={event} role={role} />
+            <EventCard key={event.id} event={event} />
           ))}
         </>
       </StateGate>

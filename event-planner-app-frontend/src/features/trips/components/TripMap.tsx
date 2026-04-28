@@ -36,7 +36,7 @@ const permissionEnum = {
 } as const;
 
 export default function TripMap({ trip }: { trip: Trip }) {
-  const { latitude, longitude, role, startDate, endDate, events } = trip;
+  const { latitude, longitude, startDate, endDate, events } = trip;
   const dispatch = useDispatch();
   const { searchEvents, selectedEvent, days } = useSelector(
     (state: RootState) => state.map,
@@ -197,7 +197,6 @@ export default function TripMap({ trip }: { trip: Trip }) {
           <EventCard
             event={selectedEvent}
             key={selectedEvent.name}
-            role={role}
             onDelete={onDelete}
           />
         </div>

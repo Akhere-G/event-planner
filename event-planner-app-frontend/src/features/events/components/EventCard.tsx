@@ -8,11 +8,17 @@ import {
 import { type Event } from "../types";
 import { canUserEdit } from "../../users/utils";
 import { useState } from "react";
-import { EditableSelect, EditableText, TimePicker } from "../../../components";
+import {
+  EditableSelect,
+  EditableText,
+  StateGate,
+  TimePicker,
+} from "../../../components";
 import { eventCategories } from "../constants";
 
 import { useParams } from "react-router";
 import { useUpdateEvent } from "../../trips/hooks";
+import { useGetTripQuery } from "../../trips/services/tripsApiSlice";
 
 interface EventCardProps {
   event: Event;
@@ -149,17 +155,16 @@ export function EventCard({
 }
 
 export default function EventCardConnected({
-  role,
   event,
   onDelete = () => {},
   onEdit = () => {},
 }: {
-  role: string;
   event: Event;
   onDelete?: () => void;
   onEdit?: () => void;
 }) {
   const tripId = Number(useParams()?.tripId);
+  const { data, isLoading, isError } = useGetTripQuery(Number(tripId));
 
   const { handleDelete, handleEdit } = useUpdateEvent({
     tripId,
@@ -168,11 +173,15 @@ export default function EventCardConnected({
   });
 
   return (
-    <EventCard
-      role={role}
-      event={event}
-      handleDelete={handleDelete}
-      handleEdit={handleEdit}
-    />
+    <StateGate loadingStateProps={{ isLoading }} errorStateProps={{ isError }}>
+      {data && (
+        <EventCard
+          role={data?.data.role}
+          event={event}
+          handleDelete={handleDelete}
+          handleEdit={handleEdit}
+        />
+      )}
+    </StateGate>
   );
 }
