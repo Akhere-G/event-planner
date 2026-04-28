@@ -18,7 +18,6 @@ export default function TripDetails(trip: Trip) {
           endDate={trip.endDate}
           events={trip.events}
           role={trip.role}
-          destination={{ latitude: trip.latitude, longitude: trip.longitude }}
         />
       </div>
     </div>

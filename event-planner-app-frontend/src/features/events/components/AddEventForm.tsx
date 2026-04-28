@@ -6,8 +6,9 @@ import { useAddEventMutation } from "../service/eventApiSlice";
 import { useParams } from "react-router";
 import { isValidationError } from "../../api/utils";
 import { useState } from "react";
+import { useGetTripQuery } from "../../trips/services/tripsApiSlice";
 
-export default function AddEventForm({
+export function AddEventForm({
   date,
   destination,
 }: {
@@ -109,5 +110,23 @@ export default function AddEventForm({
       </form>
       {errorMessage && <p className="mt-2 errorMessage">{errorMessage}</p>}
     </>
+  );
+}
+
+export default function AddEventFormConnected({ date }: { date: string }) {
+  const tripId = Number(useParams()?.tripId);
+
+  const { data } = useGetTripQuery(Number(tripId));
+
+  return (
+    data?.data && (
+      <AddEventForm
+        date={date}
+        destination={{
+          latitude: data.data.latitude,
+          longitude: data.data.longitude,
+        }}
+      />
+    )
   );
 }

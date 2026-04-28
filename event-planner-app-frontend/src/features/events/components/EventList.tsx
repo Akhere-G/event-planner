@@ -9,7 +9,7 @@ export default function EventList({ events }: { events: Event[] }) {
         emptyStateProps={{
           isEmpty: events.length === 0,
           height: 50,
-          message: "No events on this day.",
+          message: "Nothing planned yet.",
         }}
       >
         <>
