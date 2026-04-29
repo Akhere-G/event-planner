@@ -1,4 +1,4 @@
-import { Clock, Tag, Trash } from "lucide-react";
+import { Clock, Copy, ExternalLink, Tag, Trash } from "lucide-react";
 import {
   addMilliseconds,
   differenceInMilliseconds,
@@ -20,6 +20,7 @@ import { eventCategories } from "../constants";
 import { useParams } from "react-router";
 import { useUpdateEvent } from "../../trips/hooks";
 import { useGetTripQuery } from "../../trips/services/tripsApiSlice";
+import { toast } from "sonner";
 
 interface EventCardProps {
   event: Event;
@@ -74,6 +75,28 @@ export function EventCard({
             options={eventCategories}
             selectClassName="flex flex-col items-stretch text-center!"
           />
+        </div>
+        <div className="flex gap-2 items-center mb-2">
+          <p className="text-sm text-text-secondary">{eventData.address}</p>
+          <button
+            title="Copy Address"
+            className="btn p-1 hover:bg-text-primary/10 rounded transition-colors text-text-primary"
+            onClick={() => {
+              navigator.clipboard.writeText(eventData.address);
+              toast.info("Copied!");
+            }}
+          >
+            <Copy size={12} />
+          </button>
+          <a
+            href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(event.name)},${encodeURIComponent(event.address)}`}
+            target="_blank"
+            rel="noreferrer"
+            className="btn p-1 hover:bg-brand-primary/10 rounded transition-colors text-brand-primary"
+            title="Open in Google Maps"
+          >
+            <ExternalLink size={12} />
+          </a>
         </div>
 
         <EditableText

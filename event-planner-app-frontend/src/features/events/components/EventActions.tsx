@@ -1,4 +1,4 @@
-import { Route } from "lucide-react";
+import { ExternalLink, Route } from "lucide-react";
 import { setRoute } from "../../maps/service/mapSlice";
 import { useDispatch } from "react-redux";
 import type { Event } from "../types";
@@ -8,6 +8,8 @@ import { TravelModes } from "../../maps/constants";
 export default function EventActions({ from, to }: { from: Event; to: Event }) {
   const [mode, setMode] = useState(google.maps.TravelMode.WALKING);
   const dispatch = useDispatch();
+
+  const mapsUrl = `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(from.address)}&destination=${encodeURIComponent(to.address)}&travelmode=${mode.toLowerCase()}`;
 
   return (
     <div className="flex justify-start items-center gap-2">
@@ -30,6 +32,16 @@ export default function EventActions({ from, to }: { from: Event; to: Event }) {
           ))}
         </select>
       </div>
+      <a
+        href={mapsUrl}
+        target="_blank"
+        rel="noreferrer"
+        className="btn p-1 hover:bg-brand-secondary/10 rounded transition-colors text-brand-secondary flex gap-1 text-xs items-center "
+        title="Open in Google Maps"
+      >
+        <span>Open in Maps</span>
+        <ExternalLink size={12} />
+      </a>
     </div>
   );
 }

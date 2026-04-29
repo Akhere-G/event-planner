@@ -1,4 +1,11 @@
-import { Check, Plus, Star, Tag as TagIcon } from "lucide-react";
+import {
+  Check,
+  Copy,
+  ExternalLink,
+  Plus,
+  Star,
+  Tag as TagIcon,
+} from "lucide-react";
 import { Accordion, EditableSelect } from "../../../components";
 import type { EventSearchResult, Tag } from "../types";
 import type { RootState } from "../../../store";
@@ -25,6 +32,7 @@ export function EventSearchResultCard({
   isLoading,
 }: SearchEventCardProps) {
   const {
+    placeId,
     address,
     name,
     latitude,
@@ -53,10 +61,30 @@ export function EventSearchResultCard({
             </span>
           </div>
         </header>
-
-        <p className="text-sm text-text-secondary h-9 line-clamp-2">
-          {address}
-        </p>
+        <div className="flex gap-2 items-start">
+          <p className="text-sm text-text-secondary h-9 line-clamp-2">
+            {address}
+          </p>
+          <button
+            title="Copy Address"
+            className="btn p-1 hover:bg-text-primary/10 rounded transition-colors text-text-primary"
+            onClick={() => {
+              navigator.clipboard.writeText(address);
+              toast.info("Copied!");
+            }}
+          >
+            <Copy size={12} />
+          </button>
+          <a
+            href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(name)}&query_place_id=${placeId}`}
+            target="_blank"
+            rel="noreferrer"
+            className="btn p-1 hover:bg-brand-primary/10 rounded transition-colors text-brand-primary"
+            title="Open in Google Maps"
+          >
+            <ExternalLink size={12} />
+          </a>
+        </div>
         {tags.length > 0 && (
           <div className="flex gap-2 flex-wrap mt-2">
             {tags.map((tag) => (
