@@ -13,10 +13,11 @@ interface EventMarkerProps {
   position: google.maps.LatLngLiteral;
   onSelect: (event: Event) => void;
   day: number;
+  selected: boolean;
 }
 
 const EventMarker = memo(
-  ({ event, position, day, onSelect }: EventMarkerProps) => {
+  ({ event, position, day, onSelect, selected }: EventMarkerProps) => {
     const [markerRef, marker] = useAdvancedMarkerRef();
     const [showInfo, setShowInfo] = useState(false);
 
@@ -51,6 +52,7 @@ const EventMarker = memo(
           glyphColor={"var(--color-text-inverse)"}
           borderColor={"var(--color-surface-border)"}
           glyphText={day.toString()}
+          scale={selected ? 1.5 : 1}
         />
       </AdvancedMarker>
     );

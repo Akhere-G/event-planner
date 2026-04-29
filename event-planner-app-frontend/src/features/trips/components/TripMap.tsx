@@ -26,9 +26,9 @@ import {
   DayFilter,
   EventSearchResultList,
   FitToDay,
+  RouteDetails,
 } from "../../maps/components";
 import { EventCard } from "../../events/components";
-import useRoute from "../../maps/hooks/useRoute";
 
 const permissionEnum = {
   GRANTED: "GRANTED",
@@ -39,10 +39,9 @@ const permissionEnum = {
 export default function TripMap({ trip }: { trip: Trip }) {
   const { latitude, longitude, startDate, endDate, events } = trip;
   const dispatch = useDispatch();
-  const { searchEvents, selectedEvent, days, route } = useSelector(
+  const { searchEvents, selectedEvent, days } = useSelector(
     (state: RootState) => state.map,
   );
-  const { calculateAndDisplayRoute } = useRoute();
   const darkMode = useSelector((state: RootState) => state.theme.darkMode);
 
   const [userCoords, setUserCoords] = useState<{
@@ -101,12 +100,6 @@ export default function TripMap({ trip }: { trip: Trip }) {
     };
   }, [dispatch]);
 
-  useEffect(() => {
-    if (route) {
-      calculateAndDisplayRoute();
-    }
-  }, [route, calculateAndDisplayRoute]);
-
   const zoomIn = () => {
     if (map)
       map.setZoom(Math.min((map.getZoom() || DEFAULT_ZOOM) + 1, MAX_ZOOM));
@@ -132,6 +125,7 @@ export default function TripMap({ trip }: { trip: Trip }) {
       event={event}
       position={{ lat: event.latitude, lng: event.longitude }}
       onSelect={(event) => dispatch(setSelectedEvent(event))}
+      selected={selectedEvent?.id === event.id}
     />
   ));
 
@@ -180,6 +174,7 @@ export default function TripMap({ trip }: { trip: Trip }) {
       <div className="absolute top-4 right-2 flex flex-col gap-2 items-end">
         <DayFilter />
         <FitToDay />
+        <RouteDetails />
       </div>
       <div className="absolute bottom-4 right-2 flex flex-col gap-2">
         <button onClick={zoomToUser} className="p-2 btn-primary">

@@ -4,3 +4,4 @@ export { default as DayFilter } from "./DayFilter";
 export { default as FitToDay } from "./FitToDay";
 export { default as EventSearch } from "./EventSearch";
 export { default as EventSearchResultList } from "./EventSearchResultList";
+export { default as RouteDetails } from "./RouteDetails";
