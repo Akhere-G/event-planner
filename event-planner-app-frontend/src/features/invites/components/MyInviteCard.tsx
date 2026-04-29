@@ -1,3 +1,4 @@
+import { toast } from "sonner";
 import { Accordion } from "../../../components";
 import { isFetchBaseQueryError } from "../../api/utils";
 import TripSummary from "../../trips/components/TripSummary";
@@ -23,11 +24,9 @@ export default function MyInviteCard({ invite }: { invite: Invite }) {
     } catch (err) {
       if (isFetchBaseQueryError(err)) {
         if (err.status === 404) {
-          console.log("Invite not found");
-          // TODO: Add toast notifcation
+          toast.error("Invite not found.");
         } else if (err.status === 400) {
-          console.log("Can accept invite.");
-          // TODO: Add toast notifcation
+          toast.error("Cannot accept invite.");
         }
       }
     }
@@ -42,11 +41,9 @@ export default function MyInviteCard({ invite }: { invite: Invite }) {
     } catch (err) {
       if (isFetchBaseQueryError(err)) {
         if (err.status === 404) {
-          console.log("Invite not found");
-          // TODO: Add toast notifcation
+          toast.error("Invite not found.");
         } else if (err.status === 400) {
-          console.log("Cannot decline invite.");
-          // TODO: Add toast notifcation
+          toast.error("Cannot decline invite.");
         }
       }
     }

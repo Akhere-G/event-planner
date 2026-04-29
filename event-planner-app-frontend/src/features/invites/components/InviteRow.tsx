@@ -8,6 +8,7 @@ import {
 import { useMatch } from "react-router";
 import { isValidationError } from "../../api/utils";
 import { getStatusConfig } from "../utils";
+import { toast } from "sonner";
 
 export default function InviteRow({ invite }: { invite: Invite }) {
   const params = useMatch("/trips/:tripId")?.params;
@@ -27,9 +28,7 @@ export default function InviteRow({ invite }: { invite: Invite }) {
       }).unwrap();
     } catch (err) {
       if (isValidationError(err)) {
-        const serverErrors = err.data.error;
-        console.error(serverErrors);
-        //TODO: create toast notification  -  serverErrors.general?.join(", ") ?? ""
+        toast.error("Could not reinvite user.");
       }
     }
   }
@@ -39,9 +38,7 @@ export default function InviteRow({ invite }: { invite: Invite }) {
       revokeInvite({ tripId, inviteId: invite.id }).unwrap();
     } catch (err) {
       if (isValidationError(err)) {
-        const serverErrors = err.data.error;
-        console.error(serverErrors);
-        //TODO: create toast notification  -  serverErrors.general?.join(", ") ?? ""
+        toast.error("Could not revoke user.");
       }
     }
   }
@@ -113,7 +110,6 @@ export default function InviteRow({ invite }: { invite: Invite }) {
             {canRevoke && (
               <button
                 onClick={() => {
-                  //TODO: Handle Revoke
                   revoke();
                   setIsMenuOpen(false);
                 }}

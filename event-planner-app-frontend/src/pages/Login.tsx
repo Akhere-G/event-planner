@@ -11,6 +11,7 @@ import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { Link, useNavigate } from "react-router";
 import { setCredentials } from "../features/auth/services/authSlice";
+import { toast } from "sonner";
 
 export default function Login() {
   const [errorMessage, setErrorMessage] = useState("");
@@ -43,6 +44,8 @@ export default function Login() {
             message: messages[0],
           });
         });
+      } else {
+        toast.error("Sorry! Something went wrong...");
       }
     }
   };

@@ -4,6 +4,7 @@ import { setRoute } from "../service/mapSlice";
 import { Circle, Loader2, MapPin, X } from "lucide-react";
 import { useMap, useMapsLibrary } from "@vis.gl/react-google-maps";
 import { useEffect, useMemo, useState } from "react";
+import { toast } from "sonner";
 
 export default function RouteDetails() {
   const [isLoading, setIsLoading] = useState(false);
@@ -50,7 +51,6 @@ export default function RouteDetails() {
           },
           (result, status) => {
             if (status === "OK") {
-              console.log("result", result);
               directionsRenderer.setDirections(result);
               setHasDirections(true);
             } else {
@@ -58,10 +58,8 @@ export default function RouteDetails() {
             }
           },
         );
-      } catch (err) {
-        console.error(err);
-
-        // TODO: send notification
+      } catch {
+        toast.error("Cannot find directions. Try changing travel mode.");
       } finally {
         setIsLoading(false);
       }
@@ -73,9 +71,7 @@ export default function RouteDetails() {
     };
   }, [route, map, directionsService, directionsRenderer, dispatch]);
 
-  console.log(isLoading);
   if (isLoading) {
-    console.log("loading");
     return (
       <div className="fixed top-16 md:top-4 left-1/2 -translate-x-1/2 z-1">
         <Loader2 className="w-8 h-8 animate-spin text-brand-primary" />

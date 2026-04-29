@@ -3,6 +3,7 @@ import type { Trip } from "../../trips/types";
 import { isValidationError } from "../../api/utils";
 import { useDeleteTripMutation } from "../../trips/services/tripsApiSlice";
 import { closeModal } from "../modalSlice";
+import { toast } from "sonner";
 
 export default function DeleteTripModal({ trip }: { trip: Trip }) {
   const [deleteTrip, { isLoading }] = useDeleteTripMutation();
@@ -18,8 +19,7 @@ export default function DeleteTripModal({ trip }: { trip: Trip }) {
       handleClose();
     } catch (err) {
       if (isValidationError(err) && err.status === 404) {
-        console.error("Trip not found.");
-        // TODO: Add notification
+        toast.error("Trip not found.");
       }
     }
   };

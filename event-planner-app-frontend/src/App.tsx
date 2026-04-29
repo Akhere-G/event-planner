@@ -12,6 +12,7 @@ import { Header } from "./layout";
 import "react-tooltip/dist/react-tooltip.css";
 import ModalManager from "./features/modal/components/ModalManager";
 import { syncDOM } from "./features/theme/themeSlice";
+import { Toaster } from "sonner";
 
 const AddTrip = lazy(() => import("./pages/AddTrip"));
 const InvitesPage = lazy(() => import("./pages/InvitesPage"));
@@ -55,6 +56,8 @@ function App() {
   return (
     <>
       <Header links={isAuthenticated ? authLinks : unauthLinks} />
+      <Toaster position="top-right" richColors />
+
       <Routes>
         <Route
           path="/"

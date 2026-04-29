@@ -11,6 +11,7 @@ import { tripSchema, type TripSchema } from "../schemas/tripSchema";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useForm } from "react-hook-form";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 interface TripFormProps {
   initialData?: Partial<TripSchema>;
@@ -74,6 +75,8 @@ export default function TripForm({
             message: messages[0],
           });
         });
+      } else {
+        toast.error("Sorry! Something went wrong...");
       }
     }
   };

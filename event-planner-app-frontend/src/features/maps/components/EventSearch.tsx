@@ -11,6 +11,7 @@ import {
 import { useDispatch, useSelector } from "react-redux";
 import { searchTags } from "../../maps/constants";
 import type { RootState } from "../../../store";
+import { toast } from "sonner";
 
 export function EventSearch({
   destination,
@@ -84,13 +85,17 @@ export function EventSearch({
       bounds,
     };
 
-    service.textSearch(request, (results, status) => {
-      if (status === placesLibrary.PlacesServiceStatus.OK && results) {
-        onPlaceSelect(results.map(formatPlace));
-      } else {
-        console.error("Place search failed:", status);
-      }
-    });
+    try {
+      service.textSearch(request, (results, status) => {
+        if (status === placesLibrary.PlacesServiceStatus.OK && results) {
+          onPlaceSelect(results.map(formatPlace));
+        } else {
+          console.error("Place search failed:", status);
+        }
+      });
+    } catch {
+      toast.error("Sorry! Something went wrong...");
+    }
   };
 
   if (query && searchEvents.length > 0) {

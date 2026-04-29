@@ -7,6 +7,7 @@ import { useParams } from "react-router";
 import { isValidationError } from "../../api/utils";
 import { useState } from "react";
 import { useGetTripQuery } from "../../trips/services/tripsApiSlice";
+import { toast } from "sonner";
 
 export function AddEventForm({
   date,
@@ -54,6 +55,8 @@ export function AddEventForm({
             message: messages[0],
           });
         });
+      } else {
+        toast.error("Sorry! Something went wrong...");
       }
     }
   }

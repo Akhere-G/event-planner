@@ -9,6 +9,7 @@ import { useParams } from "react-router";
 import { formatDateRelative } from "../../../utils/dateFormattors";
 import type { EventSchema } from "../../events/schemas/eventSchema";
 import { useAddEventMutation } from "../../events/service/eventApiSlice";
+import { toast } from "sonner";
 
 interface SearchEventCardProps {
   event: EventSearchResult;
@@ -156,7 +157,7 @@ export default function EventSearchResultCardConnected() {
     } catch (err) {
       if (isFetchBaseQueryError(err)) {
         console.error(err);
-        // TODO: Add notification
+        toast.error("Cannot add event.");
       }
     }
   };

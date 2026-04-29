@@ -6,6 +6,7 @@ import { useMatch } from "react-router";
 import { isFetchBaseQueryError, isValidationError } from "../../api/utils";
 import { useRemoveUserMutation, useUpdateUserMutation } from "../usersApiSlice";
 import { EditableSelect } from "../../../components";
+import { toast } from "sonner";
 
 export default function UserRow({ user }: { user: User }) {
   const [userRole, setUserRole] = useState(user.role);
@@ -31,9 +32,10 @@ export default function UserRow({ user }: { user: User }) {
         if (err) {
           console.error(serverErrors);
         }
-        if (err.status === 404 || err.status === 403) {
-          console.error("User not found");
-          // TODO: Add toast notifcation
+        if (err.status === 404) {
+          toast.error("User not found.");
+        } else if (err.status === 403) {
+          toast.error("Not authorised.");
         }
       }
     }
@@ -51,16 +53,15 @@ export default function UserRow({ user }: { user: User }) {
     } catch (err) {
       setUserRole(oldRole);
       if (isFetchBaseQueryError(err)) {
-        // TODO: Add toast notifications
         switch (err.status) {
           case 400:
-            console.error("Bad Request");
+            toast.error("Cannot update role.");
             break;
           case 404:
-            console.error("Not found");
+            toast.error("User found.");
             break;
           case 403:
-            console.error("Not authorised");
+            toast.error("Not authorised.");
             break;
         }
       }
