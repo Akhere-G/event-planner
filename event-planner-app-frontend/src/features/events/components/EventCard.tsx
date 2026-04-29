@@ -52,7 +52,7 @@ export function EventCard({
   const closeDeleteModal = () => setIsModalOpen(false);
 
   return (
-    <div className="card flex-1 hover:shadow-lg transition-shadow border-l-4 border-brand-primary">
+    <div className="card flex-1 transition-shadow border-l-4 border-brand-primary">
       <div className="flex flex-col">
         <div className="flex justify-between items-center ">
           <h3 className="font-bold tracking-tight text-text-primary flex flex-col">

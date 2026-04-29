@@ -419,7 +419,7 @@
   
   
   .card {
-    @apply bg-surface border border-surface-border md:rounded-md shadow-sm hover:shadow-md transition-shadow p-4;
+    @apply bg-surface border border-surface-border md:rounded-md shadow-sm transition-shadow p-4;
   }
 
   .btn-primary {
