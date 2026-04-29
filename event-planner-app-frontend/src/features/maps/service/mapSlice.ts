@@ -8,6 +8,7 @@ interface MapState {
   selectedEvent: Event | null;
   days: Day[];
   route: Route | null;
+  isMapView: boolean;
 }
 
 const initialState: MapState = {
@@ -16,6 +17,7 @@ const initialState: MapState = {
   selectedEvent: null,
   days: [],
   route: null,
+  isMapView: false,
 };
 
 type UpdateFunc = (event: EventSearchResult) => EventSearchResult;
@@ -51,6 +53,10 @@ export const mapSlice = createSlice({
     },
     setRoute: (state, action: PayloadAction<Route | null>) => {
       state.route = action.payload;
+      state.isMapView = true;
+    },
+    setIsMapView: (state, action: PayloadAction<boolean>) => {
+      state.isMapView = action.payload;
     },
   },
 });
@@ -64,6 +70,7 @@ export const {
   clearSearchEvents,
   updateSearchEvents,
   setRoute,
+  setIsMapView,
 } = mapSlice.actions;
 
 export default mapSlice.reducer;

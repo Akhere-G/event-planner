@@ -5,13 +5,16 @@ import { isFetchBaseQueryError } from "../features/api/utils";
 import { TripDetails, TripMap } from "../features/trips/components";
 import { openModal } from "../features/modal/modalSlice";
 import { ModalType } from "../features/modal/types";
-import { useDispatch } from "react-redux";
-import { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { useEffect } from "react";
 import { isAdmin } from "../features/users/utils";
 import { List, Map } from "lucide-react";
+import type { RootState } from "../store";
+import { setIsMapView } from "../features/maps/service/mapSlice";
 
 export default function TripPage() {
-  const [isMapView, setIsMapView] = useState(false);
+  const { isMapView } = useSelector((state: RootState) => state.map);
+
   const { tripId } = useParams();
   const { data, isLoading, isError, error } = useGetTripQuery(Number(tripId));
   const [searchParams] = useSearchParams();
@@ -53,7 +56,7 @@ export default function TripPage() {
           </div>
           <div className="z-1 fixed rounded-xl bg-surface bottom-4 right-1/2 translate-x-1/2 md:hidden">
             <button
-              onClick={() => setIsMapView((prev) => !prev)}
+              onClick={() => dispatch(setIsMapView(!isMapView))}
               className="btn-secondary bg-brand-secondary/20 hover:brightness-140 border-surface-border border w-44 shadow-2xl  flex gap-2 justify-center "
             >
               {isMapView ? (
