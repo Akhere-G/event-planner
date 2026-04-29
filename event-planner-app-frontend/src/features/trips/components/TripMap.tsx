@@ -2,7 +2,7 @@ import { AdvancedMarker, Map, useMap } from "@vis.gl/react-google-maps";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import type { RootState } from "../../../store";
-import { LocateIcon, Minus, Plus, X } from "lucide-react";
+import { X } from "lucide-react";
 
 import type { Trip } from "../types";
 import { differenceInDays } from "date-fns";
@@ -27,6 +27,7 @@ import {
   EventSearchResultList,
   FitToDay,
   RouteDetails,
+  ZoomButtons,
 } from "../../maps/components";
 import { EventCard } from "../../events/components";
 
@@ -100,24 +101,6 @@ export default function TripMap({ trip }: { trip: Trip }) {
     };
   }, [dispatch]);
 
-  const zoomIn = () => {
-    if (map)
-      map.setZoom(Math.min((map.getZoom() || DEFAULT_ZOOM) + 1, MAX_ZOOM));
-  };
-  const zoomOut = () => {
-    if (map)
-      map.setZoom(Math.max((map.getZoom() || DEFAULT_ZOOM) - 1, MIN_ZOOM));
-  };
-
-  const zoomToUser = () => {
-    if (!userCoords || !map) return;
-
-    map.panTo({
-      lat: userCoords.latitude,
-      lng: userCoords.longitude,
-    });
-  };
-
   const eventMarkers = selectedEvents.map((event) => (
     <EventMarker
       day={differenceInDays(event.startAt, startDate) + 1}
@@ -176,17 +159,7 @@ export default function TripMap({ trip }: { trip: Trip }) {
         <FitToDay />
         <RouteDetails />
       </div>
-      <div className="absolute bottom-4 right-2 flex flex-col gap-2">
-        <button onClick={zoomToUser} className="p-2 btn-primary">
-          <LocateIcon size={20} />
-        </button>
-        <button onClick={zoomIn} className="p-2 btn-primary">
-          <Plus size={20} />
-        </button>
-        <button onClick={zoomOut} className="p-2 btn-primary">
-          <Minus size={20} />
-        </button>
-      </div>
+      <ZoomButtons userCoords={userCoords} />
       {selectedEvent && (
         <div
           className={`absolute bottom-14 md:bottom-2 flex w-[140%] pt-2 pl-4 

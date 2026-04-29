@@ -5,3 +5,4 @@ export { default as FitToDay } from "./FitToDay";
 export { default as EventSearch } from "./EventSearch";
 export { default as EventSearchResultList } from "./EventSearchResultList";
 export { default as RouteDetails } from "./RouteDetails";
+export { default as ZoomButtons } from "./ZoomButtons";
