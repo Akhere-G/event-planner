@@ -9,6 +9,7 @@ import { type Event } from "../types";
 import { canUserEdit } from "../../users/utils";
 import { useState } from "react";
 import {
+  ConfirmModal,
   EditableSelect,
   EditableText,
   StateGate,
@@ -33,6 +34,7 @@ export function EventCard({
   handleEdit = async () => {},
   role,
 }: EventCardProps) {
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [eventData, setEventData] = useState(event);
   const start = parseISO(eventData.startAt);
   const end = parseISO(eventData.endAt);
@@ -46,6 +48,8 @@ export function EventCard({
       setEventData(oldData);
     }
   };
+
+  const closeDeleteModal = () => setIsModalOpen(false);
 
   return (
     <div className="card flex-1 hover:shadow-lg transition-shadow border-l-4 border-brand-primary">
@@ -139,7 +143,7 @@ export function EventCard({
             <button
               className="p-0 group"
               aria-label="delete event"
-              onClick={() => handleDelete(eventData.id)}
+              onClick={() => setIsModalOpen(true)}
             >
               <Trash
                 size={16}
@@ -147,6 +151,14 @@ export function EventCard({
                 aria-hidden
               />
             </button>
+          )}
+
+          {isModalOpen && (
+            <ConfirmModal
+              title={`Delete '${eventData.name}'`}
+              closeModal={closeDeleteModal}
+              confirmAction={() => handleDelete(eventData.id)}
+            />
           )}
         </div>
       </div>

@@ -49,7 +49,15 @@ export default function DayList({
           <Accordion
             defaultIsOpen={checkDefaultOpen(index, day.date)}
             TitleComponent={() => (
-              <h3 className="text-lg">{formatDateRelative(day.date)}</h3>
+              <div className="flex flex-col items-start">
+                <span className="text-[0.65rem] font-bold uppercase tracking-widest text-brand-primary/80 ">
+                  Day {day.day}
+                </span>
+
+                <h3 className="text-xl font-semibold tracking-tight text-text-primary">
+                  {formatDateRelative(day.date)}
+                </h3>
+              </div>
             )}
             ContentComponent={() => (
               <div className="px-4 ">
