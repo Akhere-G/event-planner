@@ -1,6 +1,7 @@
 import type { Event } from "../types";
 import EventCard from "./EventCard";
 import { StateGate } from "../../../components";
+import EventActions from "./EventActions";
 
 export default function EventList({ events }: { events: Event[] }) {
   return (
@@ -13,8 +14,13 @@ export default function EventList({ events }: { events: Event[] }) {
         }}
       >
         <>
-          {events.map((event) => (
-            <EventCard key={event.id} event={event} />
+          {events.map((event, i) => (
+            <>
+              <EventCard key={event.id} event={event} />
+              {i !== events.length - 1 && (
+                <EventActions from={event} to={events[i + 1]} />
+              )}
+            </>
           ))}
         </>
       </StateGate>

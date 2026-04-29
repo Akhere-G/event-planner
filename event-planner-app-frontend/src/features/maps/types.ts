@@ -1,3 +1,5 @@
+import type { Event } from "../events/types";
+
 export interface PlacePhoto {
   height: number;
   width: number;
@@ -20,4 +22,10 @@ export interface EventSearchResult {
   category: string;
   totalReviews: number;
   photos: PlacePhoto[];
+}
+
+export interface Route {
+  from: Event;
+  to: Event;
+  mode: string;
 }

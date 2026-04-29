@@ -93,3 +93,18 @@ export const searchTags = [
     category: "logistics",
   },
 ];
+
+export const TravelModes = [
+  {
+    title: "Walking",
+    value: "WALKING",
+  },
+  {
+    title: "Driving",
+    value: "DRIVING",
+  },
+  {
+    title: "Transit",
+    value: "TRANSIT",
+  },
+];

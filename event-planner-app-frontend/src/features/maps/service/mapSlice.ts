@@ -1,12 +1,13 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 import type { Day, Event } from "../../events/types";
-import type { EventSearchResult } from "../types";
+import type { EventSearchResult, Route } from "../types";
 
 interface MapState {
   searchEvents: EventSearchResult[];
   searchIndex: number;
   selectedEvent: Event | null;
   days: Day[];
+  route: Route | null;
 }
 
 const initialState: MapState = {
@@ -14,6 +15,7 @@ const initialState: MapState = {
   searchIndex: 0,
   selectedEvent: null,
   days: [],
+  route: null,
 };
 
 type UpdateFunc = (event: EventSearchResult) => EventSearchResult;
@@ -47,6 +49,9 @@ export const mapSlice = createSlice({
       state.searchEvents = [];
       state.searchIndex = 0;
     },
+    setRoute: (state, action: PayloadAction<Route | null>) => {
+      state.route = action.payload;
+    },
   },
 });
 
@@ -58,6 +63,7 @@ export const {
   markEventAsAdded,
   clearSearchEvents,
   updateSearchEvents,
+  setRoute,
 } = mapSlice.actions;
 
 export default mapSlice.reducer;

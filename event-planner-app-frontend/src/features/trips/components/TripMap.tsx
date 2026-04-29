@@ -28,6 +28,7 @@ import {
   FitToDay,
 } from "../../maps/components";
 import { EventCard } from "../../events/components";
+import useRoute from "../../maps/hooks/useRoute";
 
 const permissionEnum = {
   GRANTED: "GRANTED",
@@ -38,9 +39,10 @@ const permissionEnum = {
 export default function TripMap({ trip }: { trip: Trip }) {
   const { latitude, longitude, startDate, endDate, events } = trip;
   const dispatch = useDispatch();
-  const { searchEvents, selectedEvent, days } = useSelector(
+  const { searchEvents, selectedEvent, days, route } = useSelector(
     (state: RootState) => state.map,
   );
+  const { calculateAndDisplayRoute } = useRoute();
   const darkMode = useSelector((state: RootState) => state.theme.darkMode);
 
   const [userCoords, setUserCoords] = useState<{
@@ -98,6 +100,13 @@ export default function TripMap({ trip }: { trip: Trip }) {
       dispatch(clearSearchEvents());
     };
   }, [dispatch]);
+
+  useEffect(() => {
+    if (route) {
+      calculateAndDisplayRoute();
+    }
+  }, [route, calculateAndDisplayRoute]);
+
   const zoomIn = () => {
     if (map)
       map.setZoom(Math.min((map.getZoom() || DEFAULT_ZOOM) + 1, MAX_ZOOM));
