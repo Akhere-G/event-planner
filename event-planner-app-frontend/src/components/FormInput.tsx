@@ -3,7 +3,7 @@ import { Tooltip } from "react-tooltip";
 export interface FormInputprops {
   label?: string;
   name: string;
-  value: string | number | undefined;
+  value?: string | number;
   type?: string;
   onChange: (
     e: React.ChangeEvent<
