@@ -3,6 +3,7 @@ import { Tooltip } from "react-tooltip";
 export interface FormInputprops {
   label?: string;
   name: string;
+  value: string | number | undefined;
   type?: string;
   onChange: (
     e: React.ChangeEvent<
@@ -26,6 +27,7 @@ export interface FormInputprops {
 const FormInput = ({
   label,
   name,
+  value,
   type = "text",
   onChange,
   onBlur = () => {},
@@ -57,6 +59,7 @@ const FormInput = ({
       {!options && !textarea && (
         <input
           id={name}
+          value={value}
           data-tooltip-id={`${name}-tooltip`}
           className={`form-input ${tooltipErrors && errorMessage ? "border-error!" : ""}`}
           name={name}
@@ -71,6 +74,7 @@ const FormInput = ({
         <select
           id={name}
           data-tooltip-id={`${name}-tooltip`}
+          value={value}
           className={`form-input ${tooltipErrors && errorMessage ? "border-error!" : ""}`}
           name={name}
           onChange={onChange}
@@ -88,6 +92,7 @@ const FormInput = ({
       {textarea && !options && (
         <textarea
           id={name}
+          value={value}
           data-tooltip-id={`${name}-tooltip`}
           className={`form-input ${tooltipErrors && errorMessage ? "border-error!" : ""}`}
           name={name}
