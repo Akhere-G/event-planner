@@ -21,13 +21,13 @@ export default function TripDetails(trip: Trip) {
           <div className="">
             <button
               onClick={() => setIsListView(true)}
-              className={`btn-secondary px-6 py-2 border-2 border-surface-border rounded-r-none active:scale-100 ${isListView ? "brightness-150" : ""}`}
+              className={`btn-secondary px-6 py-2 border-2 border-surface-border rounded-r-none active:scale-100 ${isListView ? "brightness-110" : ""}`}
             >
               List
             </button>
             <button
               onClick={() => setIsListView(false)}
-              className={`btn-secondary px-6 py-2 border-2 border-surface-border border-l-0 rounded-l-none active:scale-100  ${isListView ? "" : "brightness-150"}`}
+              className={`btn-secondary px-6 py-2 border-2 border-surface-border border-l-0 rounded-l-none active:scale-100  ${isListView ? "" : "brightness-110"}`}
             >
               Calendar
             </button>

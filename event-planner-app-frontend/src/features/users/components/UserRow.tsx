@@ -82,7 +82,7 @@ export default function UserRow({ user }: { user: User }) {
   const closeDeleteModal = () => setIsDeleteModalOpen(false);
   return (
     <tr className="group hover:bg-surface-muted/30 transition-colors text-sm md:text-current">
-      <td className="px-2 pl-4 md:px-6 py-4">
+      <td className="px-2 md:px-6 py-4">
         <div className="flex items-center gap-3">
           <div className="p-2 hidden md:block rounded-full bg-brand-primary/10 text-brand-primary">
             <UserIcon size={16} />

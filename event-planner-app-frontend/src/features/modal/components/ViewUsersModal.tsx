@@ -35,7 +35,7 @@ export default function ViewUsersModal() {
   const showInvites = () => setSearchParams({ view: "invites" });
 
   return (
-    <div className="card">
+    <div className="card border-0">
       <div className="flex items-center justify-between mb-4">
         <header className="flex ">
           <button

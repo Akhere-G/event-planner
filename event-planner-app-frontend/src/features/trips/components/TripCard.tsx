@@ -52,7 +52,7 @@ export default function TripCard({
 
   return (
     <article
-      className="relative rounded-md bg-surface shadow-md overflow-hidden cursor-pointer"
+      className="relative md:rounded-md bg-surface shadow-md overflow-hidden cursor-pointer"
       onClick={() => handleCardClick(id)}
       ref={menuRef}
     >
@@ -69,10 +69,13 @@ export default function TripCard({
           )}
           {isMenuOpen && (
             <div className="absolute top-8 right-4 mt-2 w-32 bg-surface rounded-md shadow-lg z-10 flex flex-col text-sm">
-              <button onClick={handleEdit} className="btn-menu">
+              <button onClick={handleEdit} className="btn-menu rounded-md">
                 Edit
               </button>
-              <button onClick={handleDelete} className="btn-menu text-error">
+              <button
+                onClick={handleDelete}
+                className="btn-menu rounded-md text-error"
+              >
                 Delete
               </button>
             </div>

@@ -6,6 +6,7 @@ interface LocationInputProps extends React.InputHTMLAttributes<HTMLInputElement>
   label?: string;
   errorMessage?: string;
   classNames?: string;
+  inputClassNames?: string;
   onPlaceSelect: (place: google.maps.places.PlaceResult) => void;
   searchTypes?: string[];
   cityBounds?: { north: number; east: number; south: number; west: number };
@@ -16,6 +17,7 @@ export default function LocationInput({
   label,
   errorMessage,
   classNames = "",
+  inputClassNames = "",
   onPlaceSelect,
   cityBounds,
   onPlaceQuery,
@@ -71,7 +73,7 @@ export default function LocationInput({
             {...rest}
             ref={inputRef}
             type="text"
-            className="form-input w-full"
+            className={`form-input w-full ${inputClassNames}`}
             placeholder="Search for a location..."
             onKeyDown={(e) => {
               if (e.key == "Enter" && inputRef.current && onPlaceQuery) {

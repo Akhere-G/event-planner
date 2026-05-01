@@ -35,9 +35,9 @@ export function DayFilter({
   };
 
   return (
-    <div className="rounded-xl bg-surface">
+    <div className="rounded-xl bg-surface shadow-md">
       {expanded ? (
-        <div className="card bg-brand-secondary/20 rounded-xl w-35">
+        <div className="card bg-brand-secondary text-text-inverse rounded-xl w-35">
           <div className="flex items-center justify-between gap-2 mb-2">
             <h3 className="">Filter</h3>
             <button
@@ -86,7 +86,7 @@ export function DayFilter({
         </div>
       ) : (
         <button
-          className="btn-secondary bg-brand-secondary/20 p-2"
+          className="btn-secondary bg-brand-secondary text-text-inverse p-2"
           onClick={() => setExpanded(true)}
         >
           <Layers3 size={20} />

@@ -44,7 +44,7 @@ export default function TripList({
         ))}
         <Link
           to="/addtrip"
-          className="border-brand-primary bg-surface border-2 h-full w-full rounded-md flex justify-center items-center gap-2 font-bold min-h-54"
+          className="border-brand-primary bg-surface border-2 h-full w-full md:rounded-md flex justify-center items-center gap-2 font-bold min-h-54"
         >
           <Plus className="text-brand-primary" />
           <p className="text-brand-primary">Add new trip</p>

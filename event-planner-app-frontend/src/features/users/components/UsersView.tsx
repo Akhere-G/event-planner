@@ -11,7 +11,7 @@ export default function UsersView() {
 
   return (
     <StateGate loadingStateProps={{ isLoading }} errorStateProps={{ isError }}>
-      <div className="flex flex-col gap-4 items-start px-2">
+      <div className="flex flex-col gap-4 items-start">
         <div className="w-full">
           <UsersTable users={data?.data.users ?? []} />
         </div>

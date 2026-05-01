@@ -22,9 +22,9 @@ export function FitToDay({
   if (daysWithEvents.length === 0) return;
   if (daysWithEvents.length === 1) {
     return (
-      <div className="bg-surface rounded-xl hover:brightness-140">
+      <div className="bg-surface rounded-xl hover:brightness-140 shadow-md">
         <button
-          className="bg-brand-secondary/20 border-surface-border border py-2 px-4 text-sm w-35 max-h-30 overflow-y-scroll"
+          className="btn bg-brand-secondary text-text-inverse border-surface-border border py-2 px-4 text-sm w-35 max-h-30 overflow-y-scroll"
           onClick={() => fitToDay(daysWithEvents[0].date)}
         >
           Fit to day {daysWithEvents[0].day}
@@ -34,13 +34,13 @@ export function FitToDay({
   }
 
   return (
-    <div className="bg-surface rounded-xl">
+    <div className="bg-surface rounded-xl shadow-md">
       {expanded ? (
-        <div className="card bg-brand-secondary/20 rounded-xl w-35">
+        <div className="card bg-brand-secondary text-text-inverse rounded-xl w-35">
           <div className="flex items-center justify-between gap-2 mb-2 ">
             <h3 className="">Fit to day</h3>
             <button
-              className="p-0 translate-x-3 -translate-y-4"
+              className="btn shadow-md p-0 translate-x-3 -translate-y-4"
               onClick={() => setExpanded(false)}
             >
               <X size={16} />
@@ -50,14 +50,14 @@ export function FitToDay({
             {daysWithEvents.map((day) => (
               <button
                 key={day.date}
-                className="py-2 px-0 text-sm text-left hover:brightness-140!"
+                className="btn py-2 px-0 text-sm text-left"
                 onClick={() => fitToDay(day.date)}
               >
                 <span className="whitespace-nowrap">Day {day.day}</span>
               </button>
             ))}
             <button
-              className="py-2 px-0 text-sm text-left hover:brightness-140"
+              className="btn py-2 px-0 text-sm text-left"
               onClick={fitToAll}
             >
               <span className="whitespace-nowrap">All</span>
@@ -65,14 +65,12 @@ export function FitToDay({
           </div>
         </div>
       ) : (
-        <div className="hover:brightness-200">
-          <button
-            className="bg-brand-secondary/20 btn-secondary p-2"
-            onClick={() => setExpanded(true)}
-          >
-            <Maximize size={20} />
-          </button>
-        </div>
+        <button
+          className="bg-brand-secondary text-text-inverse btn-secondary p-2"
+          onClick={() => setExpanded(true)}
+        >
+          <Maximize size={20} />
+        </button>
       )}
     </div>
   );

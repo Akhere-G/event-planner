@@ -12,7 +12,7 @@ export default function EmptyState({
   return (
     <div
       style={{ height: height + "px" }}
-      className={`bg-surface border-dashed border-slate-300 border-2 rounded-md flex flex-col gap-4 justify-center items-center`}
+      className={`bg-surface border-dashed border-surface-border border-2 rounded-md flex flex-col gap-4 justify-center items-center`}
     >
       <h2 className="text-text-secondary">{message}</h2>
       {action && (

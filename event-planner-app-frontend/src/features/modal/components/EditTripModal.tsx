@@ -22,7 +22,7 @@ export default function EditTripModal({ trip }: { trip: Trip }) {
   }
 
   return (
-    <div className="card">
+    <div className="p-4">
       <div className="flex items-center justify-between mb-4">
         <h2 className="title">Edit Trip</h2>
         <button

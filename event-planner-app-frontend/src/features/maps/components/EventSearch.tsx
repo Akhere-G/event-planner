@@ -138,13 +138,14 @@ export function EventSearch({
               onPlaceSelect={handlePlaceSelect}
               onPlaceQuery={handlePlaceQuery}
               cityBounds={cityBounds}
+              inputClassNames="bg-surface shadow-md"
             />
             <div className="flex gap-2 overflow-x-scroll py-2 rounded-md">
               {searchTags.map(({ label, query, Icon }) => (
                 <button
                   onClick={() => handlePlaceQuery(query)}
                   key={label}
-                  className="btn-secondary px-3 py-2 text-xs flex gap-2 items-center w-full text-nowrap"
+                  className="btn-secondary bg-brand-secondary shadow-md text-text-inverse px-3 py-2 text-xs flex gap-2 items-center w-full text-nowrap"
                 >
                   <Icon size={16} />
                   <span className="flex-1">{label}</span>
@@ -156,7 +157,7 @@ export function EventSearch({
       ) : (
         <div className="bg-surface rounded-xl">
           <button
-            className="btn-secondary bg-brand-secondary/20 p-2"
+            className="btn-secondary bg-brand-secondary text-text-inverse p-2"
             onClick={() => setExpanded(true)}
           >
             <Search size={20} />

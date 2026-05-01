@@ -53,12 +53,12 @@ export default function TripPage() {
           >
             <TripMap trip={data.data} />
           </div>
-          <div className="z-1 fixed rounded-xl bg-surface bottom-4 right-1/2 translate-x-1/2 md:hidden">
+          <div className="z-1 fixed rounded-xl bottom-4 right-1/2 translate-x-1/2 md:hidden">
             <button
               onClick={() => {
                 dispatch(setIsMapView(!isMapView));
               }}
-              className="btn-secondary bg-brand-secondary/20 hover:brightness-140 border-surface-border border w-44 shadow-2xl  flex gap-2 justify-center "
+              className="btn-secondary bg-brand-secondary text-text-inverse hover:brightness-140 border-surface-border border w-44 shadow-2xl  flex gap-2 justify-center "
             >
               {isMapView ? (
                 <>

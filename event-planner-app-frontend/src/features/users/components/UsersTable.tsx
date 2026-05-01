@@ -7,7 +7,7 @@ export default function UsersTable({ users }: { users: User[] }) {
       <table className="w-full text-left border-collapse">
         <thead>
           <tr className="border-b bg-surface-muted/50">
-            <th className="px-2 pl-4 py-2 md:px-6 md:py-2 text-sm text-text-secondary">
+            <th className="px-2 py-2 md:px-6 md:py-2 text-sm text-text-secondary">
               Username
             </th>
             <th className="px-2 py-2 md:px-6 md:py-2 text-sm text-text-secondary">

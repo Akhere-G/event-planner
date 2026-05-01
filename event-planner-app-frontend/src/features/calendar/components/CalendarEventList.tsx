@@ -16,7 +16,7 @@ export default function CalendarEventList({
 }: CalendarEventList) {
   if (events.length === 0) {
     return (
-      <div className="py-10 text-center border-2 border-dashed border-slate-100 md:rounded-md bg-surface">
+      <div className="py-10 text-center border-2 border-dashed border-surface-border md:rounded-md bg-surface">
         <p className="text-text-sub text-sm italic">
           No events on {format(currentDate, "PPPP")}.
         </p>

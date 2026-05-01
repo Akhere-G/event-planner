@@ -18,7 +18,7 @@ export default function SettingsPage() {
         </header>
 
         <SettingsCard
-          icon={<Palette className="text-brand" />}
+          icon={<Palette className="text-brand-primary" />}
           title="Theme Selection"
         >
           <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3">
@@ -29,8 +29,8 @@ export default function SettingsPage() {
                 onClick={() => dispatch(setTheme(t.id))}
                 className={`py-2 rounded-lg border text-sm transition-all cursor-pointer  ${
                   theme === t.id
-                    ? "border-brand-primary bg-brand/10 text-brand-primary font-bold"
-                    : "border-surface-border hover:border-brand/50 font-medium dark:border-slate-700"
+                    ? "border-brand-primary bg-brand-primary/10 text-brand-primary font-bold"
+                    : "border-surface-border hover:border-brand-primary/50 font-medium dark:surface-border"
                 }`}
               >
                 {t.name}
@@ -38,14 +38,17 @@ export default function SettingsPage() {
             ))}
           </div>
         </SettingsCard>
-        <SettingsCard icon={<Moon className="text-brand" />} title="Appearance">
+        <SettingsCard
+          icon={<Moon className="text-brand-primary" />}
+          title="Appearance"
+        >
           <div className="flex items-center justify-between">
             <span className="text-text-main font-medium">Dark Mode</span>
             <button
               aria-label="Toggle dark mode"
               onClick={() => dispatch(toggleDarkMode())}
               className={`w-12 h-6 rounded-full transition-colors cursor-pointer relative ${
-                darkMode ? "bg-brand" : "bg-slate-300 dark:bg-slate-600"
+                darkMode ? "bg-brand-primary" : "bg-surface-muted"
               }`}
             >
               <span
@@ -72,7 +75,7 @@ function SettingsCard({
 }) {
   return (
     <div className="card">
-      <div className="flex items-center gap-2 mb-4 border-b border-slate-500 dark:border-slate-400 pb-3">
+      <div className="flex items-center gap-2 mb-4 border-b border-surface-border pb-3">
         {icon}
         <h3 className="text-lg font-bold text-text-main">{title}</h3>
       </div>
@@ -86,23 +89,29 @@ export function FutureSections() {
     /* Profile Section */
   }
   <div>
-    <SettingsCard icon={<User className="text-brand" />} title="Profile">
+    <SettingsCard
+      icon={<User className="text-brand-primary" />}
+      title="Profile"
+    >
       <div className="space-y-4">
         <input
           type="text"
           placeholder="Full Name"
-          className="w-full p-2 bg-surface-muted rounded-md border border-slate-200 dark:border-slate-700 text-text-main focus:outline-none focus:border-brand transition-colors"
+          className="w-full p-2 bg-surface-muted rounded-md border  text-text-primary focus:outline-none focus:border-brand-primary transition-colors"
         />
         <input
           type="email"
           placeholder="Email Address"
-          className="w-full p-2 bg-surface-muted rounded-md border border-slate-200 dark:border-slate-700 text-text-main focus:outline-none focus:border-brand transition-colors"
+          className="w-full p-2 bg-surface-muted rounded-md border text-text-primary focus:outline-none focus:border-brand-primary transition-colors"
         />
       </div>
     </SettingsCard>
 
     {/* Security Section */}
-    <SettingsCard icon={<Shield className="text-brand" />} title="Security">
+    <SettingsCard
+      icon={<Shield className="text-brand-primary" />}
+      title="Security"
+    >
       <button aria-label="Change password" className="btn-secondary">
         Change Password
       </button>

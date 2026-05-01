@@ -29,8 +29,11 @@ export default function ModalManager() {
         setSearchParams({});
       }}
     >
-      <div className="modal" onClick={(e) => e.stopPropagation()}>
-        <div className="max-h-[90vh] overflow-y-scroll rounded-md">
+      <div
+        className="modal border-surface-border border-2 rounded-md"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="max-h-[90vh] overflow-y-scroll rounded-md bg-surface">
           <SpecificModal {...(modal.props ?? {})} />
         </div>
       </div>

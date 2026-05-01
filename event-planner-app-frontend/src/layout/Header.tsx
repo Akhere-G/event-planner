@@ -54,7 +54,7 @@ export default function Header({ links }: HeaderProps) {
               onClick={() => setIsMenuOpen(true)}
               className="p-2.5 bg-brand-primary rounded-full h-10 w-10 "
             >
-              <User size={20} />
+              <User className="text-text-inverse" size={20} />
             </button>
             <div
               className={`flex flex-col w-40 card p-0 z-10 absolute right-2 top-full ${isMenuOpen ? "visible opacity-100" : "invisible opacity-0 pointer-events-none"}`}

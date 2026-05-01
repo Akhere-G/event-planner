@@ -6,7 +6,7 @@ export default function LoadingState({
   message = "Loading...",
 }: LoadingStateProps) {
   return (
-    <div className="bg-surface min-h-50 border-slate-300 border-2 rounded-md flex flex-col gap-4 justify-center items-center">
+    <div className="bg-surface min-h-50 border-surface-border border-2 md:rounded-md flex flex-col gap-4 justify-center items-center">
       <h2 className="text-text-secondary">{message}</h2>
       <svg
         aria-hidden="true"
