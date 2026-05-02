@@ -6,7 +6,7 @@ import {
   useRevokeInviteMutation,
 } from "../services/inviteApiSlice";
 import { useMatch } from "react-router";
-import { isValidationError } from "../../api/utils";
+import { isFetchBaseQueryError } from "../../api/utils";
 import { getStatusConfig } from "../utils";
 import { toast } from "sonner";
 
@@ -27,8 +27,8 @@ export default function InviteRow({ invite }: { invite: Invite }) {
         invite: { email: email.toLowerCase(), role },
       }).unwrap();
     } catch (err) {
-      if (isValidationError(err)) {
-        toast.error("Could not reinvite user.");
+      if (isFetchBaseQueryError(err)) {
+        toast.error((err.data as { message: string }).message);
       }
     }
   }
@@ -37,8 +37,8 @@ export default function InviteRow({ invite }: { invite: Invite }) {
     try {
       revokeInvite({ tripId, inviteId: invite.id }).unwrap();
     } catch (err) {
-      if (isValidationError(err)) {
-        toast.error("Could not revoke user.");
+      if (isFetchBaseQueryError(err)) {
+        toast.error((err.data as { message: string }).message);
       }
     }
   }

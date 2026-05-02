@@ -23,11 +23,7 @@ export default function MyInviteCard({ invite }: { invite: Invite }) {
       await accept({ inviteId: invite.id, token: invite.token ?? "" }).unwrap();
     } catch (err) {
       if (isFetchBaseQueryError(err)) {
-        if (err.status === 404) {
-          toast.error("Invite not found.");
-        } else if (err.status === 400) {
-          toast.error("Cannot accept invite.");
-        }
+        toast.error((err.data as { message: string }).message);
       }
     }
   };
@@ -40,11 +36,7 @@ export default function MyInviteCard({ invite }: { invite: Invite }) {
       }).unwrap();
     } catch (err) {
       if (isFetchBaseQueryError(err)) {
-        if (err.status === 404) {
-          toast.error("Invite not found.");
-        } else if (err.status === 400) {
-          toast.error("Cannot decline invite.");
-        }
+        toast.error((err.data as { message: string }).message);
       }
     }
   };

@@ -175,8 +175,7 @@ export default function EventSearchResultCardConnected() {
       updateSearchResults();
     } catch (err) {
       if (isFetchBaseQueryError(err)) {
-        console.error(err);
-        toast.error("Cannot add event.");
+        toast.error((err.data as { message: string }).message);
       }
     }
   };

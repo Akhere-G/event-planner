@@ -1,6 +1,6 @@
 import { useDispatch } from "react-redux";
 import type { Trip } from "../../trips/types";
-import { isValidationError } from "../../api/utils";
+import { isFetchBaseQueryError } from "../../api/utils";
 import { useDeleteTripMutation } from "../../trips/services/tripsApiSlice";
 import { closeModal } from "../modalSlice";
 import { toast } from "sonner";
@@ -18,8 +18,8 @@ export default function DeleteTripModal({ trip }: { trip: Trip }) {
       await deleteTrip(trip.id).unwrap();
       handleClose();
     } catch (err) {
-      if (isValidationError(err) && err.status === 404) {
-        toast.error("Trip not found.");
+      if (isFetchBaseQueryError(err)) {
+        toast.error((err.data as { message: string }).message);
       }
     }
   };

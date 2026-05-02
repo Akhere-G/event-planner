@@ -1,3 +1,4 @@
+import { toast } from "sonner";
 import { isFetchBaseQueryError } from "../../api/utils";
 import {
   useDeleteEventMutation,
@@ -22,9 +23,8 @@ export default function useUpdateEvent({
       await deleteEvent({ tripId, eventId }).unwrap();
       onDelete();
     } catch (err) {
-      if (isFetchBaseQueryError(err) && err.status === 404) {
-        console.log("Event not found");
-        // TODO: Add toast notifcation
+      if (isFetchBaseQueryError(err)) {
+        toast.error((err.data as { message: string }).message);
       }
     }
   }
@@ -39,13 +39,7 @@ export default function useUpdateEvent({
       onEdit();
     } catch (err) {
       if (isFetchBaseQueryError(err)) {
-        if (err.status === 404) {
-          console.log("Event not found");
-          // TODO: Add toast notifcation
-        } else if (err.status === 400) {
-          // TODO: Add toast notifcation
-          throw err;
-        }
+        toast.error((err.data as { message: string }).message);
       }
     }
   }

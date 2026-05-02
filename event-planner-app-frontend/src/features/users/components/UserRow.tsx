@@ -3,7 +3,7 @@ import { UserRole, type User } from "../types";
 import { useEffect, useRef, useState } from "react";
 
 import { useMatch } from "react-router";
-import { isFetchBaseQueryError, isValidationError } from "../../api/utils";
+import { isFetchBaseQueryError } from "../../api/utils";
 import { useRemoveUserMutation, useUpdateUserMutation } from "../usersApiSlice";
 import { EditableSelect } from "../../../components";
 import { toast } from "sonner";
@@ -27,16 +27,8 @@ export default function UserRow({ user }: { user: User }) {
     try {
       await removeUser({ tripId, userId: user.id }).unwrap();
     } catch (err) {
-      if (isValidationError(err)) {
-        const serverErrors = err.data.error;
-        if (err) {
-          console.error(serverErrors);
-        }
-        if (err.status === 404) {
-          toast.error("User not found.");
-        } else if (err.status === 403) {
-          toast.error("Not authorised.");
-        }
+      if (isFetchBaseQueryError(err)) {
+        toast.error((err.data as { message: string }).message);
       }
     }
   }
@@ -53,17 +45,7 @@ export default function UserRow({ user }: { user: User }) {
     } catch (err) {
       setUserRole(oldRole);
       if (isFetchBaseQueryError(err)) {
-        switch (err.status) {
-          case 400:
-            toast.error("Cannot update role.");
-            break;
-          case 404:
-            toast.error("User found.");
-            break;
-          case 403:
-            toast.error("Not authorised.");
-            break;
-        }
+        toast.error((err.data as { message: string }).message);
       }
     }
   }
