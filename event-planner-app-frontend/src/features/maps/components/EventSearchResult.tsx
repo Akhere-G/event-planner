@@ -101,19 +101,34 @@ export function EventSearchResultCard({
           )}
           headerStyles="p-0! pt-2!"
           contentStyles="p-0 pb-2!"
-          ContentComponent={() => (
-            <div>
-              {photos.map((photo) => (
-                <div className="w-full h-60 overflow-y-scroll flex gap-2">
-                  <img
-                    className="rounded-md w-full h-full object-cover "
-                    src={photo.url}
-                    alt="Place photo"
-                  />
-                </div>
-              ))}
-            </div>
-          )}
+          ContentComponent={() => {
+            const isMultiple = photos.length > 1;
+
+            return (
+              <div
+                className={`
+      flex gap-2 overflow-x-auto pb-2 snap-x 
+      ${isMultiple ? "scrollbar-visible" : "scrollbar-hide"}
+    `}
+              >
+                {photos.map((photo, index) => (
+                  <div
+                    key={index}
+                    className={`
+            h-60 shrink-0 snap-center
+            ${isMultiple ? "w-[85%]" : "w-full"} 
+          `}
+                  >
+                    <img
+                      className="rounded-md w-full h-full object-cover shadow-sm"
+                      src={photo.url}
+                      alt={`Photo of ${name}`}
+                    />
+                  </div>
+                ))}
+              </div>
+            );
+          }}
         />
 
         <div className="flex justify-end">

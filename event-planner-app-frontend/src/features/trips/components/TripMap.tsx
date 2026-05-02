@@ -1,4 +1,9 @@
-import { AdvancedMarker, Map, useMap } from "@vis.gl/react-google-maps";
+import {
+  AdvancedMarker,
+  Map,
+  useMap,
+  useMapsLibrary,
+} from "@vis.gl/react-google-maps";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import type { RootState } from "../../../store";
@@ -11,8 +16,9 @@ import {
   setDays,
   setSelectedEvent,
   clearSearchEvents,
+  setSearchEvents,
 } from "../../maps/service/mapSlice";
-import { fitToBounds, getDaysWithFilter } from "../../maps/utils";
+import { fitToBounds, formatPlace, getDaysWithFilter } from "../../maps/utils";
 import {
   CITY_RADIUS,
   DEFAULT_ZOOM,
@@ -101,6 +107,8 @@ export default function TripMap({ trip }: { trip: Trip }) {
     };
   }, [dispatch]);
 
+  const placesLibrary = useMapsLibrary("places");
+
   const eventMarkers = selectedEvents.map((event) => (
     <EventMarker
       day={differenceInDays(event.startAt, startDate) + 1}
@@ -120,6 +128,32 @@ export default function TripMap({ trip }: { trip: Trip }) {
     dispatch(setSelectedEvent(null));
   };
 
+  const openPlaceResult = (placeId: string) => {
+    if (!placesLibrary || !map) return;
+    const placesService = new placesLibrary.PlacesService(map);
+    placesService.getDetails(
+      {
+        placeId,
+        fields: [
+          "business_status",
+          "opening_hours",
+          "name",
+          "formatted_address",
+          "geometry",
+          "place_id",
+          "rating",
+          "user_ratings_total",
+          "types",
+          "photos",
+        ],
+      },
+      (place) => {
+        console.log(place);
+        if (place) dispatch(setSearchEvents([formatPlace(place)]));
+      },
+    );
+  };
+
   return (
     <div className="relative w-full h-[93.5vh] 2xl:h-[96vh] ">
       <Map
@@ -133,7 +167,7 @@ export default function TripMap({ trip }: { trip: Trip }) {
         reuseMaps
         colorScheme={darkMode ? "DARK" : "LIGHT"}
         gestureHandling="greedy"
-        onClick={(e) => console.log(e)}
+        onClick={(e) => e.detail.placeId && openPlaceResult(e.detail.placeId)}
       >
         {eventMarkers}
         {searchEventMarkers}

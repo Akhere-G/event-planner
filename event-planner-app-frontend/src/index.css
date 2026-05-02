@@ -472,39 +472,16 @@
     @apply w-full max-w-7xl m-4
   }
 
-  /* The main container */
+  /* The main container of default google maps info view*/
   .gm-style-iw-c {
-    @apply bg-surface! text-text-primary! shadow-xl! p-2!;
-  }
-
-  /* The content wrapper */
-  .gm-style-iw-d {
-    @apply bg-surface! text-text-primary! overflow-hidden!;
+    @apply hidden!;
   }
 
   /* The tail/pointer (This is usually the 'white box' on top or bottom) */
   .gm-style-iw-tc::after {
-    @apply bg-surface! text-text-primary!;
+    @apply hidden
   }
-
-  /* Hide the default close button if it's clashing */
-  .gm-ui-hover-effect {
-    @apply hidden!;
-  }
-
-  .gm-style-iw-c * {
-    @apply bg-surface! text-text-primary! p-0!
-  }
-
-  .address * {
-    @apply bg-text-inverse text-text-secondary!
-  }
-  .view-link * {
-    @apply text-brand-accent!
-  }
-  
 }
-
 
   .rbc-show-more {
     @apply  text-brand-accent! font-semibold! text-xs! bg-transparent! hover:underline! ;

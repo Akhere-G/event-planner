@@ -1,9 +1,9 @@
 import { useState } from "react";
-import type { EventSearchResult, Tag } from "../types";
+import type { EventSearchResult } from "../types";
 import { Search, X } from "lucide-react";
 import { LocationInput } from "../../../components";
 import { useMap, useMapsLibrary } from "@vis.gl/react-google-maps";
-import { fitToBounds } from "../../maps/utils";
+import { fitToBounds, formatPlace } from "../../maps/utils";
 import {
   setSearchEvents,
   clearSearchEvents,
@@ -38,37 +38,6 @@ export function EventSearch({
     west: longitude - 0.1,
   };
 
-  const formatPlace = (
-    place: google.maps.places.PlaceResult,
-  ): EventSearchResult => {
-    const tags: Tag[] = [];
-
-    if (place.business_status !== "OPERATIONAL") {
-      tags.push({ text: "Closed", color: "var(--color-error)" });
-    }
-
-    if (place.opening_hours?.isOpen) {
-      tags.push({ text: "Open", color: "var(--color-success)" });
-    }
-
-    return {
-      name: place.name ?? "",
-      address: place.formatted_address ?? "",
-      latitude: place.geometry?.location?.lat() ?? 0,
-      longitude: place.geometry?.location?.lng() ?? 0,
-      placeId: place.place_id ?? "",
-      isAdded: false,
-      rating: place.rating ?? 0,
-      totalReviews: place.user_ratings_total ?? 0,
-      category: place.types?.find((t) => t !== "establishment") ?? "",
-      photos:
-        place.photos?.map(({ getUrl, ...photo }) => ({
-          url: getUrl(),
-          ...photo,
-        })) ?? [],
-      tags,
-    };
-  };
   const handlePlaceSelect = (place: google.maps.places.PlaceResult) => {
     onPlaceSelect([formatPlace(place)]);
     setExpanded(false);

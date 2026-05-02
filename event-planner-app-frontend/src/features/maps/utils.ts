@@ -1,6 +1,7 @@
 import type { Day, Event } from "../events/types";
 import { makeDays } from "../events/utils";
 import { DEFAULT_PADDING } from "./constants";
+import type { EventSearchResult, Tag } from "./types";
 
 export const getDaysWithFilter = (
   events: Event[],
@@ -72,4 +73,38 @@ export const fitToBounds = ({
   const bounds = getBoundsForEvents(events);
 
   map.fitBounds(bounds, DEFAULT_PADDING);
+};
+
+export const formatPlace = (
+  place: google.maps.places.PlaceResult,
+): EventSearchResult => {
+  const tags: Tag[] = [];
+
+  if (place.business_status !== "OPERATIONAL") {
+    tags.push({ text: "Closed", color: "var(--color-error)" });
+  }
+
+  if (place.opening_hours?.isOpen) {
+    tags.push({ text: "Open", color: "var(--color-success)" });
+  }
+
+  return {
+    name: place.name ?? "",
+    address: place.formatted_address ?? "",
+    latitude: place.geometry?.location?.lat() ?? 0,
+    longitude: place.geometry?.location?.lng() ?? 0,
+    placeId: place.place_id ?? "",
+    isAdded: false,
+    rating: place.rating ?? 0,
+    totalReviews: place.user_ratings_total ?? 0,
+    category:
+      place.types?.find((t) => t !== "establishment")?.replaceAll("_", " ") ??
+      "general",
+    photos:
+      place.photos?.map(({ getUrl, ...photo }) => ({
+        url: getUrl(),
+        ...photo,
+      })) ?? [],
+    tags,
+  };
 };
