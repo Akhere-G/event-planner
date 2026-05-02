@@ -17,6 +17,7 @@ import { formatDateRelative } from "../../../utils/dateFormattors";
 import type { EventSchema } from "../../events/schemas/eventSchema";
 import { useAddEventMutation } from "../../events/service/eventApiSlice";
 import { toast } from "sonner";
+import { useRef, useState } from "react";
 
 interface SearchEventCardProps {
   event: EventSearchResult;
@@ -93,43 +94,18 @@ export function EventSearchResultCard({
           </div>
         )}
 
-        <Accordion
-          TitleComponent={({ isOpen }) => (
-            <p className="text-xs text-text-secondary">
-              {isOpen ? "Show Less" : "Show More"}
-            </p>
-          )}
-          headerStyles="p-0! pt-2!"
-          contentStyles="p-0 pb-2!"
-          ContentComponent={() => {
-            const isMultiple = photos.length > 1;
-
-            return (
-              <div
-                className={`
-      flex gap-2 overflow-x-auto pb-2 snap-x 
-      ${isMultiple ? "scrollbar-visible" : "scrollbar-hide"}
-    `}
-              >
-                {photos.map((photo, index) => (
-                  <div
-                    key={index}
-                    className={`
-            h-60 shrink-0 snap-center
-            ${isMultiple ? "w-[85%]" : "w-full"} 
-          `}
-                  >
-                    <img
-                      className="rounded-md w-full h-full object-cover shadow-sm"
-                      src={photo.url}
-                      alt={`Photo of ${name}`}
-                    />
-                  </div>
-                ))}
-              </div>
-            );
-          }}
-        />
+        <div className="relative">
+          <Accordion
+            TitleComponent={({ isOpen }) => (
+              <p className="text-xs text-text-secondary">
+                {isOpen ? "Show Less" : "Show More"}
+              </p>
+            )}
+            headerStyles="p-0! pt-2!"
+            contentStyles="p-0 pb-2!"
+            ContentComponent={() => <Images photos={photos} name={name} />}
+          />
+        </div>
 
         <div className="flex justify-end">
           {event.isAdded ? (
@@ -227,6 +203,59 @@ export function TagChip({ color, text }: Tag) {
       className="rounded-full text-text-inverse font-bold px-3 py-0.5 text-xs"
     >
       {text}
+    </div>
+  );
+}
+
+function Images({ name, photos }: { name: string; photos: { url: string }[] }) {
+  const [currentIndex, setCurrentIndex] = useState(1);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const isMultiple = photos.length > 1;
+
+  const handleScroll = () => {
+    if (scrollRef.current) {
+      const { scrollLeft, offsetWidth } = scrollRef.current;
+      const offsetVariance = 1.15;
+      const newIndex =
+        Math.round((scrollLeft * offsetVariance) / offsetWidth) + 1;
+      if (newIndex !== currentIndex) {
+        setCurrentIndex(newIndex);
+      }
+    }
+  };
+
+  return (
+    <div className="relative group">
+      <div
+        ref={scrollRef}
+        onScroll={handleScroll}
+        className={`
+          flex gap-2 overflow-x-auto pb-2 snap-x snap-mandatory 
+          ${isMultiple ? "scrollbar-visible" : "scrollbar-hide"}
+        `}
+      >
+        {photos.map((photo, index) => (
+          <div
+            key={index}
+            className={`
+              h-60 shrink-0 snap-center
+              ${isMultiple ? "w-[85%]" : "w-full"} 
+            `}
+          >
+            <img
+              className="rounded-md w-full h-full object-cover shadow-sm"
+              src={photo.url}
+              alt={name}
+            />
+          </div>
+        ))}
+      </div>
+
+      {isMultiple && (
+        <div className="absolute top-3 right-3 bg-black/60 text-white text-[10px] px-2 py-1 rounded-full font-bold ">
+          {currentIndex} / {photos.length}
+        </div>
+      )}
     </div>
   );
 }

@@ -203,6 +203,7 @@
   /* --- Egyptian Dune --- */
   .theme-egyptian-dune {
     --color-canvas: #fdf6e3;
+    --color-text-canvas: #111;
     --color-surface: #8c3512;
     --color-surface-border: #6f1f00;
     --color-surface-muted: #7c2502;
@@ -423,7 +424,7 @@
   
   
   .card {
-    @apply bg-surface border border-surface-border md:rounded-md shadow-sm transition-shadow p-4;
+    @apply bg-surface border border-surface-border md:rounded-md shadow-sm transition-shadow p-4 ;
   }
 
   .btn-primary {
