@@ -119,6 +119,57 @@ def get_event_suggestions(itinerary_id, date: datetime):
                 geocoded_events.append(event)
 
         return geocoded_events
-    except Exception:
+    except Exception as e:
+        print(f"JSON Parsing failed: {e}")
         return []
-    pass
+
+
+def optimise_events(itinerary_id, event_date: datetime):
+    itinerary = get_itinerary(itinerary_id)
+    events = [
+        event
+        for event in itinerary.events
+        if event.start_at.date() == event_date.date()
+    ]
+
+    event_details = "\n".join(
+        [
+            f"- id: {event.id}, name: {event.name}, start date: {event.start_at}, end_date {event.end_at}, category: {event.category}"
+            for event in events
+        ]
+    )
+
+    prompt = f"""
+      System Role: You are a professional travel coordinator and logistics expert.
+      
+      Task: Reorder and adjust the timings of the provided events to create a seamless, non-overlapping itinerary.
+      
+      Constraints:
+      1. NO OVERLAPS: Ensure every event ends before the next one begins.
+      2. TRAVEL BUFFER: Allot a realistic 15-45 minute gap between consecutive events for transit.
+      3. GAP MINIMISATION: Avoid idle gaps longer than 60 minutes unless the event is a food or restaurant event, to allow for usual dining hours.
+      4. DATE INTEGRITY: You MUST keep the same Year, Month, and Day. Only modify the Hours and Minutes.
+      5. LOGICAL FLOW: Ensure the sequence makes geographic sense based on the event names and addresses.
+      6. VALIDATION: 'end_at' must always be strictly after 'start_at'.
+      7. SAFETY: Keep the old 'start_at' and 'end_at' times for any event you cannot optimise.
+
+      Output Format:
+      Return a valid JSON array of objects only. Do not include any preamble or markdown formatting.
+      Format:
+      {{
+        "id": "int",
+        "start_at": "ISO 8601 string",
+        "end_at": "ISO 8601 string"
+      }}
+
+      Events to Process:
+      {event_details}
+    """
+
+    try:
+        raw_json = get_ai_response(prompt)
+        events = format_json(raw_json)
+        return events
+    except Exception as e:
+        print(f"JSON Parsing failed: {e}")
+        return []

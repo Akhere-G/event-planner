@@ -1,13 +1,19 @@
 from flask import Blueprint, request
 from ..middleware.login_required import login_required
 from ..utils.format_response import api_response
-from ..services.ai_services import get_insights, get_event_suggestions
+from ..services.ai_services import get_insights, get_event_suggestions, optimise_events
 from ..services.itineraries_service import is_authorised
 from ..models import UserRole
-from ..exceptions import UserNotAuthorisedError, ItineraryDoesNotExistError
+from ..exceptions import (
+    UserNotAuthorisedError,
+    ItineraryDoesNotExistError,
+    EventNotFoundError,
+)
 from datetime import datetime
-from ..services.events_service import create_events
+from ..services.events_service import create_events, update_events
 from ..schemas.event_schema import EventSchema
+from marshmallow import ValidationError
+
 
 ai_bp = Blueprint("ai", __name__)
 
@@ -63,5 +69,53 @@ def get_event_suggestions_route(user_id: str = None, itinerary_id: str = None):
             success=False,
             error="Invalid format for date.",
             message="Invalid format for date.",
+            status_code=400,
+        )
+
+
+@ai_bp.route("/optimise-events/<int:itinerary_id>", methods=["POST"])
+@login_required
+def optimise_events_route(user_id: str = None, itinerary_id: str = None):
+    date = request.json.get("date")
+    schema = EventSchema(many=True)
+
+    if not date:
+        return api_response(success=False, error="Date is required.", status_code=400)
+    try:
+        event_date = datetime.strptime(date, "%Y-%m-%d")
+        is_authorised(
+            user_id, itinerary_id, [UserRole.ADMIN, UserRole.EDITOR, UserRole.VIEWER]
+        )
+        optimised_events = optimise_events(itinerary_id, event_date)
+        updated_events = update_events(itinerary_id, optimised_events, user_id)
+        validated_events = schema.dump(updated_events)
+        return api_response(
+            success=True,
+            data=validated_events,
+            message="Optimised events.",
+        )
+    except (
+        UserNotAuthorisedError,
+        ItineraryDoesNotExistError,
+        EventNotFoundError,
+    ) as err:
+        return api_response(
+            success=False,
+            error=err.message,
+            message=err.message,
+            status_code=err.status_code,
+        )
+    except ValueError:
+        return api_response(
+            success=False,
+            error="Invalid format for date.",
+            message="Invalid format for date.",
+            status_code=400,
+        )
+    except ValidationError as err:
+        return api_response(
+            message="Bad Request.",
+            success=False,
+            error=err.messages,
             status_code=400,
         )

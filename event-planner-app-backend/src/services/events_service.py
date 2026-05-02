@@ -91,6 +91,43 @@ def update_event(itinerary_id: int, event_id: int, data: dict):
     return event
 
 
+def update_events(itinerary_id: int, data: list[dict], updated_by_id: int):
+    itinerary = get_itinerary(itinerary_id)
+    updated_events: list[Event] = []
+    try:
+        for d in data:
+            event = next((e for e in itinerary.events if e.id == d["id"]), None)
+
+            if not event:
+                raise EventNotFoundError()
+
+            for k, v in d.items():
+                if k in [
+                    "category",
+                    "description",
+                    "end_at",
+                    "start_at",
+                ]:
+                    setattr(event, k, v)
+
+            start = event.start_at
+            end = event.end_at
+
+            if end <= start:
+                db.session.rollback()
+                raise ValidationError(
+                    {"end_at": ["End time must be after the start time."]}
+                )
+            event.updated_by_id = updated_by_id
+            updated_events.append(event)
+
+        db.session.commit()
+        return updated_events
+    except Exception as err:
+        db.session.rollback()
+        raise err
+
+
 def delete_event(itinerary_id: int, event_id: int):
     itinerary = get_itinerary(itinerary_id)
 

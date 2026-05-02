@@ -5,6 +5,7 @@ from datetime import date
 from typing import Optional
 from typing import List
 from .audit_mixins import AuditMixin
+from .event_model import Event
 
 
 class Itinerary(Base, AuditMixin):
@@ -23,7 +24,7 @@ class Itinerary(Base, AuditMixin):
         back_populates="itinerary", cascade="all, delete-orphan"
     )
 
-    events: Mapped[List["Event"]] = relationship(  # type: ignore  # noqa: F821
+    events: Mapped[List[Event]] = relationship(
         secondary="itinerary_events", order_by="Event.start_at"
     )
 

@@ -22,7 +22,24 @@ export const aiApiSlice = apiSlice.injectEndpoints({
         { type: "Trips", id: args.tripId },
       ],
     }),
+    optimiseEvents: builder.mutation<
+      { data: Event[] },
+      { tripId: number; date: string }
+    >({
+      query: ({ tripId, date }) => ({
+        url: `/ai/optimise-events/${tripId}`,
+        method: "POST",
+        body: { date },
+      }),
+      invalidatesTags: (_, __, args) => [
+        { type: "Trips", id: "LIST" },
+        { type: "Trips", id: args.tripId },
+      ],
+    }),
   }),
 });
-
-export const { useGetTripInsightsQuery, useSuggestEventsMutation } = aiApiSlice;
+export const {
+  useGetTripInsightsQuery,
+  useSuggestEventsMutation,
+  useOptimiseEventsMutation,
+} = aiApiSlice;
