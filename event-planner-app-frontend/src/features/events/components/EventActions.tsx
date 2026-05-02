@@ -1,5 +1,5 @@
 import { ExternalLink, Route } from "lucide-react";
-import { setRoute } from "../../maps/service/mapSlice";
+import { setRoutes } from "../../maps/service/mapSlice";
 import { useDispatch } from "react-redux";
 import type { Event } from "../types";
 import { useState } from "react";
@@ -14,7 +14,7 @@ export default function EventActions({ from, to }: { from: Event; to: Event }) {
   return (
     <div className="flex justify-start items-center gap-2">
       <button
-        onClick={() => dispatch(setRoute({ from, to, mode }))}
+        onClick={() => dispatch(setRoutes([{ from, to, mode }]))}
         className="btn p-1 transition-colors hover:bg-surface-muted flex gap-1 items-center"
       >
         <Route size={12} />

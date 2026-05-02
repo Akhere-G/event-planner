@@ -7,7 +7,7 @@ interface MapState {
   searchIndex: number;
   selectedEvent: Event | null;
   days: Day[];
-  route: Route | null;
+  routes: Route[] | null;
   isMapView: boolean;
 }
 
@@ -16,7 +16,7 @@ const initialState: MapState = {
   searchIndex: 0,
   selectedEvent: null,
   days: [],
-  route: null,
+  routes: null,
   isMapView: false,
 };
 
@@ -51,8 +51,8 @@ export const mapSlice = createSlice({
       state.searchEvents = [];
       state.searchIndex = 0;
     },
-    setRoute: (state, action: PayloadAction<Route | null>) => {
-      state.route = action.payload;
+    setRoutes: (state, action: PayloadAction<Route[] | null>) => {
+      state.routes = action.payload;
       state.isMapView = true;
     },
     setIsMapView: (state, action: PayloadAction<boolean>) => {
@@ -69,7 +69,7 @@ export const {
   markEventAsAdded,
   clearSearchEvents,
   updateSearchEvents,
-  setRoute,
+  setRoutes,
   setIsMapView,
 } = mapSlice.actions;
 

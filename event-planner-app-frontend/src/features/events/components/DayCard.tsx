@@ -4,7 +4,7 @@ import { Accordion } from "../../../components";
 import { formatDateRelative } from "../../../utils/dateFormattors";
 import EventList from "./EventList";
 import AddEventForm from "./AddEventForm";
-import { LoaderCircle, MoreVertical, Sparkles, Wand2 } from "lucide-react";
+import { LoaderCircle, Map, MoreVertical, Sparkles, Wand2 } from "lucide-react";
 import {
   useOptimiseEventsMutation,
   useSuggestEventsMutation,
@@ -12,6 +12,9 @@ import {
 import { useParams } from "react-router";
 import { toast } from "sonner";
 import { useGetTripQuery } from "../../trips/services/tripsApiSlice";
+import { useDispatch } from "react-redux";
+import { setRoutes } from "../../maps/service/mapSlice";
+import type { Route } from "../../maps/types";
 
 export default function DayCard({
   defaultIsOpen,
@@ -28,6 +31,8 @@ export default function DayCard({
     useSuggestEventsMutation();
   const [optimiseEvents, { isLoading: isOptimiseLoading }] =
     useOptimiseEventsMutation();
+  const dispatch = useDispatch();
+
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuContainer = useRef<HTMLDivElement>(null);
 
@@ -45,6 +50,20 @@ export default function DayCard({
     } catch {
       toast.error("Could not get suggestions.");
     }
+  };
+
+  const viewAllRoutes = () => {
+    const routes: Route[] = [];
+    day.events.forEach(
+      (event, i) =>
+        i !== day.events.length - 1 &&
+        routes.push({
+          from: event,
+          to: day.events[i + 1],
+          mode: google.maps.TravelMode.TRANSIT,
+        }),
+    );
+    dispatch(setRoutes(routes));
   };
 
   useEffect(() => {
@@ -93,6 +112,11 @@ export default function DayCard({
               onClick={(e) => e.stopPropagation()}
               className="z-1 flex flex-col gap-2 absolute top-full right-0 card p-0 text-sm"
             >
+              <button onClick={viewAllRoutes} className="flex gap-2 btn-menu">
+                <Map className="text-brand-primary" size={18} />
+                View all routes
+              </button>
+
               <button
                 onClick={getSuggestions}
                 disabled={isSuggestBtnDisabled}

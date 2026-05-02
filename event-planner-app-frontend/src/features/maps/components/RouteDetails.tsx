@@ -1,107 +1,92 @@
-import { useDispatch, useSelector } from "react-redux";
-import type { RootState } from "../../../store";
-import { setRoute } from "../service/mapSlice";
-import { Circle, Loader2, MapPin, X } from "lucide-react";
 import { useMap, useMapsLibrary } from "@vis.gl/react-google-maps";
 import { useEffect, useMemo, useState } from "react";
-import { toast } from "sonner";
+import type { Route } from "../types";
+import { Circle, MapPin, X } from "lucide-react";
+import { setRoutes } from "../service/mapSlice";
+import type { RootState } from "../../../store";
+import { useDispatch, useSelector } from "react-redux";
 
 export default function RouteDetails() {
-  const [isLoading, setIsLoading] = useState(false);
-  const [hasDirections, setHasDirections] = useState(false);
-
-  const { route } = useSelector((state: RootState) => state.map);
+  const { routes } = useSelector((state: RootState) => state.map);
   const dispatch = useDispatch();
 
-  const map = useMap();
-  const routesLib = useMapsLibrary("routes");
+  if (!routes || routes.length === 0) return null;
 
-  // Initialize the renderer and service only when the library is ready
-  const { directionsService, directionsRenderer } = useMemo(() => {
-    if (!routesLib)
-      return { directionsService: null, directionsRenderer: null };
-    return {
-      directionsService: new routesLib.DirectionsService(),
-      directionsRenderer: new routesLib.DirectionsRenderer({
-        preserveViewport: false,
-        suppressMarkers: false,
-      }),
-    };
-  }, [routesLib]);
-
-  useEffect(() => {
-    setIsLoading(true);
-    setHasDirections(false);
-    const getDirections = async () => {
-      try {
-        if (!directionsRenderer || !directionsService || !map) return;
-
-        if (!route) {
-          directionsRenderer.setDirections(null);
-          directionsRenderer.setMap(null);
-          return;
-        }
-
-        directionsRenderer.setMap(map);
-        await directionsService.route(
-          {
-            origin: { lat: route.from.latitude, lng: route.from.longitude },
-            destination: { lat: route.to.latitude, lng: route.to.longitude },
-            travelMode: route.mode as google.maps.TravelMode,
-          },
-          (result, status) => {
-            if (status === "OK") {
-              directionsRenderer.setDirections(result);
-              setHasDirections(true);
-            } else {
-              dispatch(setRoute(null));
-            }
-          },
-        );
-      } catch {
-        toast.error("Cannot find directions. Try changing travel mode.");
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    getDirections();
-    return () => {
-      directionsRenderer?.setDirections(null);
-      directionsRenderer?.setMap(null);
-    };
-  }, [route, map, directionsService, directionsRenderer, dispatch]);
-
-  if (isLoading) {
-    return (
-      <div className="fixed top-16 md:top-4 left-1/2 -translate-x-1/2 z-1">
-        <Loader2 className="w-8 h-8 animate-spin text-brand-primary" />
-      </div>
-    );
-  }
-  if (route && hasDirections) {
-    return (
-      <div className="fixed top-16 md:top-4 left-1/2 -translate-x-1/2  z-1 ">
+  return (
+    <>
+      <div className="fixed top-16 md:top-4 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center">
         <button
-          className="z-1 absolute -right-3 -top-2 bg-brand-primary p-1 shadow-md"
-          onClick={() => {
-            dispatch(setRoute(null));
-          }}
+          className="z-20 absolute -right-3 -top-2 bg-brand-primary p-1 shadow-md rounded-full text-white"
+          onClick={() => dispatch(setRoutes(null))}
         >
           <X size={16} />
         </button>
-        <div>
-          <p className="bg-surface px-4 py-2 rounded-full text-xs md:text-sm flex gap-2 items-center shadow-md">
-            <Circle size={16} />
-            {route.from.name}
-          </p>
-          <div className="border-r-2 ml-5 border-dashed h-4 w-1"></div>
-          <p className="bg-surface px-4 py-2 rounded-full text-xs md:text-sm flex gap-2 items-center shadow-md">
-            <MapPin className="text-brand-primary" size={16} />
-            {route.to.name}
-          </p>
+
+        <div className="flex flex-col gap-1">
+          {routes.map((route, idx) => (
+            <div key={idx} className="flex flex-col items-center">
+              <p className="bg-surface px-4 py-2 rounded-full text-xs md:text-sm flex gap-2 items-center shadow-md whitespace-nowrap">
+                {idx === 0 ? (
+                  <Circle size={14} />
+                ) : (
+                  <MapPin size={14} className="text-brand-primary" />
+                )}
+                {route.from.name}
+              </p>
+              <div className="border-r-2 border-dashed h-3 border-brand-primary/40"></div>
+              {idx === routes.length - 1 && (
+                <p className="bg-surface px-4 py-2 rounded-full text-xs md:text-sm flex gap-2 items-center shadow-md whitespace-nowrap">
+                  <MapPin size={14} className="text-brand-primary" />
+                  {route.to.name}
+                </p>
+              )}
+            </div>
+          ))}
         </div>
       </div>
+
+      {routes.map((route, index) => (
+        <DirectionsLeg key={index} route={route} />
+      ))}
+    </>
+  );
+}
+
+function DirectionsLeg({ route }: { route: Route }) {
+  const map = useMap();
+  const routesLib = useMapsLibrary("routes");
+  const [, setResponse] = useState<google.maps.DirectionsResult | null>(null);
+
+  const directionsRenderer = useMemo(() => {
+    if (!routesLib) return null;
+    return new routesLib.DirectionsRenderer({
+      suppressMarkers: true,
+      preserveViewport: true,
+    });
+  }, [routesLib]);
+
+  useEffect(() => {
+    if (!routesLib || !map || !directionsRenderer) return;
+
+    const service = new routesLib.DirectionsService();
+
+    service.route(
+      {
+        origin: { lat: route.from.latitude, lng: route.from.longitude },
+        destination: { lat: route.to.latitude, lng: route.to.longitude },
+        travelMode: route.mode as google.maps.TravelMode,
+      },
+      (result, status) => {
+        if (status === "OK" && result) {
+          directionsRenderer.setMap(map);
+          directionsRenderer.setDirections(result);
+          setResponse(result);
+        }
+      },
     );
-  }
+
+    return () => directionsRenderer.setMap(null);
+  }, [route, map, routesLib, directionsRenderer]);
+
   return null;
 }
