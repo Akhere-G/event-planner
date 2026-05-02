@@ -166,7 +166,6 @@ def update_itinerary(itinerary_id: int, data: dict):
         raise ItineraryDoesNotExistError()
 
     for k, v in data.items():
-        print(k, v, itinerary.__dict__.get(k))
         if hasattr(itinerary, k):
             setattr(itinerary, k, v)
 

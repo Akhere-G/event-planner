@@ -62,7 +62,6 @@ def get_insights(itinerary_id):
     """
 
     raw_response = get_ai_response(prompt)
-    print("response " + raw_response)
     try:
         insights = format_json(raw_response)
 
