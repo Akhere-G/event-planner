@@ -4,6 +4,7 @@ from .event_routes import event_bp
 from .user_routes import user_bp
 from .invite_routes import itinerary_invites_bp
 from .user_invite_routes import user_invites_bp
+from .ai_routes import ai_bp
 
 __all__ = [
     "auth_bp",
@@ -12,4 +13,5 @@ __all__ = [
     "user_bp",
     "itinerary_invites_bp",
     "user_invites_bp",
+    "ai_bp",
 ]

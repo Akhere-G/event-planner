@@ -71,6 +71,7 @@ def create_app():
             user_bp,
             itinerary_invites_bp,
             user_invites_bp,
+            ai_bp,
         )
 
         app.register_blueprint(auth_bp, url_prefix="/api/auth")
@@ -91,6 +92,7 @@ def create_app():
             user_invites_bp,
             url_prefix="/api/invites",
         )
+        app.register_blueprint(ai_bp, url_prefix="/api/ai")
 
         @app.route("/")
         def serve():

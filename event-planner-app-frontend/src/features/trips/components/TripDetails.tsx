@@ -4,21 +4,23 @@ import { isAdmin } from "../../users/utils";
 import type { Trip } from "../types";
 import TripSummary from "./TripSummary";
 import { TripCalendar } from "../../calendar/components";
+import { TripInsights } from "../../ai/components";
 
 export default function TripDetails(trip: Trip) {
   const [isListView, setIsListView] = useState(true);
 
   return (
-    <div className="flex flex-col gap-6 ">
-      <div className="card ">
+    <div className="flex flex-col gap-6">
+      <div className="card">
         <TripSummary trip={trip} showActions={isAdmin(trip.role)} />
       </div>
       <div>
-        <div className="flex items-center justify-between mb-4">
-          <h1 className="bg-canvas mb-2 ml-4 title text-text-canvas">
+        <div className="flex flex-wrap items-center gap-x-4 mb-4">
+          <TripInsights trip={trip} />
+          <h1 className="bg-canvas shrink-0 mb-2 title text-text-canvas">
             Itinerary
           </h1>
-          <div className="">
+          <div className="ml-auto shrink-0 ">
             <button
               onClick={() => setIsListView(true)}
               className={`btn-secondary px-6 py-2 border-2 border-surface-border rounded-r-none active:scale-100 ${isListView ? "brightness-110" : ""}`}
