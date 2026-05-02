@@ -4,7 +4,6 @@ import type { Trip } from "../../trips/types";
 import { useGetTripInsightsQuery } from "../services/aiApiSlice";
 import { StateGate } from "../../../components";
 import TripInsightCard from "./TripInsightCard";
-
 export default function TripInsights({ trip }: { trip: Trip }) {
   const { data, refetch, isLoading, isFetching, isError } =
     useGetTripInsightsQuery({
@@ -13,44 +12,47 @@ export default function TripInsights({ trip }: { trip: Trip }) {
   const [expanded, setExpanded] = useState(false);
 
   return (
-    <>
+    /* 
+      We apply a delay to the width transition only when unexpanding (closing).
+      This keeps the container full-width until the height has finished collapsing.
+    */
+    <div
+      className={`transition-all duration-500 ease-in-out flex flex-col
+        ${expanded ? "w-full mb-4" : "w-10 mb-0"}`}
+      style={{
+        transitionDelay: expanded ? "0ms" : "width 500ms, margin 500ms",
+      }}
+    >
       <div
-        className={`grid transition-all duration-500 ease-in-out
-          ${isFetching ? "opacity-75 pointer-events-none" : ""}
-          ${expanded ? "grid-rows-[1fr] opacity-100 mb-4 translate-y-0" : "grid-rows-[0fr] opacity-0 translate-y-full"}`}
+        className={`grid transition-[grid-template-rows,opacity] duration-500 ease-in-out
+          ${expanded ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"}`}
       >
         <div className="overflow-hidden min-h-0">
-          <header className="flex justify-between items-center w-full mb-2">
-            <h3 className="flex gap-2 items-center title text-text-canvas">
+          <header className="flex justify-between items-center w-full mb-4">
+            <h3 className="flex gap-2 items-center title text-text-canvas whitespace-nowrap">
               <Sparkles className="text-purple-800" size={20} />
               Insights
             </h3>
             <div className="flex gap-2">
-              <button
-                onClick={() => refetch()}
-                aria-label="Get insights"
-                className="btn-secondary p-2"
-              >
-                <RefreshCcw size={20} />
+              <button onClick={() => refetch()} className="btn-secondary p-2">
+                <RefreshCcw
+                  size={20}
+                  className={isFetching ? "animate-spin" : ""}
+                />
               </button>
               <button
                 className="btn-secondary p-2"
                 onClick={() => setExpanded(false)}
-                aria-label="Close insights"
               >
                 <X size={20} />
               </button>
             </div>
           </header>
+
           <StateGate
             loadingStateProps={{ isLoading }}
             errorStateProps={{ isError }}
-            emptyStateProps={{
-              isEmpty: !data?.data.length,
-              message: "No insights found. Try again.",
-              height: 80,
-            }}
-            containerClasses="w-full"
+            emptyStateProps={{ isEmpty: !data?.data.length }}
           >
             <div className="flex flex-col gap-4">
               {data?.data.map((insight) => (
@@ -60,16 +62,19 @@ export default function TripInsights({ trip }: { trip: Trip }) {
           </StateGate>
         </div>
       </div>
-      <div
-        className={`transition-all duration-500 ${expanded ? "grid-rows-[0fr] opacity-0 w-0 " : "grid-rows-[1fr] opacity-100 w-10"}`}
-      >
+
+      {!expanded && (
         <button
           onClick={() => setExpanded(true)}
-          className="btn-primary rounded-full w-10 h-10 border-surface-border shadow-md flex items-center justify-center p-0"
+          className="btn-primary rounded-full w-10 h-10 shadow-md flex items-center justify-center p-0 flex-shrink-0"
         >
-          <Sparkles size={20} />
+          {isLoading ? (
+            <RefreshCcw size={20} className="animate-spin" />
+          ) : (
+            <Sparkles size={20} />
+          )}
         </button>
-      </div>
-    </>
+      )}
+    </div>
   );
 }
