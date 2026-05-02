@@ -1,6 +1,6 @@
 from .itineraries_service import get_itinerary
 import json
-import google.generativeai as genai
+from google import genai
 from groq import Groq
 from datetime import datetime
 import os
@@ -24,9 +24,10 @@ def format_json(raw_json):
 
 def get_ai_response(prompt):
     try:
-        genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
-        model = genai.GenerativeModel("gemini-2.0-flash")
-        response = model.generate_content(prompt)
+        client_gemini = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
+        response = client_gemini.models.generate_content(
+            model="gemini-2.0-flash", contents=prompt
+        )
         if response.text:
             return response.text
     except Exception as e:
