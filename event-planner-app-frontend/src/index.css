@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
 @import "tailwindcss";
 
 :root {
@@ -31,7 +32,7 @@
   --color-warning: #f59e0b;
   --color-info: #3b82f6;
 
-  --font-sans: 'Inter', sans-serif;
+  --font-sans: 'Outfit', sans-serif;
 }
 
 @variant dark (&:where(.dark, .dark *));
@@ -398,9 +399,12 @@
   input, select, textarea {
     @apply w-full px-4 py-2 rounded-xl border border-surface-border bg-surface transition-all outline-none text-text-primary focus:ring-1 focus:ring-brand-primary focus:border-transparent;
   }
+  h1, h2, h3, h4, h5, h6 {
+    @apply tracking-tight
+  }
 
-  p, span {
-    @apply bg-blend-exclusion
+  p, span, a, label {
+    @apply bg-blend-exclusion tracking-wide
   }
   a {
     @apply text-brand-primary hover:text-brand-secondary transition-colors no-underline font-medium;
@@ -439,7 +443,7 @@
   }
 
   .title {
-    @apply text-xl
+    @apply text-xl tracking-tight 
   }
 
   .form {

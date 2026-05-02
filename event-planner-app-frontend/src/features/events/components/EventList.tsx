@@ -1,3 +1,4 @@
+import React from "react";
 import type { Event } from "../types";
 import EventCard from "./EventCard";
 import { StateGate } from "../../../components";
@@ -15,12 +16,12 @@ export default function EventList({ events }: { events: Event[] }) {
       >
         <>
           {events.map((event, i) => (
-            <>
-              <EventCard key={event.id} event={event} />
+            <React.Fragment key={event.id}>
+              <EventCard event={event} />
               {i !== events.length - 1 && (
                 <EventActions from={event} to={events[i + 1]} />
               )}
-            </>
+            </React.Fragment>
           ))}
         </>
       </StateGate>

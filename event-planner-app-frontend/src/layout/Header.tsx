@@ -36,7 +36,7 @@ export default function Header({ links }: HeaderProps) {
       <div className="z-2 bg-surface min-h-12 max-h-24 h-[6.5vh] w-full flex justify-between items-center p-4 shadow-md">
         <h1 className="text-2xl font-extrabold tracking-tighter">
           Trip
-          <span className="text-brand-secondary">Track</span>
+          <span className="text-brand-secondary tracking-tight">Track</span>
         </h1>
         {/* Desktop Nav */}
         <div className="hidden md:flex items-center gap-6 relative">
