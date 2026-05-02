@@ -4,13 +4,7 @@ import { Accordion } from "../../../components";
 import { formatDateRelative } from "../../../utils/dateFormattors";
 import EventList from "./EventList";
 import AddEventForm from "./AddEventForm";
-import {
-  Copy,
-  LoaderCircle,
-  MoreVertical,
-  Sparkles,
-  Wand2,
-} from "lucide-react";
+import { LoaderCircle, MoreVertical, Sparkles, Wand2 } from "lucide-react";
 import {
   useOptimiseEventsMutation,
   useSuggestEventsMutation,
@@ -99,20 +93,6 @@ export default function DayCard({
               onClick={(e) => e.stopPropagation()}
               className="z-1 flex flex-col gap-2 absolute top-full right-0 card p-0 text-sm"
             >
-              <button
-                onClick={() => {
-                  const text = day.events
-                    .map((e) => `${e.startAt} - ${e.name} (${e.address})`)
-                    .join("\n");
-
-                  navigator.clipboard.writeText(text);
-                  toast.success("Itinerary copied to clipboard!");
-                }}
-                className="flex gap-2 btn-menu"
-              >
-                <Copy className="text-info" size={18} />
-                Copy Events
-              </button>
               <button
                 onClick={getSuggestions}
                 disabled={isSuggestBtnDisabled}
