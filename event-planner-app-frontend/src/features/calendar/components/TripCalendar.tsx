@@ -22,6 +22,8 @@ import {
   addMilliseconds,
   setHours,
   setMinutes,
+  isBefore,
+  isAfter,
 } from "date-fns";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import "react-big-calendar/lib/addons/dragAndDrop/styles.css";
@@ -109,10 +111,17 @@ export default function TripCalendar({ trip }: { trip: Trip }) {
 
     let bgClass = isCurrentMonth ? "bg-surface" : "bg-surface-muted!";
 
+    const tripDay =
+      isSameDay(date, trip.startDate) ||
+      isSameDay(date, trip.endDate) ||
+      (isAfter(date, trip.startDate) && isBefore(date, trip.endDate));
+    console.log(date, trip.startDate, isBefore(date, trip.startDate));
     if (isToday) {
       bgClass = "!font-bold bg-blue-200! dark:bg-blue-600/50!";
     } else if (isSelected) {
       bgClass = "bg-brand-primary/20! dark:!bg-brand-primary/50";
+    } else if (!tripDay) {
+      bgClass = "bg-surface-muted/50! cursor-not-allowed!";
     }
 
     return `transition-all duration-150 cursor-pointer relative ${bgClass} hover:bg-brand-primary/20`;
@@ -131,6 +140,17 @@ export default function TripCalendar({ trip }: { trip: Trip }) {
     const endAt = new Date(draggedEvent.endAt);
 
     let newStartAt = new Date(day.start);
+
+    if (isBefore(newStartAt, trip.startDate)) {
+      toast.error("Cannot move event to before the trip start date!");
+      return;
+    }
+
+    if (isAfter(newStartAt, trip.endDate)) {
+      toast.error("Cannot move event to after the trip end date!");
+      return;
+    }
+
     newStartAt = setHours(newStartAt, startAt.getHours());
     newStartAt = setMinutes(newStartAt, startAt.getMinutes());
 
@@ -172,8 +192,20 @@ export default function TripCalendar({ trip }: { trip: Trip }) {
     const newEnd = new Date(end as Date);
     const eventItem = event.resource as Event;
 
+    if ("isSummary" in event) return;
+
     const formattedStart = format(newStart, "yyyy-MM-dd HH:mm:ss");
     const formattedEnd = format(newEnd, "yyyy-MM-dd HH:mm:ss");
+
+    if (isBefore(newStart, trip.startDate)) {
+      toast.error("Cannot move event to before the trip start date!");
+      return;
+    }
+
+    if (isAfter(newStart, trip.endDate)) {
+      toast.error("Cannot move event to after the trip end date!");
+      return;
+    }
 
     const prevEvents = tripEvents;
     try {
@@ -249,7 +281,7 @@ export default function TripCalendar({ trip }: { trip: Trip }) {
             event: ({ title, event }: any) => {
               if (event.isSummary) {
                 return (
-                  <div className="flex justify-center items-center w-full mt-1">
+                  <div className="flex justify-center items-center w-full mt-1 pointer-events-none">
                     <span className="h-2 w-2 rounded-full bg-brand-primary shadow-sm" />
                   </div>
                 );
