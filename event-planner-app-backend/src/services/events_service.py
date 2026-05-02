@@ -36,6 +36,32 @@ def create_event(itinerary_id: int, data: dict):
     return event
 
 
+def create_events(itinerary_id: int, data: list[dict], created_by_id: int):
+    try:
+        ids = []
+        for d in data:
+            event = Event(**d)
+            db.session.add(event)
+            db.session.flush()
+
+            itinerary_event = ItineraryEvent(
+                itinerary_id=itinerary_id,
+                event_id=event.id,
+                created_by_id=created_by_id,
+                updated_by_id=created_by_id,
+            )
+
+            db.session.add(itinerary_event)
+            ids.append(event.id)
+
+        db.session.commit()
+        return ids
+
+    except Exception as err:
+        db.session.rollback()
+        raise err
+
+
 def update_event(itinerary_id: int, event_id: int, data: dict):
     itinerary = get_itinerary(itinerary_id)
 

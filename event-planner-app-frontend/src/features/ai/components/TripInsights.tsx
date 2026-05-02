@@ -30,7 +30,7 @@ export default function TripInsights({ trip }: { trip: Trip }) {
         <div className="overflow-hidden min-h-0">
           <header className="flex justify-between items-center w-full mb-4">
             <h3 className="flex gap-2 items-center title text-text-canvas whitespace-nowrap">
-              <Sparkles className="text-purple-800" size={20} />
+              <Sparkles className="text-brand-primary" size={20} />
               Insights
             </h3>
             <div className="flex gap-2">

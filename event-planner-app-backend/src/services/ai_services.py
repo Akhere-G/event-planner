@@ -2,8 +2,9 @@ from .itineraries_service import get_itinerary
 import json
 import google.generativeai as genai
 from groq import Groq
-
+from datetime import datetime
 import os
+import googlemaps
 
 
 def format_json(raw_json):
@@ -71,3 +72,52 @@ def get_insights(itinerary_id):
     except Exception as e:
         print(f"JSON Parsing failed: {e}")
         return []
+
+
+def get_event_suggestions(itinerary_id, date: datetime):
+    itinerary = get_itinerary(itinerary_id)
+
+    booked_events = "\n".join([f"- {event.name}" for event in itinerary.events])
+    prompt = f"""
+      Suggest 3-4 restaurants and activities in {itinerary.destination} on {date.strftime("%Y-%m-%d")}.
+      
+      CONTEXT:
+      Currently booked: {booked_events}
+      
+      REQUIREMENTS:
+      1. Provide real-world venues located specifically in {itinerary.destination}.
+      2. For coordinates, ensure they are precise for the specific venue.
+      3. Respond ONLY with a JSON array of objects.
+
+      FORMAT:
+      {{
+        "name": "string",
+        "description": "string (Optional but use it to provide important context and tips)" ,
+        "address": "full street address, {itinerary.destination}",
+        "start_at": "ISO string,
+        "end_at": "ISO string",
+        "category": "string"
+      }}
+    """
+
+    try:
+        raw_response = get_ai_response(prompt)
+
+        gmaps = googlemaps.Client(key=os.getenv("GOOGLE_MAPS_API_KEY"))
+
+        suggestions = format_json(raw_response)
+
+        geocoded_events = []
+
+        for event in suggestions:
+            result = gmaps.geocode(f"{event['name']}, {event['address']}")
+            if result:
+                location = result[0]["geometry"]["location"]
+                event["latitude"] = location["lat"]
+                event["longitude"] = location["lng"]
+                geocoded_events.append(event)
+
+        return geocoded_events
+    except Exception:
+        return []
+    pass
