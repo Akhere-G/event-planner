@@ -115,7 +115,6 @@ export default function TripCalendar({ trip }: { trip: Trip }) {
       isSameDay(date, trip.startDate) ||
       isSameDay(date, trip.endDate) ||
       (isAfter(date, trip.startDate) && isBefore(date, trip.endDate));
-    console.log(date, trip.startDate, isBefore(date, trip.startDate));
     if (isToday) {
       bgClass = "!font-bold bg-blue-200! dark:bg-blue-600/50!";
     } else if (isSelected) {

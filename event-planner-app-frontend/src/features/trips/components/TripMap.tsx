@@ -148,7 +148,6 @@ export default function TripMap({ trip }: { trip: Trip }) {
         ],
       },
       (place) => {
-        console.log(place);
         if (place) dispatch(setSearchEvents([formatPlace(place)]));
       },
     );
