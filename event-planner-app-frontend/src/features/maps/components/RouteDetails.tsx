@@ -52,6 +52,12 @@ export default function RouteDetails() {
     fetchAll();
   }, [routes, routesLib, map, fetchRoute]);
 
+  const handleUpdateMode = (index: number, mode: string) => {
+    const updatedRoutes = [...routes!];
+    updatedRoutes[index] = { ...updatedRoutes[index], mode: mode };
+    dispatch(setRoutes(updatedRoutes));
+  };
+
   if (!routes || routes.length === 0) return null;
 
   return (
@@ -71,6 +77,7 @@ export default function RouteDetails() {
         routes={routes}
         legResults={legResults}
         onClose={() => dispatch(setRoutes(null))}
+        onUpdateMode={handleUpdateMode}
       />
     </>
   );

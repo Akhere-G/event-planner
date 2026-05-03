@@ -55,6 +55,14 @@ export const mapSlice = createSlice({
       state.routes = action.payload;
       state.isMapView = true;
     },
+    updateRouteMode: (
+      state,
+      action: PayloadAction<{ index: number; mode: string }>,
+    ) => {
+      if (state.routes) {
+        state.routes[action.payload.index].mode = action.payload.mode;
+      }
+    },
     setIsMapView: (state, action: PayloadAction<boolean>) => {
       state.isMapView = action.payload;
     },
@@ -70,6 +78,7 @@ export const {
   clearSearchEvents,
   updateSearchEvents,
   setRoutes,
+  updateRouteMode,
   setIsMapView,
 } = mapSlice.actions;
 

@@ -9,17 +9,21 @@ import {
   Loader2,
 } from "lucide-react";
 import type { Route } from "../types";
+import { EditableSelect } from "../../../components";
+import { TravelModes } from "../constants";
 
 interface RouteCarouselProps {
   routes: Route[];
   legResults: (google.maps.DirectionsResult | null)[];
   onClose: () => void;
+  onUpdateMode: (index: number, mode: string) => void;
 }
 
 export default function RouteCarousel({
   routes,
   legResults,
   onClose,
+  onUpdateMode,
 }: RouteCarouselProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [activeIndex, setActiveIndex] = useState(0);
@@ -88,9 +92,18 @@ export default function RouteCarousel({
                     <span className="text-[10px] font-bold uppercase">
                       Leg {idx + 1} of {routes.length}
                     </span>
-                    <span className="flex items-center gap-1 text-[10px] font-bold bg-brand-primary rounded-full px-6 py-2 text-text-inverse">
-                      <Navigation size={12} /> {route.mode}
-                    </span>
+                    <EditableSelect
+                      canEdit={true}
+                      selectedValue={route.mode}
+                      options={TravelModes}
+                      setValue={(newMode) => onUpdateMode(idx, newMode)}
+                      selectClassName="w-32 flex flex-col"
+                      defaultElement={
+                        <span className="flex items-center gap-1 text-[10px] font-bold bg-brand-primary rounded-full px-6 py-2 text-text-inverse">
+                          <Navigation size={12} /> {route.mode}
+                        </span>
+                      }
+                    />
                   </div>
 
                   {!apiData ? (
@@ -100,10 +113,10 @@ export default function RouteCarousel({
                   ) : (
                     <div className="flex flex-col h-full overflow-hidden">
                       <div className="flex gap-4 mb-4">
-                        <div className="text-text-inverse flex items-center gap-1 text-sm font-bold bg-brand-primary px-3 py-1 rounded-lg">
+                        <div className="text-brand-primary bg-surface-muted flex items-center gap-1 text-sm font-bold px-3 py-1 rounded-lg">
                           <Clock size={16} /> {apiData.duration?.text}
                         </div>
-                        <div className="text-text-inverse flex items-center gap-1 text-sm font-bold bg-brand-primary px-3 py-1 rounded-lg">
+                        <div className="text-brand-primary bg-surface-muted flex items-center gap-1 text-sm font-bold px-3 py-1 rounded-lg">
                           <RouteIcon size={16} /> {apiData.distance?.text}
                         </div>
                       </div>
