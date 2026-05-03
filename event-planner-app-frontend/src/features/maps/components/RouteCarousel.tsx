@@ -11,6 +11,8 @@ import {
 import type { Route } from "../types";
 import { EditableSelect } from "../../../components";
 import { TravelModes } from "../constants";
+import { useMap } from "@vis.gl/react-google-maps";
+import { fitToBounds } from "../utils";
 
 interface RouteCarouselProps {
   routes: Route[];
@@ -29,6 +31,8 @@ export default function RouteCarousel({
   const [activeIndex, setActiveIndex] = useState(0);
   const isSingleRoute = routes.length === 1;
 
+  const map = useMap();
+
   const scrollToIndex = (direction: "next" | "prev") => {
     if (!scrollRef.current) return;
 
@@ -42,6 +46,13 @@ export default function RouteCarousel({
       });
       setActiveIndex(newIndex);
     }
+    if (!map) return;
+    const currentRoute = routes[activeIndex];
+    fitToBounds({
+      map,
+      events: [currentRoute.from, currentRoute.to],
+      padding: 75,
+    });
   };
 
   return (

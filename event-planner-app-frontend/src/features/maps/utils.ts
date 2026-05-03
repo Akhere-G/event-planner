@@ -44,11 +44,13 @@ export const fitToBounds = ({
   events,
   defaultCenter,
   defaultBounds,
+  padding = DEFAULT_PADDING,
 }: {
   map: google.maps.Map;
   events: { latitude: number; longitude: number }[];
   defaultCenter?: { latitude: number; longitude: number };
   defaultBounds?: { north: number; east: number; south: number; west: number };
+  padding?: number;
 }) => {
   if (events.length === 0) {
     if (defaultCenter) {
@@ -57,7 +59,7 @@ export const fitToBounds = ({
         lng: defaultCenter.longitude,
       });
     } else if (defaultBounds) {
-      map.fitBounds(defaultBounds, DEFAULT_PADDING);
+      map.fitBounds(defaultBounds, padding);
     }
     return;
   }
@@ -72,7 +74,7 @@ export const fitToBounds = ({
 
   const bounds = getBoundsForEvents(events);
 
-  map.fitBounds(bounds, DEFAULT_PADDING);
+  map.fitBounds(bounds, padding);
 };
 
 export const formatPlace = (

@@ -50,7 +50,11 @@ export default function RouteDetails() {
     };
 
     fetchAll();
-  }, [routes, routesLib, map, fetchRoute]);
+
+    return () => {
+      dispatch(setRoutes(null));
+    };
+  }, [routes, routesLib, map, fetchRoute, dispatch]);
 
   const handleUpdateMode = (index: number, mode: string) => {
     const updatedRoutes = [...routes!];
