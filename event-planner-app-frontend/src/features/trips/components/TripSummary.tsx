@@ -1,10 +1,13 @@
-import { Calendar, UserCog } from "lucide-react";
+import { Calendar, MoreVertical, UserCog } from "lucide-react";
 import type { Trip } from "../types";
 import { formatDateRange } from "../../../utils/dateFormattors";
 import { UserAvatarList } from "../../users/components";
 import { useDispatch } from "react-redux";
 import { openModal } from "../../modal/modalSlice";
 import { ModalType } from "../../modal/types";
+import { type MouseEvent } from "react";
+import { isAdmin } from "../../users/utils";
+import useMenu from "../../../hooks/useMenu";
 
 interface TripSummaryProps {
   trip: Trip;
@@ -12,19 +15,71 @@ interface TripSummaryProps {
   hideTitle?: boolean;
 }
 export default function TripSummary({
-  trip: { name, description, startDate, endDate, userMemberships },
+  trip,
   showActions,
   hideTitle,
 }: TripSummaryProps) {
+  const { name, description, startDate, endDate, userMemberships } = trip;
+  const { closeMenu, toggleMenu, isMenuOpen, menuContainerRef } = useMenu();
+
   const dispatch = useDispatch();
+
   function openUsersView() {
     dispatch(openModal({ type: ModalType.VIEW_USERS, props: null }));
   }
+
+  const handleEdit = (e: MouseEvent<HTMLButtonElement>) => {
+    e.stopPropagation();
+    closeMenu();
+    dispatch(openModal({ type: ModalType.EDIT_TRIP, props: { trip } }));
+  };
+
+  const handleDelete = (e: MouseEvent<HTMLButtonElement>) => {
+    e.stopPropagation();
+    closeMenu();
+    dispatch(openModal({ type: ModalType.DELETE_TRIP, props: { trip } }));
+  };
+
+  const handleSettings = (e: MouseEvent<HTMLButtonElement>) => {
+    e.stopPropagation();
+    toggleMenu();
+  };
+
   return (
     <div className="flex flex-col gap-6">
-      <div>
-        {!hideTitle && <h2 className="title">{name}</h2>}
-        <p className="text-text-secondary">{description}</p>
+      <div
+        ref={menuContainerRef}
+        className="relative flex justify-between items-start"
+      >
+        <div>
+          {!hideTitle && <h2 className="title">{name}</h2>}
+          <p className="text-text-secondary">{description}</p>
+        </div>
+
+        <button
+          className="-mt-2 -mr-2 p-2 hover:bg-white/20"
+          onClick={handleSettings}
+        >
+          <MoreVertical size={20} className="text-white" />
+        </button>
+
+        {isMenuOpen && (
+          <div className="absolute top-8 right-4 mt-2 w-32 bg-surface rounded-md shadow-lg z-10 flex flex-col text-sm">
+            {isAdmin(trip.role) && (
+              <>
+                <button onClick={handleEdit} className="btn-menu rounded-md">
+                  Edit
+                </button>
+                <button
+                  onClick={handleDelete}
+                  className="btn-menu rounded-md text-error"
+                >
+                  Delete
+                </button>
+              </>
+            )}
+          </div>
+        )}
       </div>
       <div className="flex justify-between">
         <div className="flex gap-2 items-center">
