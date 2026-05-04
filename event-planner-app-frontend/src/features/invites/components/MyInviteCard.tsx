@@ -8,6 +8,7 @@ import {
 } from "../services/inviteApiSlice";
 import type { Invite } from "../types";
 import { getStatusConfig } from "../utils";
+import { Link } from "react-router";
 
 export default function MyInviteCard({ invite }: { invite: Invite }) {
   const [accept, { isLoading: isAcceptLoading }] = useAcceptInviteMutation();
@@ -42,13 +43,27 @@ export default function MyInviteCard({ invite }: { invite: Invite }) {
   };
 
   const canAcceptOrDecline = ["pending", "expired"].includes(status);
+  const isAccepted = status === "accepted";
 
+  if (invite.itinerary?.name === "To Madrid") {
+    console.log("Hiii");
+  }
   return (
     <div className="card p-0">
       <Accordion
         TitleComponent={() => (
           <div className=" flex items-center">
-            <h2 className="text-lg">{invite.itinerary?.name ?? "Trip"}</h2>
+            {isAccepted ? (
+              <Link
+                onClick={(e) => e.stopPropagation()}
+                to={`/trips/${invite.itinerary!.id}`}
+                className="text-lg"
+              >
+                {invite.itinerary!.name}
+              </Link>
+            ) : (
+              <h2 className="text-lg">{invite.itinerary!.name}</h2>
+            )}
           </div>
         )}
         ContentComponent={() => (
