@@ -110,7 +110,7 @@ export default function DayCard({
           {isMenuOpen && (
             <div
               onClick={(e) => e.stopPropagation()}
-              className="z-1 flex flex-col gap-2 absolute top-full right-0 card p-0 text-sm"
+              className="z-1 flex flex-col gap-2 absolute top-4 right-0 card p-0 text-sm"
             >
               <button onClick={viewAllRoutes} className="flex gap-2 btn-menu">
                 <Map className="text-brand-primary" size={18} />
