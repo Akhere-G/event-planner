@@ -1,6 +1,5 @@
 import { Ban, Mail, MoreVertical, RotateCcw, ShieldCheck } from "lucide-react";
 import type { Invite } from "../types";
-import { useEffect, useRef, useState } from "react";
 import {
   useCreateInviteMutation,
   useRevokeInviteMutation,
@@ -9,6 +8,7 @@ import { useMatch } from "react-router";
 import { isFetchBaseQueryError } from "../../api/utils";
 import { getStatusConfig } from "../utils";
 import { toast } from "sonner";
+import useMenu from "../../../hooks/useMenu";
 
 export default function InviteRow({ invite }: { invite: Invite }) {
   const params = useMatch("/trips/:tripId")?.params;
@@ -16,8 +16,8 @@ export default function InviteRow({ invite }: { invite: Invite }) {
   const [createInvite] = useCreateInviteMutation();
   const [revokeInvite] = useRevokeInviteMutation();
 
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const menuRef = useRef<HTMLTableCellElement>(null);
+  const { isMenuOpen, closeMenu, toggleMenu, menuContainerRef, openButtonRef } =
+    useMenu();
   const { email, role } = invite;
 
   async function reinvite() {
@@ -26,6 +26,7 @@ export default function InviteRow({ invite }: { invite: Invite }) {
         tripId,
         invite: { email: email.toLowerCase(), role },
       }).unwrap();
+      closeMenu();
     } catch (err) {
       if (isFetchBaseQueryError(err)) {
         toast.error((err.data as { message: string }).message);
@@ -36,22 +37,13 @@ export default function InviteRow({ invite }: { invite: Invite }) {
   async function revoke() {
     try {
       revokeInvite({ tripId, inviteId: invite.id }).unwrap();
+      closeMenu();
     } catch (err) {
       if (isFetchBaseQueryError(err)) {
         toast.error((err.data as { message: string }).message);
       }
     }
   }
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-        setIsMenuOpen(false);
-      }
-    };
-    if (isMenuOpen) document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [isMenuOpen]);
 
   const canResend = ["revoked", "declined", "pending"].includes(invite.status);
   const canRevoke = invite.status === "pending";
@@ -86,21 +78,24 @@ export default function InviteRow({ invite }: { invite: Invite }) {
         </span>
       </td>
 
-      <td ref={menuRef} className="z-10 px-2 md:px-4 py-4 text-right relative">
+      <td className="z-10 px-2 md:px-4 py-4 text-right relative">
         <button
-          onClick={() => setIsMenuOpen(!isMenuOpen)}
+          ref={openButtonRef}
+          onClick={toggleMenu}
           className="p-1 hover:bg-surface-muted rounded-full transition-colors"
         >
           <MoreVertical size={18} className="text-text-secondary" />
         </button>
 
         {isMenuOpen && (
-          <div className="card absolute z-20 right-8 top-1 w-32 p-0.5 flex flex-col shadow-xl bg-surface ">
+          <div
+            ref={menuContainerRef}
+            className="card absolute z-20 right-8 top-1 w-32 p-0.5 flex flex-col shadow-xl bg-surface "
+          >
             {canResend && (
               <button
                 onClick={() => {
                   reinvite();
-                  setIsMenuOpen(false);
                 }}
                 className="rounded-none flex items-center gap-2 p-1 text-xs hover:bg-surface-muted"
               >
@@ -111,7 +106,6 @@ export default function InviteRow({ invite }: { invite: Invite }) {
               <button
                 onClick={() => {
                   revoke();
-                  setIsMenuOpen(false);
                 }}
                 className="rounded-none flex items-center gap-2 p-1 text-xs hover:bg-surface-muted text-error"
               >

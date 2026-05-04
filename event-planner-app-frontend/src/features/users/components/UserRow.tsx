@@ -1,12 +1,13 @@
 import { Mail, ShieldCheck, Trash, User as UserIcon, X } from "lucide-react";
 import { UserRole, type User } from "../types";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 
 import { useMatch } from "react-router";
 import { isFetchBaseQueryError } from "../../api/utils";
 import { useRemoveUserMutation, useUpdateUserMutation } from "../usersApiSlice";
 import { EditableSelect } from "../../../components";
 import { toast } from "sonner";
+import useMenu from "../../../hooks/useMenu";
 
 export default function UserRow({ user }: { user: User }) {
   const [userRole, setUserRole] = useState(user.role);
@@ -15,8 +16,8 @@ export default function UserRow({ user }: { user: User }) {
   const params = useMatch("/trips/:tripId")?.params;
   const tripId = Number(params?.tripId);
 
-  const [isDeleteModal, setIsDeleteModalOpen] = useState(false);
-  const menuRef = useRef<HTMLTableCellElement>(null);
+  const { isMenuOpen, closeMenu, menuContainerRef, openButtonRef, toggleMenu } =
+    useMenu();
   const { username, email } = user;
 
   useEffect(() => {
@@ -50,18 +51,6 @@ export default function UserRow({ user }: { user: User }) {
     }
   }
 
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-        setIsDeleteModalOpen(false);
-      }
-    };
-    if (isDeleteModal)
-      document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [isDeleteModal]);
-
-  const closeDeleteModal = () => setIsDeleteModalOpen(false);
   return (
     <tr className="group hover:bg-surface-muted/30 transition-colors text-sm md:text-current">
       <td className="px-2 md:px-6 py-4">
@@ -97,17 +86,19 @@ export default function UserRow({ user }: { user: User }) {
         </div>
       </td>
 
-      <td ref={menuRef} className="pr-4  py-4 text-right ">
+      <td className="pr-4  py-4 text-right ">
         <button
-          onClick={() => setIsDeleteModalOpen(!isDeleteModal)}
+          ref={openButtonRef}
+          onClick={toggleMenu}
           className="p-1 hover:bg-surface-muted rounded-full transition-colors"
         >
           <Trash size={18} className="text-text-secondary" />
         </button>
 
-        {isDeleteModal && (
-          <div className="backdrop" onClick={closeDeleteModal}>
+        {isMenuOpen && (
+          <div className="backdrop" onClick={closeMenu}>
             <div
+              ref={menuContainerRef}
               className="modal flex items-center justify-center"
               onClick={(e) => e.stopPropagation()}
             >
@@ -115,16 +106,13 @@ export default function UserRow({ user }: { user: User }) {
                 <div>
                   <div className="p-4 bg-brand-primary flex gap-2 items-center justify-between">
                     <h3 className="title">Remove {username}?</h3>
-                    <button onClick={closeDeleteModal} className="btn p-2">
+                    <button onClick={closeMenu} className="btn p-2">
                       <X size={20} />
                     </button>
                   </div>
 
                   <div className="p-4 mt-4 flex justify-end gap-2">
-                    <button
-                      onClick={closeDeleteModal}
-                      className="btn-secondary"
-                    >
+                    <button onClick={closeMenu} className="btn-secondary">
                       Cancel
                     </button>
                     <button

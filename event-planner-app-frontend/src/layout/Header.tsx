@@ -1,11 +1,11 @@
 import { Menu, Moon, Sun, User, X } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router";
 import { useLogoutUserMutation } from "../features/auth/services/authApiSlice";
 import { logOut } from "../features/auth/services/authSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { toggleDarkMode } from "../features/theme/themeSlice";
 import type { RootState } from "../store";
+import useMenu from "../hooks/useMenu";
 
 interface HeaderProps {
   links: { title: string; url: string }[];
@@ -14,23 +14,18 @@ export default function Header({ links }: HeaderProps) {
   const { darkMode } = useSelector((state: RootState) => state.theme);
   const { isAuthenticated } = useSelector((state: RootState) => state.auth);
   const [logout] = useLogoutUserMutation();
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const dispatch = useDispatch();
 
-  const menuRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-        setIsMenuOpen(false);
-      }
-    };
-    if (isMenuOpen) document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [isMenuOpen]);
-
+  const { isMenuOpen, toggleMenu, menuContainerRef, openButtonRef } = useMenu({
+    closeOnClick: true,
+  });
+  const {
+    isMenuOpen: isSidebarOpen,
+    toggleMenu: toggleSidebar,
+    menuContainerRef: sidebarContainerRef,
+    openButtonRef: openSidebarButtonRef,
+  } = useMenu({ closeOnClick: true });
   return (
     <header className="relative w-full z-2 ">
       <div className="z-2 bg-surface min-h-12 max-h-24 h-[6.5vh] w-full flex justify-between items-center p-4 shadow-md">
@@ -49,20 +44,21 @@ export default function Header({ links }: HeaderProps) {
               ))}
             </ul>
           </nav>
-          <div ref={menuRef}>
+          <div>
             <button
-              onClick={() => setIsMenuOpen(true)}
+              ref={openButtonRef}
+              onClick={toggleMenu}
               className="p-2.5 bg-brand-primary rounded-full h-10 w-10 "
             >
               <User className="text-text-inverse" size={20} />
             </button>
             <div
+              ref={menuContainerRef}
               className={`flex flex-col w-40 card p-0 z-10 absolute right-2 top-full ${isMenuOpen ? "visible opacity-100" : "invisible opacity-0 pointer-events-none"}`}
             >
               {isAuthenticated && (
                 <Link
                   to="/settings"
-                  onClick={() => setIsSidebarOpen(false)}
                   className="pt-3 pb-2 hover:bg-surface-muted text-center"
                 >
                   Settings
@@ -98,7 +94,8 @@ export default function Header({ links }: HeaderProps) {
           className="btn-secondary md:hidden p-2"
           aria-expanded={isSidebarOpen}
           aria-label="Open Menu"
-          onClick={() => setIsSidebarOpen(true)}
+          onClick={toggleSidebar}
+          ref={openSidebarButtonRef}
         >
           <Menu size={24} />
         </button>
@@ -106,6 +103,7 @@ export default function Header({ links }: HeaderProps) {
 
       {/* Mobile Sidebar */}
       <div
+        ref={sidebarContainerRef}
         className={`fixed  z-50 h-full right-0 bg-surface shadow-md transition-transform
         md:hidden flex flex-col items-start  gap-4 text-start
         top-0
@@ -117,7 +115,6 @@ export default function Header({ links }: HeaderProps) {
             className="btn-secondary md:hidden p-2 mr-2 "
             aria-expanded={isSidebarOpen}
             aria-label="Close Menu"
-            onClick={() => setIsSidebarOpen(false)}
           >
             <X size={16} />
           </button>
@@ -129,7 +126,6 @@ export default function Header({ links }: HeaderProps) {
                 <Link
                   className="block py-2 pl-2 text-left hover:bg-surface-muted"
                   to={url}
-                  onClick={() => setIsSidebarOpen(false)}
                 >
                   {title}
                 </Link>
@@ -140,7 +136,6 @@ export default function Header({ links }: HeaderProps) {
             {isAuthenticated && (
               <Link
                 to="/settings"
-                onClick={() => setIsSidebarOpen(false)}
                 className="block py-2 pl-2 text-left hover:bg-surface-muted"
               >
                 Settings
@@ -174,7 +169,6 @@ export default function Header({ links }: HeaderProps) {
       <div
         className={`fixed inset-0 z-10 bg-black/40 backdrop-blur-sm md:hidden transition-all 
           ${isSidebarOpen ? "opacity-100" : "opacity-0 pointer-events-none"}`}
-        onClick={() => setIsSidebarOpen(false)}
       />
     </header>
   );

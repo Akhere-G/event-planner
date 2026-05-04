@@ -1,8 +1,8 @@
 import type { Trip } from "../types";
 import { formatDateRange } from "../../../utils/dateFormattors";
 import { MoreVertical } from "lucide-react";
-import { useEffect, useRef, useState, type MouseEvent } from "react";
 import { isAdmin } from "../../users/utils";
+import useMenu from "../../../hooks/useMenu";
 
 type TripCardProps = {
   trip: Trip;
@@ -19,48 +19,39 @@ export default function TripCard({
 }: TripCardProps) {
   const { id, name, description, startDate, endDate } = trip;
 
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-
-  const menuRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const handleClickOutside = (event: globalThis.MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-        setIsMenuOpen(false);
-      }
-    };
-    if (isMenuOpen) document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [isMenuOpen]);
-
-  const handleSettings = (e: MouseEvent<HTMLButtonElement>) => {
-    e.stopPropagation();
-    setIsMenuOpen((prev) => !prev);
+  const { toggleMenu, isMenuOpen, menuContainerRef, openButtonRef } = useMenu({
+    closeOnClick: true,
+  });
+  const handleSettings = () => {
+    toggleMenu();
   };
 
-  const handleEdit = (e: MouseEvent<HTMLButtonElement>) => {
-    e.stopPropagation();
-    setIsMenuOpen(false);
+  const handleEdit = () => {
     openEditTripModal(trip);
   };
 
-  const handleDelete = (e: MouseEvent<HTMLButtonElement>) => {
-    e.stopPropagation();
-    setIsMenuOpen(false);
+  const handleDelete = () => {
     openDeleteTripModal(trip);
   };
 
   return (
     <article
       className="relative md:rounded-md bg-surface shadow-md overflow-hidden cursor-pointer"
-      onClick={() => handleCardClick(id)}
-      ref={menuRef}
+      onClick={(e) => {
+        if (
+          !openButtonRef.current?.contains(e.target as Node) &&
+          !menuContainerRef.current?.contains(e.target as Node)
+        ) {
+          handleCardClick(id);
+        }
+      }}
     >
       <div className="p-4  bg-linear-to-r from-brand-primary to-brand-secondary h-40">
         <div className="flex items-center justify-between mb-2">
           <h3 className="text-white text-lg font-bold">{name}</h3>
           {isAdmin(trip.role) && (
             <button
+              ref={openButtonRef}
               className="-mt-2 -mr-2 p-2 hover:bg-white/20"
               onClick={handleSettings}
             >
@@ -68,7 +59,10 @@ export default function TripCard({
             </button>
           )}
           {isMenuOpen && (
-            <div className="absolute top-8 right-4 mt-2 w-32 bg-surface rounded-md shadow-lg z-10 flex flex-col text-sm">
+            <div
+              ref={menuContainerRef}
+              className="absolute top-8 right-4 mt-2 w-32 bg-surface rounded-md shadow-lg z-10 flex flex-col text-sm"
+            >
               <button onClick={handleEdit} className="btn-menu rounded-md">
                 Edit
               </button>

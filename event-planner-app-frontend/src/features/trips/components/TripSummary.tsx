@@ -23,7 +23,6 @@ export default function TripSummary({
     closeOnClick: true,
   });
 
-  console.log(isMenuOpen);
   const dispatch = useDispatch();
 
   function openUsersView() {

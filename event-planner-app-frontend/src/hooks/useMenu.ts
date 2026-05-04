@@ -21,8 +21,9 @@ export default function useMenu(props?: {
         setIsMenuOpen(false);
       }
     };
-    if (isMenuOpen)
+    if (isMenuOpen) {
       document.addEventListener("click", handleClickOutside, false);
+    }
     return () =>
       document.removeEventListener("click", handleClickOutside, false);
   }, [isMenuOpen, closeOnClick]);
