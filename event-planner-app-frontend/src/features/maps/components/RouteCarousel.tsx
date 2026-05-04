@@ -64,8 +64,6 @@ export default function RouteCarousel({
   };
   const currentRoute = routes[activeIndex];
 
-  console.log(legResults);
-
   return (
     <div className="fixed bottom-6 left-0 w-full z-20 pointer-events-none">
       <div className="md:px-4">

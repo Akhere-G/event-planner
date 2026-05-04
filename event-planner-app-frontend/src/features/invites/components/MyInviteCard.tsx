@@ -45,9 +45,6 @@ export default function MyInviteCard({ invite }: { invite: Invite }) {
   const canAcceptOrDecline = ["pending", "expired"].includes(status);
   const isAccepted = status === "accepted";
 
-  if (invite.itinerary?.name === "To Madrid") {
-    console.log("Hiii");
-  }
   return (
     <div className="card p-0">
       <Accordion

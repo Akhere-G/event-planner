@@ -117,7 +117,7 @@ export default function TripForm({
         onPlaceSelect={(place) => {
           if (!place.formatted_address || !place.geometry?.location) return;
           setValue("destination", place.formatted_address);
-          setValue("name", `To ${place.name}`);
+          setValue("name", `${place.name} ${new Date().getFullYear()}`);
           setValue("latitude", place.geometry.location.lat());
           setValue("longitude", place.geometry.location.lng());
         }}
