@@ -1,4 +1,3 @@
-import { useEffect, useRef, useState } from "react";
 import type { Day } from "../types";
 import { Accordion } from "../../../components";
 import { formatDateRelative } from "../../../utils/dateFormattors";
@@ -15,6 +14,7 @@ import { useGetTripQuery } from "../../trips/services/tripsApiSlice";
 import { useDispatch } from "react-redux";
 import { setRoutes } from "../../maps/service/mapSlice";
 import type { Route } from "../../maps/types";
+import useMenu from "../../../hooks/useMenu";
 
 export default function DayCard({
   defaultIsOpen,
@@ -33,8 +33,9 @@ export default function DayCard({
     useOptimiseEventsMutation();
   const dispatch = useDispatch();
 
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const menuContainer = useRef<HTMLDivElement>(null);
+  const { openButtonRef, isMenuOpen, toggleMenu, menuContainerRef } = useMenu({
+    closeOnClick: true,
+  });
 
   const getSuggestions = async () => {
     try {
@@ -66,91 +67,80 @@ export default function DayCard({
     dispatch(setRoutes(routes));
   };
 
-  useEffect(() => {
-    function handleClick(e: MouseEvent) {
-      if (!menuContainer.current?.contains(e.currentTarget as Node)) {
-        setIsMenuOpen(false);
-      }
-    }
-
-    if (isMenuOpen) {
-      window.addEventListener("click", handleClick);
-    }
-
-    return () => window.removeEventListener("click", handleClick);
-  }, [isMenuOpen]);
-
   const isSuggestBtnDisabled = isSuggestLoading || isFetching;
   const isOptimiseBtnDisabled = isOptimiseLoading || isFetching;
 
   return (
-    <Accordion
-      defaultIsOpen={defaultIsOpen}
-      TitleComponent={() => (
-        <div className="flex justify-between gap-2 items-center w-full relative">
-          <div className="flex flex-col items-start">
-            <span className="text-[0.65rem] font-bold uppercase tracking-widest text-brand-primary/80 ">
-              Day {day.day}
-            </span>
+    <div className="relative">
+      <Accordion
+        defaultIsOpen={defaultIsOpen}
+        TitleComponent={() => (
+          <div className="flex justify-between gap-2 items-center w-full relative">
+            <div className="flex flex-col items-start">
+              <span className="text-[0.65rem] font-bold uppercase tracking-widest text-brand-primary/80 ">
+                Day {day.day}
+              </span>
 
-            <h3 className="text-xl font-semibold tracking-tight text-text-primary">
-              {formatDateRelative(day.date)}
-            </h3>
+              <h3 className="text-xl font-semibold tracking-tight text-text-primary">
+                {formatDateRelative(day.date)}
+              </h3>
+            </div>
+
+            <button
+              ref={openButtonRef}
+              onClick={(e) => {
+                e.stopPropagation();
+                toggleMenu();
+              }}
+              className="btn p-2 -mr-4 -mt-8 text-sm"
+            >
+              <MoreVertical size={16} />
+            </button>
           </div>
+        )}
+        ContentComponent={() => (
+          <div className="px-4 ">
+            <EventList events={day.events} />
+            {canEdit && <AddEventForm date={day.date} />}
+          </div>
+        )}
+      />
+      {isMenuOpen && (
+        <div
+          ref={menuContainerRef}
+          className="z-1 flex flex-col gap-2 absolute top-8 right-6 card p-0 text-sm"
+        >
+          <button onClick={viewAllRoutes} className="flex gap-2 btn-menu">
+            <Map className="text-brand-primary" size={18} />
+            View all routes
+          </button>
 
           <button
-            onClick={(e) => {
-              e.stopPropagation();
-              setIsMenuOpen((prev) => !prev);
-            }}
-            className="btn p-2 -mr-4 -mt-8 text-sm"
+            onClick={getSuggestions}
+            disabled={isSuggestBtnDisabled}
+            className="flex gap-2 btn-menu"
           >
-            <MoreVertical size={16} />
+            {isSuggestBtnDisabled ? (
+              <LoaderCircle className="animate-spin" size={18} />
+            ) : (
+              <Sparkles className="text-brand-primary" size={18} />
+            )}
+            Fill in day
           </button>
-          {isMenuOpen && (
-            <div
-              onClick={(e) => e.stopPropagation()}
-              className="z-1 flex flex-col gap-2 absolute top-4 right-0 card p-0 text-sm"
-            >
-              <button onClick={viewAllRoutes} className="flex gap-2 btn-menu">
-                <Map className="text-brand-primary" size={18} />
-                View all routes
-              </button>
-
-              <button
-                onClick={getSuggestions}
-                disabled={isSuggestBtnDisabled}
-                className="flex gap-2 btn-menu"
-              >
-                {isSuggestBtnDisabled ? (
-                  <LoaderCircle className="animate-spin" size={18} />
-                ) : (
-                  <Sparkles className="text-brand-primary" size={18} />
-                )}
-                Fill in day
-              </button>
-              <button
-                onClick={getOptimisedEvents}
-                disabled={isOptimiseBtnDisabled}
-                className="flex gap-2 btn-menu"
-              >
-                {isOptimiseBtnDisabled ? (
-                  <LoaderCircle className="animate-spin" size={18} />
-                ) : (
-                  <Wand2 className="text-brand-primary" size={18} />
-                )}
-                Optimise day
-              </button>
-            </div>
-          )}
+          <button
+            onClick={getOptimisedEvents}
+            disabled={isOptimiseBtnDisabled}
+            className="flex gap-2 btn-menu"
+          >
+            {isOptimiseBtnDisabled ? (
+              <LoaderCircle className="animate-spin" size={18} />
+            ) : (
+              <Wand2 className="text-brand-primary" size={18} />
+            )}
+            Optimise day
+          </button>
         </div>
       )}
-      ContentComponent={() => (
-        <div className="px-4 ">
-          <EventList events={day.events} />
-          {canEdit && <AddEventForm date={day.date} />}
-        </div>
-      )}
-    />
+    </div>
   );
 }

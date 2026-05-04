@@ -1,24 +1,31 @@
 import { useEffect, useRef, useState } from "react";
 
-export default function useMenu(props?: { startsOpen?: boolean }) {
-  const { startsOpen = false } = props ?? {};
+export default function useMenu(props?: {
+  startsOpen?: boolean;
+  closeOnClick?: boolean;
+}) {
+  const { startsOpen = false, closeOnClick = false } = props ?? {};
 
   const [isMenuOpen, setIsMenuOpen] = useState(startsOpen);
 
   const menuContainerRef = useRef<HTMLDivElement>(null);
+  const openButtonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     const handleClickOutside = (event: globalThis.MouseEvent) => {
       if (
-        menuContainerRef.current &&
-        !menuContainerRef.current.contains(event.target as Node)
+        !openButtonRef.current?.contains(event.target as Node) &&
+        (!menuContainerRef.current?.contains(event.target as Node) ||
+          closeOnClick)
       ) {
         setIsMenuOpen(false);
       }
     };
-    if (isMenuOpen) document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [isMenuOpen]);
+    if (isMenuOpen)
+      document.addEventListener("click", handleClickOutside, false);
+    return () =>
+      document.removeEventListener("click", handleClickOutside, false);
+  }, [isMenuOpen, closeOnClick]);
 
   const openMenu = () => setIsMenuOpen(true);
   const closeMenu = () => setIsMenuOpen(false);
@@ -28,6 +35,7 @@ export default function useMenu(props?: { startsOpen?: boolean }) {
     isMenuOpen,
     setIsMenuOpen,
     menuContainerRef,
+    openButtonRef,
     openMenu,
     closeMenu,
     toggleMenu,
