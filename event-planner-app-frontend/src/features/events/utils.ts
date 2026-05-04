@@ -48,7 +48,7 @@ export const getDayColor = (day: number) => {
     "#7e22ce", // Lavender
     "#d65d0e", // Sandstone
     "#0891b2", // Arctic
-    "#6c390a", // Chocolate
+    "#ac794a", // Chocolate
     "#8b828b", // Timber
     "#27ad22", // Radioactive
     "#d48f07", // Midnight Gold

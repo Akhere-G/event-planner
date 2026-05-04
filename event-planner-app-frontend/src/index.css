@@ -41,13 +41,16 @@
 /* --- Bali Jungle --- */
   .theme-bali-jungle {
     --color-canvas: #6ebfae; 
-    --color-surface: #186f58;  
-    --color-surface-muted: #085f48;
+    --color-surface: #145f48;  
+    --color-surface-muted: #084f38;
     --color-brand-primary: #77c3a0; 
-    --color-surface-border: #055e46; 
-    --color-brand-secondary: #a8e4d1; 
+    --color-surface-border: #053e26; 
+    --color-brand-secondary: #68d4c1; 
     --color-text-primary: #f8f8f8;
     --color-text-secondary: #f0f0f0;
+    --color-text-inverse: #111;
+    --color-error: #faa;
+
   }
 
   /* --- Icelandic Glacier --- */
@@ -108,6 +111,7 @@
     --color-brand-secondary: #22d3ee; 
     --color-text-primary: #ffffff;
     --color-text-secondary: #a1a1aa;
+    --color-text-inverse: #09090b;
   }
 
 
@@ -160,6 +164,8 @@
     --color-brand-secondary: #1d5100; 
     --color-text-primary: #f8f8f8; 
     --color-text-secondary: #f0f0f0; 
+    --color-error: #800;
+
   }
 
   .dark.theme-outback { 
@@ -212,6 +218,8 @@
     --color-text-primary: #f8fafc;
     --color-text-secondary: #e8eaec;
     --color-text-inverse: #111;
+    --color-error: #faa;
+
   }
 
   /* --- Seoul Night --- */
@@ -251,7 +259,8 @@
     --color-brand-secondary: #fdd50c;
     --color-text-primary: #f8f8f8;
     --color-text-secondary: #f0f0f0; 
-    --color-text-inverse: #000
+    --color-text-inverse: #000;
+    --color-error: #faa;
   }
 
   /* --- Santorini Azure (Stark White & Deep Sea) --- */
@@ -309,7 +318,8 @@
     --color-brand-secondary: #ffff5f; /* Marigold */
     --color-text-primary: #f8f8f8;
     --color-text-secondary: #f0f0f0; 
-    --color-text-inverse: #000
+    --color-text-inverse: #000;
+    --color-error: #fbb;
   }
 
  /* --- Dubai Lux (Desert Gold & Obsidian) --- */
@@ -345,11 +355,14 @@
     --color-surface: #df6020; 
     --color-surface-border: #bf4000;
     --color-surface-muted: #ef7030; 
-    --color-brand-primary: #72100f; /* Papaya & Spice */
+    --color-brand-primary: #a2400f; /* Papaya & Spice */
     --color-brand-secondary: #a3f0a6; /* Pandan Leaf */
 
     --color-text-primary: #f8fafc;
     --color-text-secondary: #f8fafc;
+    --color-text-inverse: #111;
+    --color-error: #ffbfbf;
+
   }
 
   .dark.theme-bangkok-market {
