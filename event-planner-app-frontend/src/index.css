@@ -440,7 +440,7 @@
   }
 
   .btn-menu {
-    @apply hover:bg-surface-muted rounded-none disabled:hover:bg-inherit
+    @apply hover:bg-surface-muted disabled:hover:bg-inherit rounded-md
   }
 
   

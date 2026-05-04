@@ -1,4 +1,11 @@
-import { Calendar, MoreVertical, UserCog } from "lucide-react";
+import {
+  Calendar,
+  MoreVertical,
+  Pencil,
+  SquareArrowRightExit,
+  Trash,
+  UserCog,
+} from "lucide-react";
 import type { Trip } from "../types";
 import { formatDateRange } from "../../../utils/dateFormattors";
 import { UserAvatarList } from "../../users/components";
@@ -13,6 +20,7 @@ import { toast } from "sonner";
 import type { RootState } from "../../../store";
 import { ConfirmModal } from "../../../components";
 import { useState } from "react";
+import { exportToCalendar } from "../utils";
 
 interface TripSummaryProps {
   trip: Trip;
@@ -97,27 +105,43 @@ export default function TripSummary({
       {isMenuOpen && (
         <div
           ref={menuContainerRef}
-          className="absolute top-5 right-2 mt-2 w-32 bg-surface rounded-md shadow-lg z-10 flex flex-col text-sm"
+          className="absolute top-5 right-2 mt-2 px-1 bg-surface rounded-md shadow-lg z-10 flex flex-col text-sm"
         >
           <button
             disabled={isRemoveLoading}
-            onClick={() => setIsModalOpen(true)}
-            className="btn-menu rounded-md text-error"
+            onClick={() =>
+              exportToCalendar(trip.name, trip.events, trip.userMemberships)
+            }
+            className="btn-menu text-left flex gap-2 items-center"
           >
+            <Calendar size={16} />
+            Export to calendar
+          </button>
+          {isAdmin(trip.role) && (
+            <button
+              onClick={handleEdit}
+              className="btn-menu text-left flex gap-2 items-center"
+            >
+              <Pencil size={16} />
+              Edit
+            </button>
+          )}
+          <button
+            disabled={isRemoveLoading}
+            onClick={() => setIsModalOpen(true)}
+            className="btn-menu text-error text-left flex gap-2 items-center"
+          >
+            <SquareArrowRightExit size={16} />
             Leave
           </button>
           {isAdmin(trip.role) && (
-            <>
-              <button onClick={handleEdit} className="btn-menu rounded-md">
-                Edit
-              </button>
-              <button
-                onClick={handleDelete}
-                className="btn-menu rounded-md text-error"
-              >
-                Delete
-              </button>
-            </>
+            <button
+              onClick={handleDelete}
+              className="btn-menu text-error text-left flex gap-2 items-center"
+            >
+              <Trash size={16} />
+              Delete
+            </button>
           )}
         </div>
       )}

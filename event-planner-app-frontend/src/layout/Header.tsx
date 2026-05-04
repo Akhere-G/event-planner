@@ -120,11 +120,11 @@ export default function Header({ links }: HeaderProps) {
           </button>
         </div>
         <nav>
-          <ul>
+          <ul className="px-1">
             {links.map(({ title, url }) => (
               <li key={url}>
                 <Link
-                  className="block py-2 pl-2 text-left hover:bg-surface-muted"
+                  className="block py-2 pl-2 text-left hover:bg-surface-muted rounded-md"
                   to={url}
                 >
                   {title}
@@ -132,7 +132,7 @@ export default function Header({ links }: HeaderProps) {
               </li>
             ))}
           </ul>
-          <div className="mt-1">
+          <div className="mt-1 px-1">
             {isAuthenticated && (
               <Link
                 to="/settings"
@@ -144,7 +144,7 @@ export default function Header({ links }: HeaderProps) {
           </div>
           <button
             onClick={() => dispatch(toggleDarkMode())}
-            className="flex text-sm items-center gap-2 py-2 pl-2 w-full justify-end hover:bg-surface-muted rounded-none"
+            className="mx-px flex text-sm items-center gap-2 py-2 pl-2 w-full justify-end hover:bg-surface-muted rounded-none"
           >
             <span className="w-19">
               {darkMode ? "Light Mode" : "Dark Mode"}
@@ -158,7 +158,7 @@ export default function Header({ links }: HeaderProps) {
                 dispatch(logOut());
                 window.location.reload();
               }}
-              className="btn-menu py-2 pl-3 w-full text-left text-sm"
+              className="mx-px btn-menu py-2 pl-3 w-full text-left text-sm"
             >
               Logout
             </button>
