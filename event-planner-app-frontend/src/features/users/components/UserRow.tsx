@@ -1,15 +1,24 @@
-import { Mail, ShieldCheck, Trash, User as UserIcon, X } from "lucide-react";
+import {
+  Mail,
+  ShieldCheck,
+  SquareArrowRightExitIcon,
+  Trash,
+  User as UserIcon,
+} from "lucide-react";
 import { UserRole, type User } from "../types";
 import { useEffect, useState } from "react";
 
 import { useMatch } from "react-router";
 import { isFetchBaseQueryError } from "../../api/utils";
 import { useRemoveUserMutation, useUpdateUserMutation } from "../usersApiSlice";
-import { EditableSelect } from "../../../components";
+import { ConfirmModal, EditableSelect } from "../../../components";
 import { toast } from "sonner";
 import useMenu from "../../../hooks/useMenu";
+import { useSelector } from "react-redux";
+import type { RootState } from "../../../store";
 
 export default function UserRow({ user }: { user: User }) {
+  const { userId } = useSelector((state: RootState) => state.auth);
   const [userRole, setUserRole] = useState(user.role);
   const [removeUser, { isLoading: removeIsLoading }] = useRemoveUserMutation();
   const [updateUser] = useUpdateUserMutation();
@@ -18,7 +27,10 @@ export default function UserRow({ user }: { user: User }) {
 
   const { isMenuOpen, closeMenu, menuContainerRef, openButtonRef, toggleMenu } =
     useMenu();
-  const { username, email } = user;
+  const { username, email, id } = user;
+
+  const isCurrentUser = id === userId;
+  const formattedUsername = username + (isCurrentUser ? " (You)" : "");
 
   useEffect(() => {
     setUserRole(user.role);
@@ -27,6 +39,7 @@ export default function UserRow({ user }: { user: User }) {
   async function remove() {
     try {
       await removeUser({ tripId, userId: user.id }).unwrap();
+      closeMenu();
     } catch (err) {
       if (isFetchBaseQueryError(err)) {
         toast.error((err.data as { message: string }).message);
@@ -51,6 +64,9 @@ export default function UserRow({ user }: { user: User }) {
     }
   }
 
+  const RemoveUserIcon = isCurrentUser ? SquareArrowRightExitIcon : Trash;
+  const removeTitle = isCurrentUser ? "Leave trip" : `Remove ${username}`;
+
   return (
     <tr className="group hover:bg-surface-muted/30 transition-colors text-sm md:text-current">
       <td className="px-2 md:px-6 py-4">
@@ -58,7 +74,7 @@ export default function UserRow({ user }: { user: User }) {
           <div className="p-2 hidden md:block rounded-full bg-brand-primary/10 text-brand-primary">
             <UserIcon size={16} />
           </div>
-          <span>{username}</span>
+          <span>{formattedUsername}</span>
         </div>
       </td>
       <td className="px-2 md:px-6 py-4">
@@ -90,43 +106,21 @@ export default function UserRow({ user }: { user: User }) {
         <button
           ref={openButtonRef}
           onClick={toggleMenu}
+          title={removeTitle}
           className="p-1 hover:bg-surface-muted rounded-full transition-colors"
         >
-          <Trash size={18} className="text-text-secondary" />
+          <RemoveUserIcon size={18} className="text-text-secondary" />
         </button>
 
         {isMenuOpen && (
-          <div className="backdrop" onClick={closeMenu}>
-            <div
-              ref={menuContainerRef}
-              className="modal flex items-center justify-center"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="card border-brand-primary/80 p-0 overflow-clip w-[90vh] flex flex-col shadow-xl bg-surface text-left">
-                <div>
-                  <div className="p-4 bg-brand-primary flex gap-2 items-center justify-between">
-                    <h3 className="title">Remove {username}?</h3>
-                    <button onClick={closeMenu} className="btn p-2">
-                      <X size={20} />
-                    </button>
-                  </div>
-
-                  <div className="p-4 mt-4 flex justify-end gap-2">
-                    <button onClick={closeMenu} className="btn-secondary">
-                      Cancel
-                    </button>
-                    <button
-                      onClick={remove}
-                      disabled={removeIsLoading}
-                      className="btn-error"
-                    >
-                      Remove
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+          <ConfirmModal
+            closeModal={closeMenu}
+            confirmAction={remove}
+            title={isCurrentUser ? "Leave trip?" : `Remove ${username}?`}
+            confirmText={isCurrentUser ? "Leave trip" : `Remove ${username}`}
+            modalRef={menuContainerRef}
+            confirmButtonProps={{ disabled: removeIsLoading }}
+          />
         )}
       </td>
     </tr>

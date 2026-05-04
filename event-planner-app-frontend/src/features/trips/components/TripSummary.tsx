@@ -2,11 +2,17 @@ import { Calendar, MoreVertical, UserCog } from "lucide-react";
 import type { Trip } from "../types";
 import { formatDateRange } from "../../../utils/dateFormattors";
 import { UserAvatarList } from "../../users/components";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { openModal } from "../../modal/modalSlice";
 import { ModalType } from "../../modal/types";
 import { isAdmin } from "../../users/utils";
 import useMenu from "../../../hooks/useMenu";
+import { useRemoveUserMutation } from "../../users/usersApiSlice";
+import { isFetchBaseQueryError } from "../../api/utils";
+import { toast } from "sonner";
+import type { RootState } from "../../../store";
+import { ConfirmModal } from "../../../components";
+import { useState } from "react";
 
 interface TripSummaryProps {
   trip: Trip;
@@ -18,7 +24,11 @@ export default function TripSummary({
   showActions,
   hideTitle,
 }: TripSummaryProps) {
+  const [modalOpen, setIsModalOpen] = useState(false);
   const { name, description, startDate, endDate, userMemberships } = trip;
+  const [removeUser, { isLoading: isRemoveLoading }] = useRemoveUserMutation();
+  const { userId } = useSelector((state: RootState) => state.auth);
+
   const { openMenu, isMenuOpen, menuContainerRef, openButtonRef } = useMenu({
     closeOnClick: true,
   });
@@ -39,6 +49,16 @@ export default function TripSummary({
 
   const handleSettings = () => {
     openMenu();
+  };
+
+  const handleLeave = async () => {
+    try {
+      await removeUser({ tripId: trip.id, userId: userId! }).unwrap();
+    } catch (err) {
+      if (isFetchBaseQueryError(err)) {
+        toast.error((err.data as { message: string }).message);
+      }
+    }
   };
 
   return (
@@ -79,6 +99,13 @@ export default function TripSummary({
           ref={menuContainerRef}
           className="absolute top-5 right-2 mt-2 w-32 bg-surface rounded-md shadow-lg z-10 flex flex-col text-sm"
         >
+          <button
+            disabled={isRemoveLoading}
+            onClick={() => setIsModalOpen(true)}
+            className="btn-menu rounded-md text-error"
+          >
+            Leave
+          </button>
           {isAdmin(trip.role) && (
             <>
               <button onClick={handleEdit} className="btn-menu rounded-md">
@@ -93,6 +120,14 @@ export default function TripSummary({
             </>
           )}
         </div>
+      )}
+      {modalOpen && (
+        <ConfirmModal
+          closeModal={() => setIsModalOpen(false)}
+          confirmAction={handleLeave}
+          title={`Leave ${trip.name}?`}
+          confirmText="Leave"
+        />
       )}
     </div>
   );
