@@ -21,6 +21,7 @@ const Register = lazy(() => import("./pages/Register"));
 const TripPage = lazy(() => import("./pages/TripPage"));
 const Trips = lazy(() => import("./pages/Trips"));
 const Settings = lazy(() => import("./pages/Settings"));
+const About = lazy(() => import("./pages/About"));
 
 function App() {
   const isAuthenticated = useSelector(selectIsAuthenticated);
@@ -40,6 +41,8 @@ function App() {
   if (isLoading) {
     return <></>;
   }
+
+  const links = [{ title: "About", url: "/about" }];
   const authLinks = [
     { title: "Trips", url: "/" },
     { title: "Add Trip", url: "/addtrip" },
@@ -53,9 +56,14 @@ function App() {
 
   const isAuth = isAuthenticated || !!data?.data.userId;
 
+  if (isAuth) {
+    links.unshift(...authLinks);
+  } else {
+    links.unshift(...unauthLinks);
+  }
   return (
     <>
-      <Header links={isAuthenticated ? authLinks : unauthLinks} />
+      <Header links={links} />
       <Toaster position="top-right" richColors />
 
       <Routes>
@@ -115,6 +123,7 @@ function App() {
             </ProtectedRoute>
           }
         />
+        <Route path="/about" element={<About />} />
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
       <ModalManager />
