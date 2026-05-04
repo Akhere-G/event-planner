@@ -103,9 +103,9 @@ export default function DayCard({
               e.stopPropagation();
               setIsMenuOpen((prev) => !prev);
             }}
-            className="btn p-2 text-sm"
+            className="btn p-2 -mr-4 -mt-8 text-sm"
           >
-            <MoreVertical />
+            <MoreVertical size={16} />
           </button>
           {isMenuOpen && (
             <div
