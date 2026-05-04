@@ -46,9 +46,8 @@ const permissionEnum = {
 export default function TripMap({ trip }: { trip: Trip }) {
   const { latitude, longitude, startDate, endDate, events } = trip;
   const dispatch = useDispatch();
-  const { searchEvents, selectedEvent, days } = useSelector(
-    (state: RootState) => state.map,
-  );
+  const { searchEvents, selectedEvent, days, currentRouteIndex, routes } =
+    useSelector((state: RootState) => state.map);
   const darkMode = useSelector((state: RootState) => state.theme.darkMode);
 
   const [userCoords, setUserCoords] = useState<{
@@ -109,6 +108,8 @@ export default function TripMap({ trip }: { trip: Trip }) {
 
   const placesLibrary = useMapsLibrary("places");
 
+  const currentRoute = routes?.[currentRouteIndex];
+  const routeIds = [currentRoute?.from?.id, currentRoute?.to?.id];
   const eventMarkers = selectedEvents.map((event) => (
     <EventMarker
       day={differenceInDays(event.startAt, startDate) + 1}
@@ -116,7 +117,9 @@ export default function TripMap({ trip }: { trip: Trip }) {
       event={event}
       position={{ lat: event.latitude, lng: event.longitude }}
       onSelect={(event) => dispatch(setSelectedEvent(event))}
-      selected={selectedEvent?.id === event.id}
+      selected={selectedEvent?.id === event.id || routeIds.includes(event.id)}
+      isRouteStart={routeIds[0] === event.id}
+      isRouteEnd={routeIds[1] === event.id}
     />
   ));
 

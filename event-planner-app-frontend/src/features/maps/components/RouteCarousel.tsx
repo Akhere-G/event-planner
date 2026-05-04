@@ -1,12 +1,12 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import {
   X,
-  Navigation,
   Clock,
   Route as RouteIcon,
   ChevronLeft,
   ChevronRight,
   Loader2,
+  ChevronDown,
 } from "lucide-react";
 import type { Route } from "../types";
 import { EditableSelect } from "../../../components";
@@ -19,6 +19,8 @@ interface RouteCarouselProps {
   legResults: (google.maps.DirectionsResult | null)[];
   onClose: () => void;
   onUpdateMode: (index: number, mode: string) => void;
+  activeIndex: number;
+  setActiveIndex: (index: number) => void;
 }
 
 export default function RouteCarousel({
@@ -26,12 +28,25 @@ export default function RouteCarousel({
   legResults,
   onClose,
   onUpdateMode,
+  activeIndex,
+  setActiveIndex,
 }: RouteCarouselProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
-  const [activeIndex, setActiveIndex] = useState(0);
   const isSingleRoute = routes.length === 1;
 
   const map = useMap();
+
+  useEffect(() => {
+    if (!map) return;
+
+    const currentRoute = routes[activeIndex];
+
+    fitToBounds({
+      map,
+      events: [currentRoute.from, currentRoute.to],
+      padding: { top: 40, left: 50, bottom: 250, right: 30 },
+    });
+  }, [activeIndex, map, routes]);
 
   const scrollToIndex = (direction: "next" | "prev") => {
     if (!scrollRef.current) return;
@@ -46,19 +61,15 @@ export default function RouteCarousel({
       });
       setActiveIndex(newIndex);
     }
-    if (!map) return;
-    const currentRoute = routes[activeIndex];
-    fitToBounds({
-      map,
-      events: [currentRoute.from, currentRoute.to],
-      padding: 75,
-    });
   };
+  const currentRoute = routes[activeIndex];
+
+  console.log(legResults);
 
   return (
     <div className="fixed bottom-6 left-0 w-full z-20 pointer-events-none">
-      <div className="max-w-3xl mx-auto px-4">
-        <div className="flex justify-between items-center mb-3 pointer-events-auto">
+      <div className="md:px-4">
+        <div className="flex justify-between items-center pointer-events-auto">
           {!isSingleRoute && (
             <div className="flex gap-2">
               <button
@@ -95,14 +106,19 @@ export default function RouteCarousel({
                 key={idx}
                 className={`
                   snap-center shrink-0 p-1 
-                  ${isSingleRoute ? "w-full" : "w-full pr-4"}
+                  ${isSingleRoute ? "w-full" : "w-full md:pr-4"}
                 `}
               >
                 <div className="card min-h-55 max-h-[40vh] flex flex-col">
-                  <div className="flex justify-between items-center mb-4 pb-2 border-b">
-                    <span className="text-[10px] font-bold uppercase">
-                      Leg {idx + 1} of {routes.length}
-                    </span>
+                  <div className="flex justify-between items-end mb-4 pb-2 border-b gap-2">
+                    <div className="flex flex-col">
+                      <span className="text-[0.625rem] font-bold uppercase">
+                        Leg {idx + 1} of {routes.length}
+                      </span>
+                      <span className="text-xs text-text-secondary">
+                        {currentRoute.from.name} - {currentRoute.to.name}
+                      </span>
+                    </div>
                     <EditableSelect
                       canEdit={true}
                       selectedValue={route.mode}
@@ -110,8 +126,9 @@ export default function RouteCarousel({
                       setValue={(newMode) => onUpdateMode(idx, newMode)}
                       selectClassName="w-32 flex flex-col"
                       defaultElement={
-                        <span className="flex items-center gap-1 text-[10px] font-bold bg-brand-primary rounded-full px-6 py-2 text-text-inverse">
-                          <Navigation size={12} /> {route.mode}
+                        <span className="flex items-center gap-1 text-[10px] bg-brand-primary rounded-md px-4 py-2 font-bold text-text-inverse">
+                          {route.mode}
+                          <ChevronDown size={16} />
                         </span>
                       }
                     />
@@ -123,20 +140,20 @@ export default function RouteCarousel({
                     </div>
                   ) : (
                     <div className="flex flex-col h-full overflow-hidden">
-                      <div className="flex gap-4 mb-4">
-                        <div className="text-brand-primary bg-surface-muted flex items-center gap-1 text-sm font-bold px-3 py-1 rounded-lg">
-                          <Clock size={16} /> {apiData.duration?.text}
+                      <div className="flex gap-4 mb-2">
+                        <div className="text-brand-primary bg-surface-muted flex items-center gap-1 text-xs font-bold px-3 py-1 rounded-lg">
+                          <Clock size={12} /> {apiData.duration?.text}
                         </div>
-                        <div className="text-brand-primary bg-surface-muted flex items-center gap-1 text-sm font-bold px-3 py-1 rounded-lg">
-                          <RouteIcon size={16} /> {apiData.distance?.text}
+                        <div className="text-brand-primary bg-surface-muted flex items-center gap-1 text-xs font-bold px-3 py-1 rounded-lg">
+                          <RouteIcon size={12} /> {apiData.distance?.text}
                         </div>
                       </div>
 
-                      <div className="flex-1 overflow-y-auto pr-2 text-sm text-gray-600 custom-scrollbar">
+                      <div className="flex-1 overflow-y-auto pr-2 text-sm">
                         {apiData.steps?.map((step, sIdx) => (
                           <div
                             key={sIdx}
-                            className="mb-2 pb-2 border-b text-text-primary border-surface-border last:border-0"
+                            className="mb-2 pb-2 border-b text-text-primary text-sm border-surface-border last:border-0"
                             dangerouslySetInnerHTML={{
                               __html: step.instructions,
                             }}

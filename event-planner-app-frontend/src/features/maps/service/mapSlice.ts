@@ -9,6 +9,7 @@ interface MapState {
   days: Day[];
   routes: Route[] | null;
   isMapView: boolean;
+  currentRouteIndex: number;
 }
 
 const initialState: MapState = {
@@ -18,6 +19,7 @@ const initialState: MapState = {
   days: [],
   routes: null,
   isMapView: false,
+  currentRouteIndex: 0,
 };
 
 type UpdateFunc = (event: EventSearchResult) => EventSearchResult;
@@ -52,6 +54,7 @@ export const mapSlice = createSlice({
       state.searchIndex = 0;
     },
     setRoutes: (state, action: PayloadAction<Route[] | null>) => {
+      state.currentRouteIndex = 0;
       state.routes = action.payload;
       state.isMapView = true;
     },
@@ -62,6 +65,9 @@ export const mapSlice = createSlice({
       if (state.routes) {
         state.routes[action.payload.index].mode = action.payload.mode;
       }
+    },
+    setRouteIndex: (state, action: PayloadAction<number>) => {
+      state.currentRouteIndex = action.payload;
     },
     setIsMapView: (state, action: PayloadAction<boolean>) => {
       state.isMapView = action.payload;
@@ -79,6 +85,7 @@ export const {
   updateSearchEvents,
   setRoutes,
   updateRouteMode,
+  setRouteIndex,
   setIsMapView,
 } = mapSlice.actions;
 

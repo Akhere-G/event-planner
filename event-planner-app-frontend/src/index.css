@@ -473,15 +473,33 @@
     @apply w-full max-w-7xl m-4
   }
 
-  /* The main container of default google maps info view*/
-  .gm-style-iw-c {
-    @apply hidden!;
+  .gm-style-iw {
+    @apply pl-2! pr-2! pb-2!
   }
 
-  /* The tail/pointer (This is usually the 'white box' on top or bottom) */
-  .gm-style-iw-tc::after {
-    @apply hidden
+  .gm-style-iw-c, .gm-title, .address, .address-line, .view-link, .view-link *, .gm-style-iw-d   {
+    @apply bg-surface! overflow-hidden!
   }
+
+  .gm-style-iw-tc::after {
+    @apply bg-surface! text-text-primary!;
+  }
+
+  .gm-title {
+    @apply text-brand-primary 
+  }
+
+  .address-line {
+    @apply text-text-primary! fill-text-primary!
+  }
+
+  .gm-ui-hover-effect > span {
+    @apply bg-text-primary!
+  }
+  
+
+
+  
 }
 
   .rbc-show-more {

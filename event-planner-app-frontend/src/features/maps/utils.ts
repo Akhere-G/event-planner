@@ -50,7 +50,9 @@ export const fitToBounds = ({
   events: { latitude: number; longitude: number }[];
   defaultCenter?: { latitude: number; longitude: number };
   defaultBounds?: { north: number; east: number; south: number; west: number };
-  padding?: number;
+  padding?:
+    | number
+    | { top: number; left: number; bottom: number; right: number };
 }) => {
   if (events.length === 0) {
     if (defaultCenter) {

@@ -1,6 +1,6 @@
 import { useDispatch, useSelector } from "react-redux";
 import type { RootState } from "../../../store";
-import { setRoutes } from "../service/mapSlice";
+import { setRouteIndex, setRoutes } from "../service/mapSlice";
 import { useEffect, useState, useCallback } from "react";
 import { useMap, useMapsLibrary } from "@vis.gl/react-google-maps";
 import RouteCarousel from "./RouteCarousel";
@@ -8,7 +8,9 @@ import DirectionsRenderer from "./DirectionsLeg";
 import type { Route } from "../types";
 
 export default function RouteDetails() {
-  const { routes } = useSelector((state: RootState) => state.map);
+  const { routes, currentRouteIndex } = useSelector(
+    (state: RootState) => state.map,
+  );
   const dispatch = useDispatch();
 
   const map = useMap();
@@ -38,6 +40,12 @@ export default function RouteDetails() {
   );
 
   useEffect(() => {
+    return () => {
+      dispatch(setRoutes(null));
+    };
+  }, [dispatch]);
+
+  useEffect(() => {
     if (!routes || !routesLib || !map) return;
 
     const service = new routesLib.DirectionsService();
@@ -50,10 +58,6 @@ export default function RouteDetails() {
     };
 
     fetchAll();
-
-    return () => {
-      dispatch(setRoutes(null));
-    };
   }, [routes, routesLib, map, fetchRoute, dispatch]);
 
   const handleUpdateMode = (index: number, mode: string) => {
@@ -68,7 +72,8 @@ export default function RouteDetails() {
     <>
       {legResults.map(
         (result, index) =>
-          result && (
+          result &&
+          index === currentRouteIndex && (
             <DirectionsRenderer
               key={index}
               result={result}
@@ -82,6 +87,8 @@ export default function RouteDetails() {
         legResults={legResults}
         onClose={() => dispatch(setRoutes(null))}
         onUpdateMode={handleUpdateMode}
+        activeIndex={currentRouteIndex}
+        setActiveIndex={(index) => dispatch(setRouteIndex(index))}
       />
     </>
   );
