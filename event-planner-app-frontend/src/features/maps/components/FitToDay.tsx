@@ -22,7 +22,7 @@ export function FitToDay({
   if (daysWithEvents.length === 0) return;
   if (daysWithEvents.length === 1) {
     return (
-      <div className="bg-surface rounded-xl hover:brightness-140 shadow-md">
+      <div className="bg-surface rounded-xl hover:brightness-110 shadow-md">
         <button
           className="btn bg-brand-secondary text-text-inverse border-surface-border border py-2 px-4 text-sm w-35 max-h-30 overflow-y-scroll"
           onClick={() => fitToDay(daysWithEvents[0].date)}

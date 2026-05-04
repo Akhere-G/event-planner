@@ -28,11 +28,12 @@ export default function CalendarEventList({
       {events.map((event) => {
         return (
           <div
+            key={event.id}
             draggable
             onDragStart={() => setDraggedEvent(event)}
             onDragEnd={() => setDraggedEvent(null)}
           >
-            <EventCard key={event.id} event={event} />
+            <EventCard event={event} />
           </div>
         );
       })}
