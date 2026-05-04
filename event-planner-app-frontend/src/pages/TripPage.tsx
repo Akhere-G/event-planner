@@ -58,7 +58,7 @@ export default function TripPage() {
               onClick={() => {
                 dispatch(setIsMapView(!isMapView));
               }}
-              className="btn-secondary bg-brand-secondary text-text-inverse hover:brightness-110 border-surface-border border w-44 shadow-2xl  flex gap-2 justify-center "
+              className="btn-secondary bg-brand-secondary text-text-inverse px-6 flex gap-2 items-center"
             >
               {isMapView ? (
                 <>

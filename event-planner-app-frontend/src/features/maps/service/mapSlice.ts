@@ -56,7 +56,9 @@ export const mapSlice = createSlice({
     setRoutes: (state, action: PayloadAction<Route[] | null>) => {
       state.currentRouteIndex = 0;
       state.routes = action.payload;
-      state.isMapView = true;
+      if (action.payload) {
+        state.isMapView = true;
+      }
     },
     updateRouteMode: (
       state,
