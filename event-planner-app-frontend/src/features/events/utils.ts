@@ -49,9 +49,9 @@ export const getDayColor = (day: number) => {
     "#d65d0e", // Sandstone
     "#0891b2", // Arctic
     "#6c390a", // Chocolate
-    "#ab825b", // Timber
-    "#27dd22", // Radioactive
-    "#d4af37", // Midnight Gold
+    "#8b828b", // Timber
+    "#27ad22", // Radioactive
+    "#d48f07", // Midnight Gold
   ];
 
   if (day >= 0 && day < brandPrimaries.length) {
@@ -62,5 +62,5 @@ export const getDayColor = (day: number) => {
   const goldenRatioConjugate = 0.618033988749895;
   const hue = (day * goldenRatioConjugate * 360) % 360;
 
-  return `hsl(${hue}, 75%, 55%)`;
+  return `hsl(${hue}, 95%, 35%)`;
 };

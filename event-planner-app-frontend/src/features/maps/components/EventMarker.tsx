@@ -21,7 +21,7 @@ const EventMarker = memo(
     const [markerRef, marker] = useAdvancedMarkerRef();
     const [showInfo, setShowInfo] = useState(false);
 
-    const eventColor = getDayColor(day);
+    const eventColor = getDayColor(day - 1);
 
     return (
       <AdvancedMarker
