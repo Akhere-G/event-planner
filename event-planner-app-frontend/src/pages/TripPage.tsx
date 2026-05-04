@@ -63,7 +63,7 @@ export default function TripPage() {
               {isMapView ? (
                 <>
                   <List size={20} />
-                  <span>Itinerary view</span>
+                  <span>Plans view</span>
                 </>
               ) : (
                 <>

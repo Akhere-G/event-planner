@@ -19,9 +19,9 @@ export default function ConfirmModal({
   confirmButtonProps?: React.ButtonHTMLAttributes<HTMLButtonElement>;
 }) {
   return (
-    <div className="backdrop fixed w-screen z-400 " onClick={closeModal}>
+    <div className="backdrop fixed w-screen z-50 " onClick={closeModal}>
       <div
-        className="modal flex items-center justify-center w-fit"
+        className="modal flex items-center justify-center w-fit max-w-15/16"
         onClick={(e) => e.stopPropagation()}
       >
         <div
