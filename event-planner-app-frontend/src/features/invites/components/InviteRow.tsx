@@ -13,8 +13,10 @@ import useMenu from "../../../hooks/useMenu";
 export default function InviteRow({ invite }: { invite: Invite }) {
   const params = useMatch("/trips/:tripId")?.params;
   const tripId = Number(params?.tripId);
-  const [createInvite] = useCreateInviteMutation();
-  const [revokeInvite] = useRevokeInviteMutation();
+  const [createInvite, { isLoading: createIsLoading }] =
+    useCreateInviteMutation();
+  const [revokeInvite, { isLoading: revokeIsLoading }] =
+    useRevokeInviteMutation();
 
   const { isMenuOpen, closeMenu, toggleMenu, menuContainerRef, openButtonRef } =
     useMenu();
@@ -22,7 +24,7 @@ export default function InviteRow({ invite }: { invite: Invite }) {
 
   async function reinvite() {
     try {
-      createInvite({
+      await createInvite({
         tripId,
         invite: { email: email.toLowerCase(), role },
       }).unwrap();
@@ -36,7 +38,7 @@ export default function InviteRow({ invite }: { invite: Invite }) {
 
   async function revoke() {
     try {
-      revokeInvite({ tripId, inviteId: invite.id }).unwrap();
+      await revokeInvite({ tripId, inviteId: invite.id }).unwrap();
       closeMenu();
     } catch (err) {
       if (isFetchBaseQueryError(err)) {
@@ -94,6 +96,7 @@ export default function InviteRow({ invite }: { invite: Invite }) {
           >
             {canResend && (
               <button
+                disabled={createIsLoading}
                 onClick={() => {
                   reinvite();
                 }}
@@ -104,6 +107,7 @@ export default function InviteRow({ invite }: { invite: Invite }) {
             )}
             {canRevoke && (
               <button
+                disabled={revokeIsLoading}
                 onClick={() => {
                   revoke();
                 }}
