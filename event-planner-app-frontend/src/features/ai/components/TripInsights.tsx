@@ -1,21 +1,23 @@
 import { RefreshCcw, Sparkles, X } from "lucide-react";
 import { useState } from "react";
 import type { Trip } from "../../trips/types";
-import { useGetTripInsightsQuery } from "../services/aiApiSlice";
+import { useLazyGetTripInsightsQuery } from "../services/aiApiSlice";
 import { StateGate } from "../../../components";
 import TripInsightCard from "./TripInsightCard";
 export default function TripInsights({ trip }: { trip: Trip }) {
-  const { data, refetch, isLoading, isFetching, isError } =
-    useGetTripInsightsQuery({
-      tripId: trip.id,
-    });
+  const [fetchInsights, { data, isLoading, isFetching, isError }] =
+    useLazyGetTripInsightsQuery();
   const [expanded, setExpanded] = useState(false);
 
+  const openInsights = () => {
+    setExpanded(true);
+    fetchInsights({
+      tripId: trip.id,
+    });
+  };
+
+  const isDisabled = isLoading || isFetching;
   return (
-    /* 
-      We apply a delay to the width transition only when unexpanding (closing).
-      This keeps the container full-width until the height has finished collapsing.
-    */
     <div
       className={`transition-all duration-500 ease-in-out flex flex-col
         ${expanded ? "w-full mb-4" : "w-10 mb-0"}`}
@@ -31,10 +33,14 @@ export default function TripInsights({ trip }: { trip: Trip }) {
           <header className="flex justify-between items-center w-full mb-4">
             <h3 className="flex gap-2 items-center title text-text-canvas whitespace-nowrap">
               <Sparkles className="text-brand-primary" size={20} />
-              Insights
+              Tips
             </h3>
             <div className="flex gap-2">
-              <button onClick={() => refetch()} className="btn-secondary p-2">
+              <button
+                onClick={openInsights}
+                disabled={isDisabled}
+                className="btn-secondary p-2"
+              >
                 <RefreshCcw
                   size={20}
                   className={isFetching ? "animate-spin" : ""}
@@ -65,7 +71,7 @@ export default function TripInsights({ trip }: { trip: Trip }) {
 
       {!expanded && (
         <button
-          onClick={() => setExpanded(true)}
+          onClick={openInsights}
           className="btn-primary rounded-full w-10 h-10 shadow-md flex items-center justify-center p-0 flex-shrink-0"
         >
           {isLoading ? (

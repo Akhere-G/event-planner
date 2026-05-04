@@ -264,7 +264,7 @@ export default function TripCalendar({ trip }: { trip: Trip }) {
           })}
           eventPropGetter={(event: any) => ({
             className: event.isSummary
-              ? "!bg-transparent !border-none !shadow-none p-0 m-0 hover:!bg-transparent" // Hide container for dots
+              ? "!bg-transparent !border-none !shadow-none p-0 m-0 hover:!bg-transparent !pointer-events-none" // Hide container for dots
               : "!border-none !shadow-sm !rounded-md !px-1 !py-1 !text-xs !font-medium transition-all !bg-brand-primary !text-text-inverse",
           })}
           components={{
@@ -280,8 +280,13 @@ export default function TripCalendar({ trip }: { trip: Trip }) {
             event: ({ title, event }: any) => {
               if (event.isSummary) {
                 return (
-                  <div className="flex justify-center items-center w-full mt-1 pointer-events-none">
-                    <span className="h-2 w-2 rounded-full bg-brand-primary shadow-sm" />
+                  <div className="flex flex-wrap justify-center items-center gap-0.5 w-full mt-1 pointer-events-none">
+                    {new Array(event.resource).fill(1).map((_, i) => (
+                      <span
+                        key={i}
+                        className="h-2 w-2 rounded-full bg-brand-primary shadow-sm"
+                      />
+                    ))}
                   </div>
                 );
               }

@@ -40,6 +40,7 @@ export const aiApiSlice = apiSlice.injectEndpoints({
 });
 export const {
   useGetTripInsightsQuery,
+  useLazyGetTripInsightsQuery,
   useSuggestEventsMutation,
   useOptimiseEventsMutation,
 } = aiApiSlice;
