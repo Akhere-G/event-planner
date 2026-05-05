@@ -79,10 +79,10 @@ export default function TripSummary({
 
         <button
           ref={openButtonRef}
-          className="-mt-2 -mr-2 p-2 hover:bg-white/20"
+          className="-mt-2 -mr-4 p-2 btn bg"
           onClick={handleSettings}
         >
-          <MoreVertical size={20} className="text-white" />
+          <MoreVertical size={20} />
         </button>
       </div>
       <div className="flex justify-between">
