@@ -11,7 +11,7 @@ const getHours = () => {
 
 const getMinutes = () => {
   const hours: number[] = [];
-  for (let i = 0; i < 60; i++) {
+  for (let i = 0; i < 60; i = i + 5) {
     hours.push(i);
   }
 
