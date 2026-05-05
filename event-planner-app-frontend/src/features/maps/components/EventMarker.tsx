@@ -61,7 +61,7 @@ const EventMarker = memo(
         <Pin
           background={eventColor}
           glyphText={isRoutePin ? undefined : String(day)}
-          glyphSrc={isRoutePin ? "/public/map_to_icon.svg" : undefined}
+          glyphSrc={isRoutePin ? "/map_to_icon.svg" : undefined}
           glyphColor={isRouteEnd ? undefined : "var(--color-text-inverse)"}
           borderColor={"var(--color-surface-border)"}
           scale={selected ? 1.5 : 1}
