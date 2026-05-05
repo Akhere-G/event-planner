@@ -197,14 +197,10 @@ export default function TripMap({ trip }: { trip: Trip }) {
       </div>
       <ZoomButtons userCoords={userCoords} />
       {selectedEvent && (
-        <div
-          className={` absolute bottom-0
-            px-2 pb-5
-          `}
-        >
+        <div className={`z-2 absolute bottom-0 px-2 md:px-4 pb-5 w-full`}>
           <button
             onClick={() => dispatch(setSelectedEvent(null))}
-            className="absolute btn-secondary p-1 -right-2 -top-4"
+            className="absolute btn-secondary p-1 right-0 -top-4 md:-top-4"
           >
             <X size={20} />
           </button>
