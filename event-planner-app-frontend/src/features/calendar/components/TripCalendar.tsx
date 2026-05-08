@@ -281,9 +281,32 @@ export default function TripCalendar({ trip }: { trip: Trip }) {
 
   return (
     <div className="md:w-[calc(50vw-3rem)]">
-      <div className="card h-120 lg:h-150">
+      <div className="card px-0 md:p-4 h-120 lg:h-150">
         <DnDCalendar
           localizer={localizer}
+          formats={{
+            dayFormat: (date: Date, culture?: string, localizer?: any) =>
+              isMobile
+                ? localizer.format(date, "dd", culture)
+                : localizer.format(date, "EEE dd/MM", culture),
+            timeGutterFormat: (
+              date: Date,
+              culture?: string,
+              localizer?: any,
+            ) =>
+              isMobile
+                ? localizer.format(date, "HH", culture)
+                : localizer.format(date, "p", culture),
+
+            eventTimeRangeFormat: (
+              { start, end }: any,
+              culture?: string,
+              localizer?: any,
+            ) =>
+              isMobile
+                ? `${localizer.format(start, "H", culture)} - ${localizer.format(end, "H", culture)}`
+                : `${localizer.format(start, "p", culture)} - ${localizer.format(end, "p", culture)}`,
+          }}
           events={events}
           date={currentDate}
           view={view}
@@ -320,7 +343,6 @@ export default function TripCalendar({ trip }: { trip: Trip }) {
                 setCurrentDate={setCurrentDate}
                 view={view}
                 setView={setView}
-                isMobile={isMobile}
               />
             ),
             event: ({ title, event }: any) => {

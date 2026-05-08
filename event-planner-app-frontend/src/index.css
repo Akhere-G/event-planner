@@ -515,29 +515,46 @@
   
 }
 
-  .rbc-show-more {
-    @apply  text-brand-accent! font-semibold! text-xs! bg-transparent! hover:underline! ;
-  }
+.rbc-show-more {
+  @apply  text-brand-accent! font-semibold! text-xs! bg-transparent! hover:underline! ;
+}
 
-  .rbc-overlay {
-    @apply bg-surface! border! border-slate-200! shadow-xl! rounded-lg! p-2! z-50! min-w-fit! w-[30%]!;
-  }
+.rbc-overlay {
+  @apply bg-surface! border! border-slate-200! shadow-xl! rounded-lg! p-2! z-50! min-w-fit! w-[30%]!;
+}
 
-  .rbc-overlay-header {
-    @apply text-text-secondary! text-sm! font-bold! border-b! border-slate-100! dark:border-slate-800! mb-2! mt-0!  uppercase! tracking-tight!;
-  }
+.rbc-overlay-header {
+  @apply text-text-secondary! text-sm! font-bold! border-b! border-slate-100! dark:border-slate-800! mb-2! mt-0!  uppercase! tracking-tight!;
+}
 
-  .rbc-overlay .rbc-event {
-    @apply mb-2! last:mb-0!;
-  }
+.rbc-overlay .rbc-event {
+  @apply mb-2! last:mb-0!;
+}
 
-  /* 5. Month View specific tweaks */
-  .rbc-month-view, .rbc-time-view {
-    @apply   rounded-md! overflow-hidden;
-  }
+/* 5. Month View specific tweaks */
+.rbc-month-view, .rbc-time-view {
+  @apply   rounded-md! overflow-hidden;
+}
 
 
-  .rbc-header {
-    @apply py-2! text-text-secondary font-bold! text-xs! uppercase;
-  }
+.rbc-header {
+  @apply py-2! text-text-secondary font-bold! text-xs! uppercase;
+}
 
+.rbc-time-slot {
+  @apply text-xs md:text-base flex justify-center min-h-6; 
+}
+
+.rbc-label {
+  @apply p-0.5! 
+}
+
+
+.rbc-events-container {
+  @apply mr-0!
+}
+
+.rbc-header {
+  @apply  flex justify-center items-center; 
+
+}
