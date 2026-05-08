@@ -230,6 +230,51 @@ export default function TripCalendar({ trip }: { trip: Trip }) {
     }
   };
 
+  const onEventResize = async ({
+    event,
+    start,
+    end,
+  }: EventInteractionArgs<CalendarEvent>) => {
+    const formattedStart = format(start, "yyyy-MM-dd HH:mm:ss");
+    const formattedEnd = format(end, "yyyy-MM-dd HH:mm:ss");
+    const eventItem = event.resource as Event;
+
+    if (isBefore(start, trip.startDate)) {
+      return toast.error("Cannot move event to before the trip start date!");
+    }
+
+    if (isAfter(end, trip.endDate)) {
+      return toast.error("Cannot move event to after the trip end date!");
+    }
+
+    if (!isSameDay(start, end)) {
+      return toast.error("Events must start and end on the same day!");
+    }
+
+    const prevEvents = tripEvents;
+    try {
+      setTripEvents(
+        tripEvents.map((e) =>
+          e.id === eventItem.id
+            ? {
+                ...e,
+                startAt: formattedStart,
+                endAt: formattedEnd,
+              }
+            : e,
+        ),
+      );
+
+      await handleEdit(eventItem.id, {
+        startAt: formattedStart,
+        endAt: formattedEnd,
+      });
+    } catch {
+      toast.error("Could not edit event.");
+      setTripEvents(prevEvents);
+    }
+  };
+
   const eventsForSelectedDay = tripEvents.filter((t) =>
     isSameDay(new Date(t.startAt), currentDate),
   );
@@ -246,6 +291,7 @@ export default function TripCalendar({ trip }: { trip: Trip }) {
           popup={!isMobile}
           selectable
           onEventDrop={onEventDrop}
+          onEventResize={onEventResize}
           onSelectEvent={handleEventClick}
           onNavigate={setCurrentDate}
           onDropFromOutside={onDropFromOutside}
