@@ -36,6 +36,7 @@ import {
   ZoomButtons,
 } from "../../maps/components";
 import { EventCard } from "../../events/components";
+import { toast } from "sonner";
 
 const permissionEnum = {
   GRANTED: "GRANTED",
@@ -92,6 +93,12 @@ export default function TripMap({ trip }: { trip: Trip }) {
       },
       (error) => {
         console.error(error);
+        switch (error.code) {
+          case error.PERMISSION_DENIED:
+            return toast.error("Location denied!");
+          case error.POSITION_UNAVAILABLE:
+            return toast.error("Could not get location!");
+        }
         setPermission(permissionEnum.DENIED);
       },
       { enableHighAccuracy: true },
