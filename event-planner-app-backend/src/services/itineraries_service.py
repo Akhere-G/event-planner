@@ -74,7 +74,7 @@ def get_itinerary_count(user_id):
     return db.session.execute(stmt).scalar()
 
 
-def get_itinerary_memberships(user_id: int, limit: int = None, offset: int = 0):
+def get_itinerary_memberships(user_id: int, limit: int | None = None, offset: int = 0):
     stmt = (
         select(ItineraryUser)
         .where(ItineraryUser.user_id == user_id)
@@ -112,18 +112,29 @@ def get_itinerary(itinerary_id: int):
     return itinerary
 
 
-def get_itineraries(user_id: int):
+def get_itineraries(user_id: int, limit: int | None = None, offset: int = 0):
     stmt = (
-        select(Itinerary)
+        select(Itinerary, ItineraryUser.role)
         .join(Itinerary.user_memberships)
         .where(ItineraryUser.user_id == user_id)
+        .order_by(Itinerary.start_date)
+        .limit(limit)
+        .offset(offset)
         .options(
             contains_eager(Itinerary.user_memberships).selectinload(ItineraryUser.user),
             selectinload(Itinerary.events),
         )
     )
 
-    return db.session.execute(stmt).scalars().all()
+    results = db.session.execute(stmt).unique().all()
+
+    return [
+        {
+            "itinerary": row.Itinerary, 
+            "role": row.role
+        } 
+        for row in results
+    ]
 
 
 def create_itinerary(user_id: int, data: dict):
