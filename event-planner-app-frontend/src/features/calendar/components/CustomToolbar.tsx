@@ -6,7 +6,6 @@ import {
   startOfWeek,
 } from "date-fns";
 import { CalendarIcon, ChevronLeft, ChevronRight } from "lucide-react";
-import { useEffect } from "react";
 import { Views, type View } from "react-big-calendar";
 import { FormInput } from "../../../components";
 
@@ -15,19 +14,13 @@ interface CustomToolbarInterface {
   currentDate: Date;
   setCurrentDate: (newDate: Date) => void;
   setView: (view: View) => void;
-  isMobile: boolean;
 }
 export default function CustomToolbar({
   view,
   currentDate,
   setCurrentDate,
   setView,
-  isMobile,
 }: CustomToolbarInterface) {
-  useEffect(() => {
-    if (view === Views.WEEK && isMobile) setView(Views.DAY);
-  }, [view]);
-
   const goToBack = () => {
     const m = new Date(currentDate);
     if (view === Views.MONTH) {
@@ -67,7 +60,7 @@ export default function CustomToolbar({
   }
 
   return (
-    <div className="flex justify-between items-center mb-4 flex-col gap-2 lg:flex-row">
+    <div className="flex flex-wrap justify-between items-center mb-4 flex-col gap-2 lg:flex-row">
       <div className="flex items-center gap-2">
         <CalendarIcon className="text-brand-primary" size={20} />
         <h2 className="text-lg font-bold text-text-primary">{dateStr}</h2>
@@ -82,7 +75,7 @@ export default function CustomToolbar({
             { value: Views.MONTH, name: "Month" },
             { value: Views.WEEK, name: "Week" },
             { value: Views.DAY, name: "Day" },
-          ].filter((v) => v.value !== Views.WEEK || !isMobile)}
+          ]}
         />
 
         <div className="flex h-11.5 px-1 rounded-lg   text-text-inverse items-center">
