@@ -1,6 +1,6 @@
 from flask import Blueprint, request
 from ..services.itineraries_service import (
-    get_itinerary_memberships,
+    get_itineraries,
     get_itinerary_membership,
     create_itinerary,
     update_itinerary,
@@ -28,11 +28,11 @@ def get_itineraries_route(user_id):
     offset = request.args.get("offset", default=0, type=int)
 
     count = get_itinerary_count(user_id)
-    result = get_itinerary_memberships(user_id, limit, offset)
+    result = get_itineraries(user_id, limit, offset)
     itineraries = schema.dump(result)
 
     has_more = False
-    if limit is not None:
+    if limit is not None and count is not None:
         has_more = (offset + len(itineraries)) < count
 
     return api_response(
