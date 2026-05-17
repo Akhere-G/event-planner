@@ -22,5 +22,5 @@ export default function CalendarCard({
       </div>
     );
   }
-  return <div className="text-[0.7rem]  ">{title}</div>;
+  return <div className="text-[0.7rem]">{title}</div>;
 }

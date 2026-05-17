@@ -490,6 +490,11 @@
     @apply pl-2! pr-2! pb-2!
   }
 
+  .gm-style-iw * {
+    @apply bg-surface! text-text-primary border-0! border-surface-border!
+  }
+
+
   .gm-style-iw-c, .gm-title, .address, .address-line, .view-link, .view-link *, .gm-style-iw-d   {
     @apply bg-surface! overflow-hidden!
   }
