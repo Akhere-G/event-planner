@@ -1,5 +1,5 @@
-import type { Day } from "../types";
-import { Accordion } from "../../../components";
+import type { AutofillConfig, Day } from "../types";
+import { Accordion, ConfirmModal } from "../../../components";
 import { formatDateRelative } from "../../../utils/dateFormattors";
 import EventList from "./EventList";
 import AddEventForm from "./AddEventForm";
@@ -15,6 +15,7 @@ import { useDispatch } from "react-redux";
 import { setRoutes } from "../../maps/service/mapSlice";
 import type { Route } from "../../maps/types";
 import useMenu from "../../../hooks/useMenu";
+import AutofillDayForm from "./AutoFillDayForm";
 
 export default function DayCard({
   defaultIsOpen,
@@ -37,9 +38,23 @@ export default function DayCard({
     closeOnClick: true,
   });
 
-  const getSuggestions = async () => {
+  const {
+    openButtonRef: openFillButtonRef,
+    isMenuOpen: isFillMenuOpen,
+    openMenu: openFillMenu,
+    menuContainerRef: fillMenuContainerRef,
+    closeMenu: closeFillMenu,
+  } = useMenu({
+    closeOnClick: true,
+  });
+
+  interface Autofill extends AutofillConfig {
+    date: string;
+  }
+  const getSuggestions = async (autoFillData: Autofill) => {
     try {
-      await suggestEvents({ tripId, date: day.date }).unwrap();
+      await suggestEvents({ tripId, body: autoFillData }).unwrap();
+      closeFillMenu();
     } catch {
       toast.error("Could not get suggestions.");
     }
@@ -116,9 +131,13 @@ export default function DayCard({
           </button>
 
           <button
-            onClick={getSuggestions}
+            onClick={(e) => {
+              openFillMenu();
+              e.stopPropagation();
+            }}
             disabled={isSuggestBtnDisabled}
             className="flex gap-2 btn-menu"
+            ref={openFillButtonRef}
           >
             {isSuggestBtnDisabled ? (
               <LoaderCircle className="animate-spin" size={18} />
@@ -141,6 +160,32 @@ export default function DayCard({
           </button>
         </div>
       )}
+
+      {isFillMenuOpen && (
+        <ConfirmModal
+          closeModal={closeFillMenu}
+          title={`Fill Day ${day.day}`}
+          confirmText="Fill"
+          modalRef={fillMenuContainerRef}
+          confirmAction={() => {}}
+          confirmBtnClasses="bg-brand-primary"
+          confirmButtonProps={{
+            type: "submit",
+            form: "autofill-itinerary-form",
+            disabled: isSuggestLoading,
+          }}
+        >
+          <div className="p-4">
+            <AutofillDayForm
+              onSubmit={(autoFillData) =>
+                getSuggestions({ ...autoFillData, date: day.date })
+              }
+            />
+          </div>
+        </ConfirmModal>
+      )}
+
+      {isFillMenuOpen && <p>Hello</p>}
     </div>
   );
 }

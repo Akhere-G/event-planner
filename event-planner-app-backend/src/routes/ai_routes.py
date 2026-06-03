@@ -20,7 +20,7 @@ ai_bp = Blueprint("ai", __name__)
 
 @ai_bp.route("/insights/<int:itinerary_id>")
 @login_required
-def get_insights_route(user_id: str = None, itinerary_id: str = None):
+def get_insights_route(user_id: int, itinerary_id: int):
     try:
         is_authorised(
             user_id, itinerary_id, [UserRole.ADMIN, UserRole.EDITOR, UserRole.VIEWER]
@@ -38,10 +38,16 @@ def get_insights_route(user_id: str = None, itinerary_id: str = None):
 
 @ai_bp.route("/suggest-events/<int:itinerary_id>", methods=["POST"])
 @login_required
-def get_event_suggestions_route(user_id: str = None, itinerary_id: str = None):
-    date = request.json.get("date")
+def get_event_suggestions_route(user_id: int, itinerary_id: int):
     schema = EventSchema(many=True)
 
+    date = request.json.get("date")
+    pace = request.json.get("pace", "balanced")
+    companions = request.json.get("companions", "couple")
+    transport = request.json.get("transport", "public_transport")
+    interests = request.json.get("interests")
+
+    print(request.args.get("date"))
     if not date:
         return api_response(success=False, error="Date is required.", status_code=400)
     try:
@@ -49,7 +55,14 @@ def get_event_suggestions_route(user_id: str = None, itinerary_id: str = None):
         is_authorised(
             user_id, itinerary_id, [UserRole.ADMIN, UserRole.EDITOR, UserRole.VIEWER]
         )
-        suggestions = get_event_suggestions(itinerary_id, event_date)
+        suggestions = get_event_suggestions(
+            itinerary_id,
+            event_date,
+            pace=pace,
+            companions=companions,
+            transport=transport,
+            interests=interests,
+        )
         validated_suggestions = schema.load(suggestions)
         create_events(itinerary_id, validated_suggestions, user_id)
         return api_response(
@@ -75,7 +88,7 @@ def get_event_suggestions_route(user_id: str = None, itinerary_id: str = None):
 
 @ai_bp.route("/optimise-events/<int:itinerary_id>", methods=["POST"])
 @login_required
-def optimise_events_route(user_id: str = None, itinerary_id: str = None):
+def optimise_events_route(user_id: int, itinerary_id: int):
     date = request.json.get("date")
     schema = EventSchema(many=True)
 

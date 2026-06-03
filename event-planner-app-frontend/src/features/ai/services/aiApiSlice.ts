@@ -1,4 +1,5 @@
 import { apiSlice } from "../../api/apiSlice";
+import type { AutofillConfig } from "../../events/types";
 import type { TripInsight } from "../types";
 
 export const aiApiSlice = apiSlice.injectEndpoints({
@@ -10,12 +11,12 @@ export const aiApiSlice = apiSlice.injectEndpoints({
     ),
     suggestEvents: builder.mutation<
       { data: Event[] },
-      { tripId: number; date: string }
+      { tripId: number; body: AutofillConfig }
     >({
-      query: ({ tripId, date }) => ({
+      query: ({ tripId, body }) => ({
         url: `/ai/suggest-events/${tripId}`,
         method: "POST",
-        body: { date },
+        body,
       }),
       invalidatesTags: (_, __, args) => [
         { type: "Trips", id: "LIST" },

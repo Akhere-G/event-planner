@@ -5,6 +5,7 @@ from groq import Groq
 from datetime import datetime
 import os
 import googlemaps
+from typing import List
 
 
 def format_json(raw_json):
@@ -75,30 +76,56 @@ def get_insights(itinerary_id):
         return []
 
 
-def get_event_suggestions(itinerary_id, date: datetime):
+"string (Optional but use it to provide important context and tips)"
+
+
+def get_event_suggestions(
+    itinerary_id,
+    date: datetime,
+    pace: str = "balanced",
+    companions: str = "couple",
+    transport: str = "public_transport",
+    interests: List[str] | None = None,
+):
     itinerary = get_itinerary(itinerary_id)
+    interests_str = (
+        ", ".join(interests) if interests else "General sightseeing and food"
+    )
 
     booked_events = "\n".join([f"- {event.name}" for event in itinerary.events])
     prompt = f"""
-      Suggest 3-4 restaurants and activities in {itinerary.destination} on {date.strftime("%Y-%m-%d")}.
-      
-      CONTEXT:
-      Currently booked: {booked_events}
-      
-      REQUIREMENTS:
-      1. Provide real-world venues located specifically in {itinerary.destination}.
-      2. For coordinates, ensure they are precise for the specific venue.
-      3. Respond ONLY with a JSON array of objects.
+      You are an expert travel planner API. Suggest a perfectly sequenced itinerary segment of 3-4 real-world restaurants and activities in {itinerary.destination} for the date {date.strftime("%Y-%m-%d")}.
 
-      FORMAT:
-      {{
-        "name": "string",
-        "description": "string (Optional but use it to provide important context and tips)" ,
-        "address": "full street address, {itinerary.destination}",
-        "start_at": "ISO string,
-        "end_at": "ISO string",
-        "category": "string"
-      }}
+      CRITICAL USER PROFILES & PREFERENCES:
+      - Preferred Pace: {pace}. 
+        * If 'relaxed': provide 2-3 items max with generous 2+ hour gaps.
+        * If 'balanced': provide 3-4 items with standard 1-hour transitions.
+        * If 'packed': provide 4+ tightly scheduled items.
+      - Companion Dynamic: {companions}. Ensure all suggested venues, ambiance, and age-appropriateness strictly match this group structure.
+      - Mode of Transit: {transport}. Only pick clusters of locations that are logistically realistic to travel between using this method.
+      - Core Focus Areas: {interests_str}. Prioritize real venues that map directly to these interests.
+
+      CONTEXT (DO NOT DUPLICATE THESE):
+      The user already has the following items scheduled for this trip. Do not suggest them, and ensure your recommendations do not conflict with their timings:
+      {booked_events}
+      
+      STRICT SYSTEM REQUIREMENTS:
+      1. Location Accuracy: Every venue must be a real, currently open establishment physically located within {itinerary.destination}.
+      2. No placeholders: Do not generate fictional places, approximate addresses, or placeholder text.
+      3. Valid ISO Timestamps: Construct exact 'start_at' and 'end_at' strings matching the date "{date.strftime("%Y-%m-%d")}" (e.g., "{date.strftime("%Y-%m-%d")}T14:30:00Z"). Arrange them chronologically without overlaps.
+      4. Output Rule: Return ONLY a raw JSON array of objects matching the schema below. Do not include markdown code blocks, backticks (```json), or any conversational pre/post-text.
+
+      JSON SCHEMA FORMAT:
+      [
+        {{
+          "name": "Exact Official Venue Name",
+          "description": "A compelling description explaining what the activity is, context and local insider tips.",
+          "address": "Full street address, City, Country",
+          "start_at": "YYYY-MM-DDTHH:MM:SSZ",
+          "end_at": "YYYY-MM-DDTHH:MM:SSZ",
+          "category": "String that represents the type of activity"
+        }}
+      ]
     """
 
     try:

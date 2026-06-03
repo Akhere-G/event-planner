@@ -10,3 +10,4 @@ export { default as TimePicker } from "./TimePicker";
 export { default as StateGate } from "./StateGate";
 export { default as LocationInput } from "./LocationInput";
 export { default as ConfirmModal } from "./ConfirmModal";
+export { default as ToggleButton } from "./ToggleButton";
