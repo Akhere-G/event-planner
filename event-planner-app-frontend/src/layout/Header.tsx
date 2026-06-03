@@ -104,8 +104,8 @@ export default function Header({ links }: HeaderProps) {
       {/* Mobile Sidebar */}
       <div
         ref={sidebarContainerRef}
-        className={`fixed  z-50 h-full right-0 bg-surface shadow-md transition-transform
-        md:hidden flex flex-col items-start  gap-4 text-start
+        className={`fixed z-50 h-full right-0 bg-surface  shadow-md transition-transform
+        md:hidden flex flex-col items-start gap-4 text-start
         top-0
         ${isSidebarOpen ? "translate-x-0" : "translate-x-full"}`}
       >
@@ -136,7 +136,7 @@ export default function Header({ links }: HeaderProps) {
             {isAuthenticated && (
               <Link
                 to="/settings"
-                className="block py-2 pl-2 text-left hover:bg-surface-muted"
+                className="block py-2 pl-2 text-left hover:bg-surface-muted rounded-md"
               >
                 Settings
               </Link>
@@ -144,12 +144,10 @@ export default function Header({ links }: HeaderProps) {
           </div>
           <button
             onClick={() => dispatch(toggleDarkMode())}
-            className="mx-px flex text-sm items-center gap-2 py-2 pl-2 w-full justify-end hover:bg-surface-muted rounded-none"
+            className=" py-2 pl-2 text-left hover:bg-surface-muted rounded-md flex items-center gap-2 mx-1 hover:brightness-95"
           >
-            <span className="w-19">
-              {darkMode ? "Light Mode" : "Dark Mode"}
-            </span>
-            {darkMode ? <Sun size={16} /> : <Moon size={16} />}
+            <span className=" ">{darkMode ? "Light Mode" : "Dark Mode"}</span>
+            {darkMode ? <Sun size={18} /> : <Moon size={18} />}
           </button>
           {isAuthenticated && (
             <button
@@ -158,7 +156,7 @@ export default function Header({ links }: HeaderProps) {
                 dispatch(logOut());
                 window.location.reload();
               }}
-              className="mx-px btn-menu py-2 pl-3 w-full text-left text-sm"
+              className="block py-2 pl-2 text-left hover:bg-surface-muted rounded-md w-full mx-1 hover:brightness-95"
             >
               Logout
             </button>
