@@ -16,3 +16,10 @@ export type Day = {
   day: number;
   show: boolean;
 };
+
+export interface AutofillConfig {
+  pace: string;
+  companions: string;
+  transport: string;
+  interests: string[];
+}

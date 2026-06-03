@@ -8,6 +8,7 @@ export default function ConfirmModal({
   confirmAction,
   confirmBtnClasses = "btn-error",
   modalRef,
+  children,
   confirmButtonProps,
 }: {
   closeModal: () => void;
@@ -16,6 +17,7 @@ export default function ConfirmModal({
   confirmAction: () => void;
   confirmBtnClasses?: string;
   modalRef?: Ref<HTMLDivElement>;
+  children?: React.ReactNode;
   confirmButtonProps?: React.ButtonHTMLAttributes<HTMLButtonElement>;
 }) {
   return (
@@ -24,7 +26,7 @@ export default function ConfirmModal({
       onClick={closeModal}
     >
       <div
-        className="modal flex items-center justify-center w-fit max-w-15/16"
+        className="modal flex items-center justify-center w-fit max-w-15/16 max-h-[90vh] overflow-scroll"
         onClick={(e) => e.stopPropagation()}
       >
         <div
@@ -41,6 +43,8 @@ export default function ConfirmModal({
                 <X size={20} />
               </button>
             </div>
+
+            <div className="overflow-scroll max-h-[70vh]">{children}</div>
 
             <div className="p-4 mt-4 flex justify-end gap-2">
               <button onClick={closeModal} className="btn-secondary">
