@@ -6,11 +6,14 @@ from ..services.itineraries_service import (
     update_itinerary,
     delete_itinerary,
     is_authorised,
+    join_itinerary,
     get_itinerary_count,
 )
 from ..exceptions import (
     ItineraryDoesNotExistError,
     UserNotAuthorisedError,
+    UserDoesNotExistError,
+    UserAlreadyExistsError,
 )
 from ..schemas.itinerary_schema import ItinerarySchema, ItineraryWithRoleSchema
 from ..utils.format_response import api_response

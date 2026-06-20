@@ -1,12 +1,51 @@
 from ..extensions import db
-from ..models import Itinerary, ItineraryUser, UserRole, User
+from ..models import Itinerary, ItineraryUser, UserRole, User, Invite, InvitationStatus
 from sqlalchemy import select, func
 from ..exceptions import (
     UserNotAuthorisedError,
     ItineraryDoesNotExistError,
     UserDoesNotExistError,
+    UserAlreadyExistsError,
 )
 from sqlalchemy.orm import selectinload, contains_eager
+from datetime import datetime, timezone, timedelta
+
+
+def get_invite(itinerary_id: int, email: str):
+    stmt = (
+        select(Invite)
+        .where(Invite.email == email)
+        .where(Invite.itinerary_id == itinerary_id)
+    )
+
+    return db.session.execute(stmt).scalar_one_or_none()
+
+
+def create_invite(data: dict):
+    membership = get_membership_by_email(data["email"], data["itinerary_id"])
+
+    if membership:
+        raise UserAlreadyExistsError("This user is already part of this itinerary!")
+
+    existing_invite = get_invite(data["itinerary_id"], data["email"])
+    invite = None
+
+    if existing_invite:
+        if existing_invite.status == InvitationStatus.ACCEPTED.value:
+            raise UserAlreadyExistsError("User has already accepted this invite.")
+
+        existing_invite.status = InvitationStatus.PENDING.value
+        existing_invite.role = data.get("role") or existing_invite.role
+        existing_invite.expires_at = datetime.now(timezone.utc) + timedelta(days=7)
+        invite = existing_invite
+        invite.updated_by_id = data["updated_by_id"]
+    else:
+        invite = Invite(**data)
+        db.session.add(invite)
+
+    db.session.commit()
+
+    return invite
 
 
 def get_membership_by_email(email: str, itinerary_id: int):
@@ -128,13 +167,7 @@ def get_itineraries(user_id: int, limit: int | None = None, offset: int = 0):
 
     results = db.session.execute(stmt).unique().all()
 
-    return [
-        {
-            "itinerary": row.Itinerary, 
-            "role": row.role
-        } 
-        for row in results
-    ]
+    return [{"itinerary": row.Itinerary, "role": row.role} for row in results]
 
 
 def create_itinerary(user_id: int, data: dict):
@@ -194,3 +227,40 @@ def delete_itinerary(itinerary_id: int):
 
     db.session.delete(itinerary)
     db.session.commit()
+
+
+def join_itinerary(user_id, token):
+    stmt = select(User).where(User.id == id)
+    user = db.session.execute(stmt).scalar_one_or_none()
+
+    if not user:
+        raise UserDoesNotExistError()
+    role = None
+
+    stmt = select(Itinerary).where(Itinerary.viewer_code == token)
+    itinerary = db.session.execute(stmt).scalar_one_or_none()
+
+    if itinerary is not None:
+        role = UserRole.VIEWER.value
+    else:
+        stmt = select(Itinerary).where(Itinerary.editor_code == token)
+        itinerary = db.session.execute(stmt).scalar_one_or_none()
+        if itinerary is not None:
+            role = UserRole.EDITOR.value
+        else:
+            stmt = select(Itinerary).where(Itinerary.admin_code == token)
+            itinerary = db.session.execute(stmt).scalar_one_or_none()
+            if itinerary is not None:
+                role = UserRole.ADMIN.value
+
+    if itinerary is not None:
+        return create_invite(
+            {
+                "email": user.email,
+                "itinerary_id": itinerary.id,
+                "role": role,
+                "updated_by_id": user_id,
+            }
+        )
+    else:
+        raise ItineraryDoesNotExistError()
