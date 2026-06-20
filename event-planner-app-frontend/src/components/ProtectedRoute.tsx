@@ -1,4 +1,4 @@
-import { Navigate } from "react-router";
+import { Navigate, useLocation } from "react-router";
 
 export default function ProtectedRoute({
   redirect,
@@ -9,6 +9,11 @@ export default function ProtectedRoute({
   redirectTo: string;
   children: React.ReactNode;
 }) {
-  if (redirect) return <Navigate to={redirectTo} />;
+  const location = useLocation();
+
+  if (redirect) {
+    console.log("redirecting from ", location.pathname, " to ", redirectTo);
+    return <Navigate to={redirectTo} state={{ from: location }} replace />;
+  }
   return children;
 }

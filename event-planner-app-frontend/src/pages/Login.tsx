@@ -9,7 +9,7 @@ import {
 import { isValidationError } from "../features/api/utils";
 import { useState } from "react";
 import { useDispatch } from "react-redux";
-import { Link, useNavigate } from "react-router";
+import { Link, useLocation, useNavigate } from "react-router";
 import { setCredentials } from "../features/auth/services/authSlice";
 import { toast } from "sonner";
 
@@ -22,6 +22,9 @@ export default function Login() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
+  const location = useLocation();
+  const from = location.state?.from?.pathname || "/";
+
   const onSubmit = async (formData: LoginSchema) => {
     setErrorMessage("");
     try {
@@ -31,7 +34,8 @@ export default function Login() {
       };
       const result = await loginUser(formattedFormData).unwrap();
       dispatch(setCredentials(result.data.userId));
-      navigate("/");
+
+      navigate(from, { replace: true });
     } catch (err) {
       if (isValidationError(err)) {
         const serverErrors = err.data.error;

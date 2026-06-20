@@ -1,18 +1,21 @@
 import { Navigate, Route, Routes } from "react-router";
+import { lazy, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import "react-tooltip/dist/react-tooltip.css";
+import { Toaster } from "sonner";
 
 import { useCheckUserQuery } from "./features/auth/services/authApiSlice";
-import { lazy, useEffect } from "react";
 import {
   selectIsAuthenticated,
   setCredentials,
 } from "./features/auth/services/authSlice";
-import { useDispatch, useSelector } from "react-redux";
-import { ProtectedRoute } from "./components";
-import { Header } from "./layout";
-import "react-tooltip/dist/react-tooltip.css";
-import ModalManager from "./features/modal/components/ModalManager";
 import { syncDOM } from "./features/theme/themeSlice";
-import { Toaster } from "sonner";
+
+import { Header } from "./layout";
+import ModalManager from "./features/modal/components/ModalManager";
+
+import RequireAuth from "./components/RequireAuth";
+import RequireGuest from "./components/RequireGuest";
 
 const AddTrip = lazy(() => import("./pages/AddTrip"));
 const JoinTrip = lazy(() => import("./pages/JoinTrip"));
@@ -34,105 +37,101 @@ function App() {
   }, [dispatch]);
 
   useEffect(() => {
-    if (data) {
+    if (data?.data?.userId) {
       dispatch(setCredentials(data.data.userId));
     }
   }, [data, dispatch]);
 
-  if (isLoading) {
-    return <></>;
-  }
+  const isAuth = isAuthenticated || !!data?.data?.userId;
 
   const links = [{ title: "About", url: "/about" }];
-  const authLinks = [
-    { title: "Trips", url: "/" },
-    { title: "Add Trip", url: "/addtrip" },
-    { title: "Invites", url: "/invites" },
-  ];
-
-  const unauthLinks = [
-    { title: "Login", url: "/login" },
-    { title: "Register", url: "/register" },
-  ];
-
-  const isAuth = isAuthenticated || !!data?.data.userId;
-
   if (isAuth) {
-    links.unshift(...authLinks);
+    links.unshift(
+      { title: "Trips", url: "/" },
+      { title: "Add Trip", url: "/addtrip" },
+      { title: "Invites", url: "/invites" },
+    );
   } else {
-    links.unshift(...unauthLinks);
+    links.unshift(
+      { title: "Login", url: "/login" },
+      { title: "Register", url: "/register" },
+    );
   }
+
   return (
     <>
       <Header links={links} />
       <Toaster position="top-right" richColors />
 
       <Routes>
-        <Route
-          path="/"
-          element={
-            <ProtectedRoute redirect={!isAuth} redirectTo="/login">
-              <Trips />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/addtrip"
-          element={
-            <ProtectedRoute redirect={!isAuth} redirectTo="/login">
-              <AddTrip />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/trips/:tripId"
-          element={
-            <ProtectedRoute redirect={!isAuth} redirectTo="/login">
-              <TripPage />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/invites"
-          element={
-            <ProtectedRoute redirect={!isAuth} redirectTo="/login">
-              <InvitesPage />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/settings"
-          element={
-            <ProtectedRoute redirect={!isAuth} redirectTo="/login">
-              <Settings />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/join/:token"
-          element={
-            <ProtectedRoute redirect={!isAuth} redirectTo="/login">
-              <JoinTrip />
-            </ProtectedRoute>
-          }
-        />
+        <Route path="/about" element={<About />} />
+
         <Route
           path="/login"
           element={
-            <ProtectedRoute redirect={isAuth} redirectTo="/">
+            <RequireGuest isAuth={isAuth} isLoading={isLoading}>
               <Login />
-            </ProtectedRoute>
+            </RequireGuest>
           }
         />
         <Route
           path="/register"
           element={
-            <ProtectedRoute redirect={isAuth} redirectTo="/">
+            <RequireGuest isAuth={isAuth} isLoading={isLoading}>
               <Register />
-            </ProtectedRoute>
+            </RequireGuest>
           }
         />
-        <Route path="/about" element={<About />} />
+
+        <Route
+          path="/"
+          element={
+            <RequireAuth isAuth={isAuth} isLoading={isLoading}>
+              <Trips />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/addtrip"
+          element={
+            <RequireAuth isAuth={isAuth} isLoading={isLoading}>
+              <AddTrip />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/trips/:tripId"
+          element={
+            <RequireAuth isAuth={isAuth} isLoading={isLoading}>
+              <TripPage />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/invites"
+          element={
+            <RequireAuth isAuth={isAuth} isLoading={isLoading}>
+              <InvitesPage />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/settings"
+          element={
+            <RequireAuth isAuth={isAuth} isLoading={isLoading}>
+              <Settings />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/join/:token"
+          element={
+            <RequireAuth isAuth={isAuth} isLoading={isLoading}>
+              <JoinTrip />
+            </RequireAuth>
+          }
+        />
+
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
       <ModalManager />
