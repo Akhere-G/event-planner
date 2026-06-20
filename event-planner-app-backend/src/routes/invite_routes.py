@@ -1,15 +1,22 @@
 from flask import Blueprint, request
 from ..middleware.login_required import login_required
 from ..services.itineraries_service import get_itinerary_membership, is_authorised
-from ..services.invite_service import get_invites, create_invite, revoke_invite
+from ..services.invite_service import (
+    get_invites,
+    create_invite,
+    revoke_invite,
+    join_itinerary,
+)
 from ..exceptions import (
     ItineraryDoesNotExistError,
     UserNotAuthorisedError,
     UserAlreadyExistsError,
     InviteNotFoundError,
+    UserDoesNotExistError,
 )
 from ..utils.format_response import api_response
 from ..schemas.invite_schema import InviteSchemaPrivate
+from ..schemas.itinerary_schema import ItinerarySchema
 from marshmallow import ValidationError
 
 itinerary_invites_bp = Blueprint("invite", __name__)
@@ -108,6 +115,30 @@ def revoke_invite_route(user_id: int, itinerary_id: int, invite_id: int):
         return api_response(
             message=err.message,
             success=False,
+            error=err.message,
+            status_code=err.status_code,
+        )
+
+
+@itinerary_invites_bp.route("/join/<token>")
+def join_itinerary_route(user_id, token):
+    try:
+        schema = ItinerarySchema()
+        itinerary = join_itinerary(user_id, token)
+        return api_response(
+            success=True,
+            message="Joined itinerary",
+            status_code=200,
+            data=schema.dump(itinerary),
+        )
+    except (
+        ItineraryDoesNotExistError,
+        UserDoesNotExistError,
+        UserAlreadyExistsError,
+    ) as err:
+        return api_response(
+            success=False,
+            message=err.message,
             error=err.message,
             status_code=err.status_code,
         )

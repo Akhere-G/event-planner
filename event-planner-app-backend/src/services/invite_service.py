@@ -1,14 +1,22 @@
 from ..extensions import db
 from .itineraries_service import get_itinerary
 from .users_service import add_user_to_itinerary
-from ..models import Invite, InvitationStatus, User
+from ..models import Invite, InvitationStatus, User, Itinerary, UserRole
 from sqlalchemy import select
 from datetime import datetime, timedelta, timezone
-from ..exceptions import UserAlreadyExistsError, InviteNotFoundError, BadRequestError
+from ..exceptions import (
+    UserAlreadyExistsError,
+    InviteNotFoundError,
+    BadRequestError,
+    UserDoesNotExistError,
+    ItineraryDoesNotExistError,
+)
 from .itineraries_service import get_membership_by_email
 
 
-def get_invite(itinerary_id: int, invite_id: int = None, email: str = None):
+def get_invite(
+    itinerary_id: int, invite_id: int | None = None, email: str | None = None
+):
     if not invite_id and not email:
         return None
 
@@ -135,3 +143,40 @@ def decline_invite(user_id: int, token: str):
 
     db.session.commit()
     return invite
+
+
+def join_itinerary(user_id, token):
+    stmt = select(User).where(User.id == id)
+    user = db.session.execute(stmt).scalar_one_or_none()
+
+    if not user:
+        raise UserDoesNotExistError()
+    role = None
+
+    stmt = select(Itinerary).where(Itinerary.viewer_code == token)
+    itinerary = db.session.execute(stmt).scalar_one_or_none()
+
+    if itinerary is not None:
+        role = UserRole.VIEWER.value
+    else:
+        stmt = select(Itinerary).where(Itinerary.editor_code == token)
+        itinerary = db.session.execute(stmt).scalar_one_or_none()
+        if itinerary is not None:
+            role = UserRole.EDITOR.value
+        else:
+            stmt = select(Itinerary).where(Itinerary.admin_code == token)
+            itinerary = db.session.execute(stmt).scalar_one_or_none()
+            if itinerary is not None:
+                role = UserRole.ADMIN.value
+
+    if itinerary is not None:
+        return create_invite(
+            {
+                "email": user.email,
+                "itinerary_id": itinerary.id,
+                "role": role,
+                "updated_by_id": user_id,
+            }
+        )
+    else:
+        raise ItineraryDoesNotExistError()

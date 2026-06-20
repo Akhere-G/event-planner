@@ -6,6 +6,7 @@ from typing import Optional
 from typing import List
 from .audit_mixins import AuditMixin
 from .event_model import Event
+import secrets
 
 
 class Itinerary(Base, AuditMixin):
@@ -19,6 +20,15 @@ class Itinerary(Base, AuditMixin):
     description: Mapped[Optional[str]] = mapped_column(String(255))
     start_date: Mapped[date] = mapped_column(Date, index=True)
     end_date: Mapped[date] = mapped_column(Date)
+    viewer_code: Mapped[str] = mapped_column(
+        String(255), default=lambda: secrets.token_urlsafe(32)
+    )
+    editor_code: Mapped[str] = mapped_column(
+        String(255), default=lambda: secrets.token_urlsafe(32)
+    )
+    admin_code: Mapped[str] = mapped_column(
+        String(255), default=lambda: secrets.token_urlsafe(32)
+    )
 
     user_memberships: Mapped[List["ItineraryUser"]] = relationship(  # type: ignore  # noqa: F821
         back_populates="itinerary", cascade="all, delete-orphan"
