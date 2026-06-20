@@ -47,6 +47,17 @@ export const inviteApi = apiSlice.injectEndpoints({
         { type: "Trips", id: args.tripId },
       ],
     }),
+    joinTrip: builder.mutation<{ data: Invite }, { token: string }>({
+      query: ({ token }) => ({
+        url: `/invites/join/${token}`,
+        method: "POST",
+      }),
+      invalidatesTags: (result) => [
+        { type: "Invites", id: "LIST" },
+        { type: "Trips", id: "LIST" },
+        { type: "Invites", id: result?.data?.id },
+      ],
+    }),
     getMyInvites: builder.query<{ data: { invites: Invite[] } }, void>({
       query: () => `/invites`,
       providesTags: (result) => {
@@ -97,4 +108,5 @@ export const {
   useGetMyInvitesQuery,
   useAcceptInviteMutation,
   useDeclineInviteMutation,
+  useJoinTripMutation,
 } = inviteApi;

@@ -15,6 +15,7 @@ import { syncDOM } from "./features/theme/themeSlice";
 import { Toaster } from "sonner";
 
 const AddTrip = lazy(() => import("./pages/AddTrip"));
+const JoinTrip = lazy(() => import("./pages/JoinTrip"));
 const InvitesPage = lazy(() => import("./pages/InvitesPage"));
 const Login = lazy(() => import("./pages/Login"));
 const Register = lazy(() => import("./pages/Register"));
@@ -104,6 +105,14 @@ function App() {
           element={
             <ProtectedRoute redirect={!isAuth} redirectTo="/login">
               <Settings />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/join/:token"
+          element={
+            <ProtectedRoute redirect={!isAuth} redirectTo="/login">
+              <JoinTrip />
             </ProtectedRoute>
           }
         />

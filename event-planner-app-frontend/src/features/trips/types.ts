@@ -15,4 +15,7 @@ export interface Trip {
   userMemberships: User[];
   events: Event[];
   invites: Invite[];
+  adminCode?: string;
+  editorCode?: string;
+  viewerCode?: string;
 }

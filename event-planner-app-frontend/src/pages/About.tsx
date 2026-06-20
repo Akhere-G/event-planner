@@ -32,15 +32,15 @@ export default function AboutPage() {
     },
     {
       icon: <Users className="text-brand-primary" size={28} />,
-      title: "Real-time Collaboration",
+      title: "Seamless Collaboration",
       description:
-        "Invite the group and plan together. Everyone sees the latest updates instantly, so your group chat can finally take a break.",
+        "Onboard your group in seconds. Simply share a secure link and start planning together—no more back-and-forth in the group chat.",
     },
     {
       icon: <ShieldCheck className="text-brand-primary" size={28} />,
       title: "Admin & Viewer Roles",
       description:
-        "Stay in control by assigning roles. Let your co-planners edit as Admins, or keep others as Viewers so they can follow along without changing the plan.",
+        "Stay in control by assigning roles. Let your co-planners manage events as editors, add new users and edit trip details as admins or keep others as Viewers so they can follow along without changing the plan.",
     },
     {
       icon: <Search className="text-brand-primary" size={28} />,

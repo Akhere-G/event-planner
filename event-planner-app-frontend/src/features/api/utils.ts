@@ -17,3 +17,18 @@ export function isFetchBaseQueryError(
 ): error is FetchBaseQueryError {
   return typeof error === "object" && error !== null && "data" in error;
 }
+
+export interface ApiError {
+  data: { message: string };
+}
+export function isApiError(error: unknown): error is ApiError {
+  return (
+    typeof error === "object" &&
+    error !== null &&
+    "data" in error &&
+    typeof error.data === "object" &&
+    error.data !== null &&
+    "message" in error.data &&
+    typeof error.data.message === "string"
+  );
+}

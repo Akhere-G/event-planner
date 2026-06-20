@@ -84,7 +84,7 @@ def accept_invite_route(user_id: int, token: str):
         )
 
 
-@user_invites_bp.route("/<string:token>/decline", methods=["POST"])
+@user_invites_bp.route("/<token>/decline", methods=["POST"])
 @login_required
 def decline_invite_route(user_id: int, token: str):
     schema = InviteSchema()
@@ -109,10 +109,13 @@ def decline_invite_route(user_id: int, token: str):
 
 
 @user_invites_bp.route("/join/<token>", methods=["POST"])
+@login_required
 def join_itinerary_route(user_id, token):
     try:
+        print("In route")
         schema = ItinerarySchema()
         itinerary = join_itinerary(user_id, token)
+        print("existign route")
         return api_response(
             success=True,
             message="Joined itinerary",
