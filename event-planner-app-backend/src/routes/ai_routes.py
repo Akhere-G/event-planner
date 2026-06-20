@@ -47,7 +47,6 @@ def get_event_suggestions_route(user_id: int, itinerary_id: int):
     transport = request.json.get("transport", "public_transport")
     interests = request.json.get("interests")
 
-    print(request.args.get("date"))
     if not date:
         return api_response(success=False, error="Date is required.", status_code=400)
     try:

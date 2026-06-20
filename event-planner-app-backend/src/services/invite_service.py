@@ -146,7 +146,6 @@ def decline_invite(user_id: int, token: str):
 
 
 def join_itinerary(user_id, token):
-    print("In service")
     stmt = select(User).where(User.id == user_id)
     user = db.session.execute(stmt).scalar_one_or_none()
 
@@ -180,7 +179,6 @@ def join_itinerary(user_id, token):
             raise UserAlreadyExistsError()
             # return existing_invite
 
-        print("exisitng service")
         return create_invite(
             {
                 "email": user.email,
