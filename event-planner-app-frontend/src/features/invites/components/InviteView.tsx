@@ -12,7 +12,6 @@ import { RoleIcons } from "../../users/utils";
 export default function InvitesView() {
   const params = useMatch("/trips/:tripId")?.params;
   const tripId = Number(params?.tripId);
-
   const { data, isLoading, isError } = useGetInvitesQuery(tripId);
   const { data: tripData } = useGetTripQuery(tripId);
 

@@ -29,13 +29,21 @@ export default function JoinTrip() {
   }, [token, navigate, joinTrip]);
 
   console.log(error);
+  let title = "Joining trip...";
+
+  if (error) {
+    title = "Could not join trip.";
+  }
+
   return (
     <div className="container">
       <div className="card">
-        <h2 className="title mb-4">Join Trip</h2>
+        <h2 className="title mb-4">{title}</h2>
         {isLoading && <p> Loading...</p>}
         {isApiError(error) && (
-          <p> {error.data.message || "Could not join trip."}</p>
+          <>
+            <p> {error.data.message || "Could not join trip."}</p>
+          </>
         )}
       </div>
     </div>
