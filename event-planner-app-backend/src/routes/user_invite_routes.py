@@ -5,6 +5,7 @@ from ..services.invite_service import (
     get_user_invite,
     accept_invite,
     decline_invite,
+    join_itinerary,
 )
 from ..schemas.invite_schema import InviteSchema
 from ..schemas.user_schema import UserWithRoleSchema
@@ -14,8 +15,9 @@ from ..exceptions import (
     UserAlreadyExistsError,
     BadRequestError,
     ItineraryDoesNotExistError,
+    UserDoesNotExistError,
 )
-
+from ..schemas.itinerary_schema import ItinerarySchema
 
 user_invites_bp = Blueprint("user_invites", __name__)
 
@@ -101,6 +103,30 @@ def decline_invite_route(user_id: int, token: str):
         return api_response(
             message=err.message,
             success=False,
+            error=err.message,
+            status_code=err.status_code,
+        )
+
+
+@user_invites_bp.route("/join/<token>", methods=["POST"])
+def join_itinerary_route(user_id, token):
+    try:
+        schema = ItinerarySchema()
+        itinerary = join_itinerary(user_id, token)
+        return api_response(
+            success=True,
+            message="Joined itinerary",
+            status_code=200,
+            data=schema.dump(itinerary),
+        )
+    except (
+        ItineraryDoesNotExistError,
+        UserDoesNotExistError,
+        UserAlreadyExistsError,
+    ) as err:
+        return api_response(
+            success=False,
+            message=err.message,
             error=err.message,
             status_code=err.status_code,
         )

@@ -60,6 +60,9 @@ class ItinerarySchema(SQLAlchemyAutoSchema):
 
 
 class ItineraryWithRoleSchema(Schema):
+    class Meta:
+        model = Itinerary
+
     itinerary = fields.Nested("ItinerarySchema")
     role = fields.String(
         validate=validate.OneOf([e.value for e in UserRole]),
@@ -72,12 +75,27 @@ class ItineraryWithRoleSchema(Schema):
     def flatten_output(self, data, many, **kwargs):
         itinerary_data = data.pop("itinerary")
         itinerary_data["role"] = data["role"]
+
+        if data["role"] != UserRole.ADMIN.value:
+            itinerary_data.pop("viewer_code", None)
+            itinerary_data.pop("editor_code", None)
+            itinerary_data.pop("admin_code", None)
+
         return itinerary_data
 
 
 class ItinerarySchemaNoInvites(SQLAlchemyAutoSchema):
     class Meta:
         model = Itinerary
+        fields = (
+            "id",
+            "name",
+            "description",
+            "start_date",
+            "end_date",
+            "events",
+            "user_memberships",
+        )
 
     @pre_load
     def camel_to_snake(self, data, many, partial, **kwargs):
