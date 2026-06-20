@@ -3,10 +3,11 @@ import { useGetInvitesQuery } from "../services/inviteApiSlice";
 import { StateGate } from "../../../components";
 import InviteUserForm from "./InviteUserForm";
 import Invites from "./Invites";
-import { Copy, ShieldCheck, User, Users } from "lucide-react";
+import { Copy } from "lucide-react";
 import { useGetTripQuery } from "../../trips/services/tripsApiSlice";
 import { toast } from "sonner";
 import { UserRole } from "../../users/types";
+import { RoleIcons } from "../../users/utils";
 
 export default function InvitesView() {
   const params = useMatch("/trips/:tripId")?.params;
@@ -45,7 +46,7 @@ export default function InvitesView() {
 
       {!isError && !isLoading && (
         <div className="space-y-6">
-          <section className="bg-card p-6 rounded-lg border shadow-sm">
+          <section className="card shadow-sm">
             <h2 className="title mb-4">Invite via Link</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <AccessLinkCard
@@ -67,7 +68,7 @@ export default function InvitesView() {
             </p>
           </section>
 
-          <section className="bg-card p-6 rounded-lg border shadow-sm">
+          <section className="card shadow-sm">
             <h2 className="title mb-4">Invite by Email</h2>
             <InviteUserForm />
           </section>
@@ -84,19 +85,16 @@ function AccessLinkCard({
   onCopy: () => void;
   role: (typeof UserRole)[keyof typeof UserRole];
 }) {
-  const icons = {
-    [UserRole.ADMIN]: <ShieldCheck size={20} />,
-    [UserRole.EDITOR]: <User size={20} />,
-    [UserRole.VIEWER]: <Users size={20} />,
-  };
-
+  const Icon = RoleIcons[role];
   return (
     <button
       onClick={onCopy}
-      className="flex items-center justify-between p-3 border rounded-md hover:bg-muted transition-colors text-left"
+      className="flex items-center justify-between card rounded-md hover:bg-muted transition-colors text-left"
     >
       <div className="flex items-center gap-2">
-        <span className="text-brand-primary">{icons[role]}</span>
+        <span className="text-brand-primary">
+          <Icon size={20} />
+        </span>
         <span className="font-medium capitalize">{role}</span>
       </div>
       <Copy className="text-text-secondary" size={16} />

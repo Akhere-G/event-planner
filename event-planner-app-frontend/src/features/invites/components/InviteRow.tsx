@@ -9,6 +9,8 @@ import { isFetchBaseQueryError } from "../../api/utils";
 import { getStatusConfig } from "../utils";
 import { toast } from "sonner";
 import useMenu from "../../../hooks/useMenu";
+import { RoleIcons } from "../../users/utils";
+import type { UserRoleType } from "../../users/types";
 
 export default function InviteRow({ invite }: { invite: Invite }) {
   const params = useMatch("/trips/:tripId")?.params;
@@ -55,6 +57,8 @@ export default function InviteRow({ invite }: { invite: Invite }) {
     new Date(invite.expiresAt),
   );
 
+  const RoleIcon = RoleIcons[role as UserRoleType];
+
   return (
     <tr className="group hover:bg-surface-muted/30 transition-colors text-sm md:text-current">
       <td className="px-2 md:px-6 py-4">
@@ -67,7 +71,7 @@ export default function InviteRow({ invite }: { invite: Invite }) {
       </td>
       <td className="px-2 md:px-6 py-4">
         <div className="flex items-center justify-center gap-1.5 text-sm text-text-secondary capitalize">
-          <ShieldCheck className="hidden md:flex" size={14} />
+          <RoleIcon className="hidden md:flex" size={14} />
           {role}
         </div>
       </td>

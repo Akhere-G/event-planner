@@ -1,4 +1,5 @@
-import { UserRole } from "./types";
+import { Eye, Pen, ShieldCheck } from "lucide-react";
+import { UserRole, type UserRoleType } from "./types";
 
 const avatarColors = [
   "#0D9488",
@@ -20,4 +21,12 @@ export const getAvatarColor = (userId: number) => {
 export const isAdmin = (role: string) => role === UserRole.ADMIN;
 
 export const canUserEdit = (role: string) =>
-  [UserRole.ADMIN, UserRole.EDITOR].includes(role);
+  ([UserRole.ADMIN, UserRole.EDITOR] as UserRoleType[]).includes(
+    role as UserRoleType,
+  );
+
+export const RoleIcons = {
+  [UserRole.ADMIN]: ShieldCheck,
+  [UserRole.EDITOR]: Pen,
+  [UserRole.VIEWER]: Eye,
+};
