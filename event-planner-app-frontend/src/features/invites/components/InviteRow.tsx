@@ -1,4 +1,4 @@
-import { Ban, Mail, MoreVertical, RotateCcw, ShieldCheck } from "lucide-react";
+import { Ban, Mail, MoreVertical, RotateCcw } from "lucide-react";
 import type { Invite } from "../types";
 import {
   useCreateInviteMutation,
