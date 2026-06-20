@@ -9,4 +9,4 @@ export const UserRole = {
   VIEWER: "viewer",
   EDITOR: "editor",
   ADMIN: "admin",
-};
+} as const;

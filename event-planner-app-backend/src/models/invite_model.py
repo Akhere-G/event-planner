@@ -1,6 +1,6 @@
 from ..extensions import Base
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from sqlalchemy import Integer, String, ForeignKey, Enum, DateTime
+from sqlalchemy import Integer, String, ForeignKey, Enum, DateTime, UniqueConstraint
 from .itinerary_user_model import UserRole
 import enum
 from datetime import datetime, timedelta, timezone
@@ -49,4 +49,7 @@ class Invite(Base, AuditMixin):
     )
     last_editor: Mapped["User"] = relationship(  # type: ignore  # noqa: F821
         "User", foreign_keys="[Invite.updated_by_id]"
+    )
+    __table_args__ = (
+        UniqueConstraint("email", "itinerary_id", name="uq_invite_email_itinerary"),
     )
