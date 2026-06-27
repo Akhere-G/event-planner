@@ -177,6 +177,10 @@ export default function TripMap({ trip }: { trip: Trip }) {
         colorScheme={darkMode ? "DARK" : "LIGHT"}
         gestureHandling="greedy"
         onClick={(e) => e.detail.placeId && openPlaceResult(e.detail.placeId)}
+        renderingType="VECTOR"
+        rotateControl
+        tiltInteractionEnabled
+        headingInteractionEnabled
       >
         {eventMarkers}
         {searchEventMarkers}
