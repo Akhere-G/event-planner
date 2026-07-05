@@ -29,3 +29,6 @@ dist-ssr
 *.sln
 *.sw?
 ca.pem
+CLAUDE.md
+_plans
+_specs
