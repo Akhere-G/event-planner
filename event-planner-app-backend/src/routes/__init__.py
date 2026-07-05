@@ -5,6 +5,7 @@ from .user_routes import user_bp
 from .invite_routes import itinerary_invites_bp
 from .user_invite_routes import user_invites_bp
 from .ai_routes import ai_bp
+from .wishlist_routes import wishlist_bp
 
 __all__ = [
     "auth_bp",
@@ -14,4 +15,6 @@ __all__ = [
     "itinerary_invites_bp",
     "user_invites_bp",
     "ai_bp",
+    "wishlist_bp",
 ]
+

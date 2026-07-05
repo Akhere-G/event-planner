@@ -13,11 +13,11 @@ import { useDispatch, useSelector } from "react-redux";
 import { isFetchBaseQueryError } from "../../api/utils";
 import { updateSearchEvents } from "../../maps/service/mapSlice";
 import { useParams } from "react-router";
-import { formatDateRelative } from "../../../utils/dateFormattors";
 import type { EventSchema } from "../../events/schemas/eventSchema";
 import { useAddEventMutation } from "../../events/service/eventApiSlice";
 import { toast } from "sonner";
 import { useRef, useState } from "react";
+import { format } from "date-fns";
 
 interface SearchEventCardProps {
   event: EventSearchResult;
@@ -181,7 +181,7 @@ export default function EventSearchResultCardConnected() {
   };
 
   const dates = days.map((day) => ({
-    title: formatDateRelative(day.date),
+    title: format(day.date, "dd MMM"),
     value: day.date,
   }));
 
