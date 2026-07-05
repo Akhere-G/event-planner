@@ -75,7 +75,7 @@ def create_events_route(user_id: int, itinerary_id: int):
         )
 
 
-@event_bp.route("<int:event_id>", methods=["PATCH"])
+@event_bp.route("/<int:event_id>", methods=["PATCH"])
 @login_required
 def update_event_route(user_id: int, itinerary_id: int, event_id: int):
     schema = EventSchema(partial=True)
