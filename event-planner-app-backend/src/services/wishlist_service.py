@@ -34,9 +34,13 @@ def create_category(itinerary_id: int, name: str):
     return category
 
 
-def create_wishlist_item(category_id: int, item_data: dict, user_id: int):
-    # TODO: Check if wishlist cat belongs to itinerary before continuing
-    stmt = select(WishlistCategory).where(WishlistCategory.id == category_id)
+def create_wishlist_item(
+    itinerary_id: int, category_id: int, item_data: dict, user_id: int
+):
+    stmt = select(WishlistCategory).where(
+        WishlistCategory.id == category_id,
+        WishlistCategory.itinerary_id == itinerary_id,
+    )
     category = db.session.execute(stmt).scalar_one_or_none()
     if not category:
         raise BadRequestError("Category does not exist.")
@@ -54,6 +58,18 @@ def create_wishlist_item(category_id: int, item_data: dict, user_id: int):
     db.session.add(item)
     db.session.commit()
     return item
+
+
+def itinerary_contains_wishlist_item(itinerary_id: int, wishlist_item_id: int):
+    stmt = (
+        select(WishlistCategory.id)
+        .join(WishlistItem, WishlistCategory.id == WishlistItem.category_id)
+        .where(
+            WishlistCategory.itinerary_id == itinerary_id,
+            WishlistItem.id == wishlist_item_id,
+        )
+    )
+    return bool(db.session.execute(stmt).scalar_one_or_none())
 
 
 def delete_wishlist_item(item_id: int):
@@ -84,9 +100,6 @@ def promote_wishlist_item(
         raise BadRequestError("This item has already been promoted.")
 
     item.is_promoted = True
-
-    # TODO: Make longitude and latitude in events nullable to allow for non-location based events
-    # TODO: Or try to get coords from place name / address
 
     event_data = {
         "name": item.name,

@@ -7,6 +7,7 @@ from ..services.wishlist_service import (
     create_wishlist_item,
     delete_wishlist_item,
     promote_wishlist_item,
+    itinerary_contains_wishlist_item,
 )
 from ..schemas.wishlist_schema import WishlistCategorySchema, WishlistItemSchema
 from ..schemas.event_schema import EventSchema
@@ -100,7 +101,7 @@ def create_item_route(user_id: int, itinerary_id: int):
                 success=False, error="categoryId is required.", status_code=400
             )
 
-        item = create_wishlist_item(category_id, validated_data, user_id)
+        item = create_wishlist_item(itinerary_id, category_id, validated_data, user_id)
         return api_response(
             success=True,
             data=schema.dump(item),
@@ -130,6 +131,13 @@ def delete_item_route(user_id: int, itinerary_id: int, item_id: int):
             authorised_roles=[UserRole.ADMIN, UserRole.EDITOR],
             message="You must be an admin or an editor to remove items.",
         )
+        if not itinerary_contains_wishlist_item(itinerary_id, item_id):
+            return api_response(
+                success=False,
+                error="Wishlist item does not exists",
+                message="Wishlist item does not exist",
+                status_code=404,
+            )
         deleted_id = delete_wishlist_item(item_id)
         return api_response(
             success=True,
