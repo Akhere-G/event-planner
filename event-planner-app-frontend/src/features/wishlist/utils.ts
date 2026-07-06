@@ -3,16 +3,16 @@
  * Uses a palette that is visually distinct from the day event colors.
  */
 const WISHLIST_COLORS = [
+  "#a855f7", // Purple
+  "#e11d48", // Rose
+  "#24f5fb", // Amber
   "#ec4899", // Pink
   "#14b8a6", // Teal
-  "#f59e0b", // Amber
   "#6366f1", // Indigo
   "#22c55e", // Green
-  "#e11d48", // Rose
-  "#06b6d4", // Cyan
-  "#a855f7", // Purple
+  "#f6b6d4", // Red
   "#84cc16", // Lime
-  "#f97316", // Orange
+  "#f97316", // cyan
 ];
 
 export const getWishlistColor = (index: number): string => {
