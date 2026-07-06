@@ -3,7 +3,9 @@ import type {
   Wishlist as Wishlist,
   CreateWishlistPayload,
   CreateWishlistItemPayload,
+  UpdateWishlistItemPayload,
   DeleteWishlistItemPayload,
+  DeleteWishlistPayload,
   PromoteWishlistItemPayload,
   ApiResponse,
   WishlistItem,
@@ -37,6 +39,17 @@ export const wishlistApiSlice = apiSlice.injectEndpoints({
         method: "PATCH",
         body: { name },
       }),
+      invalidatesTags: ["Wishlists"],
+    }),
+    deleteWishlist: builder.mutation<
+      ApiResponse<{ deletedId: number }>,
+      DeleteWishlistPayload
+    >({
+      query: ({ tripId, wishlistId }) => ({
+        url: `/itineraries/${tripId}/wishlists/${wishlistId}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["Wishlists"],
     }),
     createWishlistItem: builder.mutation<
       ApiResponse<WishlistItem>,
@@ -45,6 +58,17 @@ export const wishlistApiSlice = apiSlice.injectEndpoints({
       query: ({ tripId, ...itemData }) => ({
         url: `/itineraries/${tripId}/wishlists/${itemData.wishlistId}/items`,
         method: "POST",
+        body: itemData,
+      }),
+      invalidatesTags: ["Wishlists"],
+    }),
+    updateWishlistItem: builder.mutation<
+      ApiResponse<WishlistItem>,
+      UpdateWishlistItemPayload
+    >({
+      query: ({ tripId, wishlistId, itemId, ...itemData }) => ({
+        url: `/itineraries/${tripId}/wishlists/${wishlistId}/items/${itemId}`,
+        method: "PATCH",
         body: itemData,
       }),
       invalidatesTags: ["Wishlists"],
@@ -77,7 +101,9 @@ export const {
   useGetWishlistsQuery,
   useCreateWishlistMutation,
   useUpdateWishlistMutation,
+  useDeleteWishlistMutation,
   useCreateWishlistItemMutation,
+  useUpdateWishlistItemMutation,
   useDeleteWishlistItemMutation,
   usePromoteWishlistItemMutation,
 } = wishlistApiSlice;
