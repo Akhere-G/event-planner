@@ -3,20 +3,22 @@
  * Uses a palette that is visually distinct from the day event colors.
  */
 const WISHLIST_COLORS = [
-  "#a855f7", // Purple
-  "#e11d48", // Rose
-  "#24f5fb", // Amber
-  "#ec4899", // Pink
-  "#14b8a6", // Teal
-  "#6366f1", // Indigo
-  "#22c55e", // Green
-  "#f6b6d4", // Red
-  "#84cc16", // Lime
-  "#f97316", // cyan
+  "#f97316", // Orange (Default)
+  "#0ea5e9", // Sky Blue (Accent)
+  "#10b981", // Emerald
+  "#ef4444", // Red (Volcanic)
+  "#7e22ce", // Lavender
+  "#d65d0e", // Sandstone
+  "#0891b2", // Arctic
+  "#ac794a", // Chocolate
+  "#8b828b", // Timber
+  "#27ad22", // Radioactive
+  "#d48f07", // Midnight Gold
 ];
 
 export const getWishlistColor = (index: number): string => {
   if (index >= 0 && index < WISHLIST_COLORS.length) {
+    index = WISHLIST_COLORS.length - index - 1;
     return WISHLIST_COLORS[index];
   }
   // Golden ratio hue spread for extras
