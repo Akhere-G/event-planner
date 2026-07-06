@@ -17,6 +17,7 @@ import {
   setSelectedEvent,
   clearSearchEvents,
   setSearchEvents,
+  setSelectedWishlistItem,
 } from "../../maps/service/mapSlice";
 import { fitToBounds, formatPlace, getDaysWithFilter } from "../../maps/utils";
 import {
@@ -41,6 +42,7 @@ import { toast } from "sonner";
 import { useGetWishlistsQuery } from "../../wishlist/services/wishlistApiSlice";
 import type { WishlistItem } from "../../wishlist/types";
 import { getWishlistColor } from "../../wishlist/utils";
+import WishlistItemCard from "../../wishlist/components/WishlistItemCard";
 
 const permissionEnum = {
   GRANTED: "GRANTED",
@@ -54,6 +56,7 @@ export default function TripMap({ trip }: { trip: Trip }) {
   const {
     searchEvents,
     selectedEvent,
+    selectedWishlistItem,
     days,
     currentRouteIndex,
     routes,
@@ -221,6 +224,8 @@ export default function TripMap({ trip }: { trip: Trip }) {
               item={item}
               position={{ lat: item.latitude!, lng: item.longitude! }}
               color={getWishlistColor(wishlistIndexById[item.wishlistId] ?? 0)}
+              onSelect={(item) => dispatch(setSelectedWishlistItem(item))}
+              selected={selectedWishlistItem?.id === item.id}
             />
           ))}
         {userCoords && (
@@ -258,6 +263,25 @@ export default function TripMap({ trip }: { trip: Trip }) {
             event={selectedEvent}
             key={selectedEvent.name}
             onDelete={onDelete}
+          />
+        </div>
+      )}
+      {selectedWishlistItem && (
+        <div className={`z-2 absolute bottom-0 px-2 md:px-4 pb-5 w-full`}>
+          <button
+            onClick={() => dispatch(setSelectedWishlistItem(null))}
+            className="z-1 absolute btn-secondary bg-canvas p-1 right-1 -top-3 md:-top-4"
+          >
+            <X size={20} />
+          </button>
+          <WishlistItemCard
+            item={selectedWishlistItem}
+            key={selectedWishlistItem.id}
+            editable={canUserEdit(trip.role)}
+            startDate={trip.startDate}
+            endDate={trip.endDate}
+            tripId={trip.id}
+            wishlistId={selectedWishlistItem.wishlistId}
           />
         </div>
       )}

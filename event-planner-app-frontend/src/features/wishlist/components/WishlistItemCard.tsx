@@ -30,8 +30,8 @@ function WishlistItemView({
     <div
       className={`p-2.5 rounded-lg border text-xs relative ${
         item.isPromoted
-          ? "bg-brand-primary/5 border-brand-primary/20 opacity-75"
-          : "border-surface-border bg-surface-muted/30"
+          ? "bg-brand-primary/5 border-brand-primary/20 opacity-85"
+          : "border-surface-border bg-surface-muted"
       }`}
     >
       <div className="flex justify-between items-start gap-1">

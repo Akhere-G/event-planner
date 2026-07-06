@@ -11,6 +11,8 @@ interface WishlistMarkerProps {
   item: WishlistItem;
   position: google.maps.LatLngLiteral;
   color: string;
+  selected: boolean;
+  onSelect: (item: WishlistItem) => void;
 }
 
 // TODO: When clicked, a wishList item card should be displayed in the map , similiar to how ehrn the event markers are clicked, an event card pops up
@@ -19,6 +21,8 @@ export default function WishlistMarker({
   item,
   position,
   color,
+  selected,
+  onSelect,
 }: WishlistMarkerProps) {
   const [markerRef, marker] = useAdvancedMarkerRef();
   const [showInfo, setShowInfo] = useState(false);
@@ -29,6 +33,7 @@ export default function WishlistMarker({
       position={position}
       onMouseEnter={() => setShowInfo(true)}
       onMouseLeave={() => setShowInfo(false)}
+      onClick={() => onSelect(item)}
     >
       {showInfo && (
         <InfoWindow
@@ -37,18 +42,10 @@ export default function WishlistMarker({
           disableAutoPan
           headerDisabled
         >
-          <div className="text-xs max-w-40">
-            <p
-              style={{ color }}
-              className="font-bold whitespace-nowrap truncate"
-            >
+          <div className="text-sm max-w-50">
+            <p style={{ color }} className="font-bold">
               {item.name}
             </p>
-            {item.address && (
-              <p className="text-text-secondary text-[10px] truncate">
-                {item.address}
-              </p>
-            )}
           </div>
         </InfoWindow>
       )}
@@ -58,7 +55,7 @@ export default function WishlistMarker({
         glyphSrc="/wishlist_star.svg"
         glyphColor={"var(--color-text-inverse)"}
         borderColor={"var(--color-surface-border)"}
-        scale={0.9}
+        scale={selected ? 1.4 : 0.9}
       />
     </AdvancedMarker>
   );

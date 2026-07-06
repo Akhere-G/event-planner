@@ -1,11 +1,13 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 import type { Day, Event } from "../../events/types";
 import type { EventSearchResult, Route } from "../types";
+import type { WishlistItem } from "../../wishlist/types";
 
 interface MapState {
   searchEvents: EventSearchResult[];
   searchIndex: number;
   selectedEvent: Event | null;
+  selectedWishlistItem: WishlistItem | null;
   days: Day[];
   routes: Route[] | null;
   isMapView: boolean;
@@ -18,6 +20,7 @@ const initialState: MapState = {
   searchEvents: [],
   searchIndex: 0,
   selectedEvent: null,
+  selectedWishlistItem: null,
   days: [],
   routes: null,
   isMapView: false,
@@ -46,6 +49,12 @@ export const mapSlice = createSlice({
     },
     setSelectedEvent: (state, action: PayloadAction<Event | null>) => {
       state.selectedEvent = action.payload;
+    },
+    setSelectedWishlistItem: (
+      state,
+      action: PayloadAction<WishlistItem | null>,
+    ) => {
+      state.selectedWishlistItem = action.payload;
     },
     markEventAsAdded: (state) => {
       const current = state.searchEvents[state.searchIndex];
@@ -98,6 +107,7 @@ export const {
   setSearchEvents,
   setSearchIndex,
   setSelectedEvent,
+  setSelectedWishlistItem,
   markEventAsAdded,
   clearSearchEvents,
   updateSearchEvents,
