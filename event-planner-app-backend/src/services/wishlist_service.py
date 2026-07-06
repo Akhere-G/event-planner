@@ -1,5 +1,5 @@
 from ..extensions import db
-from ..models import WishlistCategory, WishlistItem
+from ..models import Wishlist, WishlistItem
 from .events_service import create_event
 from ..exceptions import BadRequestError
 from sqlalchemy import select
@@ -11,42 +11,60 @@ import os
 
 def get_wishlists(itinerary_id: int):
     stmt = (
-        select(WishlistCategory)
-        .where(WishlistCategory.itinerary_id == itinerary_id)
-        .options(selectinload(WishlistCategory.items))
+        select(Wishlist)
+        .where(Wishlist.itinerary_id == itinerary_id)
+        .options(selectinload(Wishlist.items))
     )
     return db.session.execute(stmt).scalars().all()
 
 
-def create_category(itinerary_id: int, name: str):
+def create_wishlist(itinerary_id: int, name: str):
     stmt = (
-        select(WishlistCategory)
-        .where(WishlistCategory.itinerary_id == itinerary_id)
-        .where(WishlistCategory.name == name)
+        select(Wishlist)
+        .where(Wishlist.itinerary_id == itinerary_id)
+        .where(Wishlist.name == name)
     )
     existing = db.session.execute(stmt).scalar_one_or_none()
     if existing:
-        raise BadRequestError(f"Category '{name}' already exists.")
+        raise BadRequestError(f"Wishlist '{name}' already exists.")
 
-    category = WishlistCategory(itinerary_id=itinerary_id, name=name)
-    db.session.add(category)
+    wishlist = Wishlist(itinerary_id=itinerary_id, name=name)
+    db.session.add(wishlist)
     db.session.commit()
-    return category
+    return wishlist
+
+
+def update_wishlist(itinerary_id, wishlist_id, name):
+    stmt = select(Wishlist).where(
+        Wishlist.itinerary_id == itinerary_id,
+        Wishlist.id == wishlist_id,
+    )
+
+    wishlist = db.session.execute(stmt).scalar_one_or_none()
+
+    if not wishlist:
+        raise BadRequestError("Wishlist not found.")
+
+    wishlist.name = name
+
+    db.session.commit()
+
+    return wishlist
 
 
 def create_wishlist_item(
-    itinerary_id: int, category_id: int, item_data: dict, user_id: int
+    itinerary_id: int, wishlist_id: int, item_data: dict, user_id: int
 ):
-    stmt = select(WishlistCategory).where(
-        WishlistCategory.id == category_id,
-        WishlistCategory.itinerary_id == itinerary_id,
+    stmt = select(Wishlist).where(
+        Wishlist.id == wishlist_id,
+        Wishlist.itinerary_id == itinerary_id,
     )
-    category = db.session.execute(stmt).scalar_one_or_none()
-    if not category:
-        raise BadRequestError("Category does not exist.")
+    wishlist = db.session.execute(stmt).scalar_one_or_none()
+    if not wishlist:
+        raise BadRequestError("Wishlist does not exist.")
 
     item = WishlistItem(
-        category_id=category_id,
+        wishlist_id=wishlist_id,
         name=item_data.get("name"),
         address=item_data.get("address"),
         latitude=item_data.get("latitude"),
@@ -62,10 +80,10 @@ def create_wishlist_item(
 
 def itinerary_contains_wishlist_item(itinerary_id: int, wishlist_item_id: int):
     stmt = (
-        select(WishlistCategory.id)
-        .join(WishlistItem, WishlistCategory.id == WishlistItem.category_id)
+        select(Wishlist.id)
+        .join(WishlistItem, Wishlist.id == WishlistItem.wishlist_id)
         .where(
-            WishlistCategory.itinerary_id == itinerary_id,
+            Wishlist.itinerary_id == itinerary_id,
             WishlistItem.id == wishlist_item_id,
         )
     )
@@ -90,7 +108,7 @@ def promote_wishlist_item(
     stmt = (
         select(WishlistItem)
         .where(WishlistItem.id == item_id)
-        .options(selectinload(WishlistItem.category))
+        .options(selectinload(WishlistItem.wishlist))
     )
     item = db.session.execute(stmt).scalar_one_or_none()
     if not item:
@@ -107,7 +125,7 @@ def promote_wishlist_item(
         "latitude": item.latitude,
         "longitude": item.longitude,
         "description": item.description,
-        "category": item.category.name,
+        "category": item.wishlist.name,
         "start_at": start_at,
         "end_at": end_at,
         "created_by_id": user_id,

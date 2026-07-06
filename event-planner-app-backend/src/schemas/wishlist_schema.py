@@ -1,6 +1,6 @@
 from marshmallow_sqlalchemy import SQLAlchemyAutoSchema, auto_field
 from marshmallow import pre_load, fields
-from ..models import WishlistCategory, WishlistItem
+from ..models import Wishlist, WishlistItem
 import re
 
 
@@ -18,7 +18,7 @@ class WishlistItemSchema(SQLAlchemyAutoSchema):
         return re.sub(r"(?<!^)(?=[A-Z])", "_", s).lower()
 
     id = auto_field(dump_only=True)
-    category_id = auto_field(load_only=True)
+    wishlist_id = auto_field(load_only=True)
     name = auto_field(required=True)
     address = auto_field(allow_none=True)
     latitude = auto_field(allow_none=True)
@@ -30,9 +30,9 @@ class WishlistItemSchema(SQLAlchemyAutoSchema):
     created_at = auto_field(dump_only=True)
 
 
-class WishlistCategorySchema(SQLAlchemyAutoSchema):
+class WishlistSchema(SQLAlchemyAutoSchema):
     class Meta:
-        model = WishlistCategory
+        model = Wishlist
 
     @pre_load
     def camel_to_snake(self, data, many, partial, **kwargs):
