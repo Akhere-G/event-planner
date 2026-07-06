@@ -54,7 +54,7 @@ export default function WishlistCard({
       setName(oldName);
     }
   };
-  // ` (${wishlist.items?.length || 0})`
+
   return (
     <div className="border border-surface-border rounded-xl overflow-hidden bg-surface">
       <div className="w-full p-2 bg-surface-muted/50 ">

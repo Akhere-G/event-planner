@@ -37,17 +37,6 @@ function WishlistItemView({
       <div className="flex justify-between items-start gap-1">
         <div>
           <h4 className="font-semibold text-text-main pr-10">{item.name}</h4>
-          {item.address && (
-            <p className=" text-text-secondary flex items-center gap-1 mt-0.5">
-              <MapPin size={10} className="shrink-0" />
-              <span className="truncate">{item.address}</span>
-            </p>
-          )}
-          {item.description && (
-            <p className="text-[10px] text-text-secondary mt-1 italic">
-              "{item.description}"
-            </p>
-          )}
         </div>
 
         {editable && (
@@ -76,6 +65,20 @@ function WishlistItemView({
           </div>
         )}
       </div>
+
+      <div className="">
+        {item.address && (
+          <p className=" text-text-secondary flex items-center gap-1 ">
+            <MapPin size={10} className="shrink-0 -mb-1/2 " />
+            <span>{item.address}</span>
+          </p>
+        )}
+        {item.description && (
+          <p className="text-[10px] text-text-secondary mt-1 italic">
+            "{item.description}"
+          </p>
+        )}
+      </div>
     </div>
   );
 }
@@ -100,7 +103,8 @@ export default function WishlistItemCard({
   const { isMenuOpen, openMenu, closeMenu, openButtonRef } = useMenu();
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
-  const [deleteItem, { isLoading: isDeleting }] = useDeleteWishlistItemMutation();
+  const [deleteItem, { isLoading: isDeleting }] =
+    useDeleteWishlistItemMutation();
   const [promoteItem] = usePromoteWishlistItemMutation();
 
   const handleDelete = async () => {
