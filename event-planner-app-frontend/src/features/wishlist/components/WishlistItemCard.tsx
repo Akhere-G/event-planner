@@ -1,0 +1,150 @@
+import { useState } from "react";
+import { Calendar, MapPin, Trash } from "lucide-react";
+import { toast } from "sonner";
+import {
+  useDeleteWishlistItemMutation,
+  usePromoteWishlistItemMutation,
+} from "../services/wishlistApiSlice";
+import { isFetchBaseQueryError } from "../../api/utils";
+import PromoteItemModal from "./PromoteItemModal";
+import type { WishlistItem } from "../types";
+
+interface WishlistItemViewProps {
+  item: WishlistItem;
+  editable: boolean;
+  onScheduleClick: () => void;
+  onDeleteClick: () => void;
+}
+
+function WishlistItemView({
+  item,
+  editable,
+  onScheduleClick,
+  onDeleteClick,
+}: WishlistItemViewProps) {
+  return (
+    <div
+      className={`p-2.5 rounded-lg border text-xs relative ${
+        item.isPromoted
+          ? "bg-brand-primary/5 border-brand-primary/20 opacity-75"
+          : "border-surface-border bg-surface-muted/30"
+      }`}
+    >
+      <div className="flex justify-between items-start gap-1">
+        <div>
+          <h4 className="font-semibold text-text-main pr-10">{item.name}</h4>
+          {item.address && (
+            <p className=" text-text-secondary flex items-center gap-1 mt-0.5">
+              <MapPin size={10} className="shrink-0" />
+              <span className="truncate">{item.address}</span>
+            </p>
+          )}
+          {item.description && (
+            <p className="text-[10px] text-text-secondary mt-1 italic">
+              "{item.description}"
+            </p>
+          )}
+        </div>
+
+        {editable && (
+          <div className="flex items-center gap-1.5 shrink-0">
+            {!item.isPromoted ? (
+              <button
+                onClick={onScheduleClick}
+                title="Schedule Event"
+                className="p-1 rounded bg-brand-primary/10 text-brand-primary hover:bg-brand-primary hover:text-white transition-colors cursor-pointer"
+              >
+                <Calendar size={12} />
+              </button>
+            ) : (
+              <span className="px-1.5 py-0.5 rounded-full bg-brand-primary/10 text-brand-primary text-xs font-bold">
+                Added
+              </span>
+            )}
+            <button
+              onClick={onDeleteClick}
+              title="Delete activity"
+              className="p-1 rounded text-text-secondary hover:text-error hover:bg-error/10 transition-colors cursor-pointer"
+            >
+              <Trash size={12} />
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+interface WishlistItemCardProps {
+  item: WishlistItem;
+  itineraryId: number;
+  editable: boolean;
+  startDate: string;
+  endDate: string;
+}
+
+export default function WishlistItemCard({
+  item,
+  itineraryId,
+  editable,
+  startDate,
+  endDate,
+}: WishlistItemCardProps) {
+  const [isScheduling, setIsScheduling] = useState(false);
+
+  const [deleteItem] = useDeleteWishlistItemMutation();
+  const [promoteItem] = usePromoteWishlistItemMutation();
+
+  const handleDelete = async () => {
+    // TODO: Use confirm panel
+    if (!window.confirm("Are you sure you want to remove this item?")) return;
+    try {
+      await deleteItem({ itineraryId, itemId: item.id }).unwrap();
+      toast.success("Item removed from wishlist.");
+    } catch {
+      toast.error("Failed to remove item");
+    }
+  };
+
+  const handleSchedule = async (startAt: string, endAt: string) => {
+    try {
+      await promoteItem({
+        itineraryId,
+        itemId: item.id,
+        startAt,
+        endAt,
+      }).unwrap();
+
+      setIsScheduling(false);
+      toast.success("Successfully scheduled event!");
+    } catch (err) {
+      if (isFetchBaseQueryError(err)) {
+        toast.error(
+          (err.data as { message: string }).message ||
+            "Failed to schedule event.",
+        );
+      }
+    }
+  };
+
+  return (
+    <>
+      <WishlistItemView
+        item={item}
+        editable={editable}
+        onScheduleClick={() => setIsScheduling(true)}
+        onDeleteClick={handleDelete}
+      />
+
+      {isScheduling && (
+        <PromoteItemModal
+          item={item}
+          startDate={startDate}
+          endDate={endDate}
+          onClose={() => setIsScheduling(false)}
+          onSchedule={handleSchedule}
+        />
+      )}
+    </>
+  );
+}
