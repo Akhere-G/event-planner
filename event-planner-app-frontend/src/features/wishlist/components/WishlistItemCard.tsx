@@ -1,4 +1,5 @@
 import { Calendar, MapPin, Trash } from "lucide-react";
+import { useState } from "react";
 import { toast } from "sonner";
 import {
   useDeleteWishlistItemMutation,
@@ -6,6 +7,7 @@ import {
 } from "../services/wishlistApiSlice";
 import { isFetchBaseQueryError } from "../../api/utils";
 import PromoteItemModal from "./PromoteItemModal";
+import ConfirmModal from "../../../components/ConfirmModal";
 import type { WishlistItem } from "../types";
 import useMenu from "../../../hooks/useMenu";
 
@@ -96,16 +98,16 @@ export default function WishlistItemCard({
   endDate,
 }: WishlistItemCardProps) {
   const { isMenuOpen, openMenu, closeMenu, openButtonRef } = useMenu();
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
-  const [deleteItem] = useDeleteWishlistItemMutation();
+  const [deleteItem, { isLoading: isDeleting }] = useDeleteWishlistItemMutation();
   const [promoteItem] = usePromoteWishlistItemMutation();
 
   const handleDelete = async () => {
-    // TODO: Use confirm panel
-    if (!window.confirm("Are you sure you want to remove this item?")) return;
     try {
       await deleteItem({ tripId, wishlistId, itemId: item.id }).unwrap();
       toast.success("Item removed from wishlist.");
+      setShowDeleteConfirm(false);
     } catch {
       toast.error("Failed to remove item");
     }
@@ -139,7 +141,7 @@ export default function WishlistItemCard({
         item={item}
         editable={editable}
         onScheduleClick={openMenu}
-        onDeleteClick={handleDelete}
+        onDeleteClick={() => setShowDeleteConfirm(true)}
         scheduleButtonRef={openButtonRef}
       />
 
@@ -152,6 +154,22 @@ export default function WishlistItemCard({
           closeMenu={closeMenu}
           isMenuOpen={isMenuOpen}
         />
+      )}
+
+      {showDeleteConfirm && (
+        <ConfirmModal
+          title="Remove wishlist item"
+          confirmText="Remove"
+          confirmAction={handleDelete}
+          closeModal={() => setShowDeleteConfirm(false)}
+          confirmButtonProps={{ disabled: isDeleting }}
+        >
+          <p className="p-4 text-sm text-text-secondary">
+            Are you sure you want to remove{" "}
+            <strong className="text-text-main">{item.name}</strong> from the
+            wishlist?
+          </p>
+        </ConfirmModal>
       )}
     </>
   );

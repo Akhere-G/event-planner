@@ -28,6 +28,7 @@ import {
 import {
   EventMarker,
   EventSearchMarker,
+  WishlistMarker,
   EventSearch,
   DayFilter,
   EventSearchResultList,
@@ -37,6 +38,9 @@ import {
 } from "../../maps/components";
 import { EventCard } from "../../events/components";
 import { toast } from "sonner";
+import { useGetWishlistsQuery } from "../../wishlist/services/wishlistApiSlice";
+import type { WishlistItem } from "../../wishlist/types";
+import { getWishlistColor } from "../../wishlist/utils";
 
 const permissionEnum = {
   GRANTED: "GRANTED",
@@ -44,14 +48,38 @@ const permissionEnum = {
   LOADING: "LOADING",
 } as const;
 
-// TODO: Add wishlist items to map as markers
-
 export default function TripMap({ trip }: { trip: Trip }) {
   const { latitude, longitude, startDate, endDate, events } = trip;
   const dispatch = useDispatch();
-  const { searchEvents, selectedEvent, days, currentRouteIndex, routes } =
-    useSelector((state: RootState) => state.map);
+  const {
+    searchEvents,
+    selectedEvent,
+    days,
+    currentRouteIndex,
+    routes,
+    showWishlist,
+    hiddenWishlistIds,
+  } = useSelector((state: RootState) => state.map);
   const darkMode = useSelector((state: RootState) => state.theme.darkMode);
+
+  const { data: wishlistsResponse } = useGetWishlistsQuery(trip.id);
+  const wishlists = wishlistsResponse?.data ?? [];
+
+  const wishlistIndexById: Record<number, number> = {};
+  wishlists.forEach((w, i) => {
+    wishlistIndexById[w.id] = i;
+  });
+
+  const mappableWishlistItems: WishlistItem[] = wishlists
+    .filter((w) => !hiddenWishlistIds.includes(w.id))
+    .flatMap((w) =>
+      w.items
+        .filter(
+          (item) =>
+            !item.isPromoted && item.latitude != null && item.longitude != null,
+        )
+        .map((item) => ({ ...item, wishlistId: w.id })),
+    );
 
   const [userCoords, setUserCoords] = useState<{
     latitude: number;
@@ -186,6 +214,15 @@ export default function TripMap({ trip }: { trip: Trip }) {
       >
         {eventMarkers}
         {searchEventMarkers}
+        {showWishlist &&
+          mappableWishlistItems.map((item) => (
+            <WishlistMarker
+              key={item.id}
+              item={item}
+              position={{ lat: item.latitude!, lng: item.longitude! }}
+              color={getWishlistColor(wishlistIndexById[item.wishlistId] ?? 0)}
+            />
+          ))}
         {userCoords && (
           <AdvancedMarker
             position={{ lat: userCoords.latitude, lng: userCoords.longitude }}
@@ -204,7 +241,7 @@ export default function TripMap({ trip }: { trip: Trip }) {
         />
       )}
       <div className="absolute top-4 right-2 flex flex-col gap-2 items-end">
-        <DayFilter />
+        <DayFilter wishlists={wishlists} />
         <FitToDay />
         <RouteDetails />
       </div>

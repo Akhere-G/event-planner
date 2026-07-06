@@ -10,6 +10,8 @@ interface MapState {
   routes: Route[] | null;
   isMapView: boolean;
   currentRouteIndex: number;
+  showWishlist: boolean;
+  hiddenWishlistIds: number[];
 }
 
 const initialState: MapState = {
@@ -20,6 +22,8 @@ const initialState: MapState = {
   routes: null,
   isMapView: false,
   currentRouteIndex: 0,
+  showWishlist: true,
+  hiddenWishlistIds: [],
 };
 
 type UpdateFunc = (event: EventSearchResult) => EventSearchResult;
@@ -74,6 +78,18 @@ export const mapSlice = createSlice({
     setIsMapView: (state, action: PayloadAction<boolean>) => {
       state.isMapView = action.payload;
     },
+    toggleWishlist: (state) => {
+      state.showWishlist = !state.showWishlist;
+    },
+    toggleWishlistId: (state, action: PayloadAction<number>) => {
+      const id = action.payload;
+      const idx = state.hiddenWishlistIds.indexOf(id);
+      if (idx === -1) {
+        state.hiddenWishlistIds.push(id);
+      } else {
+        state.hiddenWishlistIds.splice(idx, 1);
+      }
+    },
   },
 });
 
@@ -89,6 +105,8 @@ export const {
   updateRouteMode,
   setRouteIndex,
   setIsMapView,
+  toggleWishlist,
+  toggleWishlistId,
 } = mapSlice.actions;
 
 export default mapSlice.reducer;

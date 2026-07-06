@@ -6,6 +6,8 @@ import { useMap } from "@vis.gl/react-google-maps";
 import { fitToBounds } from "../../maps/utils";
 import type { Day } from "../../events/types";
 
+// TODO: Should be able to fit to wishlist
+
 export function FitToDay({
   days,
   fitToDay,
