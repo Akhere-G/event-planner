@@ -11,9 +11,9 @@ class UserRole(enum.Enum):
     VIEWER = "viewer"
 
     @classmethod
-    def has_value(cls, value, values: list["UserRole"] = None):
-        values = values or cls
-        return value in [role.value for role in values]
+    def has_value(cls, value, values: list["UserRole"] | None = None):
+        lst = values or cls
+        return value in [role.value for role in lst]
 
 
 class ItineraryUser(Base, AuditMixin):
