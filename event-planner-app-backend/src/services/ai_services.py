@@ -119,11 +119,11 @@ def get_event_suggestions(
       [
         {{
           "name": "Exact Official Venue Name",
-          "description": "A compelling description explaining what the activity is, context and local insider tips.",
+          "description": "A compelling description explaining what the activity is, context and local insider tips. (MAX 100 characters)",
           "address": "Full street address, City, Country",
           "start_at": "YYYY-MM-DDTHH:MM:SSZ",
           "end_at": "YYYY-MM-DDTHH:MM:SSZ",
-          "category": "String that represents the type of activity"
+          "category": "String that represents the type of activity (MAX 10 CHARACTERS, spaces between words)"
         }}
       ]
     """
