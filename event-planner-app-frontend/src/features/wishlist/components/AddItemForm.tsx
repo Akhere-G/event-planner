@@ -89,7 +89,7 @@ export default function AddItemForm({
             }
             setPlaceId(place.place_id);
           }}
-          inputClassNames="text-xs px-2 py-1 h-8 rounded-md"
+          inputClassNames="text-xs px-2 py-1 h-8 rounded-md bg-surface"
           placeholder="Search with Google..."
         />
       </div>
@@ -99,7 +99,7 @@ export default function AddItemForm({
         placeholder="Activity Name (required)"
         value={name}
         onChange={(e) => setName(e.target.value)}
-        className="w-full px-2 py-1 rounded-md border border-surface-border bg-surface text-xs"
+        className="w-full px-2 py-1 rounded-md text-xs"
         required
       />
       <input
@@ -107,13 +107,13 @@ export default function AddItemForm({
         placeholder="Address (optional)"
         value={address}
         onChange={(e) => setAddress(e.target.value)}
-        className="w-full px-2 py-1 rounded-md border border-surface-border bg-surface text-xs"
+        className="w-full px-2 py-1 rounded-md text-xs"
       />
       <textarea
         placeholder="Insider tips or description (optional)"
         value={description}
         onChange={(e) => setDescription(e.target.value)}
-        className="w-full px-2 py-1 rounded-md border border-surface-border bg-surface text-xs h-12 resize-none"
+        className="w-full px-2 py-1 rounded-md text-xs h-12 resize-none"
       />
       <button type="submit" className="w-full btn-primary py-1.5 text-xs">
         Add to List
