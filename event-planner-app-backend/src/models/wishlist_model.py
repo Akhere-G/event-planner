@@ -10,8 +10,6 @@ from sqlalchemy import (
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from .audit_mixins import AuditMixin
 
-# TODO: Add audit_mixin
-
 
 class Wishlist(Base, AuditMixin):
     __tablename__ = "wishlist_categories"

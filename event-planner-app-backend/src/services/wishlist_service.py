@@ -18,7 +18,7 @@ def get_wishlists(itinerary_id: int):
     return db.session.execute(stmt).scalars().all()
 
 
-def create_wishlist(itinerary_id: int, name: str):
+def create_wishlist(user_id: int, itinerary_id: int, name: str):
     stmt = (
         select(Wishlist)
         .where(Wishlist.itinerary_id == itinerary_id)
@@ -28,13 +28,18 @@ def create_wishlist(itinerary_id: int, name: str):
     if existing:
         raise BadRequestError(f"Wishlist '{name}' already exists.")
 
-    wishlist = Wishlist(itinerary_id=itinerary_id, name=name)
+    wishlist = Wishlist(
+        itinerary_id=itinerary_id,
+        name=name,
+        created_by_id=user_id,
+        updated_by_id=user_id,
+    )
     db.session.add(wishlist)
     db.session.commit()
     return wishlist
 
 
-def update_wishlist(itinerary_id, wishlist_id, name):
+def update_wishlist(itinerary_id: int, wishlist_id: int, user_id: int, name: str):
     stmt = select(Wishlist).where(
         Wishlist.itinerary_id == itinerary_id,
         Wishlist.id == wishlist_id,
@@ -46,6 +51,7 @@ def update_wishlist(itinerary_id, wishlist_id, name):
         raise BadRequestError("Wishlist not found.")
 
     wishlist.name = name
+    wishlist.updated_by_id = user_id
 
     db.session.commit()
 
@@ -72,6 +78,7 @@ def create_wishlist_item(
         description=item_data.get("description"),
         place_id=item_data.get("place_id"),
         created_by_id=user_id,
+        updated_by_id=user_id,
     )
     db.session.add(item)
     db.session.commit()
