@@ -45,6 +45,8 @@ export function EventSearchResultCard({
     photos,
   } = event;
 
+  // TODO: Allow searched events to be added to wishlists
+
   return (
     <div className="card border-l-4 border-brand-primary">
       <div className="flex flex-col">
@@ -106,7 +108,6 @@ export function EventSearchResultCard({
             ContentComponent={() => <Images photos={photos} name={name} />}
           />
         </div>
-
         <div className="flex justify-end">
           {event.isAdded ? (
             <span className="text-xs flex gap-2 bg-brand-primary px-3 py-1 rounded-full">
