@@ -51,9 +51,8 @@ export function DayFilter({
     setDays(days.map((day) => ({ ...day, show: false })));
   };
 
-  console.log("here");
   return (
-    <div className="rounded-xl bg-surface shadow-md">
+    <div className="rounded-xl bg-surface shadow-md max-h-[40vh] overflow-y-scroll">
       {expanded ? (
         <div className="card bg-surface rounded-xl w-44">
           <div className="flex items-center justify-between gap-2 mb-2">
@@ -136,7 +135,7 @@ export function DayFilter({
                           className="inline-block w-2.5 h-2.5 rounded-full shrink-0"
                           style={{ backgroundColor: color }}
                         />
-                        <span className="whitespace-nowrap truncate max-w-[80px]">
+                        <span className="whitespace-nowrap truncate max-w-20">
                           {wishlist.name}
                         </span>
                       </label>

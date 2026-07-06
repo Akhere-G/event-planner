@@ -74,8 +74,6 @@ export function EventSearchResultCard({
     general: "",
   });
 
-  // TODO: Allow searched events to be added to wishlists
-
   function onChangeDate(date: string) {
     console.log({ date });
     setSelectedDate(date);
