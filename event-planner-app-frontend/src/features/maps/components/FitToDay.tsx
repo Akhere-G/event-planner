@@ -6,40 +6,78 @@ import { useMap } from "@vis.gl/react-google-maps";
 import { fitToBounds } from "../../maps/utils";
 import type { Day } from "../../events/types";
 import { getDayColor } from "../../events/utils";
+import { useGetWishlistsQuery } from "../../wishlist/services/wishlistApiSlice";
+import { useParams } from "react-router";
+import type { Wishlist } from "../../wishlist/types";
+import { getWishlistColor } from "../../wishlist/utils";
 
-// TODO: Should be able to fit to wishlist
+interface FitToDayProps {
+  days: Day[];
+  fitToDay: (day: string) => void;
+  fitToAll: () => void;
+  wishlists: Wishlist[];
+  hiddenWishlistIds: number[];
+  fitToWishlist: (Wishlist: Wishlist) => void;
+  showWishlist: boolean;
+}
 
 export function FitToDay({
   days,
   fitToDay,
   fitToAll,
-}: {
-  days: Day[];
-  fitToDay: (day: string) => void;
-  fitToAll: () => void;
-}) {
+  wishlists,
+  hiddenWishlistIds,
+  fitToWishlist,
+  showWishlist,
+}: FitToDayProps) {
   const [expanded, setExpanded] = useState(false);
   const daysWithEvents = days.filter(
     (day) => day.events.length > 0 && day.show,
   );
-  if (daysWithEvents.length === 0) return;
+
+  const wishlistButtons = wishlists
+    .filter((list) => !hiddenWishlistIds.includes(list.id))
+    .map((wishlist, index) => (
+      <button
+        key={wishlist.id}
+        onClick={() => fitToWishlist(wishlist)}
+        className={`m-0 mb-2 w-full flex items-center gap-2 text-sm cursor-pointer border-2 px-3 py-1`}
+        style={{ color: getWishlistColor(index) }}
+      >
+        <span
+          className="inline-block w-2.5 h-2.5 rounded-full"
+          style={{ backgroundColor: getWishlistColor(index) }}
+        />
+        <span className="whitespace-nowrap">{wishlist.name}</span>
+      </button>
+    ));
+
+  const showWishlistButtons = wishlistButtons.length > 0 && showWishlist;
+
+  if (daysWithEvents.length === 0 && wishlists.length === 0) return;
   if (daysWithEvents.length === 1) {
     return (
-      <div className="bg-surface rounded-xl hover:brightness-110 shadow-md">
+      <div className="bg-surface rounded-xl hover:brightness-110 shadow-md p-4 w-44">
         <button
-          className="btn bg-brand-secondary text-text-inverse border-surface-border border py-2 px-4 text-sm w-35 max-h-30 overflow-y-scroll"
+          className="btn bg-brand-secondary text-text-inverse border-surface-border border py-2 px-4 text-sm w-35"
           onClick={() => fitToDay(daysWithEvents[0].date)}
         >
           Fit to day {daysWithEvents[0].day}
         </button>
+        {showWishlistButtons && (
+          <div>
+            <h2 className="mt-4 mb-2">Wishlists</h2>
+            {wishlistButtons}
+          </div>
+        )}
       </div>
     );
   }
 
   return (
-    <div className="bg-surface rounded-xl shadow-md">
+    <div className="rounded-xl shadow-md max-h-[45vh] overflow-y-scroll">
       {expanded ? (
-        <div className="card rounded-xl w-35">
+        <div className="card rounded-xl w-44 overflow-x-clip">
           <div className="flex items-center justify-between gap-2 mb-2 ">
             <h3 className="">Fit to day</h3>
             <button
@@ -49,11 +87,12 @@ export function FitToDay({
               <X size={16} />
             </button>
           </div>
-          <div className="flex flex-col gap-1 max-h-40 overflow-y-scroll">
+          <div className="flex flex-col gap-1">
             {daysWithEvents.map((day) => (
               <button
                 key={day.date}
-                className="p-0 m-0 w-fit flex items-center justify-between gap-2  text-sm cursor-pointer"
+                className="m-0 w-full flex items-center gap-2 text-sm cursor-pointer border-2 px-3 py-1"
+                style={{ color: getDayColor(day.day - 1) }}
                 onClick={() => fitToDay(day.date)}
               >
                 <span
@@ -63,13 +102,22 @@ export function FitToDay({
                 <span className="whitespace-nowrap">Day {day.day}</span>
               </button>
             ))}
-            <button
-              className="btn py-2 px-0 text-sm text-left"
-              onClick={fitToAll}
-            >
-              <span className="whitespace-nowrap">All</span>
-            </button>
+            {daysWithEvents.length > 0 && (
+              <button
+                className="m-0 w-full flex items-center gap-2 text-sm cursor-pointer border-2 px-3 py-1"
+                onClick={fitToAll}
+              >
+                <span className="inline-block w-2.5 h-2.5 rounded-full bg-text-primary" />
+                <span>All</span>
+              </button>
+            )}
           </div>
+          {showWishlistButtons && (
+            <div className="">
+              <h4 className="mt-2 mb-2">Wishlists</h4>
+              {wishlistButtons}
+            </div>
+          )}
         </div>
       ) : (
         <button
@@ -84,7 +132,13 @@ export function FitToDay({
 }
 
 export default function FitToDayConnected() {
-  const { days } = useSelector((state: RootState) => state.map);
+  const { days, hiddenWishlistIds, showWishlist } = useSelector(
+    (state: RootState) => state.map,
+  );
+  const params = useParams();
+  const tripId = Number(params.tripId);
+  const { data } = useGetWishlistsQuery(tripId);
+  const wishlists = data?.data ?? [];
   const map = useMap();
 
   const selectedEvents = days
@@ -104,5 +158,25 @@ export default function FitToDayConnected() {
     if (map) fitToBounds({ map, events: selectedEvents });
   };
 
-  return <FitToDay days={days} fitToAll={fitToAll} fitToDay={fitToDay} />;
+  const fitToWishlist = (wishlist: Wishlist) => {
+    const itemsWithLocations = wishlist.items.filter(
+      (i) => i.latitude && i.longitude && !i.isPromoted,
+    );
+    if (map)
+      fitToBounds({
+        map,
+        events: itemsWithLocations as { latitude: number; longitude: number }[],
+      });
+  };
+  return (
+    <FitToDay
+      hiddenWishlistIds={hiddenWishlistIds}
+      wishlists={wishlists}
+      days={days}
+      fitToAll={fitToAll}
+      fitToDay={fitToDay}
+      fitToWishlist={fitToWishlist}
+      showWishlist={showWishlist}
+    />
+  );
 }

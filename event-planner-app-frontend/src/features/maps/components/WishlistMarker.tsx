@@ -15,8 +15,6 @@ interface WishlistMarkerProps {
   onSelect: (item: WishlistItem) => void;
 }
 
-// TODO: When clicked, a wishList item card should be displayed in the map , similiar to how ehrn the event markers are clicked, an event card pops up
-
 export default function WishlistMarker({
   item,
   position,
