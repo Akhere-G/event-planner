@@ -64,7 +64,7 @@ def create_wishlist_route(user_id: int, itinerary_id: int):
                 success=False, error="Wishlist name is required.", status_code=400
             )
 
-        category = create_wishlist(itinerary_id, name.strip())
+        category = create_wishlist(user_id, itinerary_id, name.strip())
         schema = WishlistSchema()
         return api_response(
             success=True,
@@ -107,10 +107,10 @@ def update_wishlist_route(user_id: int, itinerary_id: int, wishlist_id: int):
                 status_code=400,
             )
 
-        updated_category = update_wishlist(itinerary_id, wishlist_id, name)
+        updated_wishlist = update_wishlist(itinerary_id, wishlist_id, user_id, name)
 
         return api_response(
-            success=True, data=schema.dump(updated_category), message="Updated category"
+            success=True, data=schema.dump(updated_wishlist), message="Updated category"
         )
 
     except (ItineraryDoesNotExistError, UserNotAuthorisedError, BadRequestError) as err:
