@@ -6,7 +6,7 @@ import {
   Star,
   Tag as TagIcon,
 } from "lucide-react";
-import { Accordion, EditableSelect } from "../../../components";
+import { Accordion, ConfirmModal, FormInput } from "../../../components";
 import type { EventSearchResult, Tag } from "../types";
 import type { RootState } from "../../../store";
 import { useDispatch, useSelector } from "react-redux";
@@ -18,19 +18,35 @@ import { useAddEventMutation } from "../../events/service/eventApiSlice";
 import { toast } from "sonner";
 import { useRef, useState } from "react";
 import { format } from "date-fns";
+import {
+  useCreateWishlistItemMutation,
+  useGetWishlistsQuery,
+} from "../../wishlist/services/wishlistApiSlice";
+import type { CreateWishlistItemPayload, Wishlist } from "../../wishlist/types";
+import useMenu from "../../../hooks/useMenu";
 
 interface SearchEventCardProps {
   event: EventSearchResult;
-  handleSave: (event: EventSchema) => Promise<void>;
+  handleSaveEvent: (event: EventSchema) => Promise<void>;
+  handleSaveToWishlist: (
+    payload: Omit<CreateWishlistItemPayload, "tripId">,
+  ) => Promise<void>;
   dates: { title: string; value: string }[];
   isLoading: boolean;
+  wishlists: Wishlist[];
 }
-
+interface ErrorMessageType {
+  endAt: string;
+  startAt: string;
+  general: string;
+}
 export function EventSearchResultCard({
   event,
-  handleSave,
+  handleSaveEvent,
+  handleSaveToWishlist,
   dates,
   isLoading,
+  wishlists,
 }: SearchEventCardProps) {
   const {
     placeId,
@@ -44,9 +60,83 @@ export function EventSearchResultCard({
     totalReviews,
     photos,
   } = event;
+  const { closeMenu, isMenuOpen, openMenu, openButtonRef, menuContainerRef } =
+    useMenu();
+  const [selectedDate, setSelectedDate] = useState("");
+  const [startAt, setStartAt] = useState("12:00");
+  const [endAt, setEndAt] = useState("13:00");
+  const [selectedWishlist, setSelectedWishlist] = useState<Wishlist | null>(
+    null,
+  );
+  const [errorMessages, setErrorMessages] = useState<ErrorMessageType>({
+    startAt: "",
+    endAt: "",
+    general: "",
+  });
 
   // TODO: Allow searched events to be added to wishlists
 
+  function onChangeDate(date: string) {
+    console.log({ date });
+    setSelectedDate(date);
+    setSelectedWishlist(null);
+  }
+
+  function onChangeWishlist(wishlist: Wishlist) {
+    console.log({ wishlist });
+    setSelectedWishlist(wishlist);
+    setSelectedDate("");
+  }
+
+  let confirmText = "Select date or wishlist";
+
+  if (selectedDate) {
+    confirmText = `Save to ${new Date(selectedDate).toLocaleDateString()}`;
+  } else if (selectedWishlist) {
+    confirmText = `Save to ${selectedWishlist?.name}`;
+  }
+
+  const isDisabled = (!selectedDate && !selectedWishlist) || isLoading;
+
+  function resetErrorMessages() {
+    setErrorMessages({ endAt: "", startAt: "", general: "" });
+  }
+
+  function updateErrorMessages(state: Partial<ErrorMessageType>) {
+    setErrorMessages((prev) => ({ ...prev, ...state }));
+  }
+
+  async function handleSave() {
+    resetErrorMessages();
+    if (selectedDate) {
+      if (endAt < startAt) {
+        updateErrorMessages({ endAt: "must be after Start At" });
+        return;
+      }
+      await handleSaveEvent({
+        address,
+        category,
+        latitude,
+        longitude,
+        name,
+        startAt: `${selectedDate} ${startAt}`,
+        endAt: `${selectedDate} ${endAt}`,
+      });
+      toast.success("Added to itinerary.");
+      return closeMenu();
+    } else if (selectedWishlist) {
+      await handleSaveToWishlist({
+        address,
+        latitude,
+        longitude,
+        name,
+        wishlistId: selectedWishlist.id,
+        placeId,
+      });
+      toast.success("Added to wishlist.");
+      return closeMenu();
+    }
+  }
   return (
     <div className="card border-l-4 border-brand-primary">
       <div className="flex flex-col">
@@ -108,6 +198,68 @@ export function EventSearchResultCard({
             ContentComponent={() => <Images photos={photos} name={name} />}
           />
         </div>
+        {isMenuOpen && (
+          <ConfirmModal
+            closeModal={closeMenu}
+            confirmAction={handleSave}
+            title={`Save ${name}`}
+            modalRef={menuContainerRef}
+            confirmBtnClasses="btn-primary flex-1"
+            confirmText={confirmText}
+            confirmButtonProps={{ disabled: isDisabled }}
+          >
+            <div className="p-4">
+              <h4 className="mb-4">Save to date</h4>
+              <div className="flex flex-wrap gap-2">
+                {dates.map((date) => (
+                  <button
+                    className={`border-2 border-brand-primary text-brand-primary font-bold px-6 py-2 flex-1/4
+                      hover:bg-brand-primary hover:text-text-primary ${date.value === selectedDate ? "bg-brand-primary text-text-primary" : ""}`}
+                    key={date.value}
+                    onClick={() => onChangeDate(date.value)}
+                  >
+                    {date.title}
+                  </button>
+                ))}
+              </div>
+              <div className="flex mt-4 gap-2">
+                <FormInput
+                  type="time"
+                  name="selectedStartAt"
+                  label="Start At"
+                  formClassNames="flex-1"
+                  onChange={(e) => setStartAt(e.target.value)}
+                  value={startAt}
+                  errorMessage={errorMessages.startAt}
+                />
+                <FormInput
+                  type="time"
+                  name="selectedEndAt"
+                  label="End At"
+                  formClassNames="flex-1"
+                  onChange={(e) => setEndAt(e.target.value)}
+                  value={endAt}
+                  errorMessage={errorMessages.endAt}
+                />
+              </div>
+              <hr className="my-6" />
+              <h4 className="mb-4">Save to wishlist</h4>
+              <div className="flex flex-wrap gap-2">
+                {wishlists.map((wishlist) => (
+                  <button
+                    className={`border-2 border-brand-primary text-brand-primary font-bold px-6 py-2
+                      hover:bg-brand-primary hover:text-text-primary ${wishlist === selectedWishlist ? "bg-brand-primary text-text-primary" : ""}`}
+                    key={wishlist.id}
+                    onClick={() => onChangeWishlist(wishlist)}
+                  >
+                    {wishlist.name}
+                  </button>
+                ))}
+              </div>
+              {errorMessages.general && <p>{errorMessages.general}</p>}
+            </div>
+          </ConfirmModal>
+        )}
         <div className="flex justify-end">
           {event.isAdded ? (
             <span className="text-xs flex gap-2 bg-brand-primary px-3 py-1 rounded-full">
@@ -115,7 +267,16 @@ export function EventSearchResultCard({
               Added
             </span>
           ) : (
-            <EditableSelect
+            <>
+              <button
+                className="flex gap-2 items-center bg-brand-primary"
+                ref={openButtonRef}
+                onClick={openMenu}
+              >
+                <Plus size={16} />
+                Add
+              </button>
+              {/* <EditableSelect
               options={dates}
               isLoading={isLoading}
               canEdit
@@ -143,7 +304,8 @@ export function EventSearchResultCard({
                   Add
                 </div>
               }
-            />
+            />*/}
+            </>
           )}
         </div>
       </div>
@@ -156,10 +318,15 @@ export default function EventSearchResultCardConnected() {
   const { searchEvents, searchIndex, days } = useSelector(
     (state: RootState) => state.map,
   );
+  const { data } = useGetWishlistsQuery(Number(tripId));
+
+  const wishlists = data?.data ?? [];
+
   const dispatch = useDispatch();
 
   const [addEvent, { isLoading: isAddEventLoading }] = useAddEventMutation();
-
+  const [createWishlist, { isLoading: isCreateWishlistLoading }] =
+    useCreateWishlistItemMutation();
   const currentEvent = searchEvents[searchIndex];
 
   const updateSearchResults = () => {
@@ -170,9 +337,22 @@ export default function EventSearchResultCardConnected() {
     );
   };
 
-  const handleSave = async (event: EventSchema) => {
+  const handleSaveEvent = async (event: EventSchema) => {
     try {
       await addEvent({ tripId: Number(tripId), event }).unwrap();
+      updateSearchResults();
+    } catch (err) {
+      if (isFetchBaseQueryError(err)) {
+        toast.error((err.data as { message: string }).message);
+      }
+    }
+  };
+
+  const handleSaveToWishlist = async (
+    payload: Omit<CreateWishlistItemPayload, "tripId">,
+  ) => {
+    try {
+      await createWishlist({ ...payload, tripId: Number(tripId) }).unwrap();
       updateSearchResults();
     } catch (err) {
       if (isFetchBaseQueryError(err)) {
@@ -190,8 +370,10 @@ export default function EventSearchResultCardConnected() {
     <EventSearchResultCard
       event={currentEvent}
       dates={dates}
-      handleSave={handleSave}
-      isLoading={isAddEventLoading}
+      handleSaveEvent={handleSaveEvent}
+      handleSaveToWishlist={handleSaveToWishlist}
+      isLoading={isAddEventLoading || isCreateWishlistLoading}
+      wishlists={wishlists}
     />
   );
 }
