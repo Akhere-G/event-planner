@@ -5,6 +5,7 @@ import type { RootState } from "../../../store";
 import { useMap } from "@vis.gl/react-google-maps";
 import { fitToBounds } from "../../maps/utils";
 import type { Day } from "../../events/types";
+import { getDayColor } from "../../events/utils";
 
 // TODO: Should be able to fit to wishlist
 
@@ -38,7 +39,7 @@ export function FitToDay({
   return (
     <div className="bg-surface rounded-xl shadow-md">
       {expanded ? (
-        <div className="card bg-brand-secondary text-text-inverse rounded-xl w-35">
+        <div className="card rounded-xl w-35">
           <div className="flex items-center justify-between gap-2 mb-2 ">
             <h3 className="">Fit to day</h3>
             <button
@@ -52,9 +53,13 @@ export function FitToDay({
             {daysWithEvents.map((day) => (
               <button
                 key={day.date}
-                className="btn py-2 px-0 text-sm text-left"
+                className="p-0 m-0 w-fit flex items-center justify-between gap-2  text-sm cursor-pointer"
                 onClick={() => fitToDay(day.date)}
               >
+                <span
+                  className="inline-block w-2.5 h-2.5 rounded-full"
+                  style={{ backgroundColor: getDayColor(day.day - 1) }}
+                />
                 <span className="whitespace-nowrap">Day {day.day}</span>
               </button>
             ))}
