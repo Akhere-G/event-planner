@@ -138,7 +138,7 @@ def get_event_suggestions(
         geocoded_events = []
 
         for event in suggestions:
-            result = gmaps.geocode(f"{event['name']}, {event['address']}")
+            result = gmaps.geocode(f"{event['name']}, {event['address']}")  # type: ignore
             if result:
                 location = result[0]["geometry"]["location"]
                 event["latitude"] = location["lat"]

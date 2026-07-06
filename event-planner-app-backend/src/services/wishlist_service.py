@@ -5,6 +5,8 @@ from ..exceptions import BadRequestError
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 from datetime import datetime
+import googlemaps
+import os
 
 
 def get_wishlists(itinerary_id: int):
@@ -85,11 +87,12 @@ def promote_wishlist_item(
 
     # TODO: Make longitude and latitude in events nullable to allow for non-location based events
     # TODO: Or try to get coords from place name / address
+
     event_data = {
         "name": item.name,
-        "address": item.address or "",
-        "latitude": item.latitude or 0.0,
-        "longitude": item.longitude or 0.0,
+        "address": item.address,
+        "latitude": item.latitude,
+        "longitude": item.longitude,
         "description": item.description,
         "category": item.category.name,
         "start_at": start_at,
@@ -97,6 +100,17 @@ def promote_wishlist_item(
         "created_by_id": user_id,
         "updated_by_id": user_id,
     }
+
+    if event_data["longitude"] is None or event_data["latitude"] is None:
+        gmaps = googlemaps.Client(key=os.getenv("GOOGLE_MAPS_API_KEY"))
+
+        result = gmaps.geocode(f"{item.name}, {item.address or ''}")  # type: ignore
+        if result:
+            location = result[0]["geometry"]["location"]
+            event_data["latitude"] = location["lat"]
+            event_data["longitude"] = location["lng"]
+            if event_data["address"] is None:
+                event_data["address"] = result[0]["formatted_address"]
 
     event = create_event(itinerary_id, event_data)
     return event
