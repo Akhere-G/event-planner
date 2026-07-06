@@ -5,7 +5,9 @@ from ..services.wishlist_service import (
     get_wishlists,
     create_wishlist,
     update_wishlist,
+    delete_wishlist,
     create_wishlist_item,
+    update_wishlist_item,
     delete_wishlist_item,
     promote_wishlist_item,
     itinerary_contains_wishlist_item,
@@ -81,7 +83,30 @@ def create_wishlist_route(user_id: int, itinerary_id: int):
         )
 
 
-# TODO: Add delete Wishlist route
+@wishlist_bp.route("/<int:wishlist_id>", methods=["DELETE"])
+@login_required
+def delete_wishlist_route(user_id: int, itinerary_id: int, wishlist_id: int):
+    try:
+        is_authorised(
+            user_id=user_id,
+            itinerary_id=itinerary_id,
+            authorised_roles=[UserRole.ADMIN, UserRole.EDITOR],
+            message="You must be an admin or an editor to delete wishlists.",
+        )
+        delete_wishlist(itinerary_id, wishlist_id)
+        return api_response(
+            success=True,
+            data={"deletedId": wishlist_id},
+            message="Deleted wishlist.",
+            status_code=200,
+        )
+    except (UserNotAuthorisedError, ItineraryDoesNotExistError, BadRequestError) as err:
+        return api_response(
+            success=False,
+            message=err.message,
+            error=err.message,
+            status_code=err.status_code,
+        )
 
 
 @wishlist_bp.route("/<int:wishlist_id>", methods=["PATCH"])
@@ -188,7 +213,43 @@ def delete_item_route(user_id: int, itinerary_id: int, wishlist_id: int, item_id
         )
 
 
-# TODO: Add update Wishlist Item route
+@wishlist_bp.route("/<int:wishlist_id>/items/<int:item_id>", methods=["PATCH"])
+@login_required
+def update_item_route(user_id: int, itinerary_id: int, wishlist_id: int, item_id: int):
+    schema = WishlistItemSchema()
+    try:
+        is_authorised(
+            user_id=user_id,
+            itinerary_id=itinerary_id,
+            authorised_roles=[UserRole.ADMIN, UserRole.EDITOR],
+            message="You must be an admin or an editor to update items.",
+        )
+        if not itinerary_contains_wishlist_item(itinerary_id, item_id):
+            return api_response(
+                success=False,
+                error="Wishlist item does not exist",
+                message="Wishlist item does not exist",
+                status_code=404,
+            )
+        validated_data = schema.load(request.json, partial=True)
+        item = update_wishlist_item(itinerary_id, wishlist_id, item_id, validated_data, user_id)
+        return api_response(
+            success=True,
+            data=schema.dump(item),
+            message="Updated wishlist item.",
+            status_code=200,
+        )
+    except ValidationError as err:
+        return api_response(
+            success=False, error=err.messages, message="Bad request.", status_code=400
+        )
+    except (UserNotAuthorisedError, ItineraryDoesNotExistError, BadRequestError) as err:
+        return api_response(
+            success=False,
+            message=err.message,
+            error=err.message,
+            status_code=err.status_code,
+        )
 
 
 @wishlist_bp.route("/<int:wishlist_id>/items/<int:item_id>/promote", methods=["POST"])

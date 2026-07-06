@@ -58,6 +58,21 @@ def update_wishlist(itinerary_id: int, wishlist_id: int, user_id: int, name: str
     return wishlist
 
 
+def delete_wishlist(itinerary_id: int, wishlist_id: int):
+    stmt = select(Wishlist).where(
+        Wishlist.itinerary_id == itinerary_id,
+        Wishlist.id == wishlist_id,
+    ).options(selectinload(Wishlist.items))
+
+    wishlist = db.session.execute(stmt).scalar_one_or_none()
+    if not wishlist:
+        raise BadRequestError("Wishlist not found.")
+
+    db.session.delete(wishlist)
+    db.session.commit()
+    return wishlist_id
+
+
 def create_wishlist_item(
     itinerary_id: int, wishlist_id: int, item_data: dict, user_id: int
 ):
@@ -103,10 +118,35 @@ def delete_wishlist_item(item_id: int):
     if not item:
         raise BadRequestError("Wishlist item not found.")
 
-    # TODO check if item belongs to wishlist that belongs to itinerary before continuing
     db.session.delete(item)
     db.session.commit()
     return item_id
+
+
+def update_wishlist_item(
+    itinerary_id: int, wishlist_id: int, item_id: int, item_data: dict, user_id: int
+):
+    stmt = (
+        select(WishlistItem)
+        .join(Wishlist, Wishlist.id == WishlistItem.wishlist_id)
+        .where(
+            Wishlist.itinerary_id == itinerary_id,
+            WishlistItem.wishlist_id == wishlist_id,
+            WishlistItem.id == item_id,
+        )
+    )
+    item = db.session.execute(stmt).scalar_one_or_none()
+    if not item:
+        raise BadRequestError("Wishlist item not found.")
+
+    updatable_fields = ["name", "address", "description", "latitude", "longitude", "place_id"]
+    for field in updatable_fields:
+        if field in item_data:
+            setattr(item, field, item_data[field])
+
+    item.updated_by_id = user_id
+    db.session.commit()
+    return item
 
 
 def promote_wishlist_item(

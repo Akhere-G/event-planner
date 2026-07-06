@@ -7,8 +7,6 @@ from ..exceptions import (
 )
 from marshmallow import ValidationError
 
-from sqlalchemy import select, func
-
 
 def get_events(itinerary_id: int):
     try:
@@ -137,16 +135,5 @@ def delete_event(itinerary_id: int, event_id: int):
         raise EventNotFoundError()
 
     itinerary.events.remove(event)
-
-    db.session.flush()
-
-    count = db.session.execute(
-        select(func.count())
-        .select_from(ItineraryEvent)
-        .where(ItineraryEvent.event_id == event.id)
-    ).scalar()
-
-    # TODO: remove count query and removing from itinerary and always just delete the event
-    if count == 0:
-        db.session.delete(event)
+    db.session.delete(event)
     db.session.commit()

@@ -40,10 +40,27 @@ export interface UpdateWishlistPayload {
   wishlistId: number;
   tripId: number;
 }
+export interface DeleteWishlistPayload {
+  tripId: number;
+  wishlistId: number;
+}
+
 export interface DeleteWishlistItemPayload {
   tripId: number;
   wishlistId: number;
   itemId: number;
+}
+
+export interface UpdateWishlistItemPayload {
+  tripId: number;
+  wishlistId: number;
+  itemId: number;
+  name?: string;
+  address?: string;
+  latitude?: number;
+  longitude?: number;
+  description?: string;
+  placeId?: string;
 }
 
 export interface PromoteWishlistItemPayload {
