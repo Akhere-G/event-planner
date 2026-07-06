@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { Calendar, MapPin, Trash } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -8,12 +7,14 @@ import {
 import { isFetchBaseQueryError } from "../../api/utils";
 import PromoteItemModal from "./PromoteItemModal";
 import type { WishlistItem } from "../types";
+import useMenu from "../../../hooks/useMenu";
 
 interface WishlistItemViewProps {
   item: WishlistItem;
   editable: boolean;
   onScheduleClick: () => void;
   onDeleteClick: () => void;
+  scheduleButtonRef: React.Ref<HTMLButtonElement>;
 }
 
 function WishlistItemView({
@@ -21,6 +22,7 @@ function WishlistItemView({
   editable,
   onScheduleClick,
   onDeleteClick,
+  scheduleButtonRef,
 }: WishlistItemViewProps) {
   return (
     <div
@@ -50,6 +52,7 @@ function WishlistItemView({
           <div className="flex items-center gap-1.5 shrink-0">
             {!item.isPromoted ? (
               <button
+                ref={scheduleButtonRef}
                 onClick={onScheduleClick}
                 title="Schedule Event"
                 className="p-1 rounded bg-brand-primary/10 text-brand-primary hover:bg-brand-primary hover:text-white transition-colors cursor-pointer"
@@ -90,7 +93,7 @@ export default function WishlistItemCard({
   startDate,
   endDate,
 }: WishlistItemCardProps) {
-  const [isScheduling, setIsScheduling] = useState(false);
+  const { isMenuOpen, openMenu, closeMenu, openButtonRef } = useMenu();
 
   const [deleteItem] = useDeleteWishlistItemMutation();
   const [promoteItem] = usePromoteWishlistItemMutation();
@@ -115,7 +118,7 @@ export default function WishlistItemCard({
         endAt,
       }).unwrap();
 
-      setIsScheduling(false);
+      closeMenu();
       toast.success("Successfully scheduled event!");
     } catch (err) {
       if (isFetchBaseQueryError(err)) {
@@ -132,17 +135,19 @@ export default function WishlistItemCard({
       <WishlistItemView
         item={item}
         editable={editable}
-        onScheduleClick={() => setIsScheduling(true)}
+        onScheduleClick={openMenu}
         onDeleteClick={handleDelete}
+        scheduleButtonRef={openButtonRef}
       />
 
-      {isScheduling && (
+      {isMenuOpen && (
         <PromoteItemModal
           item={item}
           startDate={startDate}
           endDate={endDate}
-          onClose={() => setIsScheduling(false)}
           onSchedule={handleSchedule}
+          closeMenu={closeMenu}
+          isMenuOpen={isMenuOpen}
         />
       )}
     </>

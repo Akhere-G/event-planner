@@ -12,7 +12,6 @@ export default function ProtectedRoute({
   const location = useLocation();
 
   if (redirect) {
-    console.log("redirecting from ", location.pathname, " to ", redirectTo);
     return <Navigate to={redirectTo} state={{ from: location }} replace />;
   }
   return children;
