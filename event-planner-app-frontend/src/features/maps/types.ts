@@ -29,3 +29,10 @@ export interface Route {
   to: Event;
   mode: string;
 }
+
+export interface CityBounds {
+  north: number;
+  south: number;
+  east: number;
+  west: number;
+}

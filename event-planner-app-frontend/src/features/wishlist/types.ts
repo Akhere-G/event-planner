@@ -53,3 +53,12 @@ export interface ApiResponse<T> {
   message?: string;
   error?: string;
 }
+
+export interface NewItemInput {
+  name: string;
+  address?: string;
+  description?: string;
+  latitude?: number;
+  longitude?: number;
+  placeId?: string;
+}

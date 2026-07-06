@@ -1,0 +1,49 @@
+import { useState } from "react";
+import { toast } from "sonner";
+import { useCreateCategoryMutation } from "../services/wishlistApiSlice";
+
+interface AddCategoryFormProps {
+  itineraryId: number;
+  onSuccess?: () => void;
+}
+
+export default function AddCategoryForm({
+  itineraryId,
+  onSuccess = () => {},
+}: AddCategoryFormProps) {
+  const [name, setName] = useState("");
+  const [createCategory] = useCreateCategoryMutation();
+
+  const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!name.trim()) return;
+
+    try {
+      await createCategory({ itineraryId, name: name.trim() }).unwrap();
+      setName("");
+      toast.success("Wishlist category created!");
+      onSuccess();
+    } catch {
+      toast.error("Failed to create category");
+    }
+  };
+
+  return (
+    <form
+      onSubmit={handleSubmit}
+      className="mb-4 p-3 bg-surface-muted rounded-xl flex gap-2"
+    >
+      <input
+        type="text"
+        placeholder="e.g., Cool Bars, Restaurants, sightseeing"
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+        className="flex-1 px-3 py-1.5 rounded-lg border border-surface-border bg-surface text-xs focus:ring-1 focus:ring-brand-primary"
+        autoFocus
+      />
+      <button type="submit" className="btn-primary px-3 py-1.5 text-xs">
+        Save
+      </button>
+    </form>
+  );
+}
