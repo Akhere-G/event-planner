@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { toast } from "sonner";
 import { useCreateCategoryMutation } from "../services/wishlistApiSlice";
+import { isFetchBaseQueryError, type APIError } from "../../api/utils";
 
 interface AddCategoryFormProps {
   itineraryId: number;
@@ -23,8 +24,13 @@ export default function AddCategoryForm({
       setName("");
       toast.success("Wishlist category created!");
       onSuccess();
-    } catch {
-      toast.error("Failed to create category");
+    } catch (err) {
+      if (isFetchBaseQueryError(err)) {
+        const error = err as APIError;
+        toast.error(error.data.message);
+      } else {
+        toast.error("Failed to create category");
+      }
     }
   };
 

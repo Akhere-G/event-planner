@@ -28,7 +28,6 @@ export default function JoinTrip() {
     join();
   }, [token, navigate, joinTrip]);
 
-  console.log(error);
   let title = "Joining trip...";
 
   if (error) {

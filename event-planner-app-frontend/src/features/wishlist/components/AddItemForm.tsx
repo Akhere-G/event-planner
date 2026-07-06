@@ -71,7 +71,7 @@ export default function AddItemForm({
         <button
           type="button"
           onClick={onCancel}
-          className="text-text-secondary hover:text-text-primary"
+          className="text-text-secondary hover:text-text-primary p-2 -mr-2"
         >
           <X size={14} />
         </button>
