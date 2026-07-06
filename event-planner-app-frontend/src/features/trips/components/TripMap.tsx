@@ -44,6 +44,8 @@ const permissionEnum = {
   LOADING: "LOADING",
 } as const;
 
+// TODO: Add wishlist items to map as markers
+
 export default function TripMap({ trip }: { trip: Trip }) {
   const { latitude, longitude, startDate, endDate, events } = trip;
   const dispatch = useDispatch();

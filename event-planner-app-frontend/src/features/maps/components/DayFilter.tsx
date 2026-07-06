@@ -5,6 +5,7 @@ import type { RootState } from "../../../store";
 import { setDays } from "../../maps/service/mapSlice";
 import type { Day } from "../../events/types";
 
+// TODO: Add wishlist items to filter
 export function DayFilter({
   days,
   setDays,
