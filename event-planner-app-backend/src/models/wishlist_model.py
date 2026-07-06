@@ -5,16 +5,15 @@ from sqlalchemy import (
     Float,
     ForeignKey,
     UniqueConstraint,
-    DateTime,
     Boolean,
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from datetime import datetime, timezone
+from .audit_mixins import AuditMixin
 
 # TODO: Add audit_mixin
 
 
-class WishlistCategory(Base):
+class Wishlist(Base, AuditMixin):
     __tablename__ = "wishlist_categories"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
@@ -25,21 +24,21 @@ class WishlistCategory(Base):
 
     # Relationships
     items: Mapped[list["WishlistItem"]] = relationship(
-        back_populates="category",
+        back_populates="wishlist",
         cascade="all, delete-orphan",
         passive_deletes=True,
     )
 
     __table_args__ = (
-        UniqueConstraint("itinerary_id", "name", name="uq_itinerary_category_name"),
+        UniqueConstraint("itinerary_id", "name", name="uq_itinerary_wishlist_name"),
     )
 
 
-class WishlistItem(Base):
+class WishlistItem(Base, AuditMixin):
     __tablename__ = "wishlist_items"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    category_id: Mapped[int] = mapped_column(
+    wishlist_id: Mapped[int] = mapped_column(
         ForeignKey("wishlist_categories.id", ondelete="CASCADE"), index=True
     )
 
@@ -51,9 +50,4 @@ class WishlistItem(Base):
     place_id: Mapped[str] = mapped_column(String(255), nullable=True)
 
     is_promoted: Mapped[bool] = mapped_column(Boolean, default=False)
-    created_by_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime, default=lambda: datetime.now(timezone.utc)
-    )
-
-    category: Mapped["WishlistCategory"] = relationship(back_populates="items")
+    wishlist: Mapped["Wishlist"] = relationship(back_populates="items")

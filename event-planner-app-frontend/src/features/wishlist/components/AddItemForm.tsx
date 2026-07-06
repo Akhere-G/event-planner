@@ -7,16 +7,16 @@ import { isFetchBaseQueryError } from "../../api/utils";
 import type { CityBounds } from "../../maps/types";
 
 interface AddItemFormProps {
-  itineraryId: number;
-  categoryId: number;
+  tripId: number;
+  wishlistId: number;
   cityBounds: CityBounds;
   onSuccess?: () => void;
   onCancel: () => void;
 }
 
 export default function AddItemForm({
-  itineraryId,
-  categoryId,
+  tripId,
+  wishlistId,
   cityBounds,
   onSuccess = () => {},
   onCancel,
@@ -39,8 +39,8 @@ export default function AddItemForm({
 
     try {
       await createItem({
-        itineraryId,
-        categoryId,
+        tripId,
+        wishlistId,
         name: name.trim(),
         address: address.trim() || undefined,
         description: description.trim() || undefined,

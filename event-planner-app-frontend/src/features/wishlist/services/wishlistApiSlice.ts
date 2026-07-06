@@ -1,38 +1,49 @@
 import { apiSlice } from "../../api/apiSlice";
 import type {
-  WishlistCategory,
-  CreateCategoryPayload,
+  Wishlist as Wishlist,
+  CreateWishlistPayload,
   CreateWishlistItemPayload,
   DeleteWishlistItemPayload,
   PromoteWishlistItemPayload,
   ApiResponse,
   WishlistItem,
+  UpdateWishlistPayload,
 } from "../types";
 import type { Event } from "../../events/types";
 
 export const wishlistApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
-    getWishlists: builder.query<ApiResponse<WishlistCategory[]>, number>({
-      query: (itineraryId) => `/itineraries/${itineraryId}/wishlist`,
+    getWishlists: builder.query<ApiResponse<Wishlist[]>, number>({
+      query: (tripId) => `/itineraries/${tripId}/wishlists`,
       providesTags: ["Wishlists"],
     }),
-    createCategory: builder.mutation<
-      ApiResponse<WishlistCategory>,
-      CreateCategoryPayload
+    createWishlist: builder.mutation<
+      ApiResponse<Wishlist>,
+      CreateWishlistPayload
     >({
-      query: ({ itineraryId, name }) => ({
-        url: `/itineraries/${itineraryId}/wishlist/categories`,
+      query: ({ tripId, name }) => ({
+        url: `/itineraries/${tripId}/wishlists`,
         method: "POST",
         body: { name },
       }),
       invalidatesTags: ["Wishlists"],
     }),
+    updateWishlist: builder.mutation<
+      ApiResponse<Wishlist>,
+      UpdateWishlistPayload
+    >({
+      query: ({ tripId, wishlistId, name }) => ({
+        url: `/itineraries/${tripId}/wishlists/${wishlistId}`,
+        method: "PATCH",
+        body: { name },
+      }),
+    }),
     createWishlistItem: builder.mutation<
       ApiResponse<WishlistItem>,
       CreateWishlistItemPayload
     >({
-      query: ({ itineraryId, ...itemData }) => ({
-        url: `/itineraries/${itineraryId}/wishlist/items`,
+      query: ({ tripId, ...itemData }) => ({
+        url: `/itineraries/${tripId}/wishlists/${itemData.wishlistId}/items`,
         method: "POST",
         body: itemData,
       }),
@@ -42,8 +53,8 @@ export const wishlistApiSlice = apiSlice.injectEndpoints({
       ApiResponse<{ deletedId: number }>,
       DeleteWishlistItemPayload
     >({
-      query: ({ itineraryId, itemId }) => ({
-        url: `/itineraries/${itineraryId}/wishlist/items/${itemId}`,
+      query: ({ tripId, wishlistId, itemId }) => ({
+        url: `/itineraries/${tripId}/wishlists/${wishlistId}/items/${itemId}`,
         method: "DELETE",
       }),
       invalidatesTags: ["Wishlists"],
@@ -52,8 +63,8 @@ export const wishlistApiSlice = apiSlice.injectEndpoints({
       ApiResponse<Event>,
       PromoteWishlistItemPayload
     >({
-      query: ({ itineraryId, itemId, startAt, endAt }) => ({
-        url: `/itineraries/${itineraryId}/wishlist/items/${itemId}/promote`,
+      query: ({ tripId, wishlistId, itemId, startAt, endAt }) => ({
+        url: `/itineraries/${tripId}/wishlists/${wishlistId}/items/${itemId}/promote`,
         method: "POST",
         body: { startAt, endAt },
       }),
@@ -64,7 +75,8 @@ export const wishlistApiSlice = apiSlice.injectEndpoints({
 
 export const {
   useGetWishlistsQuery,
-  useCreateCategoryMutation,
+  useCreateWishlistMutation,
+  useUpdateWishlistMutation,
   useCreateWishlistItemMutation,
   useDeleteWishlistItemMutation,
   usePromoteWishlistItemMutation,

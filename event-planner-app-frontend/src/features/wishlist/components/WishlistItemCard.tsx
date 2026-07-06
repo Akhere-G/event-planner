@@ -80,7 +80,8 @@ function WishlistItemView({
 
 interface WishlistItemCardProps {
   item: WishlistItem;
-  itineraryId: number;
+  tripId: number;
+  wishlistId: number;
   editable: boolean;
   startDate: string;
   endDate: string;
@@ -88,7 +89,8 @@ interface WishlistItemCardProps {
 
 export default function WishlistItemCard({
   item,
-  itineraryId,
+  tripId,
+  wishlistId,
   editable,
   startDate,
   endDate,
@@ -102,7 +104,7 @@ export default function WishlistItemCard({
     // TODO: Use confirm panel
     if (!window.confirm("Are you sure you want to remove this item?")) return;
     try {
-      await deleteItem({ itineraryId, itemId: item.id }).unwrap();
+      await deleteItem({ tripId, wishlistId, itemId: item.id }).unwrap();
       toast.success("Item removed from wishlist.");
     } catch {
       toast.error("Failed to remove item");
@@ -112,7 +114,8 @@ export default function WishlistItemCard({
   const handleSchedule = async (startAt: string, endAt: string) => {
     try {
       await promoteItem({
-        itineraryId,
+        tripId,
+        wishlistId,
         itemId: item.id,
         startAt,
         endAt,

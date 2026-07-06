@@ -2,12 +2,12 @@ import { useState } from "react";
 import { useGetWishlistsQuery } from "../services/wishlistApiSlice";
 import { canUserEdit } from "../../users/utils";
 import { ListPlus } from "lucide-react";
-import type { WishlistCategory } from "../types";
-import AddCategoryForm from "./AddCategoryForm";
-import CategoryCard from "./CategoryCard";
+import type { Wishlist } from "../types";
+import AddWishlistForm from "./AddWishlistForm";
+import WishlistCard from "./WishlistCard";
 
 interface WishlistPanelProps {
-  itineraryId: number;
+  tripId: number;
   role: string;
   startDate: string;
   endDate: string;
@@ -16,17 +16,17 @@ interface WishlistPanelProps {
 }
 
 export default function WishlistPanel({
-  itineraryId,
+  tripId,
   role,
   startDate,
   endDate,
   latitude,
   longitude,
 }: WishlistPanelProps) {
-  const { data: response, isLoading } = useGetWishlistsQuery(itineraryId);
-  const categories = response?.data || [];
+  const { data: response, isLoading } = useGetWishlistsQuery(tripId);
+  const wishlists = response?.data || [];
 
-  const [showCategoryForm, setShowCategoryForm] = useState(false);
+  const [showWishlistForm, setShowWishlistForm] = useState(false);
   const [expandedCategories, setExpandedCategories] = useState<
     Record<number, boolean>
   >({});
@@ -40,7 +40,7 @@ export default function WishlistPanel({
     west: longitude - 0.1,
   };
 
-  const toggleCategory = (catId: number) => {
+  const toggleWishlist = (catId: number) => {
     setExpandedCategories((prev) => ({
       ...prev,
       [catId]: !prev[catId],
@@ -63,7 +63,7 @@ export default function WishlistPanel({
         </div>
         {editable && (
           <button
-            onClick={() => setShowCategoryForm(!showCategoryForm)}
+            onClick={() => setShowWishlistForm(!showWishlistForm)}
             className="btn-secondary px-3 py-1.5 flex items-center gap-1.5 text-xs"
           >
             <ListPlus size={14} />
@@ -72,27 +72,28 @@ export default function WishlistPanel({
         )}
       </div>
 
-      {showCategoryForm && (
-        <AddCategoryForm
-          itineraryId={itineraryId}
-          onSuccess={() => setShowCategoryForm(false)}
+      {showWishlistForm && (
+        <AddWishlistForm
+          tripId={tripId}
+          onSuccess={() => setShowWishlistForm(false)}
         />
       )}
 
       <div className="flex-1 overflow-y-auto space-y-3 pr-1">
-        {categories.length === 0 ? (
+        {wishlists.length === 0 ? (
           <div className="text-center py-8 text-text-secondary text-sm">
-            No lists created yet. Create a category to start planning.
+            No lists created yet. Create a wishlist to start planning.
           </div>
         ) : (
-          categories.map((category: WishlistCategory) => (
-            <CategoryCard
-              key={category.id}
-              category={category}
-              itineraryId={itineraryId}
+          wishlists.map((wishlist: Wishlist) => (
+            <WishlistCard
+              role={role}
+              key={wishlist.id}
+              wishlist={wishlist}
+              tripId={tripId}
               editable={editable}
-              isExpanded={expandedCategories[category.id] ?? true}
-              onToggle={() => toggleCategory(category.id)}
+              isExpanded={expandedCategories[wishlist.id] ?? true}
+              onToggle={() => toggleWishlist(wishlist.id)}
               cityBounds={cityBounds}
               startDate={startDate}
               endDate={endDate}

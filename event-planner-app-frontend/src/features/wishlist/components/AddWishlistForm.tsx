@@ -1,35 +1,35 @@
 import { useState } from "react";
 import { toast } from "sonner";
-import { useCreateCategoryMutation } from "../services/wishlistApiSlice";
 import { isFetchBaseQueryError, type APIError } from "../../api/utils";
+import { useCreateWishlistMutation } from "../services/wishlistApiSlice";
 
-interface AddCategoryFormProps {
-  itineraryId: number;
+interface AddWishlistFormProps {
+  tripId: number;
   onSuccess?: () => void;
 }
 
-export default function AddCategoryForm({
-  itineraryId,
+export default function AddWishlistForm({
+  tripId,
   onSuccess = () => {},
-}: AddCategoryFormProps) {
+}: AddWishlistFormProps) {
   const [name, setName] = useState("");
-  const [createCategory] = useCreateCategoryMutation();
+  const [createWishlist] = useCreateWishlistMutation();
 
   const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!name.trim()) return;
 
     try {
-      await createCategory({ itineraryId, name: name.trim() }).unwrap();
+      await createWishlist({ tripId, name: name.trim() }).unwrap();
       setName("");
-      toast.success("Wishlist category created!");
+      toast.success("Wishlist created!");
       onSuccess();
     } catch (err) {
       if (isFetchBaseQueryError(err)) {
         const error = err as APIError;
         toast.error(error.data.message);
       } else {
-        toast.error("Failed to create category");
+        toast.error("Failed to create wishlist");
       }
     }
   };

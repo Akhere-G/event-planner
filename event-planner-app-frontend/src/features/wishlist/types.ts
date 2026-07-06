@@ -12,16 +12,16 @@ export interface WishlistItem {
   createdAt?: string;
 }
 
-export interface WishlistCategory {
+export interface Wishlist {
   id: number;
-  itineraryId: number;
+  tripId: number;
   name: string;
   items: WishlistItem[];
 }
 
 export interface CreateWishlistItemPayload {
-  itineraryId: number;
-  categoryId: number;
+  tripId: number;
+  wishlistId: number;
   name: string;
   address?: string;
   latitude?: number;
@@ -30,18 +30,25 @@ export interface CreateWishlistItemPayload {
   placeId?: string;
 }
 
-export interface CreateCategoryPayload {
-  itineraryId: number;
+export interface CreateWishlistPayload {
+  tripId: number;
   name: string;
 }
 
+export interface UpdateWishlistPayload {
+  name: string;
+  wishlistId: number;
+  tripId: number;
+}
 export interface DeleteWishlistItemPayload {
-  itineraryId: number;
+  tripId: number;
+  wishlistId: number;
   itemId: number;
 }
 
 export interface PromoteWishlistItemPayload {
-  itineraryId: number;
+  tripId: number;
+  wishlistId: number;
   itemId: number;
   startAt: string;
   endAt: string;

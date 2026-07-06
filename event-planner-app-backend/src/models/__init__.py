@@ -6,7 +6,7 @@ from src.models.itinerary_user_model import UserRole
 from src.models.event_model import Event
 from src.models.invite_model import Invite, InvitationStatus
 from src.models.audit_mixins import AuditMixin
-from src.models.wishlist_model import WishlistCategory, WishlistItem
+from src.models.wishlist_model import Wishlist, WishlistItem
 
 __all__ = [
     "AuditMixin",
@@ -18,6 +18,6 @@ __all__ = [
     "Event",
     "Invite",
     "InvitationStatus",
-    "WishlistCategory",
+    "Wishlist",
     "WishlistItem",
 ]

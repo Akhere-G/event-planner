@@ -49,7 +49,7 @@ export default function TripDetails(trip: Trip) {
           {activeTab === "tips" && <TripInsights trip={trip} />}
           {activeTab === "wishlist" && (
             <WishlistPanel
-              itineraryId={trip.id}
+              tripId={trip.id}
               role={trip.role}
               startDate={trip.startDate}
               endDate={trip.endDate}

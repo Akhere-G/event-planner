@@ -95,7 +95,7 @@ def create_app():
         )
         app.register_blueprint(
             wishlist_bp,
-            url_prefix="/api/itineraries/<int:itinerary_id>/wishlist",
+            url_prefix="/api/itineraries/<int:itinerary_id>/wishlists",
         )
         app.register_blueprint(ai_bp, url_prefix="/api/ai")
 

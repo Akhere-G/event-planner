@@ -3,13 +3,14 @@ from ..middleware.login_required import login_required
 from ..services.itineraries_service import get_itinerary_membership, is_authorised
 from ..services.wishlist_service import (
     get_wishlists,
-    create_category,
+    create_wishlist,
+    update_wishlist,
     create_wishlist_item,
     delete_wishlist_item,
     promote_wishlist_item,
     itinerary_contains_wishlist_item,
 )
-from ..schemas.wishlist_schema import WishlistCategorySchema, WishlistItemSchema
+from ..schemas.wishlist_schema import WishlistSchema, WishlistItemSchema
 from ..schemas.event_schema import EventSchema
 from ..schemas.itinerary_schema import UserRole
 from ..utils.format_response import api_response
@@ -31,7 +32,7 @@ def get_wishlists_route(user_id: int, itinerary_id: int):
     try:
         get_itinerary_membership(user_id, itinerary_id)
         results = get_wishlists(itinerary_id)
-        schema = WishlistCategorySchema(many=True)
+        schema = WishlistSchema(many=True)
         return api_response(
             success=True,
             data=schema.dump(results),
@@ -47,24 +48,24 @@ def get_wishlists_route(user_id: int, itinerary_id: int):
         )
 
 
-@wishlist_bp.route("/categories", methods=["POST"])
+@wishlist_bp.route("", methods=["POST"])
 @login_required
-def create_category_route(user_id: int, itinerary_id: int):
+def create_wishlist_route(user_id: int, itinerary_id: int):
     try:
         is_authorised(
             user_id=user_id,
             itinerary_id=itinerary_id,
             authorised_roles=[UserRole.ADMIN, UserRole.EDITOR],
-            message="You must be an admin or an editor to add categories.",
+            message="You must be an admin or an editor to add wishlists.",
         )
         name = request.json.get("name")
         if not name or not name.strip():
             return api_response(
-                success=False, error="Category name is required.", status_code=400
+                success=False, error="Wishlist name is required.", status_code=400
             )
 
-        category = create_category(itinerary_id, name.strip())
-        schema = WishlistCategorySchema()
+        category = create_wishlist(itinerary_id, name.strip())
+        schema = WishlistSchema()
         return api_response(
             success=True,
             data=schema.dump(category),
@@ -80,12 +81,50 @@ def create_category_route(user_id: int, itinerary_id: int):
         )
 
 
-# TODO: Add update Wishlist route
+# TODO: Add delete Wishlist route
 
 
-@wishlist_bp.route("/items", methods=["POST"])
+@wishlist_bp.route("/<int:wishlist_id>", methods=["PATCH"])
 @login_required
-def create_item_route(user_id: int, itinerary_id: int):
+def update_wishlist_route(user_id: int, itinerary_id: int, wishlist_id: int):
+    is_authorised(
+        user_id=user_id,
+        itinerary_id=itinerary_id,
+        authorised_roles=[
+            UserRole.ADMIN,
+            UserRole.EDITOR,
+        ],
+        message="You must be an admin or an editor to edit wishlists.",
+    )
+    try:
+        schema = WishlistSchema()
+        name = request.json.get("name", "").strip()
+        if not name:
+            return api_response(
+                success=False,
+                error="Name is required",
+                message="Name is required",
+                status_code=400,
+            )
+
+        updated_category = update_wishlist(itinerary_id, wishlist_id, name)
+
+        return api_response(
+            success=True, data=schema.dump(updated_category), message="Updated category"
+        )
+
+    except (ItineraryDoesNotExistError, UserNotAuthorisedError, BadRequestError) as err:
+        return api_response(
+            success=False,
+            error=err.message,
+            message=err.message,
+            status_code=err.status_code,
+        )
+
+
+@wishlist_bp.route("/<int:wishlist_id>/items", methods=["POST"])
+@login_required
+def create_item_route(user_id: int, itinerary_id: int, wishlist_id: int):
     schema = WishlistItemSchema()
     try:
         is_authorised(
@@ -95,13 +134,8 @@ def create_item_route(user_id: int, itinerary_id: int):
             message="You must be an admin or an editor to add items.",
         )
         validated_data = schema.load(request.json)
-        category_id = request.json.get("categoryId")
-        if not category_id:
-            return api_response(
-                success=False, error="categoryId is required.", status_code=400
-            )
 
-        item = create_wishlist_item(itinerary_id, category_id, validated_data, user_id)
+        item = create_wishlist_item(itinerary_id, wishlist_id, validated_data, user_id)
         return api_response(
             success=True,
             data=schema.dump(item),
@@ -121,9 +155,9 @@ def create_item_route(user_id: int, itinerary_id: int):
         )
 
 
-@wishlist_bp.route("/items/<int:item_id>", methods=["DELETE"])
+@wishlist_bp.route("/<int:wishlist_id>/items/<int:item_id>", methods=["DELETE"])
 @login_required
-def delete_item_route(user_id: int, itinerary_id: int, item_id: int):
+def delete_item_route(user_id: int, itinerary_id: int, wishlist_id: int, item_id: int):
     try:
         is_authorised(
             user_id=user_id,
@@ -157,9 +191,9 @@ def delete_item_route(user_id: int, itinerary_id: int, item_id: int):
 # TODO: Add update Wishlist Item route
 
 
-@wishlist_bp.route("/items/<int:item_id>/promote", methods=["POST"])
+@wishlist_bp.route("/<int:wishlist_id>/items/<int:item_id>/promote", methods=["POST"])
 @login_required
-def promote_item_route(user_id: int, itinerary_id: int, item_id: int):
+def promote_item_route(user_id: int, itinerary_id: int, wishlist_id: int, item_id: int):
     try:
         is_authorised(
             user_id=user_id,
@@ -167,6 +201,14 @@ def promote_item_route(user_id: int, itinerary_id: int, item_id: int):
             authorised_roles=[UserRole.ADMIN, UserRole.EDITOR],
             message="You must be an admin or an editor to schedule items.",
         )
+        if not itinerary_contains_wishlist_item(itinerary_id, item_id):
+            return api_response(
+                success=False,
+                error="Wishlist item does not exists",
+                message="Wishlist item does not exist",
+                status_code=404,
+            )
+
         start_at_str = request.json.get("startAt")
         end_at_str = request.json.get("endAt")
 
