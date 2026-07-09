@@ -130,6 +130,17 @@ export default function AboutPage() {
           </div>
         </div>
       </section>
+
+      <h2 className="text-3xl font-bold text-text-primary mb-10 text-left border-b border-surface-border pb-4 px-2 md:px-0">
+        Contact Us
+      </h2>
+      <p>
+        Contact us at{" "}
+        <a href="mailto:akhereaihoeghinlan@gmail.com">
+          akhereaihoeghinlan@gmail.com
+        </a>{" "}
+        if you have any questions, queries or requests.
+      </p>
     </div>
   );
 }
