@@ -1,10 +1,14 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { X } from "lucide-react";
 import { toast } from "sonner";
 import { LocationInput } from "../../../components";
-import { useCreateWishlistItemMutation } from "../services/wishlistApiSlice";
+import {
+  useCreateWishlistItemMutation,
+  useUpdateWishlistItemMutation,
+} from "../services/wishlistApiSlice";
 import { isFetchBaseQueryError } from "../../api/utils";
 import type { CityBounds } from "../../maps/types";
+import type { WishlistItem } from "../types";
 
 interface AddItemFormProps {
   tripId: number;
@@ -12,6 +16,7 @@ interface AddItemFormProps {
   cityBounds: CityBounds;
   onSuccess?: () => void;
   onCancel: () => void;
+  selectedItem: WishlistItem | null;
 }
 
 export default function AddItemForm({
@@ -20,15 +25,40 @@ export default function AddItemForm({
   cityBounds,
   onSuccess = () => {},
   onCancel,
+  selectedItem,
 }: AddItemFormProps) {
   const [name, setName] = useState("");
-  const [address, setAddress] = useState("");
-  const [description, setDescription] = useState("");
+  const [address, setAddress] = useState<string | undefined>("");
+  const [description, setDescription] = useState<string | undefined>("");
   const [latitude, setLatitude] = useState<number | undefined>(undefined);
   const [longitude, setLongitude] = useState<number | undefined>(undefined);
   const [placeId, setPlaceId] = useState<string | undefined>(undefined);
+  const [updateItem] = useUpdateWishlistItemMutation();
 
   const [createItem] = useCreateWishlistItemMutation();
+
+  const formId = `additemform-${wishlistId}`;
+
+  useEffect(() => {
+    function setInitialState() {
+      if (!selectedItem) {
+        return;
+      }
+      setName(selectedItem.name);
+      setAddress(selectedItem.address);
+      setDescription(selectedItem.description);
+      setLatitude(selectedItem.latitude);
+      setLongitude(selectedItem.longitude);
+      setPlaceId(selectedItem.placeId);
+    }
+
+    setInitialState();
+
+    const el = document.getElementById(formId);
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [selectedItem, formId]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,18 +68,33 @@ export default function AddItemForm({
     }
 
     try {
-      await createItem({
-        tripId,
-        wishlistId,
-        name: name.trim(),
-        address: address.trim() || undefined,
-        description: description.trim() || undefined,
-        latitude,
-        longitude,
-        placeId,
-      }).unwrap();
+      if (selectedItem) {
+        await updateItem({
+          itemId: selectedItem.id,
+          tripId,
+          wishlistId,
+          name,
+          address,
+          description,
+          latitude,
+          longitude,
+          placeId,
+        }).unwrap();
+        toast.success("Wishlist item updated!");
+      } else {
+        await createItem({
+          tripId,
+          wishlistId,
+          name: name.trim(),
+          address: address?.trim() || undefined,
+          description: description?.trim() || undefined,
+          latitude,
+          longitude,
+          placeId,
+        }).unwrap();
+        toast.success("Wishlist item added!");
+      }
 
-      toast.success("Wishlist item added!");
       onSuccess();
     } catch (err) {
       if (isFetchBaseQueryError(err)) {
@@ -63,11 +108,14 @@ export default function AddItemForm({
 
   return (
     <form
+      id={formId}
       onSubmit={handleSubmit}
       className="p-3 bg-surface-muted rounded-lg space-y-2 border border-surface-border"
     >
       <div className="flex justify-between items-center mb-1">
-        <span className="text-xs font-bold text-text-main">New Activity</span>
+        <span className="text-xs font-bold text-text-main">
+          {selectedItem ? "Update Activity" : "New Activity"}
+        </span>
         <button
           type="button"
           onClick={onCancel}
@@ -115,9 +163,18 @@ export default function AddItemForm({
         onChange={(e) => setDescription(e.target.value)}
         className="w-full px-2 py-1 rounded-md text-xs h-12 resize-none"
       />
-      <button type="submit" className="w-full btn-primary py-1.5 text-xs">
-        Add to List
-      </button>
+      <div className="flex gap-4">
+        <button
+          type="button"
+          onClick={onCancel}
+          className="btn-secondary flex-1"
+        >
+          Cancel
+        </button>
+        <button type="submit" className="flex-1 btn-primary py-1.5 text-xs">
+          {selectedItem ? "Update Item" : "Add to List"}
+        </button>
+      </div>
     </form>
   );
 }

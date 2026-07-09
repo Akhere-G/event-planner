@@ -1,4 +1,4 @@
-import { Calendar, MapPin, Trash } from "lucide-react";
+import { Calendar, Edit, MapPin, Trash } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import {
@@ -17,6 +17,7 @@ interface WishlistItemViewProps {
   onScheduleClick: () => void;
   onDeleteClick: () => void;
   scheduleButtonRef: React.Ref<HTMLButtonElement>;
+  editItem: (item: WishlistItem) => void;
 }
 
 function WishlistItemView({
@@ -25,6 +26,7 @@ function WishlistItemView({
   onScheduleClick,
   onDeleteClick,
   scheduleButtonRef,
+  editItem,
 }: WishlistItemViewProps) {
   return (
     <div
@@ -34,13 +36,13 @@ function WishlistItemView({
           : "border-surface-border bg-surface-muted"
       }`}
     >
-      <div className="flex justify-between items-start gap-1">
+      <div className="flex justify-between items-start gap-2">
         <div>
           <h4 className="font-semibold text-text-main pr-10">{item.name}</h4>
         </div>
 
         {editable && (
-          <div className="flex items-center gap-1.5 shrink-0">
+          <div className="flex items-center gap-1 shrink-0">
             {!item.isPromoted ? (
               <button
                 ref={scheduleButtonRef}
@@ -55,6 +57,13 @@ function WishlistItemView({
                 Added
               </span>
             )}
+            <button
+              className="ml-1 p-1 rounded text-text-secondary hover:text-info hover:bg-info/25 transition-colors cursor-pointer"
+              title="Edit activity"
+              onClick={() => editItem(item)}
+            >
+              <Edit size={12} />
+            </button>
             <button
               onClick={onDeleteClick}
               title="Delete activity"
@@ -90,6 +99,7 @@ interface WishlistItemCardProps {
   editable: boolean;
   startDate: string;
   endDate: string;
+  editItem: (item: WishlistItem) => void;
 }
 
 export default function WishlistItemCard({
@@ -99,6 +109,7 @@ export default function WishlistItemCard({
   editable,
   startDate,
   endDate,
+  editItem,
 }: WishlistItemCardProps) {
   const { isMenuOpen, openMenu, closeMenu, openButtonRef } = useMenu();
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -147,6 +158,7 @@ export default function WishlistItemCard({
         onScheduleClick={openMenu}
         onDeleteClick={() => setShowDeleteConfirm(true)}
         scheduleButtonRef={openButtonRef}
+        editItem={editItem}
       />
 
       {isMenuOpen && (
