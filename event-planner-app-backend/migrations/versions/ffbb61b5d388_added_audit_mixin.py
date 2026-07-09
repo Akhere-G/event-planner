@@ -3,7 +3,6 @@
 Revision ID: ffbb61b5d388
 Revises: 6b68d2fc96ee
 Create Date: 2026-07-06 12:05:27.465832
-
 """
 
 from alembic import op
@@ -18,11 +17,36 @@ depends_on = None
 
 
 def upgrade():
-    with op.batch_alter_table("wishlist_categories", schema=None) as batch_op:
-        batch_op.add_column(sa.Column("created_at", sa.DateTime(), nullable=False))
-        batch_op.add_column(sa.Column("updated_at", sa.DateTime(), nullable=False))
+    # ----------------------------
+    # wishlist_categories
+    # ----------------------------
+    with op.batch_alter_table("wishlist_categories") as batch_op:
+        batch_op.add_column(sa.Column("created_at", sa.DateTime(), nullable=True))
+        batch_op.add_column(sa.Column("updated_at", sa.DateTime(), nullable=True))
         batch_op.add_column(sa.Column("created_by_id", sa.Integer(), nullable=True))
         batch_op.add_column(sa.Column("updated_by_id", sa.Integer(), nullable=True))
+
+    # Backfill timestamps for existing rows
+    op.execute("""
+        UPDATE wishlist_categories
+        SET
+            created_at = UTC_TIMESTAMP(),
+            updated_at = UTC_TIMESTAMP()
+        WHERE created_at IS NULL
+    """)
+
+    with op.batch_alter_table("wishlist_categories") as batch_op:
+        batch_op.alter_column(
+            "created_at",
+            existing_type=sa.DateTime(),
+            nullable=False,
+        )
+
+        batch_op.alter_column(
+            "updated_at",
+            existing_type=sa.DateTime(),
+            nullable=False,
+        )
 
         batch_op.drop_constraint(
             batch_op.f("uq_itinerary_category_name"),
@@ -48,15 +72,40 @@ def upgrade():
             ["id"],
         )
 
-    with op.batch_alter_table("wishlist_items", schema=None) as batch_op:
-        batch_op.add_column(sa.Column("wishlist_id", sa.Integer(), nullable=False))
-        batch_op.add_column(sa.Column("updated_at", sa.DateTime(), nullable=False))
+    # ----------------------------
+    # wishlist_items
+    # ----------------------------
+    with op.batch_alter_table("wishlist_items") as batch_op:
+        batch_op.add_column(sa.Column("wishlist_id", sa.Integer(), nullable=True))
+        batch_op.add_column(sa.Column("updated_at", sa.DateTime(), nullable=True))
         batch_op.add_column(sa.Column("updated_by_id", sa.Integer(), nullable=True))
 
         batch_op.alter_column(
             "created_by_id",
             existing_type=sa.INTEGER(),
             nullable=True,
+        )
+
+    # Copy existing values
+    op.execute("""
+        UPDATE wishlist_items
+        SET
+            wishlist_id = category_id,
+            updated_at = UTC_TIMESTAMP()
+        WHERE wishlist_id IS NULL
+    """)
+
+    with op.batch_alter_table("wishlist_items") as batch_op:
+        batch_op.alter_column(
+            "wishlist_id",
+            existing_type=sa.Integer(),
+            nullable=False,
+        )
+
+        batch_op.alter_column(
+            "updated_at",
+            existing_type=sa.DateTime(),
+            nullable=False,
         )
 
         batch_op.drop_index(batch_op.f("ix_wishlist_items_category_id"))
@@ -86,7 +135,7 @@ def upgrade():
 
 
 def downgrade():
-    with op.batch_alter_table("wishlist_items", schema=None) as batch_op:
+    with op.batch_alter_table("wishlist_items") as batch_op:
         batch_op.add_column(sa.Column("category_id", sa.INTEGER(), nullable=False))
 
         batch_op.drop_constraint(
@@ -125,7 +174,7 @@ def downgrade():
         batch_op.drop_column("updated_at")
         batch_op.drop_column("wishlist_id")
 
-    with op.batch_alter_table("wishlist_categories", schema=None) as batch_op:
+    with op.batch_alter_table("wishlist_categories") as batch_op:
         batch_op.drop_constraint(
             "fk_wishlist_categories_updated_by_id_users",
             type_="foreignkey",
