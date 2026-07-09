@@ -1,14 +1,24 @@
 import { useState } from "react";
-import { ChevronDown, ChevronUp, Plus } from "lucide-react";
+import {
+  ChevronDown,
+  ChevronUp,
+  MoreVertical,
+  Plus,
+  Trash,
+} from "lucide-react";
 import AddItemForm from "./AddItemForm";
 import WishlistItemCard from "./WishlistItemCard";
 import type { Wishlist } from "../types";
 import type { CityBounds } from "../../maps/types";
-import { EditableText } from "../../../components";
+import { ConfirmModal, EditableText } from "../../../components";
 import { canUserEdit } from "../../users/utils";
-import { useUpdateWishlistMutation } from "../services/wishlistApiSlice";
+import {
+  useDeleteWishlistMutation,
+  useUpdateWishlistMutation,
+} from "../services/wishlistApiSlice";
 import { isFetchBaseQueryError, type APIError } from "../../api/utils";
 import { toast } from "sonner";
+import useMenu from "../../../hooks/useMenu";
 
 interface WishlistCardProps {
   wishlist: Wishlist;
@@ -36,7 +46,16 @@ export default function WishlistCard({
   const [name, setName] = useState(wishlist.name);
   const [isAddingItem, setIsAddingItem] = useState(false);
   const [updateWishlist] = useUpdateWishlistMutation();
-
+  const { openMenu, isMenuOpen, openButtonRef, menuContainerRef } = useMenu();
+  const {
+    openMenu: openConfirmDeleteModal,
+    isMenuOpen: isDeleteModalOpen,
+    openButtonRef: openDeleteButtonRef,
+    menuContainerRef: deleteMenuRef,
+    closeMenu: closeDeleteModal,
+  } = useMenu();
+  const [deleteWishlist, { isLoading: isDeleteLoading }] =
+    useDeleteWishlistMutation();
   const updateWishlistName = async (name: string) => {
     const oldName = wishlist.name;
     try {
@@ -55,9 +74,22 @@ export default function WishlistCard({
     }
   };
 
+  const confirmDelete = async () => {
+    try {
+      await deleteWishlist({ tripId, wishlistId: wishlist.id }).unwrap();
+    } catch (err) {
+      if (isFetchBaseQueryError(err)) {
+        const error = err as APIError;
+
+        toast.error(error.data.message);
+      } else {
+        toast.error("Could not delete wishlist");
+      }
+    }
+  };
   return (
-    <div className="border border-surface-border rounded-xl overflow-hidden bg-surface">
-      <div className="w-full p-2 bg-surface-muted/50 ">
+    <div className="relative border border-surface-border rounded-xl overflow-hidden bg-surface">
+      <div className="w-full p-2 bg-surface-muted/50 flex items-center justify-between">
         <div className="flex items-center gap-2 ">
           <button className="p-1" onClick={onToggle}>
             {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
@@ -71,6 +103,12 @@ export default function WishlistCard({
             emptyText="Change name"
           />
         </div>
+
+        {editable && (
+          <button className="p-2" ref={openButtonRef} onClick={openMenu}>
+            <MoreVertical size={16} />
+          </button>
+        )}
       </div>
 
       {isExpanded && (
@@ -112,6 +150,31 @@ export default function WishlistCard({
             ))
           )}
         </div>
+      )}
+
+      {isMenuOpen && (
+        <div
+          ref={menuContainerRef}
+          className="absolute card z-1 top-4 right-4 py-1 px-1"
+        >
+          <button
+            ref={openDeleteButtonRef}
+            disabled={isDeleteLoading}
+            className="btn-menu text-error flex items-center gap-2"
+            onClick={openConfirmDeleteModal}
+          >
+            <Trash size={16} /> Delete
+          </button>
+        </div>
+      )}
+
+      {isDeleteModalOpen && (
+        <ConfirmModal
+          closeModal={closeDeleteModal}
+          confirmAction={confirmDelete}
+          title={`Delete wishlist ${wishlist.name}?`}
+          modalRef={deleteMenuRef}
+        />
       )}
     </div>
   );
