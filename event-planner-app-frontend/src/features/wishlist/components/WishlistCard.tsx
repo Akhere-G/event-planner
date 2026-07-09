@@ -8,7 +8,7 @@ import {
 } from "lucide-react";
 import AddItemForm from "./AddItemForm";
 import WishlistItemCard from "./WishlistItemCard";
-import type { Wishlist } from "../types";
+import type { Wishlist, WishlistItem } from "../types";
 import type { CityBounds } from "../../maps/types";
 import { ConfirmModal, EditableText } from "../../../components";
 import { canUserEdit } from "../../users/utils";
@@ -46,6 +46,7 @@ export default function WishlistCard({
   const [name, setName] = useState(wishlist.name);
   const [isAddingItem, setIsAddingItem] = useState(false);
   const [updateWishlist] = useUpdateWishlistMutation();
+  const [selectedItem, setSelectedItem] = useState<null | WishlistItem>(null);
   const { openMenu, isMenuOpen, openButtonRef, menuContainerRef } = useMenu();
   const {
     openMenu: openConfirmDeleteModal,
@@ -87,6 +88,12 @@ export default function WishlistCard({
       }
     }
   };
+
+  const editItem = (item: WishlistItem) => {
+    setSelectedItem(item);
+    setIsAddingItem(true);
+  };
+
   return (
     <div className="relative border border-surface-border rounded-xl bg-surface">
       <div
@@ -130,7 +137,11 @@ export default function WishlistCard({
               wishlistId={wishlist.id}
               cityBounds={cityBounds}
               onSuccess={() => setIsAddingItem(false)}
-              onCancel={() => setIsAddingItem(false)}
+              onCancel={() => {
+                setIsAddingItem(false);
+                setSelectedItem(null);
+              }}
+              selectedItem={selectedItem}
             />
           )}
 
@@ -148,6 +159,7 @@ export default function WishlistCard({
                 editable={editable}
                 startDate={startDate}
                 endDate={endDate}
+                editItem={editItem}
               />
             ))
           )}
