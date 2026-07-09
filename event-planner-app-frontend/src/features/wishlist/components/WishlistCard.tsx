@@ -88,8 +88,10 @@ export default function WishlistCard({
     }
   };
   return (
-    <div className="relative border border-surface-border rounded-xl overflow-hidden bg-surface">
-      <div className="w-full p-2 bg-surface-muted/50 flex items-center justify-between">
+    <div className="relative border border-surface-border rounded-xl bg-surface">
+      <div
+        className={`w-full p-2 bg-surface-muted/50 rounded-xl flex items-center justify-between ${isExpanded ? "rounded-b-none!" : ""}`}
+      >
         <div className="flex items-center gap-2 ">
           <button className="p-1" onClick={onToggle}>
             {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
@@ -155,7 +157,7 @@ export default function WishlistCard({
       {isMenuOpen && (
         <div
           ref={menuContainerRef}
-          className="absolute card z-1 top-4 right-4 py-1 px-1"
+          className="absolute isolate card z-200 top-4 right-4 py-1 px-1"
         >
           <button
             ref={openDeleteButtonRef}
