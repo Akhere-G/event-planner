@@ -1,5 +1,6 @@
 import {
   Calendar,
+  FileText,
   MoreVertical,
   Pencil,
   SquareArrowRightExit,
@@ -20,7 +21,7 @@ import { toast } from "sonner";
 import type { RootState } from "../../../store";
 import { ConfirmModal } from "../../../components";
 import { useState } from "react";
-import { exportToCalendar } from "../utils";
+import { exportToCalendar, exportToDoc } from "../utils";
 
 interface TripSummaryProps {
   trip: Trip;
@@ -116,6 +117,13 @@ export default function TripSummary({
           >
             <Calendar size={16} />
             Export to calendar
+          </button>
+          <button
+            onClick={() => exportToDoc(trip)}
+            className="btn-menu text-left flex gap-2 items-center"
+          >
+            <FileText size={16} />
+            Export to Word
           </button>
           {isAdmin(trip.role) && (
             <button
