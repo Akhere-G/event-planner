@@ -43,6 +43,9 @@ import { useGetWishlistsQuery } from "../../wishlist/services/wishlistApiSlice";
 import type { WishlistItem } from "../../wishlist/types";
 import { getWishlistColor } from "../../wishlist/utils";
 import WishlistItemCard from "../../wishlist/components/WishlistItemCard";
+import useMenu from "../../../hooks/useMenu";
+import { ConfirmModal } from "../../../components";
+import AddItemForm from "../../wishlist/components/AddItemForm";
 
 const permissionEnum = {
   GRANTED: "GRANTED",
@@ -65,6 +68,13 @@ export default function TripMap({ trip }: { trip: Trip }) {
   } = useSelector((state: RootState) => state.map);
   const darkMode = useSelector((state: RootState) => state.theme.darkMode);
 
+  const {
+    isMenuOpen: isEditingWishlistItem,
+    setIsMenuOpen: setIsEditingWishlistItem,
+    closeMenu: closeEditWishlistItemModal,
+    openButtonRef: editWishlistItemButtonRef,
+    menuContainerRef: editWishlistItemModalRef,
+  } = useMenu();
   const { data: wishlistsResponse } = useGetWishlistsQuery(trip.id);
   const wishlists = wishlistsResponse?.data ?? [];
 
@@ -98,16 +108,17 @@ export default function TripMap({ trip }: { trip: Trip }) {
     .filter((day) => day.show)
     .flatMap((day) => day.events);
 
+  const cityBounds = {
+    north: latitude + CITY_RADIUS,
+    south: latitude - CITY_RADIUS,
+    east: longitude + CITY_RADIUS,
+    west: longitude - CITY_RADIUS,
+  };
+
   useEffect(() => {
     if (!map) return;
 
-    const defaultBounds = {
-      north: latitude + CITY_RADIUS,
-      south: latitude - CITY_RADIUS,
-      east: longitude + CITY_RADIUS,
-      west: longitude - CITY_RADIUS,
-    };
-    fitToBounds({ map, events: selectedEvents, defaultBounds });
+    fitToBounds({ map, events: selectedEvents, defaultBounds: cityBounds });
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [map, latitude, longitude]);
@@ -282,6 +293,8 @@ export default function TripMap({ trip }: { trip: Trip }) {
             endDate={trip.endDate}
             tripId={trip.id}
             wishlistId={selectedWishlistItem.wishlistId}
+            editItem={() => setIsEditingWishlistItem(true)}
+            editButtonRef={editWishlistItemButtonRef}
           />
         </div>
       )}
@@ -295,6 +308,29 @@ export default function TripMap({ trip }: { trip: Trip }) {
           </button>
           <EventSearchResultList />
         </div>
+      )}
+
+      {isEditingWishlistItem && selectedWishlistItem && (
+        <ConfirmModal
+          closeModal={closeEditWishlistItemModal}
+          title="Edit wishlist item"
+          modalRef={editWishlistItemModalRef}
+          hideButtons
+        >
+          <AddItemForm
+            cityBounds={cityBounds}
+            onCancel={() => {
+              setIsEditingWishlistItem(false);
+            }}
+            selectedItem={selectedWishlistItem}
+            tripId={trip.id}
+            wishlistId={selectedWishlistItem.wishlistId}
+            onSuccess={() => {
+              setIsEditingWishlistItem(false);
+              dispatch(setSelectedWishlistItem(null));
+            }}
+          />
+        </ConfirmModal>
       )}
     </div>
   );

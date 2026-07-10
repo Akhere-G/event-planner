@@ -7,6 +7,8 @@ import { TripCalendar } from "../../calendar/components";
 import { TripInsights } from "../../ai/components";
 import WishlistPanel from "../../wishlist/components/WishlistPanel";
 
+// TODO Add Resizable sections from shadcn
+
 export default function TripDetails(trip: Trip) {
   const [activeTab, setActiveTab] = useState<
     "list" | "calendar" | "wishlist" | "tips"

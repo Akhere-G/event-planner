@@ -1,5 +1,5 @@
 import { Calendar, Edit, MapPin, Trash } from "lucide-react";
-import { useState } from "react";
+import React, { useState } from "react";
 import { toast } from "sonner";
 import {
   useDeleteWishlistItemMutation,
@@ -18,6 +18,8 @@ interface WishlistItemViewProps {
   onDeleteClick: () => void;
   scheduleButtonRef: React.Ref<HTMLButtonElement>;
   editItem: (item: WishlistItem) => void;
+  editButtonProps?: React.ButtonHTMLAttributes<HTMLButtonElement>;
+  editButtonRef: React.Ref<HTMLButtonElement>;
 }
 
 function WishlistItemView({
@@ -27,6 +29,8 @@ function WishlistItemView({
   onDeleteClick,
   scheduleButtonRef,
   editItem,
+  editButtonProps,
+  editButtonRef,
 }: WishlistItemViewProps) {
   return (
     <div
@@ -61,6 +65,8 @@ function WishlistItemView({
               className="ml-1 p-1 rounded text-text-secondary hover:text-info hover:bg-info/25 transition-colors cursor-pointer"
               title="Edit activity"
               onClick={() => editItem(item)}
+              {...editButtonProps}
+              ref={editButtonRef}
             >
               <Edit size={12} />
             </button>
@@ -100,6 +106,8 @@ interface WishlistItemCardProps {
   startDate: string;
   endDate: string;
   editItem: (item: WishlistItem) => void;
+  editButtonProps?: React.ButtonHTMLAttributes<HTMLButtonElement>;
+  editButtonRef: React.Ref<HTMLButtonElement>;
 }
 
 export default function WishlistItemCard({
@@ -110,6 +118,8 @@ export default function WishlistItemCard({
   startDate,
   endDate,
   editItem,
+  editButtonProps,
+  editButtonRef,
 }: WishlistItemCardProps) {
   const { isMenuOpen, openMenu, closeMenu, openButtonRef } = useMenu();
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -159,6 +169,8 @@ export default function WishlistItemCard({
         onDeleteClick={() => setShowDeleteConfirm(true)}
         scheduleButtonRef={openButtonRef}
         editItem={editItem}
+        editButtonProps={editButtonProps}
+        editButtonRef={editButtonRef}
       />
 
       {isMenuOpen && (
