@@ -19,7 +19,7 @@ interface WishlistItemViewProps {
   scheduleButtonRef: React.Ref<HTMLButtonElement>;
   editItem: (item: WishlistItem) => void;
   editButtonProps?: React.ButtonHTMLAttributes<HTMLButtonElement>;
-  editButtonRef: React.Ref<HTMLButtonElement>;
+  editButtonRef?: React.Ref<HTMLButtonElement>;
 }
 
 function WishlistItemView({
@@ -107,7 +107,7 @@ interface WishlistItemCardProps {
   endDate: string;
   editItem: (item: WishlistItem) => void;
   editButtonProps?: React.ButtonHTMLAttributes<HTMLButtonElement>;
-  editButtonRef: React.Ref<HTMLButtonElement>;
+  editButtonRef?: React.Ref<HTMLButtonElement>;
 }
 
 export default function WishlistItemCard({
