@@ -28,6 +28,10 @@ interface EventCardProps {
   handleEdit?: (eventId: number, updatedEvent: Partial<Event>) => Promise<void>;
   role: string;
 }
+// TODO: Make start at and end at select be modals instead (with date picker).
+// TODO: Use shadcn popup for category select.
+// TODO: Allow for name edit
+// TODO: Add show in map function for event cards in list
 
 export function EventCard({
   event,

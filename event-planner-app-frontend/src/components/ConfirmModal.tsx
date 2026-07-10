@@ -10,15 +10,17 @@ export default function ConfirmModal({
   modalRef,
   children,
   confirmButtonProps,
+  hideButtons = false,
 }: {
   closeModal: () => void;
   title: string;
   confirmText?: string;
-  confirmAction: () => void;
+  confirmAction?: () => void;
   confirmBtnClasses?: string;
   modalRef?: Ref<HTMLDivElement>;
   children?: React.ReactNode;
   confirmButtonProps?: React.ButtonHTMLAttributes<HTMLButtonElement>;
+  hideButtons?: boolean;
 }) {
   return (
     <div
@@ -46,18 +48,20 @@ export default function ConfirmModal({
 
             <div className="overflow-scroll max-h-[70vh]">{children}</div>
 
-            <div className="p-4 mt-4 flex justify-end gap-2">
-              <button onClick={closeModal} className="btn-secondary">
-                Cancel
-              </button>
-              <button
-                onClick={confirmAction}
-                className={confirmBtnClasses}
-                {...confirmButtonProps}
-              >
-                {confirmText}
-              </button>
-            </div>
+            {!hideButtons && (
+              <div className="p-4 mt-4 flex justify-end gap-2">
+                <button onClick={closeModal} className="btn-secondary">
+                  Cancel
+                </button>
+                <button
+                  onClick={confirmAction}
+                  className={confirmBtnClasses}
+                  {...confirmButtonProps}
+                >
+                  {confirmText}
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>
