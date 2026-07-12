@@ -4,14 +4,16 @@ import type { Trip } from "../types";
 import TripSummary from "./TripSummary";
 import { TripInsights } from "../../ai/components";
 import TripActivities from "./TripActivities";
+import AccommodationPage from "../../accommodations/components/AccommodationPage";
 
 // TODO Add Resizable sections from shadcn
 
-type TabOption = "activities" | "tips";
+type TabOption = "activities" | "tips" | "accommodation";
 
 const tabs: { name: string; tab: TabOption }[] = [
   { name: "Activities", tab: "activities" },
   { name: "Tips", tab: "tips" },
+  { name: "Accommodation", tab: "accommodation" },
 ];
 
 export default function TripDetails(trip: Trip) {
@@ -56,6 +58,17 @@ export default function TripDetails(trip: Trip) {
         <div className="w-full">
           {activeTab === "activities" && <TripActivities trip={trip} />}
           {activeTab === "tips" && <TripInsights trip={trip} />}
+          {activeTab === "accommodation" && (
+            <AccommodationPage
+              trip={trip}
+              cityBounds={{
+                north: trip.latitude + 0.1,
+                south: trip.latitude - 0.1,
+                east: trip.longitude + 0.1,
+                west: trip.longitude - 0.1,
+              }}
+            />
+          )}
         </div>
       </div>
     </div>
