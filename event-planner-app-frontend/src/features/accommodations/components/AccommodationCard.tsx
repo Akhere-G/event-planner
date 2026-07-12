@@ -9,21 +9,78 @@ import {
 } from "lucide-react";
 import type { Accommodation } from "../types";
 import { formatDateRange } from "../../../utils/dateFormattors";
+import UpdateAccommodationModal from "./UpdateAccommodationModal";
+import DeleteAccommodationModal from "./DeleteAccommodationModal";
+import { useDeleteAccommodationMutation } from "../apiSlice";
+import { isApiError } from "../../api/utils";
+import { toast } from "sonner";
+import { useParams } from "react-router";
+import { useGetTripQuery } from "../../trips/services/tripsApiSlice";
+import { getCityBounds } from "../../maps/utils";
 
 interface AccommodationCardProps {
   accommodation: Accommodation;
-  onUpdate: (accommodation: Accommodation) => void;
-  onDelete: (accommodation: Accommodation) => void;
+  deleteFuncProps?: { onSuccess?: () => void };
 }
 
 export default function AccommodationCard({
   accommodation,
-  onUpdate,
-  onDelete,
+  deleteFuncProps,
 }: AccommodationCardProps) {
+  const params = useParams();
+  const tripId = Number(params.tripId);
+  const { data } = useGetTripQuery(tripId);
+  const trip = data?.data || null;
   const [isExpanded, setIsExpanded] = useState(false);
+  const [deleteAccommodation] = useDeleteAccommodationMutation();
+  const [selectedAccommodation, setSelectedAccommodation] =
+    useState<Accommodation | null>(null);
+  const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [accommodationToDelete, setAccommodationToDelete] =
+    useState<Accommodation | null>(null);
+
   const shouldShowExpand =
     accommodation.description && accommodation.description.length > 100;
+
+  const handleUpdate = (accommodation: Accommodation) => {
+    setSelectedAccommodation(accommodation);
+    setIsUpdateModalOpen(true);
+  };
+
+  const handleDelete = (accommodation: Accommodation) => {
+    setAccommodationToDelete(accommodation);
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (accommodationToDelete) {
+      try {
+        await deleteAccommodation({
+          tripId,
+          accommodationId: accommodationToDelete.id,
+        }).unwrap();
+        setIsDeleteModalOpen(false);
+        setAccommodationToDelete(null);
+        toast.success("Successfully deleted accommodation.");
+        if (deleteFuncProps?.onSuccess) {
+          deleteFuncProps.onSuccess();
+        }
+      } catch (err) {
+        console.error("Failed to delete accommodation:", err);
+        if (isApiError(err)) {
+          return toast.error(err.data.message);
+        }
+        toast.error("Could not delete accommodation.");
+      }
+    }
+  };
+
+  if (!trip) {
+    return;
+  }
+
+  const cityBounds = getCityBounds(trip);
 
   return (
     <div className="card p-4 space-y-3">
@@ -45,14 +102,14 @@ export default function AccommodationCard({
         </div>
         <div className="flex gap-2">
           <button
-            onClick={() => onUpdate(accommodation)}
+            onClick={() => handleUpdate(accommodation)}
             className="p-2 hover:bg-surface-muted rounded-md text-text-secondary hover:text-text-primary transition-colors"
             title="Update"
           >
             <Edit2 size={16} />
           </button>
           <button
-            onClick={() => onDelete(accommodation)}
+            onClick={() => handleDelete(accommodation)}
             className="p-2 hover:bg-surface-muted rounded-md text-text-secondary hover:text-error transition-colors"
             title="Delete"
           >
@@ -90,6 +147,29 @@ export default function AccommodationCard({
           )}
         </div>
       )}
+
+      <UpdateAccommodationModal
+        isOpen={isUpdateModalOpen}
+        onClose={() => {
+          setIsUpdateModalOpen(false);
+          setSelectedAccommodation(null);
+        }}
+        accommodation={selectedAccommodation}
+        tripId={tripId}
+        cityBounds={cityBounds}
+        tripStart={trip.startDate}
+        tripEnd={trip.endDate}
+      />
+
+      <DeleteAccommodationModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => {
+          setIsDeleteModalOpen(false);
+          setAccommodationToDelete(null);
+        }}
+        accommodation={accommodationToDelete}
+        onConfirm={handleDeleteConfirm}
+      />
     </div>
   );
 }

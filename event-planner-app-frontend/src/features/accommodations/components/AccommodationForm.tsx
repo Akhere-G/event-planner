@@ -143,6 +143,7 @@ export default function AccommodationForm({
             }
           }}
           errorMessage={errors.address?.message}
+          searchTypes={["lodging"]}
           {...register("address")}
         />
       </div>
