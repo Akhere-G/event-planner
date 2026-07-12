@@ -109,6 +109,7 @@ export const formatPlace = (
         url: getUrl(),
         ...photo,
       })) ?? [],
+    types: place.types ?? [],
     tags,
   };
 };
