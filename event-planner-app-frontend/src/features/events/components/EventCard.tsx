@@ -1,10 +1,5 @@
 import { Clock, Copy, ExternalLink, Tag, Trash } from "lucide-react";
-import {
-  addMilliseconds,
-  differenceInMilliseconds,
-  format,
-  parseISO,
-} from "date-fns";
+import { format, parseISO } from "date-fns";
 import { type Event } from "../types";
 import { canUserEdit } from "../../users/utils";
 import { useState } from "react";
@@ -13,7 +8,6 @@ import {
   EditableSelect,
   EditableText,
   StateGate,
-  TimePicker,
 } from "../../../components";
 import { eventCategories } from "../constants";
 
@@ -21,14 +15,16 @@ import { useParams } from "react-router";
 import { useUpdateEvent } from "../../trips/hooks";
 import { useGetTripQuery } from "../../trips/services/tripsApiSlice";
 import { toast } from "sonner";
+import EditEventDatesModal from "./EditEventDatesModal";
 
 interface EventCardProps {
   event: Event;
   handleDelete?: (id: number) => Promise<void>;
   handleEdit?: (eventId: number, updatedEvent: Partial<Event>) => Promise<void>;
   role: string;
+  tripStartDate?: string;
+  tripEndDate?: string;
 }
-// TODO: Make start at and end at select be modals instead (with date picker).
 // TODO: Use shadcn popup for category select.
 // TODO: Allow for name edit
 // TODO: Add show in map function for event cards in list
@@ -38,8 +34,11 @@ export function EventCard({
   handleDelete = async () => {},
   handleEdit = async () => {},
   role,
+  tripStartDate = "",
+  tripEndDate = "",
 }: EventCardProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isDateModalOpen, setIsDateModalOpen] = useState(false);
   const [eventData, setEventData] = useState(event);
   const start = parseISO(eventData.startAt);
   const end = parseISO(eventData.endAt);
@@ -118,51 +117,31 @@ export function EventCard({
           <div className="flex items-center gap-2">
             <Clock size={16} className="text-brand-primary" />
             <div className="flex gap-1 text-xs!">
-              <EditableSelect
-                selectedValue={format(eventData.startAt, "yyyy-MM-dd HH:mm")}
-                defaultElement={format(start, "p")}
-                canEdit={canUserEdit(role)}
-                selectClassName=" overflow-y-scroll"
-                CustomSelect={({ close }) => {
-                  const time = format(eventData.startAt, "HH:mm");
-
-                  function onChange(time: string) {
-                    const startAt =
-                      format(eventData.startAt, "yyyy-MM-dd ") + time;
-                    const newStart = new Date(startAt);
-                    const oldStart = new Date(eventData.startAt);
-                    const oldEnd = new Date(eventData.endAt);
-
-                    const duration = differenceInMilliseconds(oldEnd, oldStart);
-                    const newEnd = addMilliseconds(newStart, duration);
-                    const endAt = format(newEnd, "yyyy-MM-dd HH:mm");
-
-                    updateEventData({ startAt, endAt });
-                    close();
-                  }
-
-                  return (
-                    <TimePicker value={time} onChange={onChange} scrollToTime />
-                  );
-                }}
-              />
-              -
-              <EditableSelect
-                selectedValue={format(eventData.endAt, "yyyy-MM-dd HH:mm")}
-                defaultElement={format(end, "p")}
-                canEdit={canUserEdit(role)}
-                CustomSelect={({ close }) => {
-                  const time = format(eventData.endAt, "HH:mm");
-
-                  function onChange(time: string) {
-                    const endAt = format(eventData.endAt, "yyyy-MM-dd ") + time;
-                    updateEventData({ endAt });
-                    close();
-                  }
-
-                  return <TimePicker value={time} onChange={onChange} />;
-                }}
-              />
+              {canUserEdit(role) ? (
+                <>
+                  <button
+                    onClick={() => setIsDateModalOpen(true)}
+                    className="hover:text-brand-primary p-0"
+                    title="Change event times"
+                  >
+                    {format(start, "p")}
+                  </button>
+                  <span>-</span>
+                  <button
+                    onClick={() => setIsDateModalOpen(true)}
+                    className="hover:text-brand-primary p-0"
+                    title="Change event times"
+                  >
+                    {format(end, "p")}
+                  </button>
+                </>
+              ) : (
+                <>
+                  <span>{format(start, "p")}</span>
+                  <span>-</span>
+                  <span>{format(end, "p")}</span>
+                </>
+              )}
             </div>
           </div>
 
@@ -185,6 +164,19 @@ export function EventCard({
               title={`Delete '${eventData.name}'`}
               closeModal={closeDeleteModal}
               confirmAction={() => handleDelete(eventData.id)}
+            />
+          )}
+
+          {isDateModalOpen && (
+            <EditEventDatesModal
+              event={eventData}
+              tripStartDate={tripStartDate}
+              tripEndDate={tripEndDate}
+              isOpen={isDateModalOpen}
+              onClose={() => setIsDateModalOpen(false)}
+              onSave={async (startAt, endAt) => {
+                await updateEventData({ startAt, endAt });
+              }}
             />
           )}
         </div>
@@ -219,6 +211,8 @@ export default function EventCardConnected({
           event={event}
           handleDelete={handleDelete}
           handleEdit={handleEdit}
+          tripStartDate={data?.data.startDate}
+          tripEndDate={data?.data.endDate}
         />
       )}
     </StateGate>
