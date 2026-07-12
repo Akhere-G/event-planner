@@ -41,6 +41,9 @@ class Itinerary(Base, AuditMixin):
     invites: Mapped[List["Invite"]] = relationship(  # type: ignore  # noqa: F821
         back_populates="itinerary", cascade="all, delete-orphan"
     )
+    accommodations: Mapped[List["Accommodation"]] = relationship(  # type: ignore  # noqa: F821
+        back_populates="itinerary", cascade="all, delete-orphan", passive_deletes=True
+    )
     creator: Mapped["User"] = relationship(  # type: ignore  # noqa: F821
         "User", foreign_keys="[Itinerary.created_by_id]"
     )
