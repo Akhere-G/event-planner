@@ -8,6 +8,7 @@ import { isValidationError } from "../../api/utils";
 import { useState } from "react";
 import { useGetTripQuery } from "../../trips/services/tripsApiSlice";
 import { toast } from "sonner";
+import { getCityBounds } from "../../maps/utils";
 
 export function AddEventForm({
   date,
@@ -61,14 +62,7 @@ export function AddEventForm({
     }
   }
 
-  const { latitude, longitude } = destination;
-
-  const cityBounds = {
-    north: latitude + 0.1,
-    south: latitude - 0.1,
-    east: longitude + 0.1,
-    west: longitude - 0.1,
-  };
+  const cityBounds = getCityBounds(destination);
 
   return (
     <>

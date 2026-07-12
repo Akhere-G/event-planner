@@ -5,6 +5,7 @@ import { ListPlus } from "lucide-react";
 import type { Wishlist } from "../types";
 import AddWishlistForm from "./AddWishlistForm";
 import WishlistCard from "./WishlistCard";
+import { getCityBounds } from "../../maps/utils";
 
 interface WishlistPanelProps {
   tripId: number;
@@ -33,12 +34,7 @@ export default function WishlistPanel({
 
   const editable = canUserEdit(role);
 
-  const cityBounds = {
-    north: latitude + 0.1,
-    south: latitude - 0.1,
-    east: longitude + 0.1,
-    west: longitude - 0.1,
-  };
+  const cityBounds = getCityBounds({ latitude, longitude });
 
   const toggleWishlist = (catId: number) => {
     setExpandedCategories((prev) => ({
