@@ -8,12 +8,30 @@ import { TripInsights } from "../../ai/components";
 import WishlistPanel from "../../wishlist/components/WishlistPanel";
 
 // TODO Add Resizable sections from shadcn
+// TODO use tabs from shadcn
 
+type TabOption = "list" | "calendar" | "wishlist" | "tips";
 export default function TripDetails(trip: Trip) {
-  const [activeTab, setActiveTab] = useState<
-    "list" | "calendar" | "wishlist" | "tips"
-  >("list");
+  const [activeTab, setActiveTab] = useState<TabOption>("list");
 
+  const tabs = [
+    {
+      name: "Tips",
+      tab: "tips",
+    },
+    {
+      name: "Wishlists",
+      tab: "wishlist",
+    },
+    {
+      name: "List",
+      tab: "list",
+    },
+    {
+      name: "Calendar",
+      tab: "calendar",
+    },
+  ];
   return (
     <div className="flex flex-col gap-6">
       <div className="card">
@@ -21,30 +39,31 @@ export default function TripDetails(trip: Trip) {
       </div>
       <div>
         <div className="ml-auto w-full mb-4 flex items-center">
-          <button
-            onClick={() => setActiveTab("tips")}
-            className={`btn-secondary px-4 py-2 border-2 border-surface-border rounded-r-none rounded-l-xl active:scale-100 flex items-center gap-1.5 cursor-pointer ${activeTab === "tips" ? "brightness-110 bg-brand-primary/10 border-brand-primary/50 text-brand-primary font-bold" : ""}`}
-          >
-            Tips
-          </button>
-          <button
-            className={`btn-secondary px-4 py-2 border-2 border-surface-border border-l-0 rounded-none active:scale-100 cursor-pointer ${activeTab === "wishlist" ? "brightness-110 bg-brand-primary/10 border-brand-primary/50 text-brand-primary font-bold" : ""}`}
-            onClick={() => setActiveTab("wishlist")}
-          >
-            Wishlist
-          </button>
-          <button
-            onClick={() => setActiveTab("list")}
-            className={`btn-secondary px-4 py-2 border-2 border-surface-border border-l-0 rounded-none active:scale-100 cursor-pointer ${activeTab === "list" ? "brightness-110 bg-brand-primary/10 border-brand-primary/50 text-brand-primary font-bold" : ""}`}
-          >
-            List
-          </button>
-          <button
-            onClick={() => setActiveTab("calendar")}
-            className={`btn-secondary px-4 py-2 border-2 border-surface-border border-l-0 rounded-l-none rounded-r-xl active:scale-100 flex items-center gap-1.5 cursor-pointer ${activeTab === "calendar" ? "brightness-110 bg-brand-primary/10 border-brand-primary/50 text-brand-primary font-bold" : ""}`}
-          >
-            Calendar
-          </button>
+          {tabs.map((tab, i) => {
+            let classNames =
+              "btn-secondary px-4 py-2 border-2 border-surface-border border-l-0 rounded-none active:scale-100 ";
+
+            if (activeTab === tab.tab) {
+              classNames +=
+                " brightness-110 bg-brand-primary/10 border-brand-primary/50 text-text-primary font-bold";
+            }
+            if (i === 0) {
+              classNames += " rounded-l-xl border-l-2";
+            }
+
+            if (i === tabs.length - 1) {
+              classNames += " rounded-r-xl!";
+            }
+            return (
+              <button
+                key={tab.name}
+                onClick={() => setActiveTab(tab.tab as TabOption)}
+                className={classNames}
+              >
+                {tab.name}
+              </button>
+            );
+          })}
         </div>
 
         <div className="w-full">

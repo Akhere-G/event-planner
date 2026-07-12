@@ -24,7 +24,7 @@
   --color-text-primary: var(--txt-primary);
   --color-text-secondary: var(--txt-secondary);
   --color-text-inverse: var(--txt-inverse);
-  --color-text-canvas: var(--color-text-primary);
+  --color-text-canvas: var(--color-brand-primary);
   
 
   --color-success: #10b981;
@@ -50,6 +50,8 @@
     --color-text-secondary: #f0f0f0;
     --color-text-inverse: #111;
     --color-error: #faa;
+    --color-text-canvas: var(--color-text-primary);
+
 
   }
 
@@ -123,6 +125,8 @@
     --color-brand-primary: #0d9488; 
     --color-brand-secondary: #ff698c; 
     --color-brand-accent: #ff9a81;
+    --color-text-canvas: var(--color-text-primary);
+
   }
 
   .dark.theme-havana-retro {
@@ -204,6 +208,8 @@
     --color-brand-secondary: #e4a8d1; 
     --color-text-primary: #f8f8f8;
     --color-text-secondary: #f0f0f0;
+    --color-text-canvas: var(--color-text-primary);
+
   }
 
   /* --- Egyptian Dune --- */
@@ -346,6 +352,8 @@
     --color-brand-secondary: #a8d1e4; 
     --color-text-primary: #f8f8f8;
     --color-text-secondary: #f0f0f0;
+    --color-text-canvas: var(--color-text-primary);
+
   }
 
   /* --- Bangkok Market (Vibrant & Energetic) --- */

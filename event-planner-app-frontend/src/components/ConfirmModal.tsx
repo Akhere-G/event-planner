@@ -1,6 +1,8 @@
 import { X } from "lucide-react";
 import type { Ref } from "react";
 
+// TODO: convert to shadcn modal
+
 export default function ConfirmModal({
   closeModal,
   title,

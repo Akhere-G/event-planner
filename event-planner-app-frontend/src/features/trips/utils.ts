@@ -1,13 +1,27 @@
 import {
+  BorderStyle,
   Document,
   ExternalHyperlink,
   HeadingLevel,
   Packer,
   Paragraph,
+  ShadingType,
+  Table,
+  TableCell,
+  TableLayoutType,
+  TableRow,
   TextRun,
+  UnderlineType,
+  VerticalAlignTable,
+  WidthType,
 } from "docx";
 import { createEvents } from "ics";
-import { differenceInHours, differenceInMinutes, format, parseISO } from "date-fns";
+import {
+  differenceInHours,
+  differenceInMinutes,
+  format,
+  parseISO,
+} from "date-fns";
 import { toast } from "sonner";
 import type { Day, Event } from "../events/types";
 import { makeDays } from "../events/utils";
@@ -25,86 +39,427 @@ function sortEventsByStart(events: Event[]): Event[] {
   );
 }
 
-function buildTripHeaderParagraphs(trip: Trip): Paragraph[] {
-  const paragraphs: Paragraph[] = [
-    new Paragraph({ text: trip.name, heading: HeadingLevel.HEADING_1 }),
-    new Paragraph({
-      children: [new TextRun(`Destination: ${trip.destination}`)],
-    }),
-    new Paragraph({
+type DocThemeColors = {
+  canvas: string;
+  surface: string;
+  surfaceBorder: string;
+  brandPrimary: string;
+  textCanvas: string;
+  textPrimary: string;
+  textInverse: string;
+};
+
+const DEFAULT_THEME: DocThemeColors = {
+  canvas: "#f8fafc",
+  surface: "#ffffff",
+  surfaceBorder: "#e2e8f0",
+  brandPrimary: "#f97316",
+  textCanvas: "#0f172a",
+  textPrimary: "#0f172a",
+  textInverse: "#ffffff",
+};
+
+const HALF_INCH_TWIPS = 720;
+
+function normalizeHexColor(value: string, fallback = DEFAULT_THEME.textPrimary): string {
+  const trimmed = value.trim();
+  const withoutHash = trimmed.startsWith("#") ? trimmed.slice(1) : trimmed;
+
+  if (/^[0-9a-fA-F]{3}$/.test(withoutHash)) {
+    return withoutHash
+      .split("")
+      .map((character) => `${character}${character}`)
+      .join("")
+      .toUpperCase();
+  }
+
+  if (/^[0-9a-fA-F]{6}$/.test(withoutHash)) {
+    return withoutHash.toUpperCase();
+  }
+
+  const rgbMatch = trimmed.match(
+    /^rgba?\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})/i,
+  );
+  if (rgbMatch) {
+    return rgbMatch
+      .slice(1, 4)
+      .map((component) =>
+        Math.max(0, Math.min(255, Number(component)))
+          .toString(16)
+          .padStart(2, "0"),
+      )
+      .join("")
+      .toUpperCase();
+  }
+
+  return normalizeHexColor(fallback);
+}
+
+function resolveCssColorValue(
+  styles: CSSStyleDeclaration,
+  name: string,
+  fallback: string,
+): string {
+  const raw = styles.getPropertyValue(name).trim();
+  if (!raw) {
+    return fallback;
+  }
+
+  if (!raw.startsWith("var(")) {
+    return raw;
+  }
+
+  const inner = raw.slice(4, -1).split(",")[0]?.trim();
+  if (!inner) {
+    return fallback;
+  }
+
+  return resolveCssColorValue(styles, inner, fallback);
+}
+
+function readThemeColors(): DocThemeColors {
+  const styles = window.getComputedStyle(document.documentElement);
+  const get = (name: string, fallback: string) =>
+    normalizeHexColor(resolveCssColorValue(styles, name, fallback), fallback);
+
+  return {
+    canvas: get("--color-canvas", DEFAULT_THEME.canvas),
+    surface: get("--color-surface", DEFAULT_THEME.surface),
+    surfaceBorder: get("--color-surface-border", DEFAULT_THEME.surfaceBorder),
+    brandPrimary: get("--color-brand-primary", DEFAULT_THEME.brandPrimary),
+    textCanvas: get("--color-text-canvas", DEFAULT_THEME.textCanvas),
+    textPrimary: get("--color-text-primary", DEFAULT_THEME.textPrimary),
+    textInverse: get("--color-text-inverse", DEFAULT_THEME.textInverse),
+  };
+}
+
+function darkenHexColor(hex: string, factor: number): string {
+  const normalized = normalizeHexColor(hex);
+  if (normalized.length !== 6) {
+    return normalized;
+  }
+
+  const clamp = (value: number) =>
+    Math.max(0, Math.min(255, Math.round(value)));
+  const red = clamp(Number.parseInt(normalized.slice(0, 2), 16) * (1 - factor));
+  const green = clamp(
+    Number.parseInt(normalized.slice(2, 4), 16) * (1 - factor),
+  );
+  const blue = clamp(
+    Number.parseInt(normalized.slice(4, 6), 16) * (1 - factor),
+  );
+
+  return [red, green, blue]
+    .map((component) => component.toString(16).padStart(2, "0"))
+    .join("")
+    .toUpperCase();
+}
+
+function buildBorder(color: string) {
+  return {
+    style: BorderStyle.SINGLE,
+    color,
+    size: 12,
+  };
+}
+
+function buildTableBorders(color: string) {
+  const border = buildBorder(color);
+  return {
+    top: border,
+    bottom: border,
+    left: border,
+    right: border,
+    insideHorizontal: border,
+    insideVertical: border,
+  };
+}
+
+function buildTextParagraph(
+  text: string,
+  color: string,
+  options?: { bold?: boolean; italics?: boolean },
+): Paragraph {
+  return new Paragraph({
+    children: [new TextRun({ text, color, ...options })],
+  });
+}
+
+function buildLabeledParagraph(
+  label: string,
+  value: string,
+  colors: DocThemeColors,
+): Paragraph {
+  return new Paragraph({
+    children: [
+      new TextRun({
+        text: `${label}: `,
+        bold: true,
+        color: colors.textPrimary,
+      }),
+      new TextRun({ text: value, color: colors.textPrimary }),
+    ],
+  });
+}
+
+function buildLinkParagraph(
+  label: string,
+  url: string,
+  colors: DocThemeColors,
+): Paragraph {
+  return new Paragraph({
+    children: [
+      new ExternalHyperlink({
+        link: url,
+        children: [
+          new TextRun({
+            text: label,
+            color: colors.brandPrimary,
+            underline: {
+              type: UnderlineType.SINGLE,
+              color: colors.brandPrimary,
+            },
+          }),
+        ],
+      }),
+    ],
+  });
+}
+
+function buildLabelCell(label: string, colors: DocThemeColors): TableCell {
+  return new TableCell({
+    shading: {
+      fill: colors.brandPrimary,
+      color: colors.brandPrimary,
+      type: ShadingType.CLEAR,
+    },
+    verticalAlign: VerticalAlignTable.CENTER,
+    margins: { top: 120, bottom: 120, left: 120, right: 120 },
+    children: [
+      new Paragraph({
+        children: [
+          new TextRun({ text: label, bold: true, color: colors.textInverse }),
+        ],
+      }),
+    ],
+  });
+}
+
+function buildValueCell(
+  children: Paragraph[],
+  colors: DocThemeColors,
+): TableCell {
+  return new TableCell({
+    shading: {
+      fill: colors.surface,
+      color: colors.surface,
+      type: ShadingType.CLEAR,
+    },
+    verticalAlign: VerticalAlignTable.CENTER,
+    margins: { top: 120, bottom: 120, left: 120, right: 120 },
+    children,
+  });
+}
+
+function buildTripHeaderSection(
+  trip: Trip,
+  colors: DocThemeColors,
+): Array<Paragraph | Table> {
+  const borderColor = darkenHexColor(colors.brandPrimary, 0.45);
+  const rows = [
+    new TableRow({
       children: [
-        new TextRun(`Dates: ${formatDateRange(trip.startDate, trip.endDate)}`),
+        buildLabelCell("Destination", colors),
+        buildValueCell(
+          [buildTextParagraph(trip.destination, colors.textPrimary)],
+          colors,
+        ),
+      ],
+    }),
+    new TableRow({
+      children: [
+        buildLabelCell("Dates", colors),
+        buildValueCell(
+          [
+            buildTextParagraph(
+              formatDateRange(trip.startDate, trip.endDate),
+              colors.textPrimary,
+            ),
+          ],
+          colors,
+        ),
       ],
     }),
   ];
+
   if (trip.description) {
-    paragraphs.push(
-      new Paragraph({ children: [new TextRun(trip.description)] }),
+    rows.push(
+      new TableRow({
+        children: [
+          buildLabelCell("Description", colors),
+          buildValueCell(
+            [buildTextParagraph(trip.description, colors.textPrimary)],
+            colors,
+          ),
+        ],
+      }),
     );
   }
-  return paragraphs;
-}
 
-function buildEventParagraphs(event: Event): Paragraph[] {
-  const time = `${format(parseISO(event.startAt), "p")} – ${format(parseISO(event.endAt), "p")}`;
-  const paragraphs: Paragraph[] = [
+  return [
     new Paragraph({
+      heading: HeadingLevel.HEADING_1,
       children: [
-        new TextRun({ text: `${time}  ` }),
-        new TextRun({ text: event.name, bold: true }),
-      ],
-    }),
-    new Paragraph({
-      children: [new TextRun(`Location: ${event.address}`)],
-    }),
-    new Paragraph({
-      children: [
-        new ExternalHyperlink({
-          link: buildGoogleMapsUrl(event),
-          children: [
-            new TextRun({ text: "Open in Maps", style: "Hyperlink" }),
-          ],
+        new TextRun({
+          text: trip.name,
+          color: colors.textCanvas,
+          bold: true,
+          size: 36,
         }),
       ],
     }),
-  ];
-  if (event.category) {
-    paragraphs.push(
-      new Paragraph({
-        children: [new TextRun(`Category: ${event.category}`)],
-      }),
-    );
-  }
-  if (event.description) {
-    paragraphs.push(
-      new Paragraph({
-        children: [new TextRun(`Notes: ${event.description}`)],
-      }),
-    );
-  }
-  paragraphs.push(new Paragraph({ text: "" }));
-  return paragraphs;
-}
-
-function buildDayParagraphs(day: Day): Paragraph[] {
-  const dayLabel = format(parseISO(day.date), "EEE d MMM");
-  const paragraphs: Paragraph[] = [
     new Paragraph({
-      text: `Day ${day.day} — ${dayLabel}`,
       heading: HeadingLevel.HEADING_2,
+      spacing: { before: 240, after: 120 },
+      children: [
+        new TextRun({
+          text: "Trip overview",
+          color: colors.textCanvas,
+          bold: true,
+        }),
+      ],
+    }),
+    new Table({
+      width: { size: "100%", type: WidthType.PERCENTAGE },
+      layout: TableLayoutType.FIXED,
+      columnWidths: [2300, 8200],
+      borders: buildTableBorders(borderColor),
+      rows,
     }),
   ];
+}
+
+function buildEventDetailsCell(
+  event: Event,
+  colors: DocThemeColors,
+): TableCell {
+  const children: Paragraph[] = [];
+
+  if (event.category) {
+    children.push(buildLabeledParagraph("Category", event.category, colors));
+  }
+
+  if (event.description) {
+    children.push(buildLabeledParagraph("Notes", event.description, colors));
+  }
+
+  if (children.length === 0) {
+    children.push(buildTextParagraph("—", colors.textPrimary));
+  }
+
+  return buildValueCell(children, colors);
+}
+
+function buildEventLocationCell(
+  event: Event,
+  colors: DocThemeColors,
+): TableCell {
+  return buildValueCell(
+    [
+      buildTextParagraph(event.address, colors.textPrimary),
+      buildLinkParagraph("Open in Maps", buildGoogleMapsUrl(event), colors),
+    ],
+    colors,
+  );
+}
+
+function buildDayActivityTable(events: Event[], colors: DocThemeColors): Table {
+  const borderColor = darkenHexColor(colors.brandPrimary, 0.45);
+  const rows = [
+    new TableRow({
+      children: [
+        buildLabelCell("Time", colors),
+        buildLabelCell("Activity", colors),
+        buildLabelCell("Location", colors),
+        buildLabelCell("Details", colors),
+      ],
+    }),
+    ...events.map(
+      (event) =>
+        new TableRow({
+          children: [
+            buildValueCell(
+              [
+                buildTextParagraph(
+                  `${format(parseISO(event.startAt), "p")} – ${format(parseISO(event.endAt), "p")}`,
+                  colors.textPrimary,
+                ),
+              ],
+              colors,
+            ),
+            buildValueCell(
+              [
+                buildTextParagraph(event.name, colors.textPrimary, {
+                  bold: true,
+                }),
+              ],
+              colors,
+            ),
+            buildEventLocationCell(event, colors),
+            buildEventDetailsCell(event, colors),
+          ],
+        }),
+    ),
+  ];
+
+  return new Table({
+    width: { size: "100%", type: WidthType.PERCENTAGE },
+    layout: TableLayoutType.FIXED,
+    columnWidths: [1560, 2600, 3630, 3410],
+    borders: buildTableBorders(borderColor),
+    rows,
+  });
+}
+
+function buildDaySection(
+  day: Day,
+  colors: DocThemeColors,
+): Array<Paragraph | Table> {
+  const dayLabel = format(parseISO(day.date), "EEE d MMM");
   const sorted = sortEventsByStart(day.events);
+  const children: Array<Paragraph | Table> = [
+    new Paragraph({
+      heading: HeadingLevel.HEADING_2,
+      spacing: { before: 240, after: 120 },
+      children: [
+        new TextRun({
+          text: `Day ${day.day} — ${dayLabel}`,
+          color: colors.textCanvas,
+          bold: true,
+        }),
+      ],
+    }),
+    new Paragraph({
+      children: [
+        new TextRun({
+          text:
+            sorted.length === 0
+              ? "No activities planned."
+              : `${sorted.length} ${sorted.length === 1 ? "activity" : "activities"}`,
+          color: colors.textCanvas,
+          italics: true,
+        }),
+      ],
+      spacing: { after: 120 },
+    }),
+  ];
+
   if (sorted.length === 0) {
-    paragraphs.push(
-      new Paragraph({ children: [new TextRun("No activities planned.")] }),
-    );
-    return paragraphs;
+    return children;
   }
-  for (const event of sorted) {
-    paragraphs.push(...buildEventParagraphs(event));
-  }
-  return paragraphs;
+
+  children.push(buildDayActivityTable(sorted, colors));
+  return children;
 }
 
 function downloadBlob(blob: Blob, filename: string): void {
@@ -120,17 +475,34 @@ function downloadBlob(blob: Blob, filename: string): void {
 
 export async function exportToDoc(trip: Trip): Promise<void> {
   try {
+    const colors = readThemeColors();
     const days = makeDays(trip.events, trip.startDate, trip.endDate);
-    const children: Paragraph[] = [
-      ...buildTripHeaderParagraphs(trip),
-      ...days.flatMap(buildDayParagraphs),
+    const children: Array<Paragraph | Table> = [
+      ...buildTripHeaderSection(trip, colors),
+      ...days.flatMap((day) => buildDaySection(day, colors)),
     ];
-    const doc = new Document({ sections: [{ children }] });
+    const doc = new Document({
+      background: { color: colors.canvas },
+      sections: [
+        {
+          properties: {
+            page: {
+              margin: {
+                left: HALF_INCH_TWIPS,
+                right: HALF_INCH_TWIPS,
+              },
+            },
+          },
+          children,
+        },
+      ],
+    });
     const blob = await Packer.toBlob(doc);
     const filename = `${trip.name.replace(/\s+/g, "_")}.docx`;
     downloadBlob(blob, filename);
     toast.success("Itinerary exported!");
-  } catch {
+  } catch (err) {
+    console.error(err);
     toast.error("Could not export.");
   }
 }
