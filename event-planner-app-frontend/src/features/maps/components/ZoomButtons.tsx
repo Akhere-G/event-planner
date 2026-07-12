@@ -1,13 +1,19 @@
 import { useMap } from "@vis.gl/react-google-maps";
-import { LocateIcon, Minus, Plus } from "lucide-react";
+import { Home, LocateIcon, Minus, Plus } from "lucide-react";
 import { DEFAULT_ZOOM, MAX_ZOOM, MIN_ZOOM } from "../constants";
+import { useGetAccommodationsQuery } from "../../accommodations/apiSlice";
+import { useParams } from "react-router";
+import { fitToBounds } from "../utils";
+import { useGetTripQuery } from "../../trips/services/tripsApiSlice";
 
 export function ZoomButtons({
   zoomToUser,
+  zoomHome,
   zoomIn,
   zoomOut,
 }: {
   zoomToUser: () => void;
+  zoomHome: () => void;
   zoomIn: () => void;
   zoomOut: () => void;
 }) {
@@ -16,6 +22,9 @@ export function ZoomButtons({
       <div className="absolute bottom-4 right-2 flex flex-col gap-2">
         <button onClick={zoomToUser} className="p-2 btn-primary">
           <LocateIcon size={20} />
+        </button>
+        <button onClick={zoomHome} className="p-2 btn-primary">
+          <Home size={20} />
         </button>
         <button onClick={zoomIn} className="p-2 btn-primary">
           <Plus size={20} />
@@ -33,6 +42,15 @@ export default function ZoomButtonsConnected({
 }: {
   userCoords: null | { latitude: number; longitude: number };
 }) {
+  const params = useParams();
+  const tripId = Number(params.tripId);
+
+  const { data } = useGetAccommodationsQuery(tripId);
+  const { data: tripData } = useGetTripQuery(tripId);
+
+  const trip = tripData?.data;
+
+  const accommodations = data?.data ?? [];
   const map = useMap();
 
   const zoomIn = () => {
@@ -52,7 +70,17 @@ export default function ZoomButtonsConnected({
       lng: userCoords?.longitude,
     });
   };
+
+  const zoomHome = () => {
+    if (map) fitToBounds({ map, events: accommodations, defaultCenter: trip });
+  };
+
   return (
-    <ZoomButtons zoomIn={zoomIn} zoomOut={zoomOut} zoomToUser={zoomToUser} />
+    <ZoomButtons
+      zoomIn={zoomIn}
+      zoomOut={zoomOut}
+      zoomToUser={zoomToUser}
+      zoomHome={zoomHome}
+    />
   );
 }
