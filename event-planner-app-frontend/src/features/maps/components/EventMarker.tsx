@@ -34,6 +34,12 @@ const EventMarker = memo(
     const eventColor = getDayColor(day - 1);
 
     const isRoutePin = isRouteStart || isRouteEnd;
+    let pinIcon: string | undefined = undefined;
+    if (isRouteStart) {
+      pinIcon = "/map_to_icon.svg";
+    } else if (isRouteEnd) {
+      pinIcon = "/flag.svg";
+    }
     return (
       <AdvancedMarker
         ref={markerRef}
@@ -61,7 +67,7 @@ const EventMarker = memo(
         <Pin
           background={eventColor}
           glyphText={isRoutePin ? undefined : String(day)}
-          glyphSrc={isRoutePin ? "/map_to_icon.svg" : undefined}
+          glyphSrc={pinIcon}
           glyphColor={isRouteEnd ? undefined : "var(--color-text-inverse)"}
           borderColor={"var(--color-surface-border)"}
           scale={selected ? 1.5 : 1}

@@ -16,6 +16,7 @@ import { setRoutes } from "../../maps/service/mapSlice";
 import type { Route } from "../../maps/types";
 import useMenu from "../../../hooks/useMenu";
 import AutofillDayForm from "./AutoFillDayForm";
+import { useGetAccommodationsQuery } from "../../accommodations/apiSlice";
 
 export default function DayCard({
   defaultIsOpen,
@@ -28,6 +29,9 @@ export default function DayCard({
 }) {
   const tripId = Number(useParams()?.tripId);
   const { isFetching } = useGetTripQuery(tripId);
+  const { data } = useGetAccommodationsQuery(tripId);
+  const accommodations = data?.data ?? [];
+
   const [suggestEvents, { isLoading: isSuggestLoading }] =
     useSuggestEventsMutation();
   const [optimiseEvents, { isLoading: isOptimiseLoading }] =
@@ -69,7 +73,20 @@ export default function DayCard({
   };
 
   const viewAllRoutes = () => {
+    if (!day.events.length) return;
     const routes: Route[] = [];
+    const date = new Date(day.date);
+    const accom = accommodations.find(
+      (accom) =>
+        new Date(accom.startDate) <= date && date <= new Date(accom.endDate),
+    );
+    if (accom) {
+      routes.push({
+        from: accom,
+        to: day.events[0],
+        mode: google.maps.TravelMode.TRANSIT,
+      });
+    }
     day.events.forEach(
       (event, i) =>
         i !== day.events.length - 1 &&
@@ -79,6 +96,13 @@ export default function DayCard({
           mode: google.maps.TravelMode.TRANSIT,
         }),
     );
+    if (accom) {
+      routes.push({
+        from: day.events[day.events.length - 1],
+        to: accom,
+        mode: google.maps.TravelMode.TRANSIT,
+      });
+    }
     dispatch(setRoutes(routes));
   };
 
@@ -125,7 +149,11 @@ export default function DayCard({
           ref={menuContainerRef}
           className="z-1 flex flex-col gap-2 absolute top-8 right-6 card p-0 text-sm"
         >
-          <button onClick={viewAllRoutes} className="flex gap-2 btn-menu">
+          <button
+            onClick={viewAllRoutes}
+            disabled={!day.events.length}
+            className="flex gap-2 btn-menu"
+          >
             <Map className="text-brand-primary" size={18} />
             View all routes
           </button>
