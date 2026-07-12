@@ -75,13 +75,11 @@ export function EventSearchResultCard({
   });
 
   function onChangeDate(date: string) {
-    console.log({ date });
     setSelectedDate(date);
     setSelectedWishlist(null);
   }
 
   function onChangeWishlist(wishlist: Wishlist) {
-    console.log({ wishlist });
     setSelectedWishlist(wishlist);
     setSelectedDate("");
   }
