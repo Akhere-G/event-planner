@@ -63,6 +63,7 @@ def create_app():
             Event,
             Invite,
             InvitationStatus,
+            Accommodation,
         )
         from .routes import (
             auth_bp,
@@ -73,6 +74,7 @@ def create_app():
             user_invites_bp,
             ai_bp,
             wishlist_bp,
+            accommodation_bp,
         )
 
         app.register_blueprint(auth_bp, url_prefix="/api/auth")
@@ -96,6 +98,10 @@ def create_app():
         app.register_blueprint(
             wishlist_bp,
             url_prefix="/api/itineraries/<int:itinerary_id>/wishlists",
+        )
+        app.register_blueprint(
+            accommodation_bp,
+            url_prefix="/api/itineraries/<int:itinerary_id>/accommodations",
         )
         app.register_blueprint(ai_bp, url_prefix="/api/ai")
 
