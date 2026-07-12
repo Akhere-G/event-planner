@@ -53,6 +53,7 @@ export function EventSearch({
           onPlaceSelect(results.map(formatPlace));
         } else {
           console.error("Place search failed:", status);
+          toast.error("Sorry! Something went wrong...");
         }
       });
     } catch {

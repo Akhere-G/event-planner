@@ -5,7 +5,7 @@ export interface Accommodation {
   address: string;
   latitude: number;
   longitude: number;
-  description: string;
+  description?: string;
   startDate: string;
   endDate: string;
 }

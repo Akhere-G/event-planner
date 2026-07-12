@@ -3,10 +3,17 @@ import type { Day, Event } from "../../events/types";
 import type { EventSearchResult, Route } from "../types";
 import type { WishlistItem } from "../../wishlist/types";
 
+export interface AccommodationLocation {
+  latitude: number;
+  longitude: number;
+  name: string;
+  address: string;
+}
 interface MapState {
   searchEvents: EventSearchResult[];
   searchIndex: number;
   selectedEvent: Event | null;
+  selectedAccommodation: AccommodationLocation | null;
   selectedWishlistItem: WishlistItem | null;
   days: Day[];
   routes: Route[] | null;
@@ -20,6 +27,7 @@ const initialState: MapState = {
   searchEvents: [],
   searchIndex: 0,
   selectedEvent: null,
+  selectedAccommodation: null,
   selectedWishlistItem: null,
   days: [],
   routes: null,
@@ -49,6 +57,12 @@ export const mapSlice = createSlice({
     },
     setSelectedEvent: (state, action: PayloadAction<Event | null>) => {
       state.selectedEvent = action.payload;
+    },
+    setSelectedAccommodation: (
+      state,
+      action: PayloadAction<AccommodationLocation | null>,
+    ) => {
+      state.selectedAccommodation = action.payload;
     },
     setSelectedWishlistItem: (
       state,
@@ -107,6 +121,7 @@ export const {
   setSearchEvents,
   setSearchIndex,
   setSelectedEvent,
+  setSelectedAccommodation,
   setSelectedWishlistItem,
   markEventAsAdded,
   clearSearchEvents,

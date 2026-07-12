@@ -24,6 +24,7 @@ interface AccommodationFormProps {
   selectedAccommodation: Accommodation | null;
   tripStart: string;
   tripEnd: string;
+  isEditing: boolean;
 }
 
 export default function AccommodationForm({
@@ -34,6 +35,7 @@ export default function AccommodationForm({
   selectedAccommodation,
   tripStart,
   tripEnd,
+  isEditing,
 }: AccommodationFormProps) {
   const [errorMessage, setErrorMessage] = useState("");
   const [updateAccommodation] = useUpdateAccommodationMutation();
@@ -72,7 +74,7 @@ export default function AccommodationForm({
   const onSubmit = async (formState: AccommodationSchema) => {
     setErrorMessage("");
     try {
-      if (selectedAccommodation) {
+      if (isEditing && selectedAccommodation) {
         await updateAccommodation({
           ...formState,
           accommodationId: selectedAccommodation.id,
@@ -119,7 +121,7 @@ export default function AccommodationForm({
     <form onSubmit={handleSubmit(onSubmit)} className="card space-y-3">
       <div className="flex justify-between items-center mb-2">
         <span className="text-sm font-bold text-text-main">
-          {selectedAccommodation ? "Update Accommodation" : "New Accommodation"}
+          {isEditing ? "Update Accommodation" : "New Accommodation"}
         </span>
         <button
           type="button"
@@ -204,7 +206,7 @@ export default function AccommodationForm({
           Cancel
         </button>
         <button type="submit" className="flex-1 btn-primary">
-          {selectedAccommodation ? "Update" : "Add Accommodation"}
+          {isEditing ? "Update" : "Add Accommodation"}
         </button>
       </div>
     </form>
