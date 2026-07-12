@@ -55,3 +55,10 @@ class BadRequestError(Exception):
         self.message = message
         self.status_code = 400
         super().__init__(self.message)
+
+
+class NotFoundError(Exception):
+    def __init__(self, message="Item Not Found."):
+        self.message = message
+        self.status_code = 404
+        super().__init__(self.message)
