@@ -1,37 +1,22 @@
 import { useState } from "react";
-import { DayList } from "../../events/components";
 import { isAdmin } from "../../users/utils";
 import type { Trip } from "../types";
 import TripSummary from "./TripSummary";
-import { TripCalendar } from "../../calendar/components";
 import { TripInsights } from "../../ai/components";
-import WishlistPanel from "../../wishlist/components/WishlistPanel";
+import TripActivities from "./TripActivities";
 
 // TODO Add Resizable sections from shadcn
-// TODO use tabs from shadcn
 
-type TabOption = "list" | "calendar" | "wishlist" | "tips";
+type TabOption = "activities" | "tips";
+
+const tabs: { name: string; tab: TabOption }[] = [
+  { name: "Activities", tab: "activities" },
+  { name: "Tips", tab: "tips" },
+];
+
 export default function TripDetails(trip: Trip) {
-  const [activeTab, setActiveTab] = useState<TabOption>("list");
+  const [activeTab, setActiveTab] = useState<TabOption>("activities");
 
-  const tabs = [
-    {
-      name: "Tips",
-      tab: "tips",
-    },
-    {
-      name: "Wishlists",
-      tab: "wishlist",
-    },
-    {
-      name: "List",
-      tab: "list",
-    },
-    {
-      name: "Calendar",
-      tab: "calendar",
-    },
-  ];
   return (
     <div className="flex flex-col gap-6">
       <div className="card">
@@ -57,8 +42,10 @@ export default function TripDetails(trip: Trip) {
             return (
               <button
                 key={tab.name}
-                onClick={() => setActiveTab(tab.tab as TabOption)}
+                type="button"
+                onClick={() => setActiveTab(tab.tab)}
                 className={classNames}
+                aria-pressed={activeTab === tab.tab}
               >
                 {tab.name}
               </button>
@@ -67,26 +54,8 @@ export default function TripDetails(trip: Trip) {
         </div>
 
         <div className="w-full">
+          {activeTab === "activities" && <TripActivities trip={trip} />}
           {activeTab === "tips" && <TripInsights trip={trip} />}
-          {activeTab === "wishlist" && (
-            <WishlistPanel
-              tripId={trip.id}
-              role={trip.role}
-              startDate={trip.startDate}
-              endDate={trip.endDate}
-              latitude={trip.latitude}
-              longitude={trip.longitude}
-            />
-          )}
-          {activeTab === "list" && (
-            <DayList
-              startDate={trip.startDate}
-              endDate={trip.endDate}
-              events={trip.events}
-              role={trip.role}
-            />
-          )}
-          {activeTab === "calendar" && <TripCalendar trip={trip} />}
         </div>
       </div>
     </div>

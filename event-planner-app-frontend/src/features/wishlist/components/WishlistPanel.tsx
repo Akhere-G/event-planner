@@ -56,11 +56,10 @@ export default function WishlistPanel({
   }
 
   return (
-    <div className="card w-full flex flex-col min-h-[60vh] bg-surface">
-      <div className="flex items-center justify-between border-b border-surface-border pb-3 mb-4">
-        <div>
-          <h2 className="text-xl font-bold text-text-main">Trip Wishlist</h2>
-        </div>
+    <div className=" w-full flex flex-col min-h-[60vh] bg-surface">
+      <div
+        className={`flex items-center justify-between ${editable ? "border-b pb-3 mb-4 " : ""} border-surface-border`}
+      >
         {editable && (
           <button
             onClick={() => setShowWishlistForm(!showWishlistForm)}
