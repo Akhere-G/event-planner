@@ -20,8 +20,10 @@ export interface EventSearchResult {
   category: string;
   totalReviews: number;
   photos: PlacePhoto[];
+  types: string[];
 }
 export interface Point {
+  id: number;
   latitude: number;
   longitude: number;
   name: string;
