@@ -112,3 +112,18 @@ export const formatPlace = (
     tags,
   };
 };
+
+export const getCityBounds = ({
+  latitude,
+  longitude,
+}: {
+  latitude: number;
+  longitude: number;
+}) => {
+  return {
+    north: latitude + 0.1,
+    south: latitude - 0.1,
+    east: longitude + 0.1,
+    west: longitude - 0.1,
+  };
+};

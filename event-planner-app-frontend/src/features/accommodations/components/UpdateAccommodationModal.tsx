@@ -31,9 +31,6 @@ export default function UpdateAccommodationModal({
     <ConfirmModal
       closeModal={onClose}
       title="Update Accommodation"
-      confirmText=""
-      confirmAction={undefined}
-      confirmBtnClasses=""
       modalRef={modalRef}
       hideButtons
     >

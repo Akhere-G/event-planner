@@ -46,6 +46,7 @@ import WishlistItemCard from "../../wishlist/components/WishlistItemCard";
 import useMenu from "../../../hooks/useMenu";
 import { ConfirmModal } from "../../../components";
 import AddItemForm from "../../wishlist/components/AddItemForm";
+import AccommodationMarkers from "./AccommodationMarkers";
 
 const permissionEnum = {
   GRANTED: "GRANTED",
@@ -239,6 +240,7 @@ export default function TripMap({ trip }: { trip: Trip }) {
               selected={selectedWishlistItem?.id === item.id}
             />
           ))}
+        <AccommodationMarkers />
         {userCoords && (
           <AdvancedMarker
             position={{ lat: userCoords.latitude, lng: userCoords.longitude }}
