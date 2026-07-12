@@ -3,7 +3,7 @@ import type { EventSearchResult } from "../types";
 import { Search, X } from "lucide-react";
 import { LocationInput } from "../../../components";
 import { useMap, useMapsLibrary } from "@vis.gl/react-google-maps";
-import { fitToBounds, formatPlace } from "../../maps/utils";
+import { fitToBounds, formatPlace, getCityBounds } from "../../maps/utils";
 import {
   setSearchEvents,
   clearSearchEvents,
@@ -20,8 +20,6 @@ export function EventSearch({
   destination: { latitude: number; longitude: number };
   onPlaceSelect: (eventSearchResult: EventSearchResult[]) => void;
 }) {
-  const { latitude, longitude } = destination;
-
   const [expanded, setExpanded] = useState(false);
   const [query, setQuery] = useState<string | null>(null);
 
@@ -31,12 +29,7 @@ export function EventSearch({
   const map = useMap();
   const placesLibrary = useMapsLibrary("places");
 
-  const cityBounds = {
-    north: latitude + 0.1,
-    south: latitude - 0.1,
-    east: longitude + 0.1,
-    west: longitude - 0.1,
-  };
+  const cityBounds = getCityBounds(destination);
 
   const handlePlaceSelect = (place: google.maps.places.PlaceResult) => {
     onPlaceSelect([formatPlace(place)]);

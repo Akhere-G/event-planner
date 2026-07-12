@@ -5,6 +5,7 @@ import TripSummary from "./TripSummary";
 import { TripInsights } from "../../ai/components";
 import TripActivities from "./TripActivities";
 import AccommodationPage from "../../accommodations/components/AccommodationPage";
+import { getCityBounds } from "../../maps/utils";
 
 // TODO Add Resizable sections from shadcn
 
@@ -59,15 +60,7 @@ export default function TripDetails(trip: Trip) {
           {activeTab === "activities" && <TripActivities trip={trip} />}
           {activeTab === "tips" && <TripInsights trip={trip} />}
           {activeTab === "accommodation" && (
-            <AccommodationPage
-              trip={trip}
-              cityBounds={{
-                north: trip.latitude + 0.1,
-                south: trip.latitude - 0.1,
-                east: trip.longitude + 0.1,
-                west: trip.longitude - 0.1,
-              }}
-            />
+            <AccommodationPage trip={trip} cityBounds={getCityBounds(trip)} />
           )}
         </div>
       </div>
