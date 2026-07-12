@@ -44,6 +44,7 @@ export default function UpdateAccommodationModal({
           onCancel={onClose}
           tripStart={tripStart}
           tripEnd={tripEnd}
+          isEditing
         />
       )}
     </ConfirmModal>

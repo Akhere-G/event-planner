@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { isAdmin } from "../../users/utils";
 import type { Trip } from "../types";
 import TripSummary from "./TripSummary";
@@ -6,6 +5,7 @@ import { TripInsights } from "../../ai/components";
 import TripActivities from "./TripActivities";
 import AccommodationPage from "../../accommodations/components/AccommodationPage";
 import { getCityBounds } from "../../maps/utils";
+import { useSearchParams } from "react-router";
 
 // TODO Add Resizable sections from shadcn
 
@@ -18,7 +18,17 @@ const tabs: { name: string; tab: TabOption }[] = [
 ];
 
 export default function TripDetails(trip: Trip) {
-  const [activeTab, setActiveTab] = useState<TabOption>("activities");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const activeTab = searchParams.get("activeTab") ?? "activities";
+
+  function setActiveTab(tab: TabOption) {
+    setSearchParams((current) => {
+      const next = new URLSearchParams(current);
+      next.set("activeTab", tab);
+
+      return next;
+    });
+  }
 
   return (
     <div className="flex flex-col gap-6">

@@ -11,8 +11,12 @@ import type { EventSearchResult, Tag } from "../types";
 import type { RootState } from "../../../store";
 import { useDispatch, useSelector } from "react-redux";
 import { isFetchBaseQueryError } from "../../api/utils";
-import { updateSearchEvents } from "../../maps/service/mapSlice";
-import { useParams } from "react-router";
+import {
+  setIsMapView,
+  setSelectedAccommodation,
+  updateSearchEvents,
+} from "../../maps/service/mapSlice";
+import { useParams, useSearchParams } from "react-router";
 import type { EventSchema } from "../../events/schemas/eventSchema";
 import { useAddEventMutation } from "../../events/service/eventApiSlice";
 import { toast } from "sonner";
@@ -25,6 +29,8 @@ import {
 import type { CreateWishlistItemPayload, Wishlist } from "../../wishlist/types";
 import useMenu from "../../../hooks/useMenu";
 
+//TODO: refactor
+
 interface SearchEventCardProps {
   event: EventSearchResult;
   handleSaveEvent: (event: EventSchema) => Promise<void>;
@@ -34,6 +40,7 @@ interface SearchEventCardProps {
   dates: { title: string; value: string }[];
   isLoading: boolean;
   wishlists: Wishlist[];
+  addAccommodation: (event: EventSearchResult) => void;
 }
 interface ErrorMessageType {
   endAt: string;
@@ -47,6 +54,7 @@ export function EventSearchResultCard({
   dates,
   isLoading,
   wishlists,
+  addAccommodation,
 }: SearchEventCardProps) {
   const {
     placeId,
@@ -131,6 +139,16 @@ export function EventSearchResultCard({
       });
       toast.success("Added to wishlist.");
       return closeMenu();
+    }
+  }
+
+  const isAccom = event.types.includes("lodging");
+
+  function handleAdd() {
+    if (isAccom) {
+      addAccommodation(event);
+    } else {
+      openMenu();
     }
   }
   return (
@@ -267,40 +285,11 @@ export function EventSearchResultCard({
               <button
                 className="flex gap-2 items-center bg-brand-primary"
                 ref={openButtonRef}
-                onClick={openMenu}
+                onClick={handleAdd}
               >
                 <Plus size={16} />
                 Add
               </button>
-              {/* <EditableSelect
-              options={dates}
-              isLoading={isLoading}
-              canEdit
-              setValue={(date) =>
-                handleSave({
-                  address,
-                  category,
-                  latitude,
-                  longitude,
-                  name,
-                  startAt: `${date} 12:00`,
-                  endAt: `${date} 13:00`,
-                })
-              }
-              selectClassName={`top-auto bottom-0 right-0 left-auto grid grid-cols-4 w-40`}
-              selectedValue=""
-              showEditIcon={false}
-              defaultElement={
-                <div
-                  tabIndex={0}
-                  role="button"
-                  className="group btn-secondary px-3 py-1 rounded-md flex gap-2 items-center w-min"
-                >
-                  <Plus size={16} aria-hidden />
-                  Add
-                </div>
-              }
-            />*/}
             </>
           )}
         </div>
@@ -319,6 +308,7 @@ export default function EventSearchResultCardConnected() {
   const wishlists = data?.data ?? [];
 
   const dispatch = useDispatch();
+  const [, setSearchParams] = useSearchParams();
 
   const [addEvent, { isLoading: isAddEventLoading }] = useAddEventMutation();
   const [createWishlist, { isLoading: isCreateWishlistLoading }] =
@@ -362,6 +352,20 @@ export default function EventSearchResultCardConnected() {
     value: day.date,
   }));
 
+  function addAccommodation(event: EventSearchResult) {
+    dispatch(
+      setSelectedAccommodation({
+        ...event,
+      }),
+    );
+    dispatch(setIsMapView(false));
+    setSearchParams((current) => {
+      const next = new URLSearchParams(current);
+      next.set("activeTab", "accommodation");
+      return next;
+    });
+  }
+
   return (
     <EventSearchResultCard
       event={currentEvent}
@@ -370,6 +374,7 @@ export default function EventSearchResultCardConnected() {
       handleSaveToWishlist={handleSaveToWishlist}
       isLoading={isAddEventLoading || isCreateWishlistLoading}
       wishlists={wishlists}
+      addAccommodation={addAccommodation}
     />
   );
 }

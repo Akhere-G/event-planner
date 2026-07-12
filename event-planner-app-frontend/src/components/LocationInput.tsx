@@ -33,7 +33,7 @@ export default function LocationInput({
     if (!placesLibrary || !inputRef.current) return;
 
     const options: google.maps.places.AutocompleteOptions = {
-      fields: ["formatted_address", "geometry", "name"],
+      fields: ["formatted_address", "geometry", "name", "types"],
       types: searchTypes,
     };
 
