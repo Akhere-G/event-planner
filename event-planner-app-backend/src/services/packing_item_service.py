@@ -1,7 +1,6 @@
 from ..extensions import db
 from ..models import PackingItem
 from sqlalchemy import select, or_, and_
-import itineraries_service
 from ..exceptions import NotFoundError
 
 
@@ -18,7 +17,7 @@ def get_packing_lists(user_id: int, itinerary_id: int):
 def create_packing_item(user_id: int, itinerary_id: int, packing_item: dict):
     new_packing_item = PackingItem(
         itinerary_id=itinerary_id,
-        owner_id=user_id,
+        owner_id=user_id if not packing_item["is_shared"] else None,
         name=packing_item["name"],
         category=packing_item["category"],
         is_shared=packing_item["is_shared"],

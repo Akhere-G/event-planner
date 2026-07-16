@@ -3,6 +3,7 @@ from sqlalchemy import Integer, String, Boolean, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from .audit_mixins import AuditMixin
 from .itinerary_model import Itinerary
+from .user_model import User
 from typing import Optional
 
 
@@ -26,10 +27,12 @@ class PackingItem(Base, AuditMixin):
 
     is_checked: Mapped[bool] = mapped_column(Boolean, default=False)
     checked_by_id: Mapped[Optional[Integer]] = mapped_column(
-        Integer, ForeignKey("users.id", ondelete="SET NULL")
+        Integer, ForeignKey("users.id", ondelete="SET NULL"), default=None
     )
-    checked_by: Mapped["User"] = relationship("User", foreign_keys=[checked_by_id])  # type: ignore # noqa: F821
-    itinerary: Mapped["Itinerary"] = relationship(
-        "Itinerary", back_populates="packing_items"
+    checked_by: Mapped[Optional["User"]] = relationship(
+        "User", foreign_keys=[checked_by_id]
     )  # type: ignore # noqa: F821
-    user: Mapped["User"] = relationship("User", foreign_keys=[owner_id])  # type: ignore # noqa: F821
+    itinerary: Mapped["Itinerary"] = relationship(
+        "Itinerary",
+    )  # type: ignore # noqa: F821
+    user: Mapped[Optional["User"]] = relationship("User", foreign_keys=[owner_id])  # type: ignore # noqa: F821

@@ -66,7 +66,7 @@ def create_packing_item(user_id: int, itinerary_id: int):
         return api_response(success=False, error=err.messages, status_code=400)
 
 
-@packing_item_bp.route("/<packing_item_id:int>", methods=["PATCH"])
+@packing_item_bp.route("/<int:packing_item_id>", methods=["PATCH"])
 def update_packing_item(user_id: int, itinerary_id: int, packing_item_id: int):
     try:
         itineraries_service.get_itinerary_membership(user_id, itinerary_id)
@@ -106,7 +106,7 @@ def update_packing_item(user_id: int, itinerary_id: int, packing_item_id: int):
         return api_response(success=False, error=err.messages, status_code=400)
 
 
-@packing_item_bp.route("/<packing_item_id:int>", methods=["DELETE"])
+@packing_item_bp.route("/<int:packing_item_id>", methods=["DELETE"])
 @login_required
 def delete_packing_item(user_id: int, itinerary_id: int, packing_item_id: int):
     itineraries_service.get_itinerary_membership(user_id, itinerary_id)
