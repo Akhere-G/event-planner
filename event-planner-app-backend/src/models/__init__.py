@@ -8,6 +8,7 @@ from src.models.invite_model import Invite, InvitationStatus
 from src.models.audit_mixins import AuditMixin
 from src.models.wishlist_model import Wishlist, WishlistItem
 from src.models.accommodation_model import Accommodation
+from src.models.packing_item_model import PackingItem
 
 __all__ = [
     "AuditMixin",
@@ -22,4 +23,5 @@ __all__ = [
     "Wishlist",
     "WishlistItem",
     "Accommodation",
+    "PackingItem",
 ]

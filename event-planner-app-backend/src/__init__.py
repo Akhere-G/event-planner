@@ -64,6 +64,7 @@ def create_app():
             Invite,
             InvitationStatus,
             Accommodation,
+            PackingItem,
         )
         from .routes import (
             auth_bp,
@@ -75,6 +76,7 @@ def create_app():
             ai_bp,
             wishlist_bp,
             accommodation_bp,
+            packing_item_bp,
         )
 
         app.register_blueprint(auth_bp, url_prefix="/api/auth")
@@ -104,6 +106,10 @@ def create_app():
             url_prefix="/api/itineraries/<int:itinerary_id>/accommodations",
         )
         app.register_blueprint(ai_bp, url_prefix="/api/ai")
+        app.register_blueprint(
+            packing_item_bp,
+            url_prefix="/api/itineraries/<int:itinerary_id>/packing_items",
+        )
 
         @app.route("/")
         def serve():
