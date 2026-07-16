@@ -7,6 +7,7 @@ from .user_invite_routes import user_invites_bp
 from .ai_routes import ai_bp
 from .wishlist_routes import wishlist_bp
 from .accommodation_routes import accommodation_bp
+from .packing_item_routes import packing_item_bp
 
 __all__ = [
     "auth_bp",
@@ -18,5 +19,5 @@ __all__ = [
     "ai_bp",
     "wishlist_bp",
     "accommodation_bp",
+    "packing_item_bp",
 ]
-
