@@ -35,9 +35,9 @@ export const formatDateRelative = (date: string | number | Date) => {
   const sameDay = isSameDay(dateVal, today);
   const sameYear = isSameYear(dateVal, today);
 
-  if (yesterday) return "Yesterday";
-  if (sameDay) return "Today";
-  if (tommorrow) return "Tomorrow";
-  if (sameYear) return format(dateVal, "dd MMM");
-  return format(dateVal, "dd MMM yyyy");
+  if (yesterday) return format(dateVal, "E dd MMM") + " (Yesterday)";
+  if (sameDay) return format(dateVal, "E dd MMM") + " (Today)";
+  if (tommorrow) return format(dateVal, "E dd MMM") + " (Tomorrow)";
+  if (sameYear) return format(dateVal, "E dd MMM");
+  return format(dateVal, "E dd MMM yyyy");
 };
