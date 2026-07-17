@@ -1,6 +1,12 @@
 import { useState } from "react";
 import { toast } from "sonner";
-import { format, parseISO } from "date-fns";
+import {
+  addMilliseconds,
+  differenceInMilliseconds,
+  format,
+  isValid,
+  parseISO,
+} from "date-fns";
 import type { Event } from "../types";
 import { ConfirmModal, FormInput } from "../../../components";
 import { isApiError } from "../../api/utils";
@@ -67,6 +73,32 @@ export default function EditEventDatesModal({
   const minDatetime = `${tripStartDate}T00:00`;
   const maxDatetime = `${tripEndDate}T23:59`;
 
+  function updateStartTime(newStartAt: string) {
+    const newStartAtDate = new Date(newStartAt);
+
+    if (!newStartAt || !isValid(newStartAtDate)) {
+      setStartAt(newStartAt);
+      return;
+    }
+
+    const endAtDate = new Date(endAt);
+
+    if (!endAt || !isValid(endAtDate)) {
+      const newEndAt = addMilliseconds(newStartAtDate, 60 * 60 * 1000);
+
+      setStartAt(newStartAt);
+      setEndAt(format(newEndAt, "yyyy-MM-dd'T'HH:mm"));
+      return;
+    }
+
+    const oldStartAtDate = new Date(startAt);
+    const duration = differenceInMilliseconds(endAtDate, oldStartAtDate);
+
+    const newEndAt = addMilliseconds(newStartAtDate, duration);
+
+    setStartAt(newStartAt);
+    setEndAt(format(newEndAt, "yyyy-MM-dd'T'HH:mm"));
+  }
   return (
     <ConfirmModal
       closeModal={onClose}
@@ -86,7 +118,7 @@ export default function EditEventDatesModal({
           label="Start At"
           name="startAt"
           value={startAt}
-          onChange={(e) => setStartAt(e.target.value)}
+          onChange={(e) => updateStartTime(e.target.value)}
           // @ts-expect-error min is used by base input component
           min={minDatetime}
           max={maxDatetime}
