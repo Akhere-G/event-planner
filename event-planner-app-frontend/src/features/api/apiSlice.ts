@@ -6,6 +6,6 @@ const baseUrl =
 export const apiSlice = createApi({
   reducerPath: "api",
   baseQuery: fetchBaseQuery({ baseUrl, credentials: "include" }),
-  tagTypes: ["Trips", "Events", "Invites", "Users", "Wishlists", "Accommodations"],
+  tagTypes: ["Trips", "Events", "Invites", "Users", "Wishlists", "Accommodations", "PackingItem"],
   endpoints: () => ({}),
 });

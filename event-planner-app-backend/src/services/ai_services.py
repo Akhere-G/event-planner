@@ -200,3 +200,45 @@ def optimise_events(itinerary_id, event_date: datetime):
     except Exception as e:
         print(f"JSON Parsing failed: {e}")
         return []
+
+
+def generate_packing_list(itinerary_id: int):
+    itinerary = get_itinerary(itinerary_id)
+    duration = (itinerary.end_date - itinerary.start_date).days + 1
+    booked_events = "\n".join(
+        [f"- {event.name}: {event.description or ''}" for event in itinerary.events]
+    )
+
+    prompt = f"""
+    You are an expert travel coordinator. Generate a highly customized packing checklist for a trip to {itinerary.destination}
+    from {itinerary.start_date} to {itinerary.end_date} (duration: {duration} days).
+
+    Context:
+    - Scheduled Activities/Events:
+    {booked_events if booked_events else "General sightseeing"}
+
+    Instructions:
+    1. Infer the typical weather for {itinerary.destination} during {itinerary.start_date.strftime('%B')}.
+    2. Categorize items into: "Clothing", "Toiletries", "Electronics", "Documents", "Specialty Gear", or "Misc".
+    3. Tailor recommendations directly to the activities and weather (e.g. swimwear/sunscreen for beach/swimming, formal wear for dining, walking shoes, rain jacket, charger, passport/ID, etc.).
+    4. Provide appropriate item quantities where applicable (e.g., "5x Shirts", "3x Socks").
+    5. Mark items as "is_shared": true for group gear/shared documents, and "is_shared": false for individual clothing/personal items.
+    
+    Output MUST be a raw JSON array of objects only. No markdown code block wraps.
+    Schema:
+    [
+      {{"name": "Light Rain Jacket", "category": "Clothing", "is_shared": false}},
+      {{"name": "First Aid Kit", "category": "Specialty Gear", "is_shared": true}}
+    ]
+    """
+
+    raw_response = get_ai_response(prompt)
+    try:
+        items = format_json(raw_response)
+        if not isinstance(items, list):
+            return []
+        return items
+    except Exception as e:
+        print(f"Packing AI JSON parsing failed: {e}")
+        return []
+

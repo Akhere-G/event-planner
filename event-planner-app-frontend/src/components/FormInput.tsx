@@ -22,6 +22,7 @@ export interface FormInputprops {
   textarea?: boolean;
   ref?: React.Ref<HTMLElement>;
   tooltipErrors?: boolean;
+  placeholder?: string;
 }
 
 const FormInput = ({
@@ -38,6 +39,7 @@ const FormInput = ({
   textarea = false,
   tooltipErrors = false,
   ref,
+  placeholder,
   ...props
 }: FormInputprops) => {
   return (
@@ -67,6 +69,7 @@ const FormInput = ({
           onChange={onChange}
           onBlur={onBlur}
           ref={ref as React.Ref<HTMLInputElement>}
+          placeholder={placeholder}
           {...props}
         />
       )}

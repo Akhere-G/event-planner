@@ -44,6 +44,9 @@ class Itinerary(Base, AuditMixin):
     accommodations: Mapped[List["Accommodation"]] = relationship(  # type: ignore  # noqa: F821
         back_populates="itinerary", cascade="all, delete-orphan", passive_deletes=True
     )
+    packing_items: Mapped[List["PackingItem"]] = relationship(  # type: ignore  # noqa: F821
+        "PackingItem", back_populates="itinerary", cascade="all, delete-orphan", passive_deletes=True
+    )
     creator: Mapped["User"] = relationship(  # type: ignore  # noqa: F821
         "User", foreign_keys="[Itinerary.created_by_id]"
     )

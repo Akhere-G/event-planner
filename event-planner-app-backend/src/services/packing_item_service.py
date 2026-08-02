@@ -43,7 +43,7 @@ def get_packing_item(user_id: int, itinerary_id: int, packing_item_id: int):
     item = db.session.execute(stmt).scalar_one_or_none()
 
     if not item:
-        raise NotFoundError("Packing item note found")
+        raise NotFoundError("Packing item not found")
     return item
 
 
@@ -58,6 +58,10 @@ def update_packing_item(
         if k in fields:
             setattr(item, k, v)
 
+    if "is_checked" in packing_item_data:
+        item.checked_by_id = user_id if packing_item_data["is_checked"] else None
+
+    item.updated_by_id = user_id
     db.session.commit()
 
     return item
@@ -70,3 +74,29 @@ def delete_packing_item(user_id: int, itinerary_id: int, packing_item_id: int):
     db.session.commit()
 
     return packing_item_id
+
+
+def generate_and_add_packing_items(user_id: int, itinerary_id: int):
+    from .ai_services import generate_packing_list
+
+    generated_items = generate_packing_list(itinerary_id)
+    for item in generated_items:
+        name = item.get("name")
+        category = item.get("category", "General")
+        is_shared = bool(item.get("is_shared", False))
+        if not name:
+            continue
+        new_item = PackingItem(
+            itinerary_id=itinerary_id,
+            owner_id=user_id if not is_shared else None,
+            name=name,
+            category=category,
+            is_shared=is_shared,
+            created_by_id=user_id,
+            updated_by_id=user_id,
+        )
+        db.session.add(new_item)
+
+    db.session.commit()
+    return get_packing_lists(user_id, itinerary_id)
+
