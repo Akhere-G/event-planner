@@ -6,7 +6,7 @@ import { useState } from "react";
 import { TravelModes } from "../../maps/constants";
 
 export default function EventActions({ from, to }: { from: Event; to: Event }) {
-  const [mode, setMode] = useState(google.maps.TravelMode.WALKING);
+  const [mode, setMode] = useState(google?.maps?.TravelMode?.WALKING ?? "");
   const dispatch = useDispatch();
 
   const mapsUrl = `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(from.address)}&destination=${encodeURIComponent(to.address)}&travelmode=${mode.toLowerCase()}`;
