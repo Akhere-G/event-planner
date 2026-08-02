@@ -1,8 +1,8 @@
 import * as yup from "yup";
 
 export const packingItemSchema = yup.object({
-  name: yup.string().trim().required(),
-  category: yup.string().trim().required(),
+  name: yup.string().trim().required("Item name is required"),
+  category: yup.string().trim().required("Category is required"),
   isShared: yup.bool().default(false),
 });
 

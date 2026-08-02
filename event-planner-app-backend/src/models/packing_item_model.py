@@ -19,20 +19,20 @@ class PackingItem(Base, AuditMixin):
         ForeignKey("users.id", ondelete="CASCADE"),
         nullable=True,
         index=True,
-        default=False,
+        default=None,
     )
     name: Mapped[str] = mapped_column(String(100))
     category: Mapped[str] = mapped_column(String(50))
     is_shared: Mapped[bool] = mapped_column(Boolean, default=False)
 
     is_checked: Mapped[bool] = mapped_column(Boolean, default=False)
-    checked_by_id: Mapped[Optional[Integer]] = mapped_column(
-        Integer, ForeignKey("users.id", ondelete="SET NULL"), default=None
+    checked_by_id: Mapped[Optional[int]] = mapped_column(
+        Integer, ForeignKey("users.id", ondelete="SET NULL"), default=None, nullable=True
     )
     checked_by: Mapped[Optional["User"]] = relationship(
         "User", foreign_keys=[checked_by_id]
     )  # type: ignore # noqa: F821
     itinerary: Mapped["Itinerary"] = relationship(
-        "Itinerary",
+        "Itinerary", back_populates="packing_items"
     )  # type: ignore # noqa: F821
     user: Mapped[Optional["User"]] = relationship("User", foreign_keys=[owner_id])  # type: ignore # noqa: F821
