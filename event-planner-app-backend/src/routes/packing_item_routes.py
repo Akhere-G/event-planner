@@ -39,7 +39,7 @@ def create_packing_item(user_id: int, itinerary_id: int):
     try:
         itineraries_service.get_itinerary_membership(user_id, itinerary_id)
         packing_item = schema.load(request.json)
-        if packing_item.is_shared:
+        if packing_item["is_shared"]:
             itineraries_service.is_authorised(
                 user_id,
                 itinerary_id,
