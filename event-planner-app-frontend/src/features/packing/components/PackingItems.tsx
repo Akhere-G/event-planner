@@ -63,7 +63,6 @@ export default function PackingItems({
         </div>
       )}
 
-      {/* Empty State */}
       {packingItems.length === 0 ? (
         <EmptyState
           message={
@@ -77,8 +76,7 @@ export default function PackingItems({
           }}
         />
       ) : (
-        /* Categorized Item Sections with Accordion */
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 2xl:grid-cols-2 gap-4">
           {categoryNames.map((category) => {
             const items = groupedCategories[category];
             const checkedCount = items.filter((i) => i.isChecked).length;

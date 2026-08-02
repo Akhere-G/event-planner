@@ -101,7 +101,7 @@ export default function PackingItemCard({
           type="button"
           onClick={handleSaveEdit}
           disabled={isUpdating}
-          className="p-2.5 rounded-lg bg-brand-primary text-text-inverse hover:brightness-110 flex-shrink-0"
+          className="p-1 rounded-lg bg-brand-primary text-text-inverse hover:brightness-110 shrink-0"
         >
           <Check className="w-5 h-5" />
         </button>
@@ -112,7 +112,7 @@ export default function PackingItemCard({
             setEditName(packingItem.name);
             setEditCategory(packingItem.category);
           }}
-          className="p-2.5 rounded-lg bg-surface-muted text-text-secondary hover:text-text-primary flex-shrink-0"
+          className="p-1 rounded-lg bg-surface-muted text-text-secondary hover:text-text-primary shrink-0"
         >
           <X className="w-5 h-5" />
         </button>
@@ -133,7 +133,7 @@ export default function PackingItemCard({
           type="button"
           onClick={handleToggleCheck}
           disabled={isUpdating}
-          className="text-brand-primary hover:scale-105 transition-transform flex-shrink-0 cursor-pointer"
+          className="p-0 text-brand-primary hover:scale-105 transition-transform shrink-0 cursor-pointer"
           aria-label={
             packingItem.isChecked ? "Mark incomplete" : "Mark complete"
           }
@@ -145,9 +145,9 @@ export default function PackingItemCard({
           )}
         </button>
 
-        <div className="min-w-0 flex-1">
+        <div className="min-w-0 flex-1 w-full">
           <span
-            className={`text-sm font-medium transition-all block truncate ${
+            className={`text-sm font-medium transition-all flex w-full ${
               packingItem.isChecked
                 ? "line-through text-text-secondary"
                 : "text-text-primary"
@@ -164,7 +164,7 @@ export default function PackingItemCard({
         </div>
       </div>
 
-      <div className="flex items-center gap-2 flex-shrink-0 ml-2">
+      <div className="flex items-center gap-2 shrink-0 ml-2">
         <span className="text-xs px-2.5 py-0.5 rounded-full bg-surface-muted border border-surface-border text-text-secondary capitalize hidden sm:inline-block">
           {packingItem.category}
         </span>
