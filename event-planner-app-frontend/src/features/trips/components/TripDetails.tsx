@@ -38,7 +38,7 @@ export default function TripDetails(trip: Trip) {
         <TripSummary trip={trip} showActions={isAdmin(trip.role)} />
       </div>
       <div>
-        <div className="ml-auto w-full mb-4 flex items-center">
+        <div className="ml-auto w-full mb-4 flex items-center overflow-x-scroll">
           {tabs.map((tab, i) => {
             let classNames =
               "btn-secondary px-4 py-2 border-2 border-surface-border border-l-0 rounded-none active:scale-100 ";
