@@ -39,7 +39,7 @@ export default function PackingPage({ trip }: { trip: Trip }) {
   const handleGenerateAI = async () => {
     try {
       await generatePackingItems({ tripId: trip.id }).unwrap();
-      toast.success("AI generated customized packing recommendations!");
+      toast.success("AI generated customised packing recommendations!");
     } catch (err) {
       if (isApiError(err)) {
         toast.error(err.data.message);
@@ -90,7 +90,7 @@ export default function PackingPage({ trip }: { trip: Trip }) {
               {isGenerating ? (
                 <>
                   <Loader2 className="w-5 h-5 animate-spin text-text-inverse" />
-                  <span>Analyzing Itinerary...</span>
+                  <span>Analysing Itinerary...</span>
                 </>
               ) : (
                 <>
@@ -112,9 +112,9 @@ export default function PackingPage({ trip }: { trip: Trip }) {
                 Get Ready for {trip.destination}!
               </h3>
               <p className="text-sm text-text-secondary">
-                Let AI analyze your travel dates, infer destination weather, and
+                Let AI analyse your travel dates, infer destination weather, and
                 review your scheduled itinerary events to construct a
-                personalized packing list.
+                personalised packing list.
               </p>
             </div>
             <button
