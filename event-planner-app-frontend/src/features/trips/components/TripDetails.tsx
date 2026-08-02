@@ -74,9 +74,7 @@ export default function TripDetails(trip: Trip) {
           {activeTab === "accommodation" && (
             <AccommodationPage trip={trip} cityBounds={getCityBounds(trip)} />
           )}
-          {activeTab === "packing" && (
-            <PackingPage trip={trip} cityBounds={getCityBounds(trip)} />
-          )}
+          {activeTab === "packing" && <PackingPage trip={trip} />}
         </div>
       </div>
     </div>
