@@ -1,4 +1,11 @@
-import { Calendar, Edit, MapPin, Trash } from "lucide-react";
+import {
+  Calendar,
+  Edit,
+  MapPin,
+  Trash,
+  Copy,
+  ExternalLink,
+} from "lucide-react";
 import React, { useState } from "react";
 import { toast } from "sonner";
 import {
@@ -21,6 +28,8 @@ interface WishlistItemViewProps {
   editButtonProps?: React.ButtonHTMLAttributes<HTMLButtonElement>;
   editButtonRef?: React.Ref<HTMLButtonElement>;
 }
+
+// TODO: Add dropdown menu for edit, delete and location actions
 
 function WishlistItemView({
   item,
@@ -83,9 +92,28 @@ function WishlistItemView({
 
       <div className="">
         {item.address && (
-          <p className=" text-text-secondary flex items-center gap-1 ">
-            <MapPin size={10} className="shrink-0 -mb-1/2 " />
+          <p className="text-text-secondary flex items-center gap-1.5 mt-0.5">
+            <MapPin size={10} className="shrink-0 -mb-1/2" />
             <span>{item.address}</span>
+            <button
+              title="Copy Address"
+              className="btn p-0.5 hover:bg-text-primary/10 rounded transition-colors text-text-primary"
+              onClick={() => {
+                navigator.clipboard.writeText(item.address!);
+                toast.info("Copied!");
+              }}
+            >
+              <Copy size={10} />
+            </button>
+            <a
+              href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(item.name)},${encodeURIComponent(item.address)}`}
+              target="_blank"
+              rel="noreferrer"
+              className="btn p-0.5 hover:bg-brand-primary/10 rounded transition-colors text-brand-primary"
+              title="Open in Google Maps"
+            >
+              <ExternalLink size={10} />
+            </a>
           </p>
         )}
         {item.description && (

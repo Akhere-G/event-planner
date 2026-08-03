@@ -1,4 +1,11 @@
-import { Clock, Copy, ExternalLink, Tag, Trash } from "lucide-react";
+import {
+  Clock,
+  Copy,
+  ExternalLink,
+  MoreVertical,
+  Tag,
+  Trash,
+} from "lucide-react";
 import { format, parseISO } from "date-fns";
 import { type Event } from "../types";
 import { canUserEdit } from "../../users/utils";
@@ -10,6 +17,7 @@ import {
   StateGate,
 } from "../../../components";
 import { eventCategories } from "../constants";
+import useMenu from "../../../hooks/useMenu";
 
 import { useParams } from "react-router";
 import { useUpdateEvent } from "../../trips/hooks";
@@ -43,6 +51,10 @@ export function EventCard({
   const start = parseISO(eventData.startAt);
   const end = parseISO(eventData.endAt);
 
+  const { openMenu, isMenuOpen, menuContainerRef, openButtonRef } = useMenu({
+    closeOnClick: true,
+  });
+
   const updateEventData = async (newData: Partial<Event>) => {
     const oldData = eventData;
     try {
@@ -55,51 +67,84 @@ export function EventCard({
 
   const closeDeleteModal = () => setIsModalOpen(false);
 
+  const handleCopyAddress = () => {
+    navigator.clipboard.writeText(eventData.address);
+    toast.info("Copied!");
+  };
+
+  const handleOpenInMaps = () => {
+    window.open(
+      `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(event.name)},${encodeURIComponent(event.address)}`,
+      "_blank",
+    );
+  };
+
   return (
-    <div className="card flex-1 transition-shadow border-l-4 border-brand-primary">
+    <div className="card flex-1 transition-shadow border-l-4 border-brand-primary relative">
       <div className="flex flex-col">
-        <div className="flex justify-between items-center ">
+        <div className="flex justify-between items-start">
           <h3 className="font-bold tracking-tight text-text-primary flex flex-col">
             <span>{eventData.name}</span>
           </h3>
 
-          <EditableSelect
-            selectedValue={eventData.category}
-            canEdit={canUserEdit(role)}
-            defaultElement={
-              <span className="flex items-center gap-1 px-2 py-1 rounded-full bg-brand-secondary/10 text-brand-secondary text-xs font-semibold uppercase">
-                <Tag size={16} />
-                {eventData.category}
-              </span>
-            }
-            setValue={(category) => {
-              updateEventData({ category });
-            }}
-            options={eventCategories}
-            selectClassName="flex flex-col items-stretch text-center!"
-          />
+          <button
+            ref={openButtonRef}
+            className="p-1 hover:bg-surface-muted rounded transition-colors text-text-secondary"
+            onClick={openMenu}
+          >
+            <MoreVertical size={16} />
+          </button>
         </div>
+
+        {isMenuOpen && (
+          <div
+            ref={menuContainerRef}
+            className="absolute top-8 right-2 px-1 bg-surface rounded-md shadow-lg z-10 flex flex-col text-sm min-w-[160px]"
+          >
+            <button
+              onClick={handleCopyAddress}
+              className="btn-menu text-left flex gap-2 items-center"
+            >
+              <Copy size={16} />
+              Copy Address
+            </button>
+            <button
+              onClick={handleOpenInMaps}
+              className="btn-menu text-left flex gap-2 items-center"
+            >
+              <ExternalLink size={16} />
+              Open in Maps
+            </button>
+            {canUserEdit(role) && (
+              <button
+                onClick={() => setIsModalOpen(true)}
+                className="btn-menu text-error text-left flex gap-2 items-center"
+              >
+                <Trash size={16} />
+                Delete
+              </button>
+            )}
+          </div>
+        )}
+
+        <EditableSelect
+          selectedValue={eventData.category}
+          canEdit={canUserEdit(role)}
+          defaultElement={
+            <span className="flex items-center self-end gap-1 my-1 px-4 py-1 rounded-full bg-brand-secondary/10 text-brand-secondary text-xs font-semibold uppercase w-min">
+              <Tag size={16} />
+              {eventData.category}
+            </span>
+          }
+          setValue={(category) => {
+            updateEventData({ category });
+          }}
+          options={eventCategories}
+          selectClassName="flex flex-col items-stretch text-center!"
+        />
+
         <div className="flex gap-2 items-center mb-2">
           <p className="text-sm text-text-secondary">{eventData.address}</p>
-          <button
-            title="Copy Address"
-            className="btn p-1 hover:bg-text-primary/10 rounded transition-colors text-text-primary"
-            onClick={() => {
-              navigator.clipboard.writeText(eventData.address);
-              toast.info("Copied!");
-            }}
-          >
-            <Copy size={12} />
-          </button>
-          <a
-            href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(event.name)},${encodeURIComponent(event.address)}`}
-            target="_blank"
-            rel="noreferrer"
-            className="btn p-1 hover:bg-brand-primary/10 rounded transition-colors text-brand-primary"
-            title="Open in Google Maps"
-          >
-            <ExternalLink size={12} />
-          </a>
         </div>
 
         <EditableText
@@ -144,42 +189,28 @@ export function EventCard({
               )}
             </div>
           </div>
-
-          {canUserEdit(role) && (
-            <button
-              className="p-0 group"
-              aria-label="delete event"
-              onClick={() => setIsModalOpen(true)}
-            >
-              <Trash
-                size={16}
-                className="group-hover:hover:stroke-error duration-300"
-                aria-hidden
-              />
-            </button>
-          )}
-
-          {isModalOpen && (
-            <ConfirmModal
-              title={`Delete '${eventData.name}'`}
-              closeModal={closeDeleteModal}
-              confirmAction={() => handleDelete(eventData.id)}
-            />
-          )}
-
-          {isDateModalOpen && (
-            <EditEventDatesModal
-              event={eventData}
-              tripStartDate={tripStartDate}
-              tripEndDate={tripEndDate}
-              isOpen={isDateModalOpen}
-              onClose={() => setIsDateModalOpen(false)}
-              onSave={async (startAt, endAt) => {
-                await updateEventData({ startAt, endAt });
-              }}
-            />
-          )}
         </div>
+
+        {isModalOpen && (
+          <ConfirmModal
+            title={`Delete '${eventData.name}'`}
+            closeModal={closeDeleteModal}
+            confirmAction={() => handleDelete(eventData.id)}
+          />
+        )}
+
+        {isDateModalOpen && (
+          <EditEventDatesModal
+            event={eventData}
+            tripStartDate={tripStartDate}
+            tripEndDate={tripEndDate}
+            isOpen={isDateModalOpen}
+            onClose={() => setIsDateModalOpen(false)}
+            onSave={async (startAt, endAt) => {
+              await updateEventData({ startAt, endAt });
+            }}
+          />
+        )}
       </div>
     </div>
   );

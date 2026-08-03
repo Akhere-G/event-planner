@@ -6,6 +6,8 @@ import {
   Trash2,
   ChevronDown,
   ChevronUp,
+  Copy,
+  ExternalLink,
 } from "lucide-react";
 import type { Accommodation } from "../types";
 import { formatDateRange } from "../../../utils/dateFormattors";
@@ -22,6 +24,8 @@ interface AccommodationCardProps {
   accommodation: Accommodation;
   deleteFuncProps?: { onSuccess?: () => void };
 }
+
+// TODO: Add dropdown menu for edit, delete and location actions
 
 export default function AccommodationCard({
   accommodation,
@@ -86,12 +90,53 @@ export default function AccommodationCard({
     <div className="card p-4 space-y-3">
       <div className="flex justify-between items-start">
         <div className="flex-1">
-          <h3 className="font-semibold text-text-main text-lg">
-            {accommodation.name}
-          </h3>
+          <div className="flex gap- justify-between">
+            <h3 className="font-semibold text-text-main text-lg">
+              {accommodation.name}
+            </h3>
+            <div className="flex gap-2">
+              <button
+                onClick={() => handleUpdate(accommodation)}
+                className="p-2 hover:bg-surface-muted rounded-md text-text-secondary hover:text-text-primary transition-colors"
+                title="Update"
+              >
+                <Edit2 size={16} />
+              </button>
+              <button
+                onClick={() => handleDelete(accommodation)}
+                className="p-2 hover:bg-surface-muted rounded-md text-text-secondary hover:text-error transition-colors"
+                title="Delete"
+              >
+                <Trash2 size={16} />
+              </button>
+            </div>
+          </div>
           <div className="flex items-center gap-2 text-text-secondary text-sm mt-1">
-            <MapPin size={14} />
+            <MapPin size={14} className="shrink-0" />
             <span>{accommodation.address}</span>
+            {accommodation.address && (
+              <div className="flex items-center gap-1">
+                <button
+                  title="Copy Address"
+                  className="btn p-1 hover:bg-text-primary/10 rounded transition-colors text-text-primary"
+                  onClick={() => {
+                    navigator.clipboard.writeText(accommodation.address);
+                    toast.info("Copied!");
+                  }}
+                >
+                  <Copy size={12} />
+                </button>
+                <a
+                  href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(accommodation.name)},${encodeURIComponent(accommodation.address)}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="btn p-1 hover:bg-brand-primary/10 rounded transition-colors text-brand-primary"
+                  title="Open in Google Maps"
+                >
+                  <ExternalLink size={12} />
+                </a>
+              </div>
+            )}
           </div>
           <div className="flex items-center gap-2 text-text-secondary text-sm mt-1">
             <Calendar size={14} />
@@ -99,22 +144,6 @@ export default function AccommodationCard({
               {formatDateRange(accommodation.startDate, accommodation.endDate)}
             </span>
           </div>
-        </div>
-        <div className="flex gap-2">
-          <button
-            onClick={() => handleUpdate(accommodation)}
-            className="p-2 hover:bg-surface-muted rounded-md text-text-secondary hover:text-text-primary transition-colors"
-            title="Update"
-          >
-            <Edit2 size={16} />
-          </button>
-          <button
-            onClick={() => handleDelete(accommodation)}
-            className="p-2 hover:bg-surface-muted rounded-md text-text-secondary hover:text-error transition-colors"
-            title="Delete"
-          >
-            <Trash2 size={16} />
-          </button>
         </div>
       </div>
 
