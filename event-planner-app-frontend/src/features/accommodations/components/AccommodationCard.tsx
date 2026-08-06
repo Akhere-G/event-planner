@@ -8,6 +8,7 @@ import {
   ChevronUp,
   Copy,
   ExternalLink,
+  MoreVertical,
 } from "lucide-react";
 import type { Accommodation } from "../types";
 import { formatDateRange } from "../../../utils/dateFormattors";
@@ -19,6 +20,8 @@ import { toast } from "sonner";
 import { useParams } from "react-router";
 import { useGetTripQuery } from "../../trips/services/tripsApiSlice";
 import { getCityBounds } from "../../maps/utils";
+import useMenu from "../../../hooks/useMenu";
+import { canUserEdit } from "../../users/utils";
 
 interface AccommodationCardProps {
   accommodation: Accommodation;
@@ -44,6 +47,10 @@ export default function AccommodationCard({
   const [accommodationToDelete, setAccommodationToDelete] =
     useState<Accommodation | null>(null);
 
+  const { openMenu, isMenuOpen, menuContainerRef, openButtonRef } = useMenu({
+    closeOnClick: true,
+  });
+
   const shouldShowExpand =
     accommodation.description && accommodation.description.length > 100;
 
@@ -55,6 +62,21 @@ export default function AccommodationCard({
   const handleDelete = (accommodation: Accommodation) => {
     setAccommodationToDelete(accommodation);
     setIsDeleteModalOpen(true);
+  };
+
+  const handleCopyAddress = () => {
+    if (!accommodation.address) return;
+    navigator.clipboard.writeText(accommodation.address);
+    toast.info("Copied!");
+  };
+
+  const handleOpenInMaps = () => {
+    if (!accommodation.address) return;
+
+    window.open(
+      `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(accommodation.name)},${encodeURIComponent(accommodation.address)}`,
+      "_blank",
+    );
   };
 
   const handleDeleteConfirm = async () => {
@@ -86,57 +108,27 @@ export default function AccommodationCard({
 
   const cityBounds = getCityBounds(trip);
 
+  const editable = canUserEdit(trip.role);
+
   return (
-    <div className="card p-4 space-y-3">
+    <div className="card p-4 space-y-3 relative">
       <div className="flex justify-between items-start">
         <div className="flex-1">
           <div className="flex gap- justify-between">
             <h3 className="font-semibold text-text-main text-lg">
               {accommodation.name}
             </h3>
-            <div className="flex gap-2">
-              <button
-                onClick={() => handleUpdate(accommodation)}
-                className="p-2 hover:bg-surface-muted rounded-md text-text-secondary hover:text-text-primary transition-colors"
-                title="Update"
-              >
-                <Edit2 size={16} />
-              </button>
-              <button
-                onClick={() => handleDelete(accommodation)}
-                className="p-2 hover:bg-surface-muted rounded-md text-text-secondary hover:text-error transition-colors"
-                title="Delete"
-              >
-                <Trash2 size={16} />
-              </button>
-            </div>
+            <button
+              ref={openButtonRef}
+              className="p-1 hover:bg-surface-muted rounded transition-colors text-text-secondary"
+              onClick={openMenu}
+            >
+              <MoreVertical size={16} />
+            </button>
           </div>
           <div className="flex items-center gap-2 text-text-secondary text-sm mt-1">
             <MapPin size={14} className="shrink-0" />
             <span>{accommodation.address}</span>
-            {accommodation.address && (
-              <div className="flex items-center gap-1">
-                <button
-                  title="Copy Address"
-                  className="btn p-1 hover:bg-text-primary/10 rounded transition-colors text-text-primary"
-                  onClick={() => {
-                    navigator.clipboard.writeText(accommodation.address);
-                    toast.info("Copied!");
-                  }}
-                >
-                  <Copy size={12} />
-                </button>
-                <a
-                  href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(accommodation.name)},${encodeURIComponent(accommodation.address)}`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="btn p-1 hover:bg-brand-primary/10 rounded transition-colors text-brand-primary"
-                  title="Open in Google Maps"
-                >
-                  <ExternalLink size={12} />
-                </a>
-              </div>
-            )}
           </div>
           <div className="flex items-center gap-2 text-text-secondary text-sm mt-1">
             <Calendar size={14} />
@@ -172,6 +164,46 @@ export default function AccommodationCard({
                   Show less
                 </button>
               )}
+            </>
+          )}
+        </div>
+      )}
+
+      {isMenuOpen && (
+        <div
+          ref={menuContainerRef}
+          className="absolute top-8 right-2 px-1 bg-surface rounded-md shadow-lg z-10 flex flex-col text-sm min-w-[160px]"
+        >
+          <button
+            onClick={handleCopyAddress}
+            className="btn-menu text-left flex gap-2 items-center"
+          >
+            <Copy size={16} />
+            Copy Address
+          </button>
+          <button
+            onClick={handleOpenInMaps}
+            className="btn-menu text-left flex gap-2 items-center"
+          >
+            <ExternalLink size={16} />
+            Open in Maps
+          </button>
+          {editable && (
+            <>
+              <button
+                className="btn-menu text-left flex gap-2 items-center"
+                title="Edit activity"
+                onClick={() => handleUpdate(accommodation)}
+              >
+                <Edit2 size={16} /> Edit
+              </button>
+              <button
+                onClick={() => handleDelete(accommodation)}
+                className="btn-menu text-error text-left flex gap-2 items-center"
+              >
+                <Trash2 size={16} />
+                Delete
+              </button>
             </>
           )}
         </div>
