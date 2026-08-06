@@ -6,6 +6,7 @@ import {
   Copy,
   ExternalLink,
   MoreVertical,
+  Eye,
 } from "lucide-react";
 import React, { useState } from "react";
 import { toast } from "sonner";
@@ -18,6 +19,11 @@ import PromoteItemModal from "./PromoteItemModal";
 import ConfirmModal from "../../../components/ConfirmModal";
 import type { WishlistItem } from "../types";
 import useMenu from "../../../hooks/useMenu";
+import { useDispatch } from "react-redux";
+import {
+  setIsMapView,
+  setSelectedWishlistItem,
+} from "../../maps/service/mapSlice";
 
 interface WishlistItemViewProps {
   item: WishlistItem;
@@ -46,6 +52,8 @@ function WishlistItemView({
     closeOnClick: true,
   });
 
+  const dispatch = useDispatch();
+
   const handleCopyAddress = () => {
     if (!item.address) return;
     navigator.clipboard.writeText(item.address);
@@ -61,11 +69,16 @@ function WishlistItemView({
     );
   };
 
+  const handleView = () => {
+    dispatch(setSelectedWishlistItem(item));
+    dispatch(setIsMapView(true));
+  };
+
   return (
     <div
       className={`p-2.5 rounded-lg border text-xs relative ${
         item.isPromoted
-          ? " bg-brand-primary/5 border-brand-primary/20"
+          ? " bg-surface-muted border border-brand-primary/20"
           : " border-surface-border bg-surface-muted"
       }`}
     >
@@ -100,6 +113,13 @@ function WishlistItemView({
           ref={menuContainerRef}
           className="absolute top-8 right-2 px-1 bg-surface rounded-md shadow-lg z-10 flex flex-col text-sm min-w-[160px]"
         >
+          <button
+            onClick={handleView}
+            className="btn-menu text-left flex gap-2 items-center"
+          >
+            <Eye size={16} />
+            View
+          </button>
           <button
             onClick={handleCopyAddress}
             className="btn-menu text-left flex gap-2 items-center"
