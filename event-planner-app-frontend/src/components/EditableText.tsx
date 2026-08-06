@@ -1,3 +1,4 @@
+import { Pencil } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 interface EditableTextProps {
@@ -47,10 +48,15 @@ export default function EditableText({
         onClick={() => {
           setIsEditing(true);
         }}
-        className={`${canEdit && isEditing ? "invisible hidden" : "visible block"} p-0 m-0 min-h-5 cursor-text max-w-[70vw]  
-        ${canEdit ? "hover:bg-surface-muted" : ""} duration-300 ${textClassName} ${!value && emptyText ? "text-text-secondary" : ""}`}
+        className={`${canEdit && isEditing ? "invisible hidden" : "visible block"} relative group p-0 m-0 min-h-5 cursor-text max-w-[70vw]  
+        ${canEdit ? " cursor-pointer hover:bg-surface-muted" : ""} duration-300 ${textClassName} ${!value && emptyText ? "text-text-secondary" : ""}`}
       >
         {value || emptyText}
+        {canEdit && (
+          <div className="absolute -top-2 -right-2 hidden group-hover:flex ">
+            <Pencil size={10} />
+          </div>
+        )}
       </p>
     </>
   );
