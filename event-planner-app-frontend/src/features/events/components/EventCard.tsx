@@ -1,6 +1,7 @@
 import {
   Clock,
   Copy,
+  Edit,
   ExternalLink,
   Eye,
   MoreVertical,
@@ -27,14 +28,15 @@ import { toast } from "sonner";
 import EditEventDatesModal from "./EditEventDatesModal";
 import { useDispatch } from "react-redux";
 import { setIsMapView, setSelectedEvent } from "../../maps/service/mapSlice";
+import EditEventModal from "./EditEventModal";
+import type { Trip } from "../../trips/types";
 
 interface EventCardProps {
   event: Event;
   handleDelete?: (id: number) => Promise<void>;
   handleEdit?: (eventId: number, updatedEvent: Partial<Event>) => Promise<void>;
   role: string;
-  tripStartDate?: string;
-  tripEndDate?: string;
+  trip: Trip;
 }
 // TODO: Use shadcn popup for category select.
 // TODO: Allow for name edit
@@ -45,8 +47,7 @@ export function EventCard({
   handleDelete = async () => {},
   handleEdit = async () => {},
   role,
-  tripStartDate = "",
-  tripEndDate = "",
+  trip,
 }: EventCardProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDateModalOpen, setIsDateModalOpen] = useState(false);
@@ -55,6 +56,16 @@ export function EventCard({
   const end = parseISO(eventData.endAt);
 
   const { openMenu, isMenuOpen, menuContainerRef, openButtonRef } = useMenu({
+    closeOnClick: true,
+  });
+
+  const {
+    openMenu: setEditModalTrue,
+    isMenuOpen: isEditing,
+    menuContainerRef: editModalContainer,
+    openButtonRef: editButtonRef,
+    closeMenu: closeEditModal,
+  } = useMenu({
     closeOnClick: true,
   });
 
@@ -87,6 +98,8 @@ export function EventCard({
       "_blank",
     );
   };
+
+  if (event.name === "McDonald's") console.log(isEditing);
 
   return (
     <div className="card flex-1 transition-shadow border-l-4 border-brand-primary relative">
@@ -133,13 +146,26 @@ export function EventCard({
             </button>
 
             {canUserEdit(role) && (
-              <button
-                onClick={() => setIsModalOpen(true)}
-                className="btn-menu text-error text-left flex gap-2 items-center"
-              >
-                <Trash size={16} />
-                Delete
-              </button>
+              <>
+                <button
+                  onClick={(e) => {
+                    setEditModalTrue();
+                    e.stopPropagation();
+                  }}
+                  className="btn-menu text-left flex gap-2 items-center"
+                  ref={editButtonRef}
+                >
+                  <Edit size={16} />
+                  Edit
+                </button>
+                <button
+                  onClick={() => setIsModalOpen(true)}
+                  className="btn-menu text-error text-left flex gap-2 items-center"
+                >
+                  <Trash size={16} />
+                  Delete
+                </button>
+              </>
             )}
           </div>
         )}
@@ -219,13 +245,23 @@ export function EventCard({
         {isDateModalOpen && (
           <EditEventDatesModal
             event={eventData}
-            tripStartDate={tripStartDate}
-            tripEndDate={tripEndDate}
+            tripStartDate={trip.startDate}
+            tripEndDate={trip.endDate}
             isOpen={isDateModalOpen}
             onClose={() => setIsDateModalOpen(false)}
             onSave={async (startAt, endAt) => {
               await updateEventData({ startAt, endAt });
             }}
+          />
+        )}
+        {isEditing && (
+          <EditEventModal
+            event={event}
+            onClose={closeEditModal}
+            onSave={async (updatedEvent) => {
+              await updateEventData(updatedEvent);
+            }}
+            editModalContainer={editModalContainer}
           />
         )}
       </div>
@@ -259,8 +295,7 @@ export default function EventCardConnected({
           event={event}
           handleDelete={handleDelete}
           handleEdit={handleEdit}
-          tripStartDate={data?.data.startDate}
-          tripEndDate={data?.data.endDate}
+          trip={data.data}
         />
       )}
     </StateGate>

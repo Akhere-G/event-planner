@@ -11,6 +11,7 @@ interface LocationInputProps extends React.InputHTMLAttributes<HTMLInputElement>
   searchTypes?: string[];
   cityBounds?: { north: number; east: number; south: number; west: number };
   onPlaceQuery?: (query: string) => void;
+  initialValue?: string;
 }
 
 export default function LocationInput({
@@ -21,6 +22,7 @@ export default function LocationInput({
   onPlaceSelect,
   cityBounds,
   onPlaceQuery,
+  initialValue,
   searchTypes = ["establishment"],
   ...rest
 }: LocationInputProps) {
@@ -46,6 +48,12 @@ export default function LocationInput({
 
     setAutocomplete(instance);
   }, [placesLibrary, searchTypes, cityBounds]);
+
+  useEffect(() => {
+    if (inputRef.current && initialValue) {
+      inputRef.current.value = initialValue;
+    }
+  }, [initialValue]);
 
   useEffect(() => {
     if (!autocomplete) return;

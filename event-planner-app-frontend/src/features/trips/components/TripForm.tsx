@@ -123,6 +123,11 @@ export default function TripForm({
         }}
       />
       <FormInput
+        label="Name"
+        {...register("name")}
+        errorMessage={formState.errors.name?.message}
+      />
+      <FormInput
         label="Description"
         {...register("description")}
         errorMessage={formState.errors.description?.message}
