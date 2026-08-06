@@ -65,8 +65,8 @@ function WishlistItemView({
     <div
       className={`p-2.5 rounded-lg border text-xs relative ${
         item.isPromoted
-          ? "bg-brand-primary/5 border-brand-primary/20 opacity-85"
-          : "border-surface-border bg-surface-muted"
+          ? " bg-brand-primary/5 border-brand-primary/20"
+          : " border-surface-border bg-surface-muted"
       }`}
     >
       <div className="flex justify-between items-start gap-2">
@@ -120,7 +120,6 @@ function WishlistItemView({
                 <button
                   ref={scheduleButtonRef}
                   onClick={(e) => {
-                    console.log("here");
                     onScheduleClick();
                     e.stopPropagation();
                   }}
@@ -216,17 +215,12 @@ export default function WishlistItemCard({
     }
   };
 
-  if (item.name === "Champ de Mars") {
-    console.log(item.name, isMenuOpen);
-  }
-
   return (
     <>
       <WishlistItemView
         item={item}
         editable={editable}
         onScheduleClick={() => {
-          console.log("heeeeeere");
           openMenu();
         }}
         onDeleteClick={() => setShowDeleteConfirm(true)}
