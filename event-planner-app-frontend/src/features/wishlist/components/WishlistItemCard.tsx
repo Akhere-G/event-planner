@@ -5,6 +5,7 @@ import {
   Trash,
   Copy,
   ExternalLink,
+  MoreVertical,
 } from "lucide-react";
 import React, { useState } from "react";
 import { toast } from "sonner";
@@ -41,6 +42,25 @@ function WishlistItemView({
   editButtonProps,
   editButtonRef,
 }: WishlistItemViewProps) {
+  const { openMenu, isMenuOpen, menuContainerRef, openButtonRef } = useMenu({
+    closeOnClick: true,
+  });
+
+  const handleCopyAddress = () => {
+    if (!item.address) return;
+    navigator.clipboard.writeText(item.address);
+    toast.info("Copied!");
+  };
+
+  const handleOpenInMaps = () => {
+    if (!item.address) return;
+
+    window.open(
+      `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(item.name)},${encodeURIComponent(item.address)}`,
+      "_blank",
+    );
+  };
+
   return (
     <div
       className={`p-2.5 rounded-lg border text-xs relative ${
@@ -50,44 +70,16 @@ function WishlistItemView({
       }`}
     >
       <div className="flex justify-between items-start gap-2">
-        <div>
+        <div className="flex justify-between w-full">
           <h4 className="font-semibold text-text-main pr-10">{item.name}</h4>
+          <button
+            ref={openButtonRef}
+            className="p-1 hover:bg-surface-muted rounded transition-colors text-text-secondary"
+            onClick={openMenu}
+          >
+            <MoreVertical size={16} />
+          </button>
         </div>
-
-        {editable && (
-          <div className="flex items-center gap-1 shrink-0">
-            {!item.isPromoted ? (
-              <button
-                ref={scheduleButtonRef}
-                onClick={onScheduleClick}
-                title="Schedule Event"
-                className="p-1 rounded bg-brand-primary/10 text-brand-primary hover:bg-brand-primary hover:text-white transition-colors cursor-pointer"
-              >
-                <Calendar size={12} />
-              </button>
-            ) : (
-              <span className="px-1.5 py-0.5 rounded-full bg-brand-primary/10 text-brand-primary text-xs font-bold">
-                Added
-              </span>
-            )}
-            <button
-              className="ml-1 p-1 rounded text-text-secondary hover:text-info hover:bg-info/25 transition-colors cursor-pointer"
-              title="Edit activity"
-              onClick={() => editItem(item)}
-              {...editButtonProps}
-              ref={editButtonRef}
-            >
-              <Edit size={12} />
-            </button>
-            <button
-              onClick={onDeleteClick}
-              title="Delete activity"
-              className="p-1 rounded text-text-secondary hover:text-error hover:bg-error/10 transition-colors cursor-pointer"
-            >
-              <Trash size={12} />
-            </button>
-          </div>
-        )}
       </div>
 
       <div className="">
@@ -95,25 +87,6 @@ function WishlistItemView({
           <p className="text-text-secondary flex items-center gap-1.5 mt-0.5">
             <MapPin size={10} className="shrink-0 -mb-1/2" />
             <span>{item.address}</span>
-            <button
-              title="Copy Address"
-              className="btn p-0.5 hover:bg-text-primary/10 rounded transition-colors text-text-primary"
-              onClick={() => {
-                navigator.clipboard.writeText(item.address!);
-                toast.info("Copied!");
-              }}
-            >
-              <Copy size={10} />
-            </button>
-            <a
-              href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(item.name)},${encodeURIComponent(item.address)}`}
-              target="_blank"
-              rel="noreferrer"
-              className="btn p-0.5 hover:bg-brand-primary/10 rounded transition-colors text-brand-primary"
-              title="Open in Google Maps"
-            >
-              <ExternalLink size={10} />
-            </a>
           </p>
         )}
         {item.description && (
@@ -122,6 +95,61 @@ function WishlistItemView({
           </p>
         )}
       </div>
+      {isMenuOpen && (
+        <div
+          ref={menuContainerRef}
+          className="absolute top-8 right-2 px-1 bg-surface rounded-md shadow-lg z-10 flex flex-col text-sm min-w-[160px]"
+        >
+          <button
+            onClick={handleCopyAddress}
+            className="btn-menu text-left flex gap-2 items-center"
+          >
+            <Copy size={16} />
+            Copy Address
+          </button>
+          <button
+            onClick={handleOpenInMaps}
+            className="btn-menu text-left flex gap-2 items-center"
+          >
+            <ExternalLink size={16} />
+            Open in Maps
+          </button>
+          {editable && (
+            <>
+              {!item.isPromoted && (
+                <button
+                  ref={scheduleButtonRef}
+                  onClick={(e) => {
+                    console.log("here");
+                    onScheduleClick();
+                    e.stopPropagation();
+                  }}
+                  title="Schedule Event"
+                  className="btn-menu  text-left flex gap-2 items-center"
+                >
+                  <Calendar size={16} /> Schedule
+                </button>
+              )}
+              <button
+                className="btn-menu text-left flex gap-2 items-center"
+                title="Edit activity"
+                onClick={() => editItem(item)}
+                {...editButtonProps}
+                ref={editButtonRef}
+              >
+                <Edit size={16} /> Edit
+              </button>
+              <button
+                onClick={onDeleteClick}
+                className="btn-menu text-error text-left flex gap-2 items-center"
+              >
+                <Trash size={16} />
+                Delete
+              </button>
+            </>
+          )}
+        </div>
+      )}
     </div>
   );
 }
@@ -188,12 +216,19 @@ export default function WishlistItemCard({
     }
   };
 
+  if (item.name === "Champ de Mars") {
+    console.log(item.name, isMenuOpen);
+  }
+
   return (
     <>
       <WishlistItemView
         item={item}
         editable={editable}
-        onScheduleClick={openMenu}
+        onScheduleClick={() => {
+          console.log("heeeeeere");
+          openMenu();
+        }}
         onDeleteClick={() => setShowDeleteConfirm(true)}
         scheduleButtonRef={openButtonRef}
         editItem={editItem}
