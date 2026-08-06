@@ -8,7 +8,7 @@ import {
 } from "lucide-react";
 import AddItemForm from "./AddItemForm";
 import WishlistItemCard from "./WishlistItemCard";
-import type { Wishlist, WishlistItem } from "../types";
+import type { Wishlist, WishlistItem, WishlistItemVote } from "../types";
 import type { CityBounds } from "../../maps/types";
 import { ConfirmModal, EditableText } from "../../../components";
 import { canUserEdit } from "../../users/utils";
@@ -19,6 +19,9 @@ import {
 import { isFetchBaseQueryError, type APIError } from "../../api/utils";
 import { toast } from "sonner";
 import useMenu from "../../../hooks/useMenu";
+
+const sumVotes = (votes: WishlistItemVote[]) =>
+  votes.reduce((prev, curr) => prev + (curr.isThumbsUp ? 1 : -1), 0);
 
 interface WishlistCardProps {
   wishlist: Wishlist;
@@ -94,6 +97,8 @@ export default function WishlistCard({
     setIsAddingItem(true);
   };
 
+  const items = [...wishlist.items];
+  items.sort((a, b) => sumVotes(b.votes) - sumVotes(a.votes));
   return (
     <div className="relative border border-surface-border rounded-xl bg-surface">
       <div
@@ -150,7 +155,7 @@ export default function WishlistCard({
               No activities added yet.
             </div>
           ) : (
-            wishlist.items.map((item) => (
+            items.map((item) => (
               <WishlistItemCard
                 wishlistId={wishlist.id}
                 key={item.id}
