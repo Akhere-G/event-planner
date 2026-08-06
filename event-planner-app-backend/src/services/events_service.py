@@ -70,6 +70,10 @@ def update_event(itinerary_id: int, event_id: int, data: dict):
 
     for k, v in data.items():
         if k in [
+            "name",
+            "address",
+            "longitude",
+            "latitude",
             "category",
             "description",
             "end_at",
