@@ -1,7 +1,24 @@
 from marshmallow_sqlalchemy import SQLAlchemyAutoSchema, auto_field
 from marshmallow import pre_load, fields
-from ..models import Wishlist, WishlistItem
+from ..models import Wishlist, WishlistItem, WishlistItemVote
 import re
+from .user_schema import UserSchema
+
+
+class WishlistItemVoteSchema(SQLAlchemyAutoSchema):
+    class Meta:
+        model = WishlistItemVote
+
+    @pre_load
+    def camel_to_snake(self, data, many, partial, **kwargs):
+        if not data:
+            return data
+        return {self._to_snake(k): v for k, v in data.items()}
+
+    def _to_snake(self, s):
+        return re.sub(r"(?<!^)(?=[A-Z])", "_", s).lower()
+
+    user = fields.Nested(UserSchema)
 
 
 class WishlistItemSchema(SQLAlchemyAutoSchema):
@@ -18,7 +35,7 @@ class WishlistItemSchema(SQLAlchemyAutoSchema):
         return re.sub(r"(?<!^)(?=[A-Z])", "_", s).lower()
 
     id = auto_field(dump_only=True)
-    wishlist_id = auto_field(load_only=True)
+    wishlist_id = auto_field()
     name = auto_field(required=True)
     address = auto_field(allow_none=True)
     latitude = auto_field(allow_none=True)
@@ -28,6 +45,7 @@ class WishlistItemSchema(SQLAlchemyAutoSchema):
     is_promoted = auto_field(dump_only=True)
     created_by_id = auto_field(dump_only=True)
     created_at = auto_field(dump_only=True)
+    votes = fields.Nested(WishlistItemVoteSchema, many=True, dump_only=True)
 
 
 class WishlistSchema(SQLAlchemyAutoSchema):

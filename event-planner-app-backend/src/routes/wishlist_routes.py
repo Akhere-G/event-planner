@@ -1,29 +1,31 @@
+from datetime import datetime
+
 from flask import Blueprint, request
-from ..middleware.login_required import login_required
-from ..services.itineraries_service import get_itinerary_membership, is_authorised
-from ..services.wishlist_service import (
-    get_wishlists,
-    create_wishlist,
-    update_wishlist,
-    delete_wishlist,
-    create_wishlist_item,
-    update_wishlist_item,
-    delete_wishlist_item,
-    promote_wishlist_item,
-    itinerary_contains_wishlist_item,
-)
-from ..schemas.wishlist_schema import WishlistSchema, WishlistItemSchema
-from ..schemas.event_schema import EventSchema
-from ..schemas.itinerary_schema import UserRole
-from ..utils.format_response import api_response
+from marshmallow import ValidationError
+
 from ..exceptions import (
     BadRequestError,
     ItineraryDoesNotExistError,
     UserNotAuthorisedError,
 )
-from marshmallow import ValidationError
-from datetime import datetime
-
+from ..middleware.login_required import login_required
+from ..schemas.event_schema import EventSchema
+from ..schemas.itinerary_schema import UserRole
+from ..schemas.wishlist_schema import WishlistItemSchema, WishlistSchema
+from ..services.itineraries_service import get_itinerary_membership, is_authorised
+from ..services.wishlist_service import (
+    create_wishlist,
+    create_wishlist_item,
+    delete_wishlist,
+    delete_wishlist_item,
+    get_wishlists,
+    itinerary_contains_wishlist_item,
+    promote_wishlist_item,
+    update_wishlist,
+    update_wishlist_item,
+    vote_for_wishlist_item,
+)
+from ..utils.format_response import api_response
 
 wishlist_bp = Blueprint("wishlist", __name__)
 
@@ -232,7 +234,9 @@ def update_item_route(user_id: int, itinerary_id: int, wishlist_id: int, item_id
                 status_code=404,
             )
         validated_data = schema.load(request.json, partial=True)
-        item = update_wishlist_item(itinerary_id, wishlist_id, item_id, validated_data, user_id)
+        item = update_wishlist_item(
+            itinerary_id, wishlist_id, item_id, validated_data, user_id
+        )
         return api_response(
             success=True,
             data=schema.dump(item),
@@ -304,4 +308,43 @@ def promote_item_route(user_id: int, itinerary_id: int, wishlist_id: int, item_i
             message=getattr(err, "message", str(err)),
             error=getattr(err, "message", str(err)),
             status_code=getattr(err, "status_code", 400),
+        )
+
+
+@wishlist_bp.route("/<int:wishlist_id>/items/<int:item_id>/vote", methods=["POST"])
+@login_required
+def vote_for_wishlist_item_route(
+    user_id: int, itinerary_id: int, wishlist_id: int, item_id: int
+):
+    vote = request.json.get("vote")
+    try:
+        if vote is None:
+            raise BadRequestError("Vote is required.")
+        is_authorised(
+            user_id=user_id,
+            itinerary_id=itinerary_id,
+            authorised_roles=[UserRole.ADMIN, UserRole.EDITOR, UserRole.VIEWER],
+            message="You must be an admin or an editor to schedule items.",
+        )
+
+        if not itinerary_contains_wishlist_item(itinerary_id, item_id):
+            return api_response(
+                success=False,
+                error="Wishlist item does not exists",
+                message="Wishlist item does not exist",
+                status_code=404,
+            )
+
+        vote_for_wishlist_item(user_id, item_id, vote)
+
+        return api_response(
+            success=True, message="Voted for wishlist item.", status_code=200
+        )
+
+    except (UserNotAuthorisedError, BadRequestError, ItineraryDoesNotExistError) as err:
+        return api_response(
+            error=err.message,
+            message=err.message,
+            status_code=err.status_code,
+            success=False,
         )

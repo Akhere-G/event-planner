@@ -1,3 +1,11 @@
+export interface WishlistItemVote {
+  isThumbsUp: boolean;
+  user: {
+    email: string;
+    username: string;
+    id: number;
+  };
+}
 export interface WishlistItem {
   id: number;
   wishlistId: number;
@@ -10,6 +18,7 @@ export interface WishlistItem {
   isPromoted: boolean;
   createdBy?: number;
   createdAt?: string;
+  votes: WishlistItemVote[];
 }
 
 export interface Wishlist {
@@ -85,4 +94,11 @@ export interface NewItemInput {
   latitude?: number;
   longitude?: number;
   placeId?: string;
+}
+
+export interface VoteForWishlistItemPayload {
+  vote: number;
+  tripId: number;
+  wishlistId: number;
+  wishlistItemId: number;
 }
