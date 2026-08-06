@@ -10,6 +10,7 @@ import type {
   ApiResponse,
   WishlistItem,
   UpdateWishlistPayload,
+  VoteForWishlistItemPayload,
 } from "../types";
 import type { Event } from "../../events/types";
 
@@ -94,6 +95,17 @@ export const wishlistApiSlice = apiSlice.injectEndpoints({
       }),
       invalidatesTags: ["Wishlists", "Events", "Trips"],
     }),
+    voteForWishlistItem: builder.mutation<
+      ApiResponse<void>,
+      VoteForWishlistItemPayload
+    >({
+      query: ({ tripId, wishlistId, wishlistItemId, vote }) => ({
+        url: `itineraries/${tripId}/wishlists/${wishlistId}/items/${wishlistItemId}/vote`,
+        method: "POST",
+        body: { vote },
+      }),
+      invalidatesTags: ["Wishlists"],
+    }),
   }),
 });
 
@@ -106,4 +118,5 @@ export const {
   useUpdateWishlistItemMutation,
   useDeleteWishlistItemMutation,
   usePromoteWishlistItemMutation,
+  useVoteForWishlistItemMutation,
 } = wishlistApiSlice;

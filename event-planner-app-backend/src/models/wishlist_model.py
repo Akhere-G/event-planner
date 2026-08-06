@@ -1,13 +1,15 @@
-from ..extensions import Base
 from sqlalchemy import (
-    Integer,
-    String,
+    Boolean,
     Float,
     ForeignKey,
+    Integer,
+    String,
     UniqueConstraint,
-    Boolean,
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+
+from ..extensions import Base
+from . import User
 from .audit_mixins import AuditMixin
 
 
@@ -49,3 +51,25 @@ class WishlistItem(Base, AuditMixin):
 
     is_promoted: Mapped[bool] = mapped_column(Boolean, default=False)
     wishlist: Mapped["Wishlist"] = relationship(back_populates="items")
+    votes: Mapped[list["WishlistItemVote"]] = relationship(
+        back_populates="wishlist_item"
+    )
+
+
+class WishlistItemVote(Base, AuditMixin):
+    __tablename__ = "wishlist_item_votes"
+    wishlist_item_id: Mapped[int] = mapped_column(
+        Integer,
+        ForeignKey("wishlist_items.id", ondelete="CASCADE"),
+        index=True,
+        primary_key=True,
+    )
+    user_id: Mapped[int] = mapped_column(
+        Integer,
+        ForeignKey("users.id", ondelete="CASCADE"),
+        index=True,
+        primary_key=True,
+    )
+    isThumbsUp: Mapped[bool] = mapped_column(Boolean)
+    wishlist_item: Mapped["WishlistItem"] = relationship(back_populates="votes")
+    user: Mapped["User"] = relationship(foreign_keys="[WishlistItemVote.user_id]")

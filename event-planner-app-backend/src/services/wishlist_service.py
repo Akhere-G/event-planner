@@ -1,5 +1,5 @@
 from ..extensions import db
-from ..models import Wishlist, WishlistItem
+from ..models import Wishlist, WishlistItem, WishlistItemVote
 from .events_service import create_event
 from ..exceptions import BadRequestError
 from sqlalchemy import select
@@ -13,7 +13,11 @@ def get_wishlists(itinerary_id: int):
     stmt = (
         select(Wishlist)
         .where(Wishlist.itinerary_id == itinerary_id)
-        .options(selectinload(Wishlist.items))
+        .options(
+            selectinload(Wishlist.items)
+            .selectinload(WishlistItem.votes)
+            .selectinload(WishlistItemVote.user)
+        )
     )
     return db.session.execute(stmt).scalars().all()
 
@@ -59,10 +63,14 @@ def update_wishlist(itinerary_id: int, wishlist_id: int, user_id: int, name: str
 
 
 def delete_wishlist(itinerary_id: int, wishlist_id: int):
-    stmt = select(Wishlist).where(
-        Wishlist.itinerary_id == itinerary_id,
-        Wishlist.id == wishlist_id,
-    ).options(selectinload(Wishlist.items))
+    stmt = (
+        select(Wishlist)
+        .where(
+            Wishlist.itinerary_id == itinerary_id,
+            Wishlist.id == wishlist_id,
+        )
+        .options(selectinload(Wishlist.items))
+    )
 
     wishlist = db.session.execute(stmt).scalar_one_or_none()
     if not wishlist:
@@ -139,7 +147,14 @@ def update_wishlist_item(
     if not item:
         raise BadRequestError("Wishlist item not found.")
 
-    updatable_fields = ["name", "address", "description", "latitude", "longitude", "place_id"]
+    updatable_fields = [
+        "name",
+        "address",
+        "description",
+        "latitude",
+        "longitude",
+        "place_id",
+    ]
     for field in updatable_fields:
         if field in item_data:
             setattr(item, field, item_data[field])
@@ -192,3 +207,36 @@ def promote_wishlist_item(
 
     event = create_event(itinerary_id, event_data)
     return event
+
+
+def vote_for_wishlist_item(user_id, item_id, vote):
+    stmt = select(WishlistItemVote).where(
+        WishlistItemVote.wishlist_item_id == item_id,
+        WishlistItemVote.user_id == user_id,
+    )
+
+    wishlist_item_vote = db.session.execute(stmt).scalar_one_or_none()
+
+    if wishlist_item_vote and (
+        wishlist_item_vote.isThumbsUp
+        and vote == 1
+        or (not wishlist_item_vote.isThumbsUp and vote == -1)
+    ):
+        db.session.delete(wishlist_item_vote)
+        db.session.commit()
+        return
+
+    if not wishlist_item_vote:
+        wishlist_item_vote = WishlistItemVote(
+            wishlist_item_id=item_id,
+            user_id=user_id,
+            isThumbsUp=vote == 1,
+            created_by_id=user_id,
+            updated_by_id=user_id,
+        )
+        db.session.add(wishlist_item_vote)
+    else:
+        wishlist_item_vote.isThumbsUp = vote == 1
+        wishlist_item_vote.updated_by_id = user_id
+
+    db.session.commit()

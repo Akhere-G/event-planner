@@ -7,25 +7,31 @@ import {
   ExternalLink,
   MoreVertical,
   Eye,
+  ThumbsUp,
+  ThumbsDown,
 } from "lucide-react";
 import React, { useState } from "react";
 import { toast } from "sonner";
 import {
   useDeleteWishlistItemMutation,
   usePromoteWishlistItemMutation,
+  useVoteForWishlistItemMutation,
 } from "../services/wishlistApiSlice";
 import { isFetchBaseQueryError } from "../../api/utils";
 import PromoteItemModal from "./PromoteItemModal";
 import ConfirmModal from "../../../components/ConfirmModal";
-import type { WishlistItem } from "../types";
+import type { VoteForWishlistItemPayload, WishlistItem } from "../types";
 import useMenu from "../../../hooks/useMenu";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import {
   setIsMapView,
   setSelectedWishlistItem,
 } from "../../maps/service/mapSlice";
+import { useParams } from "react-router";
+import type { RootState } from "../../../store";
 
 interface WishlistItemViewProps {
+  tripId: number;
   item: WishlistItem;
   editable: boolean;
   onScheduleClick: () => void;
@@ -34,11 +40,17 @@ interface WishlistItemViewProps {
   editItem: (item: WishlistItem) => void;
   editButtonProps?: React.ButtonHTMLAttributes<HTMLButtonElement>;
   editButtonRef?: React.Ref<HTMLButtonElement>;
+  voteForItem: (payload: VoteForWishlistItemPayload) => void;
+  isVoteLoading: boolean;
+  userDidUpvote: boolean;
+  userDidDownvote: boolean;
 }
 
 // TODO: Add dropdown menu for edit, delete and location actions
 
 function WishlistItemView({
+  tripId,
+
   item,
   editable,
   onScheduleClick,
@@ -47,6 +59,10 @@ function WishlistItemView({
   editItem,
   editButtonProps,
   editButtonRef,
+  voteForItem,
+  isVoteLoading,
+  userDidUpvote,
+  userDidDownvote,
 }: WishlistItemViewProps) {
   const { openMenu, isMenuOpen, menuContainerRef, openButtonRef } = useMenu({
     closeOnClick: true,
@@ -82,31 +98,73 @@ function WishlistItemView({
           : " border-surface-border bg-surface-muted"
       }`}
     >
-      <div className="flex justify-between items-start gap-2">
-        <div className="flex justify-between w-full">
-          <h4 className="font-semibold text-text-main pr-10">{item.name}</h4>
-          <button
-            ref={openButtonRef}
-            className="p-1 hover:bg-surface-muted rounded transition-colors text-text-secondary"
-            onClick={openMenu}
-          >
-            <MoreVertical size={16} />
-          </button>
-        </div>
+      <div className="flex justify-between w-full">
+        <h4 className="font-semibold text-text-main pr-10">{item.name}</h4>
+        <button
+          ref={openButtonRef}
+          className="p-1 hover:bg-surface-muted rounded transition-colors text-text-secondary"
+          onClick={openMenu}
+        >
+          <MoreVertical size={16} />
+        </button>
       </div>
 
-      <div className="">
-        {item.address && (
-          <p className="text-text-secondary flex items-center gap-1.5 mt-0.5">
-            <MapPin size={10} className="shrink-0 -mb-1/2" />
-            <span>{item.address}</span>
-          </p>
-        )}
-        {item.description && (
-          <p className="text-[10px] text-text-secondary mt-1 italic">
-            "{item.description}"
-          </p>
-        )}
+      {item.address && (
+        <p className="text-text-secondary flex items-center gap-1.5 mt-0.5">
+          <MapPin size={10} className="shrink-0 -mb-1/2" />
+          <span>{item.address}</span>
+        </p>
+      )}
+      {item.description && (
+        <p className="text-[10px] text-text-secondary mt-1 italic">
+          "{item.description}"
+        </p>
+      )}
+
+      <div className="flex gap-2 mt-2">
+        <button
+          className={`p-1 group hover:bg-success/5 hover:text-success flex items-center gap-1 transition-colors duration-300 ${userDidUpvote ? "bg-success/5 text-success" : ""}`}
+          onClick={() =>
+            voteForItem({
+              tripId,
+              wishlistId: item.wishlistId,
+              wishlistItemId: item.id,
+              vote: 1,
+            })
+          }
+          disabled={isVoteLoading}
+        >
+          <ThumbsUp
+            size={16}
+            className="group-hover:text-success transition-colors duration-300 "
+          />{" "}
+          {item.votes.reduce(
+            (prev, curr) => prev + (curr.isThumbsUp ? 1 : 0),
+            0,
+          )}
+        </button>
+
+        <button
+          className={`p-1 group hover:bg-error/5 hover:text-error flex items-center gap-1 transition-colors duration-300 ${userDidDownvote ? "bg-error/5 text-error" : ""}`}
+          onClick={() =>
+            voteForItem({
+              tripId,
+              wishlistId: item.wishlistId,
+              wishlistItemId: item.id,
+              vote: -1,
+            })
+          }
+          disabled={isVoteLoading}
+        >
+          <ThumbsDown
+            size={16}
+            className="group-hover:text-error transition-colors duration-300"
+          />{" "}
+          {item.votes.reduce(
+            (prev, curr) => prev + (!curr.isThumbsUp ? 1 : 0),
+            0,
+          )}
+        </button>
       </div>
       {isMenuOpen && (
         <div
@@ -187,7 +245,6 @@ interface WishlistItemCardProps {
 
 export default function WishlistItemCard({
   item,
-  tripId,
   wishlistId,
   editable,
   startDate,
@@ -196,13 +253,16 @@ export default function WishlistItemCard({
   editButtonProps,
   editButtonRef,
 }: WishlistItemCardProps) {
+  const tripId = Number(useParams()?.tripId);
   const { isMenuOpen, openMenu, closeMenu, openButtonRef } = useMenu();
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const [deleteItem, { isLoading: isDeleting }] =
     useDeleteWishlistItemMutation();
   const [promoteItem] = usePromoteWishlistItemMutation();
-
+  const [voteForItem, { isLoading: isVoteLoading }] =
+    useVoteForWishlistItemMutation();
+  const userId = useSelector((state: RootState) => state.auth.userId);
   const handleDelete = async () => {
     try {
       await deleteItem({ tripId, wishlistId, itemId: item.id }).unwrap();
@@ -235,9 +295,17 @@ export default function WishlistItemCard({
     }
   };
 
+  const userDidUpvote = item.votes.some(
+    (vote) => vote.user.id === userId && vote.isThumbsUp,
+  );
+  const userDidDownvote = item.votes.some(
+    (vote) => vote.user.id === userId && !vote.isThumbsUp,
+  );
+
   return (
     <>
       <WishlistItemView
+        tripId={tripId}
         item={item}
         editable={editable}
         onScheduleClick={() => {
@@ -248,6 +316,10 @@ export default function WishlistItemCard({
         editItem={editItem}
         editButtonProps={editButtonProps}
         editButtonRef={editButtonRef}
+        voteForItem={voteForItem}
+        isVoteLoading={isVoteLoading}
+        userDidUpvote={userDidUpvote}
+        userDidDownvote={userDidDownvote}
       />
 
       {isMenuOpen && (
