@@ -2,6 +2,7 @@ import {
   Clock,
   Copy,
   ExternalLink,
+  Eye,
   MoreVertical,
   Tag,
   Trash,
@@ -24,6 +25,8 @@ import { useUpdateEvent } from "../../trips/hooks";
 import { useGetTripQuery } from "../../trips/services/tripsApiSlice";
 import { toast } from "sonner";
 import EditEventDatesModal from "./EditEventDatesModal";
+import { useDispatch } from "react-redux";
+import { setIsMapView, setSelectedEvent } from "../../maps/service/mapSlice";
 
 interface EventCardProps {
   event: Event;
@@ -55,6 +58,8 @@ export function EventCard({
     closeOnClick: true,
   });
 
+  const dispatch = useDispatch();
+
   const updateEventData = async (newData: Partial<Event>) => {
     const oldData = eventData;
     try {
@@ -67,6 +72,10 @@ export function EventCard({
 
   const closeDeleteModal = () => setIsModalOpen(false);
 
+  const handleView = () => {
+    dispatch(setSelectedEvent(event));
+    dispatch(setIsMapView(true));
+  };
   const handleCopyAddress = () => {
     navigator.clipboard.writeText(eventData.address);
     toast.info("Copied!");
@@ -102,6 +111,13 @@ export function EventCard({
             className="absolute top-8 right-2 px-1 bg-surface rounded-md shadow-lg z-10 flex flex-col text-sm min-w-[160px]"
           >
             <button
+              onClick={handleView}
+              className="btn-menu text-left flex gap-2 items-center"
+            >
+              <Eye size={16} />
+              View
+            </button>
+            <button
               onClick={handleCopyAddress}
               className="btn-menu text-left flex gap-2 items-center"
             >
@@ -115,6 +131,7 @@ export function EventCard({
               <ExternalLink size={16} />
               Open in Maps
             </button>
+
             {canUserEdit(role) && (
               <button
                 onClick={() => setIsModalOpen(true)}
