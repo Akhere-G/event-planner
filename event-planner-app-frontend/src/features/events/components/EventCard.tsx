@@ -99,14 +99,19 @@ export function EventCard({
     );
   };
 
-  if (event.name === "McDonald's") console.log(isEditing);
-
   return (
     <div className="card flex-1 transition-shadow border-l-4 border-brand-primary relative">
       <div className="flex flex-col">
         <div className="flex justify-between items-start">
           <h3 className="font-bold tracking-tight text-text-primary flex flex-col">
-            <span>{eventData.name}</span>
+            <EditableText
+              value={eventData.name}
+              canEdit={canUserEdit(role)}
+              setValue={(name) => {
+                updateEventData({ name });
+                handleEdit(eventData.id, { name });
+              }}
+            />
           </h3>
 
           <button
