@@ -1,26 +1,15 @@
-import {
-  Check,
-  Copy,
-  ExternalLink,
-  Plus,
-  Star,
-  Tag as TagIcon,
-} from "lucide-react";
-import { Accordion, ConfirmModal, FormInput } from "../../../components";
-import type { EventSearchResult, Tag } from "../types";
+import { Check, Plus } from "lucide-react";
+import { Accordion, ConfirmModal } from "../../../components";
+import type { EventSearchResult } from "../types";
 import type { RootState } from "../../../store";
 import { useDispatch, useSelector } from "react-redux";
 import { isFetchBaseQueryError } from "../../api/utils";
-import {
-  setIsMapView,
-  setSelectedAccommodation,
-  updateSearchEvents,
-} from "../../maps/service/mapSlice";
-import { useParams, useSearchParams } from "react-router";
+import { updateSearchEvents } from "../../maps/service/mapSlice";
+import { useParams } from "react-router";
 import type { EventSchema } from "../../events/schemas/eventSchema";
 import { useAddEventMutation } from "../../events/service/eventApiSlice";
 import { toast } from "sonner";
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { format } from "date-fns";
 import {
   useCreateWishlistItemMutation,
@@ -28,179 +17,83 @@ import {
 } from "../../wishlist/services/wishlistApiSlice";
 import type { CreateWishlistItemPayload, Wishlist } from "../../wishlist/types";
 import useMenu from "../../../hooks/useMenu";
+import AccommodationForm from "../../accommodations/components/AccommodationForm";
+import { useGetTripQuery } from "../../trips/services/tripsApiSlice";
+import { getCityBounds } from "../../maps/utils";
 
-//TODO: refactor
+// Extracted components
+import { PlaceHeader } from "./PlaceHeader";
+import { PlaceAddress } from "./PlaceAddress";
+import { TagChip } from "./TagChip";
+import { SaveEventModal } from "./SaveEventModal";
+import { ImageCarousel } from "./ImageCarousel";
 
-interface SearchEventCardProps {
+// Main component
+
+interface EventSearchResultCardProps {
   event: EventSearchResult;
-  handleSaveEvent: (event: EventSchema) => Promise<void>;
-  handleSaveToWishlist: (
-    payload: Omit<CreateWishlistItemPayload, "tripId">,
-  ) => Promise<void>;
   dates: { title: string; value: string }[];
-  isLoading: boolean;
   wishlists: Wishlist[];
-  addAccommodation: (event: EventSearchResult) => void;
+  tripId: number;
+  tripStart: string;
+  tripEnd: string;
+  cityBounds: { north: number; south: number; east: number; west: number };
+  isLoading: boolean;
+  onSaveEvent: (event: EventSchema) => Promise<void>;
+  onSaveWishlist: (payload: Omit<CreateWishlistItemPayload, "tripId">) => Promise<void>;
+  onAccommodationSaved: () => void;
 }
-interface ErrorMessageType {
-  endAt: string;
-  startAt: string;
-  general: string;
-}
+
 export function EventSearchResultCard({
   event,
-  handleSaveEvent,
-  handleSaveToWishlist,
   dates,
-  isLoading,
   wishlists,
-  addAccommodation,
-}: SearchEventCardProps) {
-  const {
-    placeId,
-    address,
-    name,
-    latitude,
-    longitude,
-    category,
-    tags,
-    rating,
-    totalReviews,
-    photos,
-  } = event;
-  const { closeMenu, isMenuOpen, openMenu, openButtonRef, menuContainerRef } =
-    useMenu();
-  const [selectedDate, setSelectedDate] = useState("");
-  const [startAt, setStartAt] = useState("12:00");
-  const [endAt, setEndAt] = useState("13:00");
-  const [selectedWishlist, setSelectedWishlist] = useState<Wishlist | null>(
-    null,
-  );
-  const [errorMessages, setErrorMessages] = useState<ErrorMessageType>({
-    startAt: "",
-    endAt: "",
-    general: "",
-  });
+  tripId,
+  tripStart,
+  tripEnd,
+  cityBounds,
+  isLoading,
+  onSaveEvent,
+  onSaveWishlist,
+  onAccommodationSaved,
+}: EventSearchResultCardProps) {
+  const { closeMenu, isMenuOpen, openMenu, openButtonRef, menuContainerRef } = useMenu();
+  const [isAccommodationOpen, setIsAccommodationOpen] = useState(false);
+  const isAccommodation = event.types.includes("lodging");
 
-  function onChangeDate(date: string) {
-    setSelectedDate(date);
-    setSelectedWishlist(null);
-  }
-
-  function onChangeWishlist(wishlist: Wishlist) {
-    setSelectedWishlist(wishlist);
-    setSelectedDate("");
-  }
-
-  let confirmText = "Select date or wishlist";
-
-  if (selectedDate) {
-    confirmText = `Save to ${new Date(selectedDate).toLocaleDateString()}`;
-  } else if (selectedWishlist) {
-    confirmText = `Save to ${selectedWishlist?.name}`;
-  }
-
-  const isDisabled = (!selectedDate && !selectedWishlist) || isLoading;
-
-  function resetErrorMessages() {
-    setErrorMessages({ endAt: "", startAt: "", general: "" });
-  }
-
-  function updateErrorMessages(state: Partial<ErrorMessageType>) {
-    setErrorMessages((prev) => ({ ...prev, ...state }));
-  }
-
-  async function handleSave() {
-    resetErrorMessages();
-    if (selectedDate) {
-      if (endAt < startAt) {
-        updateErrorMessages({ endAt: "must be after Start At" });
-        return;
-      }
-      await handleSaveEvent({
-        address,
-        category,
-        latitude,
-        longitude,
-        name,
-        startAt: `${selectedDate} ${startAt}`,
-        endAt: `${selectedDate} ${endAt}`,
-      });
-      toast.success("Added to itinerary.");
-      return closeMenu();
-    } else if (selectedWishlist) {
-      await handleSaveToWishlist({
-        address,
-        latitude,
-        longitude,
-        name,
-        wishlistId: selectedWishlist.id,
-        placeId,
-      });
-      toast.success("Added to wishlist.");
-      return closeMenu();
-    }
-  }
-
-  const isAccom = event.types.includes("lodging");
-
-  function handleAdd() {
-    if (isAccom) {
-      addAccommodation(event);
+  const handleAdd = () => {
+    if (isAccommodation) {
+      setIsAccommodationOpen(true);
     } else {
       openMenu();
     }
-  }
+  };
+
   return (
     <div className="card border-l-4 border-brand-primary">
-      <div className="flex flex-col">
-        <header className="truncate font-bold tracking-tight text-text-primary flex flex-col lg:flex-row gap-2 w-full  lg:items-center lg:justify-between">
-          <h3 className="text-sm lg:text-md truncate  p-0! m-0!">{name}</h3>
-          <div className="text-xs lg:text-sm flex justify-between items-center gap-2">
-            <span className="text-warning flex gap-1 items-center">
-              <Star fill="var(--color-warning)" size={14} />
-              {rating}
-              <span className="text-text-secondary">({totalReviews})</span>
-            </span>
-            <span className="text-xs  flex items-center gap-1 px-2 py-1 rounded-full bg-brand-secondary/10 text-brand-secondary font-semibold uppercase">
-              <TagIcon size={16} />
-              {category}
-            </span>
-          </div>
-        </header>
-        <div className="flex gap-2 items-start">
-          <p className="text-sm text-text-secondary h-9 line-clamp-2">
-            {address}
-          </p>
-          <button
-            title="Copy Address"
-            className="btn p-1 hover:bg-text-primary/10 rounded transition-colors text-text-primary"
-            onClick={() => {
-              navigator.clipboard.writeText(address);
-              toast.info("Copied!");
-            }}
-          >
-            <Copy size={12} />
-          </button>
-          <a
-            href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(name)}&query_place_id=${placeId}`}
-            target="_blank"
-            rel="noreferrer"
-            className="btn p-1 hover:bg-brand-primary/10 rounded transition-colors text-brand-primary"
-            title="Open in Google Maps"
-          >
-            <ExternalLink size={12} />
-          </a>
-        </div>
-        {tags.length > 0 && (
-          <div className="flex gap-2 flex-wrap mt-2">
-            {tags.map((tag) => (
+      <div className="flex flex-col gap-3">
+        <PlaceHeader
+          name={event.name}
+          rating={event.rating}
+          totalReviews={event.totalReviews}
+          category={event.category}
+        />
+
+        <PlaceAddress
+          name={event.name}
+          address={event.address}
+          placeId={event.placeId}
+        />
+
+        {event.tags.length > 0 && (
+          <div className="flex gap-2 flex-wrap">
+            {event.tags.map((tag) => (
               <TagChip key={tag.text} {...tag} />
             ))}
           </div>
         )}
 
-        <div className="relative">
+        {event.photos.length > 0 && (
           <Accordion
             TitleComponent={({ isOpen }) => (
               <p className="text-xs text-text-secondary">
@@ -209,71 +102,52 @@ export function EventSearchResultCard({
             )}
             headerStyles="p-0! pt-2!"
             contentStyles="p-0 pb-2!"
-            ContentComponent={() => <Images photos={photos} name={name} />}
+            ContentComponent={() => (
+              <ImageCarousel photos={event.photos} name={event.name} />
+            )}
           />
-        </div>
-        {isMenuOpen && (
+        )}
+
+        <SaveEventModal
+          isOpen={isMenuOpen}
+          event={event}
+          dates={dates}
+          wishlists={wishlists}
+          isLoading={isLoading}
+          onClose={closeMenu}
+          onSaveEvent={onSaveEvent}
+          onSaveWishlist={onSaveWishlist}
+        />
+
+        {isAccommodationOpen && (
           <ConfirmModal
-            closeModal={closeMenu}
-            confirmAction={handleSave}
-            title={`Save ${name}`}
+            closeModal={() => setIsAccommodationOpen(false)}
+            title="Add Accommodation from Search"
             modalRef={menuContainerRef}
-            confirmBtnClasses="btn-primary flex-1"
-            confirmText={confirmText}
-            confirmButtonProps={{ disabled: isDisabled }}
+            hideButtons
           >
             <div className="p-4">
-              <h4 className="mb-4">Save to date</h4>
-              <div className="flex flex-wrap gap-2">
-                {dates.map((date) => (
-                  <button
-                    className={`border-2 border-brand-primary text-brand-primary font-bold px-6 py-2 flex-1/4
-                      hover:bg-brand-primary hover:text-text-primary ${date.value === selectedDate ? "bg-brand-primary text-text-primary" : ""}`}
-                    key={date.value}
-                    onClick={() => onChangeDate(date.value)}
-                  >
-                    {date.title}
-                  </button>
-                ))}
-              </div>
-              <div className="flex mt-4 gap-2">
-                <FormInput
-                  type="time"
-                  name="selectedStartAt"
-                  label="Start At"
-                  formClassNames="flex-1"
-                  onChange={(e) => setStartAt(e.target.value)}
-                  value={startAt}
-                  errorMessage={errorMessages.startAt}
-                />
-                <FormInput
-                  type="time"
-                  name="selectedEndAt"
-                  label="End At"
-                  formClassNames="flex-1"
-                  onChange={(e) => setEndAt(e.target.value)}
-                  value={endAt}
-                  errorMessage={errorMessages.endAt}
-                />
-              </div>
-              <hr className="my-6" />
-              <h4 className="mb-4">Save to wishlist</h4>
-              <div className="flex flex-wrap gap-2">
-                {wishlists.map((wishlist) => (
-                  <button
-                    className={`border-2 border-brand-primary text-brand-primary font-bold px-6 py-2
-                      hover:bg-brand-primary hover:text-text-primary ${wishlist === selectedWishlist ? "bg-brand-primary text-text-primary" : ""}`}
-                    key={wishlist.id}
-                    onClick={() => onChangeWishlist(wishlist)}
-                  >
-                    {wishlist.name}
-                  </button>
-                ))}
-              </div>
-              {errorMessages.general && <p>{errorMessages.general}</p>}
+              <AccommodationForm
+                tripId={tripId}
+                cityBounds={cityBounds}
+                selectedAccommodation={{
+                  name: event.name,
+                  address: event.address,
+                  latitude: event.latitude,
+                  longitude: event.longitude,
+                }}
+                tripStart={tripStart}
+                tripEnd={tripEnd}
+                onSuccess={() => {
+                  setIsAccommodationOpen(false);
+                  onAccommodationSaved();
+                }}
+                onCancel={() => setIsAccommodationOpen(false)}
+              />
             </div>
           </ConfirmModal>
         )}
+
         <div className="flex justify-end">
           {event.isAdded ? (
             <span className="text-xs flex gap-2 bg-brand-primary px-3 py-1 rounded-full">
@@ -281,16 +155,14 @@ export function EventSearchResultCard({
               Added
             </span>
           ) : (
-            <>
-              <button
-                className="flex gap-2 items-center bg-brand-primary"
-                ref={openButtonRef}
-                onClick={handleAdd}
-              >
-                <Plus size={16} />
-                Add
-              </button>
-            </>
+            <button
+              ref={openButtonRef}
+              onClick={handleAdd}
+              className="flex gap-2 items-center bg-brand-primary"
+            >
+              <Plus size={16} />
+              Add
+            </button>
           )}
         </div>
       </div>
@@ -298,22 +170,23 @@ export function EventSearchResultCard({
   );
 }
 
+// Connected component
+
 export default function EventSearchResultCardConnected() {
   const { tripId } = useParams();
   const { searchEvents, searchIndex, days } = useSelector(
     (state: RootState) => state.map,
   );
-  const { data } = useGetWishlistsQuery(Number(tripId));
-
-  const wishlists = data?.data ?? [];
+  const { data: wishlists } = useGetWishlistsQuery(Number(tripId));
+  const { data: tripData } = useGetTripQuery(Number(tripId));
 
   const dispatch = useDispatch();
-  const [, setSearchParams] = useSearchParams();
-
   const [addEvent, { isLoading: isAddEventLoading }] = useAddEventMutation();
   const [createWishlist, { isLoading: isCreateWishlistLoading }] =
     useCreateWishlistItemMutation();
+
   const currentEvent = searchEvents[searchIndex];
+  const trip = tripData?.data;
 
   const updateSearchResults = () => {
     dispatch(
@@ -334,7 +207,7 @@ export default function EventSearchResultCardConnected() {
     }
   };
 
-  const handleSaveToWishlist = async (
+  const handleSaveWishlist = async (
     payload: Omit<CreateWishlistItemPayload, "tripId">,
   ) => {
     try {
@@ -347,98 +220,26 @@ export default function EventSearchResultCardConnected() {
     }
   };
 
+  if (!currentEvent || !trip) return null;
+
   const dates = days.map((day) => ({
     title: format(day.date, "dd MMM"),
     value: day.date,
   }));
 
-  function addAccommodation(event: EventSearchResult) {
-    dispatch(
-      setSelectedAccommodation({
-        ...event,
-      }),
-    );
-    dispatch(setIsMapView(false));
-    setSearchParams((current) => {
-      const next = new URLSearchParams(current);
-      next.set("activeTab", "accommodation");
-      return next;
-    });
-  }
-
   return (
     <EventSearchResultCard
       event={currentEvent}
       dates={dates}
-      handleSaveEvent={handleSaveEvent}
-      handleSaveToWishlist={handleSaveToWishlist}
+      wishlists={wishlists?.data ?? []}
+      tripId={Number(tripId)}
+      tripStart={trip.startDate}
+      tripEnd={trip.endDate}
+      cityBounds={getCityBounds(trip)}
       isLoading={isAddEventLoading || isCreateWishlistLoading}
-      wishlists={wishlists}
-      addAccommodation={addAccommodation}
+      onSaveEvent={handleSaveEvent}
+      onSaveWishlist={handleSaveWishlist}
+      onAccommodationSaved={updateSearchResults}
     />
-  );
-}
-
-export function TagChip({ color, text }: Tag) {
-  return (
-    <div
-      style={{ backgroundColor: color }}
-      className="rounded-full text-text-inverse font-bold px-3 py-0.5 text-xs"
-    >
-      {text}
-    </div>
-  );
-}
-
-function Images({ name, photos }: { name: string; photos: { url: string }[] }) {
-  const [currentIndex, setCurrentIndex] = useState(1);
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const isMultiple = photos.length > 1;
-
-  const handleScroll = () => {
-    if (scrollRef.current) {
-      const { scrollLeft, offsetWidth } = scrollRef.current;
-      const offsetVariance = 1.15;
-      const newIndex =
-        Math.round((scrollLeft * offsetVariance) / offsetWidth) + 1;
-      if (newIndex !== currentIndex) {
-        setCurrentIndex(newIndex);
-      }
-    }
-  };
-
-  return (
-    <div className="relative group">
-      <div
-        ref={scrollRef}
-        onScroll={handleScroll}
-        className={`
-          flex gap-2 overflow-x-auto pb-2 snap-x snap-mandatory 
-          ${isMultiple ? "scrollbar-visible" : "scrollbar-hide"}
-        `}
-      >
-        {photos.map((photo, index) => (
-          <div
-            key={index}
-            className={`
-              h-60 shrink-0 snap-center
-              ${isMultiple ? "w-[85%]" : "w-full"} 
-            `}
-          >
-            <img
-              className="rounded-md w-full h-full object-cover shadow-sm"
-              src={photo.url}
-              alt={name}
-            />
-          </div>
-        ))}
-      </div>
-
-      {isMultiple && (
-        <div className="absolute top-3 right-3 bg-black/60 text-white text-[10px] px-2 py-1 rounded-full font-bold ">
-          {currentIndex} / {photos.length}
-        </div>
-      )}
-    </div>
   );
 }

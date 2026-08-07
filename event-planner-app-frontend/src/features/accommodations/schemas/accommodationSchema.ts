@@ -3,8 +3,8 @@ import * as yup from "yup";
 export const accommodationSchema = yup.object({
   name: yup.string().trim().required("Name is required."),
   address: yup.string().trim().required("Address is required."),
-  latitude: yup.number(),
-  longitude: yup.number(),
+  latitude: yup.number().required(),
+  longitude: yup.number().required(),
   description: yup.string().trim().optional().default(""),
   startDate: yup
     .string()

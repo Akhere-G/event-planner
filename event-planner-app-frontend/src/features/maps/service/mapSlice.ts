@@ -2,18 +2,13 @@ import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 import type { Day, Event } from "../../events/types";
 import type { EventSearchResult, Route } from "../types";
 import type { WishlistItem } from "../../wishlist/types";
+import type { Accommodation } from "../../accommodations/types";
 
-export interface AccommodationLocation {
-  latitude: number;
-  longitude: number;
-  name: string;
-  address: string;
-}
 interface MapState {
   searchEvents: EventSearchResult[];
   searchIndex: number;
   selectedEvent: Event | null;
-  selectedAccommodation: AccommodationLocation | null;
+  selectedAccommodation: Accommodation | null;
   selectedWishlistItem: WishlistItem | null;
   days: Day[];
   routes: Route[] | null;
@@ -60,7 +55,7 @@ export const mapSlice = createSlice({
     },
     setSelectedAccommodation: (
       state,
-      action: PayloadAction<AccommodationLocation | null>,
+      action: PayloadAction<Accommodation | null>,
     ) => {
       state.selectedAccommodation = action.payload;
     },

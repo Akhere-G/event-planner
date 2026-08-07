@@ -18,6 +18,7 @@ import {
   clearSearchEvents,
   setSearchEvents,
   setSelectedWishlistItem,
+  setSelectedAccommodation,
 } from "../../maps/service/mapSlice";
 import { fitToBounds, formatPlace, getDaysWithFilter } from "../../maps/utils";
 import {
@@ -47,6 +48,7 @@ import useMenu from "../../../hooks/useMenu";
 import { ConfirmModal } from "../../../components";
 import AddItemForm from "../../wishlist/components/AddItemForm";
 import AccommodationMarkers from "./AccommodationMarkers";
+import AccommodationCard from "../../accommodations/components/AccommodationCard";
 
 const permissionEnum = {
   GRANTED: "GRANTED",
@@ -60,6 +62,7 @@ export default function TripMap({ trip }: { trip: Trip }) {
   const {
     searchEvents,
     selectedEvent,
+    selectedAccommodation,
     selectedWishlistItem,
     days,
     currentRouteIndex,
@@ -318,6 +321,23 @@ export default function TripMap({ trip }: { trip: Trip }) {
             wishlistId={selectedWishlistItem.wishlistId}
             editItem={() => setIsEditingWishlistItem(true)}
             editButtonRef={editWishlistItemButtonRef}
+          />
+        </div>
+      )}
+      {selectedAccommodation && (
+        <div className={`z-2 absolute bottom-0 px-2 md:px-4 pb-5 w-full`}>
+          <button
+            onClick={() => dispatch(setSelectedAccommodation(null))}
+            className="absolute btn-secondary p-1 right-0 -top-4 md:-top-4"
+          >
+            <X size={20} />
+          </button>
+          <AccommodationCard
+            accommodation={selectedAccommodation}
+            key={selectedAccommodation.id}
+            deleteFuncProps={{
+              onSuccess: () => dispatch(setSelectedAccommodation(null)),
+            }}
           />
         </div>
       )}
