@@ -158,6 +158,27 @@ export default function TripMap({ trip }: { trip: Trip }) {
     };
   }, [dispatch]);
 
+  useEffect(() => {
+    if (selectedEvent && map) {
+      fitToBounds({ map, events: [selectedEvent] });
+    }
+  }, [selectedEvent, map]);
+
+  useEffect(() => {
+    if (
+      selectedWishlistItem &&
+      selectedWishlistItem.latitude &&
+      selectedWishlistItem.longitude &&
+      map
+    ) {
+      const item = {
+        longitude: selectedWishlistItem.longitude!,
+        latitude: selectedWishlistItem.latitude!,
+      };
+      fitToBounds({ map, events: [item] });
+    }
+  }, [selectedWishlistItem, map]);
+
   const placesLibrary = useMapsLibrary("places");
 
   const currentRoute = routes?.[currentRouteIndex];
