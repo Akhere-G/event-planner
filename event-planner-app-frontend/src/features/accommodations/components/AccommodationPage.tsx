@@ -6,8 +6,7 @@ import AccommodationCard from "./AccommodationCard";
 import StateGate from "../../../components/StateGate";
 import type { CityBounds } from "../../maps/types";
 import type { Trip } from "../../trips/types";
-import { useDispatch, useSelector } from "react-redux";
-import type { RootState } from "../../../store";
+import { useDispatch } from "react-redux";
 import { setSelectedAccommodation } from "../../maps/service/mapSlice";
 
 interface AccommodationPageProps {
@@ -25,15 +24,13 @@ export default function AccommodationPage({
     isLoading,
     error,
   } = useGetAccommodationsQuery(tripId);
-  const selectedAccommodation = useSelector(
-    (state: RootState) => state.map.selectedAccommodation,
-  );
+
   const dispatch = useDispatch();
   const [showAddForm, setShowAddForm] = useState(false);
 
   const accommodations = accommodationsData?.data || [];
 
-  const showForm = showAddForm || !!selectedAccommodation;
+  const showForm = showAddForm;
 
   const closeForm = () => {
     setShowAddForm(false);
@@ -68,25 +65,13 @@ export default function AccommodationPage({
 
         {showForm && (
           <AccommodationForm
-            key="new"
             tripId={tripId}
             cityBounds={cityBounds}
-            selectedAccommodation={
-              selectedAccommodation
-                ? {
-                    ...selectedAccommodation,
-                    startDate: trip.startDate,
-                    endDate: trip.endDate,
-                    id: -1,
-                    itineraryId: trip.id,
-                  }
-                : null
-            }
             onSuccess={closeForm}
             onCancel={closeForm}
+            selectedAccommodation={null}
             tripStart={trip.startDate}
             tripEnd={trip.endDate}
-            isEditing={false}
           />
         )}
 

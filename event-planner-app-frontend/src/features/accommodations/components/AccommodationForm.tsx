@@ -19,28 +19,37 @@ import type { Accommodation } from "../types";
 interface AccommodationFormProps {
   tripId: number;
   cityBounds: CityBounds;
-  onSuccess?: () => void;
-  onCancel: () => void;
-  selectedAccommodation: Accommodation | null;
+  selectedAccommodation: Partial<Accommodation> | null;
   tripStart: string;
   tripEnd: string;
-  isEditing: boolean;
+  onSuccess?: () => void;
+  onCancel: () => void;
 }
 
 export default function AccommodationForm({
   tripId,
   cityBounds,
-  onSuccess = () => {},
-  onCancel,
   selectedAccommodation,
   tripStart,
   tripEnd,
-  isEditing,
+  onSuccess = () => {},
+  onCancel,
 }: AccommodationFormProps) {
   const [errorMessage, setErrorMessage] = useState("");
   const [updateAccommodation] = useUpdateAccommodationMutation();
   const [createAccommodation] = useCreateAccommodationMutation();
-  const [key, setKey] = useState(0);
+
+  const isEditing = !!selectedAccommodation?.id;
+
+  const defaultFormValues: AccommodationSchema = {
+    name: selectedAccommodation?.name || "",
+    address: selectedAccommodation?.address || "",
+    latitude: selectedAccommodation?.latitude ?? 0,
+    longitude: selectedAccommodation?.longitude ?? 0,
+    description: selectedAccommodation?.description || "",
+    startDate: selectedAccommodation?.startDate || tripStart,
+    endDate: selectedAccommodation?.endDate || tripEnd,
+  };
 
   const {
     register,
@@ -48,62 +57,42 @@ export default function AccommodationForm({
     handleSubmit,
     setError,
     setValue,
-    reset,
-  } = useForm({
+  } = useForm<AccommodationSchema>({
     resolver: yupResolver(accommodationSchema),
-    defaultValues: selectedAccommodation
-      ? {
-          name: selectedAccommodation.name,
-          address: selectedAccommodation.address,
-          latitude: selectedAccommodation.latitude,
-          longitude: selectedAccommodation.longitude,
-          description: selectedAccommodation.description || "",
-          startDate: selectedAccommodation.startDate,
-          endDate: selectedAccommodation.endDate,
-        }
-      : {
-          name: "",
-          address: "",
-          description: "",
-          startDate: tripStart,
-          endDate: tripEnd,
-        },
+    defaultValues: defaultFormValues,
     mode: "onSubmit",
   });
 
   const onSubmit = async (formState: AccommodationSchema) => {
     setErrorMessage("");
     try {
-      if (isEditing && selectedAccommodation) {
+      const basePayload = {
+        tripId,
+        name: formState.name.trim(),
+        address: formState.address.trim(),
+        description: formState.description?.trim() || undefined,
+        latitude: formState.latitude,
+        longitude: formState.longitude,
+        startDate: formState.startDate,
+        endDate: formState.endDate,
+      };
+
+      if (isEditing && selectedAccommodation?.id) {
         await updateAccommodation({
-          ...formState,
+          ...basePayload,
           accommodationId: selectedAccommodation.id,
-          tripId,
-          name: formState.name.trim(),
-          address: formState.address.trim(),
-          description: formState.description?.trim() || undefined,
         }).unwrap();
         toast.success("Accommodation updated!");
       } else {
-        await createAccommodation({
-          ...formState,
-          tripId,
-          name: formState.name.trim(),
-          address: formState.address.trim(),
-          description: formState.description?.trim() || undefined,
-        }).unwrap();
+        await createAccommodation(basePayload).unwrap();
         toast.success("Accommodation added!");
       }
 
       onSuccess();
-      reset();
-      setKey((prev) => prev + 1);
     } catch (err) {
       if (isValidationError(err)) {
         const serverErrors = err.data.error;
-
         setErrorMessage(serverErrors.general?.join(", ") ?? "");
-
         Object.entries(serverErrors).forEach(([k, messages]) => {
           setError(k as keyof AccommodationSchema, {
             type: "server",
@@ -118,7 +107,7 @@ export default function AccommodationForm({
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="card space-y-3">
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-3">
       <div className="flex justify-between items-center mb-2">
         <span className="text-sm font-bold text-text-main">
           {isEditing ? "Update Accommodation" : "New Accommodation"}
@@ -132,35 +121,25 @@ export default function AccommodationForm({
         </button>
       </div>
 
-      <div className="mb-2">
-        <LocationInput
-          key={key}
-          cityBounds={cityBounds}
-          onPlaceSelect={(place) => {
-            setValue("name", place.name || "");
-            setValue("address", place.formatted_address || "");
-            if (place.geometry?.location) {
-              setValue("latitude", place.geometry.location.lat());
-              setValue("longitude", place.geometry.location.lng());
-            }
-          }}
-          errorMessage={errors.address?.message}
-          searchTypes={["lodging"]}
-          {...register("address")}
-        />
-      </div>
+      <LocationInput
+        cityBounds={cityBounds}
+        onPlaceSelect={(place) => {
+          setValue("name", place.name || "");
+          setValue("address", place.formatted_address || "");
+          if (place.geometry?.location) {
+            setValue("latitude", place.geometry.location.lat());
+            setValue("longitude", place.geometry.location.lng());
+          }
+        }}
+        errorMessage={errors.address?.message}
+        searchTypes={["lodging"]}
+        {...register("address")}
+      />
 
       <FormInput
         label="Name"
         {...register("name")}
         errorMessage={errors.name?.message}
-        formClassNames="w-full"
-      />
-
-      <FormInput
-        label="Address"
-        {...register("address")}
-        errorMessage={errors.address?.message}
         formClassNames="w-full"
       />
 
