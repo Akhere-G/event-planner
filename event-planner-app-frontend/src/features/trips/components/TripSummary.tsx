@@ -14,7 +14,6 @@ import { useDispatch, useSelector } from "react-redux";
 import { openModal } from "../../modal/modalSlice";
 import { ModalType } from "../../modal/types";
 import { isAdmin } from "../../users/utils";
-import useMenu from "../../../hooks/useMenu";
 import { useRemoveUserMutation } from "../../users/usersApiSlice";
 import { isFetchBaseQueryError } from "../../api/utils";
 import { toast } from "sonner";
@@ -22,6 +21,12 @@ import type { RootState } from "../../../store";
 import { ConfirmModal } from "../../../components";
 import { useState } from "react";
 import { exportToCalendar, exportToDoc } from "../utils";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "../../../components/ui/dropdown-menu";
 
 interface TripSummaryProps {
   trip: Trip;
@@ -38,10 +43,6 @@ export default function TripSummary({
   const [removeUser, { isLoading: isRemoveLoading }] = useRemoveUserMutation();
   const { userId } = useSelector((state: RootState) => state.auth);
 
-  const { openMenu, isMenuOpen, menuContainerRef, openButtonRef } = useMenu({
-    closeOnClick: true,
-  });
-
   const dispatch = useDispatch();
 
   function openUsersView() {
@@ -54,10 +55,6 @@ export default function TripSummary({
 
   const handleDelete = () => {
     dispatch(openModal({ type: ModalType.DELETE_TRIP, props: { trip } }));
-  };
-
-  const handleSettings = () => {
-    openMenu();
   };
 
   const handleLeave = async () => {
@@ -78,13 +75,58 @@ export default function TripSummary({
           <p className="text-text-secondary">{description}</p>
         </div>
 
-        <button
-          ref={openButtonRef}
-          className="-mt-2 -mr-4 p-2 btn bg"
-          onClick={handleSettings}
-        >
-          <MoreVertical size={20} />
-        </button>
+        <DropdownMenu>
+          <DropdownMenuTrigger className="-mt-2 -mr-4 p-2 btn bg">
+            <MoreVertical size={20} />
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem
+              disabled={isRemoveLoading}
+              onClick={() =>
+                exportToCalendar(trip.name, trip.events, trip.userMemberships)
+              }
+              className="flex gap-2 items-center"
+            >
+              <Calendar size={16} />
+              Export to calendar
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={() => exportToDoc(trip)}
+              className="flex gap-2 items-center"
+            >
+              <FileText size={16} />
+              Export to Word
+            </DropdownMenuItem>
+            {isAdmin(trip.role) && (
+              <>
+                <DropdownMenuItem
+                  onClick={handleEdit}
+                  className="flex gap-2 items-center"
+                >
+                  <Pencil size={16} />
+                  Edit
+                </DropdownMenuItem>
+              </>
+            )}
+            <DropdownMenuItem
+              disabled={isRemoveLoading}
+              onClick={() => setIsModalOpen(true)}
+              className="flex gap-2 items-center text-error"
+            >
+              <SquareArrowRightExit size={16} />
+              Leave
+            </DropdownMenuItem>
+            {isAdmin(trip.role) && (
+              <DropdownMenuItem
+                onClick={handleDelete}
+                className="flex gap-2 items-center text-error"
+              >
+                <Trash size={16} />
+                Delete
+              </DropdownMenuItem>
+            )}
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
       <div className="flex justify-between">
         <div className="flex gap-2 items-center">
@@ -103,56 +145,6 @@ export default function TripSummary({
           )}
         </div>
       </div>
-      {isMenuOpen && (
-        <div
-          ref={menuContainerRef}
-          className="absolute top-5 right-2 mt-2 px-1 bg-surface rounded-md shadow-lg z-10 flex flex-col text-sm"
-        >
-          <button
-            disabled={isRemoveLoading}
-            onClick={() =>
-              exportToCalendar(trip.name, trip.events, trip.userMemberships)
-            }
-            className="btn-menu text-left flex gap-2 items-center"
-          >
-            <Calendar size={16} />
-            Export to calendar
-          </button>
-          <button
-            onClick={() => exportToDoc(trip)}
-            className="btn-menu text-left flex gap-2 items-center"
-          >
-            <FileText size={16} />
-            Export to Word
-          </button>
-          {isAdmin(trip.role) && (
-            <button
-              onClick={handleEdit}
-              className="btn-menu text-left flex gap-2 items-center"
-            >
-              <Pencil size={16} />
-              Edit
-            </button>
-          )}
-          <button
-            disabled={isRemoveLoading}
-            onClick={() => setIsModalOpen(true)}
-            className="btn-menu text-error text-left flex gap-2 items-center"
-          >
-            <SquareArrowRightExit size={16} />
-            Leave
-          </button>
-          {isAdmin(trip.role) && (
-            <button
-              onClick={handleDelete}
-              className="btn-menu text-error text-left flex gap-2 items-center"
-            >
-              <Trash size={16} />
-              Delete
-            </button>
-          )}
-        </div>
-      )}
       {modalOpen && (
         <ConfirmModal
           closeModal={() => setIsModalOpen(false)}

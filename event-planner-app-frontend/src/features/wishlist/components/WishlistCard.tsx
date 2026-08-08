@@ -18,7 +18,12 @@ import {
 } from "../services/wishlistApiSlice";
 import { isFetchBaseQueryError, type APIError } from "../../api/utils";
 import { toast } from "sonner";
-import useMenu from "../../../hooks/useMenu";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "../../../components/ui/dropdown-menu";
 
 const sumVotes = (votes: WishlistItemVote[]) =>
   votes.reduce((prev, curr) => prev + (curr.isThumbsUp ? 1 : -1), 0);
@@ -50,14 +55,7 @@ export default function WishlistCard({
   const [isAddingItem, setIsAddingItem] = useState(false);
   const [updateWishlist] = useUpdateWishlistMutation();
   const [selectedItem, setSelectedItem] = useState<null | WishlistItem>(null);
-  const { openMenu, isMenuOpen, openButtonRef, menuContainerRef } = useMenu();
-  const {
-    openMenu: openConfirmDeleteModal,
-    isMenuOpen: isDeleteModalOpen,
-    openButtonRef: openDeleteButtonRef,
-    menuContainerRef: deleteMenuRef,
-    closeMenu: closeDeleteModal,
-  } = useMenu();
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [deleteWishlist, { isLoading: isDeleteLoading }] =
     useDeleteWishlistMutation();
   const updateWishlistName = async (name: string) => {
@@ -119,9 +117,20 @@ export default function WishlistCard({
         </div>
 
         {editable && (
-          <button className="p-2" ref={openButtonRef} onClick={openMenu}>
-            <MoreVertical size={16} />
-          </button>
+          <DropdownMenu>
+            <DropdownMenuTrigger className="p-2">
+              <MoreVertical size={16} />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem
+                disabled={isDeleteLoading}
+                onClick={() => setIsDeleteModalOpen(true)}
+                className="flex items-center gap-2 text-error"
+              >
+                <Trash size={16} /> Delete
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         )}
       </div>
 
@@ -171,28 +180,11 @@ export default function WishlistCard({
         </div>
       )}
 
-      {isMenuOpen && (
-        <div
-          ref={menuContainerRef}
-          className="absolute isolate card z-200 top-4 right-4 py-1 px-1"
-        >
-          <button
-            ref={openDeleteButtonRef}
-            disabled={isDeleteLoading}
-            className="btn-menu text-error flex items-center gap-2"
-            onClick={openConfirmDeleteModal}
-          >
-            <Trash size={16} /> Delete
-          </button>
-        </div>
-      )}
-
       {isDeleteModalOpen && (
         <ConfirmModal
-          closeModal={closeDeleteModal}
+          closeModal={() => setIsDeleteModalOpen(false)}
           confirmAction={confirmDelete}
           title={`Delete wishlist ${wishlist.name}?`}
-          modalRef={deleteMenuRef}
         />
       )}
     </div>

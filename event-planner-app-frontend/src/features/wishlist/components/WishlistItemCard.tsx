@@ -10,7 +10,7 @@ import {
   ThumbsUp,
   ThumbsDown,
 } from "lucide-react";
-import React, { useState } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 import {
   useDeleteWishlistItemMutation,
@@ -21,7 +21,6 @@ import { isFetchBaseQueryError } from "../../api/utils";
 import PromoteItemModal from "./PromoteItemModal";
 import ConfirmModal from "../../../components/ConfirmModal";
 import type { VoteForWishlistItemPayload, WishlistItem } from "../types";
-import useMenu from "../../../hooks/useMenu";
 import { useDispatch, useSelector } from "react-redux";
 import {
   setIsMapView,
@@ -29,6 +28,12 @@ import {
 } from "../../maps/service/mapSlice";
 import { useParams } from "react-router";
 import type { RootState } from "../../../store";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "../../../components/ui/dropdown-menu";
 
 interface WishlistItemViewProps {
   tripId: number;
@@ -36,38 +41,25 @@ interface WishlistItemViewProps {
   editable: boolean;
   onScheduleClick: () => void;
   onDeleteClick: () => void;
-  scheduleButtonRef: React.Ref<HTMLButtonElement>;
   editItem: (item: WishlistItem) => void;
-  editButtonProps?: React.ButtonHTMLAttributes<HTMLButtonElement>;
-  editButtonRef?: React.Ref<HTMLButtonElement>;
   voteForItem: (payload: VoteForWishlistItemPayload) => void;
   isVoteLoading: boolean;
   userDidUpvote: boolean;
   userDidDownvote: boolean;
 }
 
-// TODO: Add dropdown menu for edit, delete and location actions
-
 function WishlistItemView({
   tripId,
-
   item,
   editable,
   onScheduleClick,
   onDeleteClick,
-  scheduleButtonRef,
   editItem,
-  editButtonProps,
-  editButtonRef,
   voteForItem,
   isVoteLoading,
   userDidUpvote,
   userDidDownvote,
 }: WishlistItemViewProps) {
-  const { openMenu, isMenuOpen, menuContainerRef, openButtonRef } = useMenu({
-    closeOnClick: true,
-  });
-
   const dispatch = useDispatch();
 
   const handleCopyAddress = () => {
@@ -100,13 +92,62 @@ function WishlistItemView({
     >
       <div className="flex justify-between w-full">
         <h4 className="font-semibold text-text-main pr-10">{item.name}</h4>
-        <button
-          ref={openButtonRef}
-          className="p-1 hover:bg-surface-muted rounded transition-colors text-text-secondary"
-          onClick={openMenu}
-        >
-          <MoreVertical size={16} />
-        </button>
+        <DropdownMenu>
+          <DropdownMenuTrigger className="p-1 hover:bg-surface-muted rounded transition-colors text-text-secondary">
+            <MoreVertical size={16} />
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem
+              onClick={handleView}
+              className="flex gap-2 items-center"
+            >
+              <Eye size={16} />
+              View
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={handleCopyAddress}
+              className="flex gap-2 items-center"
+            >
+              <Copy size={16} />
+              Copy Address
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={handleOpenInMaps}
+              className="flex gap-2 items-center"
+            >
+              <ExternalLink size={16} />
+              Open in Maps
+            </DropdownMenuItem>
+            {editable && (
+              <>
+                {!item.isPromoted && (
+                  <DropdownMenuItem
+                    onClick={(e) => {
+                      onScheduleClick();
+                      e.stopPropagation();
+                    }}
+                    className="flex gap-2 items-center"
+                  >
+                    <Calendar size={16} /> Schedule
+                  </DropdownMenuItem>
+                )}
+                <DropdownMenuItem
+                  className="flex gap-2 items-center"
+                  onClick={() => editItem(item)}
+                >
+                  <Edit size={16} /> Edit
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={onDeleteClick}
+                  className="flex gap-2 items-center text-error"
+                >
+                  <Trash size={16} />
+                  Delete
+                </DropdownMenuItem>
+              </>
+            )}
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
 
       {item.address && (
@@ -166,67 +207,6 @@ function WishlistItemView({
           )}
         </button>
       </div>
-      {isMenuOpen && (
-        <div
-          ref={menuContainerRef}
-          className="absolute top-8 right-2 px-1 bg-surface rounded-md shadow-lg z-10 flex flex-col text-sm min-w-[160px]"
-        >
-          <button
-            onClick={handleView}
-            className="btn-menu text-left flex gap-2 items-center"
-          >
-            <Eye size={16} />
-            View
-          </button>
-          <button
-            onClick={handleCopyAddress}
-            className="btn-menu text-left flex gap-2 items-center"
-          >
-            <Copy size={16} />
-            Copy Address
-          </button>
-          <button
-            onClick={handleOpenInMaps}
-            className="btn-menu text-left flex gap-2 items-center"
-          >
-            <ExternalLink size={16} />
-            Open in Maps
-          </button>
-          {editable && (
-            <>
-              {!item.isPromoted && (
-                <button
-                  ref={scheduleButtonRef}
-                  onClick={(e) => {
-                    onScheduleClick();
-                    e.stopPropagation();
-                  }}
-                  title="Schedule Event"
-                  className="btn-menu  text-left flex gap-2 items-center"
-                >
-                  <Calendar size={16} /> Schedule
-                </button>
-              )}
-              <button
-                className="btn-menu text-left flex gap-2 items-center"
-                title="Edit activity"
-                onClick={() => editItem(item)}
-                {...editButtonProps}
-                ref={editButtonRef}
-              >
-                <Edit size={16} /> Edit
-              </button>
-              <button
-                onClick={onDeleteClick}
-                className="btn-menu text-error text-left flex gap-2 items-center"
-              >
-                <Trash size={16} />
-                Delete
-              </button>
-            </>
-          )}
-        </div>
-      )}
     </div>
   );
 }
@@ -239,8 +219,6 @@ interface WishlistItemCardProps {
   startDate: string;
   endDate: string;
   editItem: (item: WishlistItem) => void;
-  editButtonProps?: React.ButtonHTMLAttributes<HTMLButtonElement>;
-  editButtonRef?: React.Ref<HTMLButtonElement>;
 }
 
 export default function WishlistItemCard({
@@ -250,11 +228,9 @@ export default function WishlistItemCard({
   startDate,
   endDate,
   editItem,
-  editButtonProps,
-  editButtonRef,
 }: WishlistItemCardProps) {
   const tripId = Number(useParams()?.tripId);
-  const { isMenuOpen, openMenu, closeMenu, openButtonRef } = useMenu();
+  const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const [deleteItem, { isLoading: isDeleting }] =
@@ -283,7 +259,7 @@ export default function WishlistItemCard({
         endAt,
       }).unwrap();
 
-      closeMenu();
+      setIsScheduleModalOpen(false);
       toast.success("Successfully scheduled event!");
     } catch (err) {
       if (isFetchBaseQueryError(err)) {
@@ -309,27 +285,24 @@ export default function WishlistItemCard({
         item={item}
         editable={editable}
         onScheduleClick={() => {
-          openMenu();
+          setIsScheduleModalOpen(true);
         }}
         onDeleteClick={() => setShowDeleteConfirm(true)}
-        scheduleButtonRef={openButtonRef}
         editItem={editItem}
-        editButtonProps={editButtonProps}
-        editButtonRef={editButtonRef}
         voteForItem={voteForItem}
         isVoteLoading={isVoteLoading}
         userDidUpvote={userDidUpvote}
         userDidDownvote={userDidDownvote}
       />
 
-      {isMenuOpen && (
+      {isScheduleModalOpen && (
         <PromoteItemModal
           item={item}
           startDate={startDate}
           endDate={endDate}
           onSchedule={handleSchedule}
-          closeMenu={closeMenu}
-          isMenuOpen={isMenuOpen}
+          closeMenu={() => setIsScheduleModalOpen(false)}
+          isMenuOpen={isScheduleModalOpen}
         />
       )}
 

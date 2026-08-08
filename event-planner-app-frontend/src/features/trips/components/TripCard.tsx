@@ -2,7 +2,12 @@ import type { Trip } from "../types";
 import { formatDateRange } from "../../../utils/dateFormattors";
 import { MoreVertical } from "lucide-react";
 import { isAdmin } from "../../users/utils";
-import useMenu from "../../../hooks/useMenu";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "../../../components/ui/dropdown-menu";
 
 type TripCardProps = {
   trip: Trip;
@@ -19,13 +24,6 @@ export default function TripCard({
 }: TripCardProps) {
   const { id, name, description, startDate, endDate } = trip;
 
-  const { toggleMenu, isMenuOpen, menuContainerRef, openButtonRef } = useMenu({
-    closeOnClick: true,
-  });
-  const handleSettings = () => {
-    toggleMenu();
-  };
-
   const handleEdit = () => {
     openEditTripModal(trip);
   };
@@ -38,41 +36,32 @@ export default function TripCard({
     <article
       className="relative md:rounded-md bg-surface shadow-md overflow-hidden cursor-pointer"
       onClick={(e) => {
-        if (
-          !openButtonRef.current?.contains(e.target as Node) &&
-          !menuContainerRef.current?.contains(e.target as Node)
-        ) {
+        const target = e.target as HTMLElement;
+        if (!target.closest("button") && !target.closest("[role='menuitem']")) {
           handleCardClick(id);
         }
       }}
     >
-      <div className="p-4  bg-linear-to-r from-brand-primary to-brand-secondary h-40">
+      <div className="p-4 bg-linear-to-r from-brand-primary to-brand-secondary h-40">
         <div className="flex items-center justify-between mb-2">
           <h3 className="text-white text-lg font-bold">{name}</h3>
           {isAdmin(trip.role) && (
-            <button
-              ref={openButtonRef}
-              className="-mt-2 -mr-2 p-2 hover:bg-white/20"
-              onClick={handleSettings}
-            >
-              <MoreVertical size={20} className="text-white" />
-            </button>
-          )}
-          {isMenuOpen && (
-            <div
-              ref={menuContainerRef}
-              className="absolute top-8 right-4 mt-2 w-32 bg-surface rounded-md shadow-lg z-10 flex flex-col text-sm"
-            >
-              <button onClick={handleEdit} className="btn-menu rounded-md">
-                Edit
-              </button>
-              <button
-                onClick={handleDelete}
-                className="btn-menu rounded-md text-error"
-              >
-                Delete
-              </button>
-            </div>
+            <DropdownMenu>
+              <DropdownMenuTrigger className="-mt-2 -mr-2 p-2 hover:bg-white/20 rounded transition-colors">
+                <MoreVertical size={20} className="text-white" />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem
+                  onClick={handleEdit}
+                  className="text-text-primary"
+                >
+                  Edit
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleDelete} className="text-error">
+                  Delete
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           )}
         </div>
         <p className="text-text-inverse/85 truncate">{description}</p>
