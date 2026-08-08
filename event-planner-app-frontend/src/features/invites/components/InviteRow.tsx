@@ -8,9 +8,14 @@ import { useMatch } from "react-router";
 import { isFetchBaseQueryError } from "../../api/utils";
 import { getStatusConfig } from "../utils";
 import { toast } from "sonner";
-import useMenu from "../../../hooks/useMenu";
 import { RoleIcons } from "../../users/utils";
 import type { UserRoleType } from "../../users/types";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "../../../components/ui/dropdown-menu";
 
 export default function InviteRow({ invite }: { invite: Invite }) {
   const params = useMatch("/trips/:tripId")?.params;
@@ -19,9 +24,6 @@ export default function InviteRow({ invite }: { invite: Invite }) {
     useCreateInviteMutation();
   const [revokeInvite, { isLoading: revokeIsLoading }] =
     useRevokeInviteMutation();
-
-  const { isMenuOpen, closeMenu, toggleMenu, menuContainerRef, openButtonRef } =
-    useMenu();
   const { email, role } = invite;
 
   async function reinvite() {
@@ -30,7 +32,6 @@ export default function InviteRow({ invite }: { invite: Invite }) {
         tripId,
         invite: { email: email.toLowerCase(), role },
       }).unwrap();
-      closeMenu();
     } catch (err) {
       if (isFetchBaseQueryError(err)) {
         toast.error((err.data as { message: string }).message);
@@ -41,7 +42,6 @@ export default function InviteRow({ invite }: { invite: Invite }) {
   async function revoke() {
     try {
       await revokeInvite({ tripId, inviteId: invite.id }).unwrap();
-      closeMenu();
     } catch (err) {
       if (isFetchBaseQueryError(err)) {
         toast.error((err.data as { message: string }).message);
@@ -85,48 +85,36 @@ export default function InviteRow({ invite }: { invite: Invite }) {
       </td>
 
       <td className="z-10 px-2 md:px-4 py-4 text-right relative">
-        <button
-          ref={openButtonRef}
-          onClick={toggleMenu}
-          className="p-1 hover:bg-surface-muted rounded-full transition-colors"
-        >
-          <MoreVertical size={18} className="text-text-secondary" />
-        </button>
-
-        {isMenuOpen && (
-          <div
-            ref={menuContainerRef}
-            className="card absolute z-20 right-8 top-1 w-32 p-0.5 flex flex-col shadow-xl bg-surface "
-          >
+        <DropdownMenu>
+          <DropdownMenuTrigger className="p-1 hover:bg-surface-muted rounded-full transition-colors">
+            <MoreVertical size={18} className="text-text-secondary" />
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
             {canResend && (
-              <button
+              <DropdownMenuItem
                 disabled={createIsLoading}
-                onClick={() => {
-                  reinvite();
-                }}
-                className="rounded-none flex items-center gap-2 p-1 text-xs hover:bg-surface-muted"
+                onClick={reinvite}
+                className="flex items-center gap-2"
               >
                 <RotateCcw size={14} /> Resend
-              </button>
+              </DropdownMenuItem>
             )}
             {canRevoke && (
-              <button
+              <DropdownMenuItem
                 disabled={revokeIsLoading}
-                onClick={() => {
-                  revoke();
-                }}
-                className="rounded-none flex items-center gap-2 p-1 text-xs hover:bg-surface-muted text-error"
+                onClick={revoke}
+                className="flex items-center gap-2 text-error"
               >
                 <Ban size={14} /> Revoke
-              </button>
+              </DropdownMenuItem>
             )}
             {!canResend && !canRevoke && (
               <span className="p-2 text-xs text-text-muted italic text-center">
                 No actions
               </span>
             )}
-          </div>
-        )}
+          </DropdownMenuContent>
+        </DropdownMenu>
       </td>
     </tr>
   );

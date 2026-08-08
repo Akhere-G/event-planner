@@ -13,7 +13,6 @@ import { isFetchBaseQueryError } from "../../api/utils";
 import { useRemoveUserMutation, useUpdateUserMutation } from "../usersApiSlice";
 import { ConfirmModal, EditableSelect } from "../../../components";
 import { toast } from "sonner";
-import useMenu from "../../../hooks/useMenu";
 import { useSelector } from "react-redux";
 import type { RootState } from "../../../store";
 
@@ -22,11 +21,9 @@ export default function UserRow({ user }: { user: User }) {
   const [userRole, setUserRole] = useState(user.role);
   const [removeUser, { isLoading: removeIsLoading }] = useRemoveUserMutation();
   const [updateUser] = useUpdateUserMutation();
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const params = useMatch("/trips/:tripId")?.params;
   const tripId = Number(params?.tripId);
-
-  const { isMenuOpen, closeMenu, menuContainerRef, openButtonRef, toggleMenu } =
-    useMenu();
   const { username, email, id } = user;
 
   const isCurrentUser = id === userId;
@@ -39,7 +36,7 @@ export default function UserRow({ user }: { user: User }) {
   async function remove() {
     try {
       await removeUser({ tripId, userId: user.id }).unwrap();
-      closeMenu();
+      setIsConfirmOpen(false);
     } catch (err) {
       if (isFetchBaseQueryError(err)) {
         toast.error((err.data as { message: string }).message);
@@ -104,21 +101,19 @@ export default function UserRow({ user }: { user: User }) {
 
       <td className="pr-4  py-4 text-right ">
         <button
-          ref={openButtonRef}
-          onClick={toggleMenu}
+          onClick={() => setIsConfirmOpen(true)}
           title={removeTitle}
           className="p-1 hover:bg-surface-muted rounded-full transition-colors"
         >
           <RemoveUserIcon size={18} className="text-text-secondary" />
         </button>
 
-        {isMenuOpen && (
+        {isConfirmOpen && (
           <ConfirmModal
-            closeModal={closeMenu}
+            closeModal={() => setIsConfirmOpen(false)}
             confirmAction={remove}
             title={isCurrentUser ? "Leave trip?" : `Remove ${username}?`}
             confirmText={isCurrentUser ? "Leave trip" : `Remove ${username}`}
-            modalRef={menuContainerRef}
             confirmButtonProps={{ disabled: removeIsLoading }}
           />
         )}

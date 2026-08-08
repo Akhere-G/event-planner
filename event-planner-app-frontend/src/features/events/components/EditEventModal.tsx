@@ -6,10 +6,8 @@ export default function EditEventModal({
   event,
   onClose,
   onSave,
-  editModalContainer,
 }: {
   event: Event;
-  editModalContainer: React.Ref<HTMLDivElement>;
   onClose: () => void;
   onSave: (event: Event) => Promise<void>;
 }) {
@@ -19,7 +17,6 @@ export default function EditEventModal({
       title={`Edit ${event.name}`}
       confirmAction={() => onSave(event)}
       confirmText="Edit "
-      modalRef={editModalContainer}
       hideButtons
     >
       <div className="card">

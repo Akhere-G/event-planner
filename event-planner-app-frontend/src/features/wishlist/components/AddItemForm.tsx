@@ -171,7 +171,7 @@ export default function AddItemForm({
         >
           Cancel
         </button>
-        <button type="submit" className="flex-1 btn-primary py-1.5 text-xs">
+        <button type="submit" className="flex-1 btn-primary py-1.5">
           {selectedItem ? "Update Item" : "Add to List"}
         </button>
       </div>

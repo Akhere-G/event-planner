@@ -14,9 +14,16 @@ import { useGetTripQuery } from "../../trips/services/tripsApiSlice";
 import { useDispatch } from "react-redux";
 import { setRoutes } from "../../maps/service/mapSlice";
 import type { Route } from "../../maps/types";
-import useMenu from "../../../hooks/useMenu";
 import AutofillDayForm from "./AutoFillDayForm";
 import { useGetAccommodationsQuery } from "../../accommodations/apiSlice";
+
+import { useState } from "react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "../../../components/ui/dropdown-menu";
 
 export default function DayCard({
   defaultIsOpen,
@@ -38,19 +45,7 @@ export default function DayCard({
     useOptimiseEventsMutation();
   const dispatch = useDispatch();
 
-  const { openButtonRef, isMenuOpen, toggleMenu, menuContainerRef } = useMenu({
-    closeOnClick: true,
-  });
-
-  const {
-    openButtonRef: openFillButtonRef,
-    isMenuOpen: isFillMenuOpen,
-    openMenu: openFillMenu,
-    menuContainerRef: fillMenuContainerRef,
-    closeMenu: closeFillMenu,
-  } = useMenu({
-    closeOnClick: true,
-  });
+  const [isFillMenuOpen, setIsFillMenuOpen] = useState(false);
 
   interface Autofill extends AutofillConfig {
     date: string;
@@ -58,7 +53,7 @@ export default function DayCard({
   const getSuggestions = async (autoFillData: Autofill) => {
     try {
       await suggestEvents({ tripId, body: autoFillData }).unwrap();
-      closeFillMenu();
+      setIsFillMenuOpen(false);
     } catch {
       toast.error("Could not get suggestions.");
     }
@@ -125,16 +120,51 @@ export default function DayCard({
               </h3>
             </div>
 
-            <button
-              ref={openButtonRef}
-              onClick={(e) => {
-                e.stopPropagation();
-                toggleMenu();
-              }}
-              className="btn p-2 -mr-4 -mt-8 text-sm"
-            >
-              <MoreVertical size={16} />
-            </button>
+            <DropdownMenu>
+              <DropdownMenuTrigger
+                onClick={(e) => e.stopPropagation()}
+                className="btn p-2 -mr-4 -mt-8 text-sm"
+              >
+                <MoreVertical size={16} />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem
+                  onClick={viewAllRoutes}
+                  disabled={!day.events.length}
+                  className="flex gap-2 items-center"
+                >
+                  <Map className="text-brand-primary" size={18} />
+                  View all routes
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={(e) => {
+                    setIsFillMenuOpen(true);
+                    e.stopPropagation();
+                  }}
+                  disabled={isSuggestBtnDisabled}
+                  className="flex gap-2 items-center"
+                >
+                  {isSuggestBtnDisabled ? (
+                    <LoaderCircle className="animate-spin" size={18} />
+                  ) : (
+                    <Sparkles className="text-brand-primary" size={18} />
+                  )}
+                  Fill in day
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={getOptimisedEvents}
+                  disabled={isOptimiseBtnDisabled}
+                  className="flex gap-2 items-center"
+                >
+                  {isOptimiseBtnDisabled ? (
+                    <LoaderCircle className="animate-spin" size={18} />
+                  ) : (
+                    <Wand2 className="text-brand-primary" size={18} />
+                  )}
+                  Optimise day
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         )}
         ContentComponent={() => (
@@ -144,57 +174,12 @@ export default function DayCard({
           </div>
         )}
       />
-      {isMenuOpen && (
-        <div
-          ref={menuContainerRef}
-          className="z-1 flex flex-col gap-2 absolute top-8 right-6 card p-0 text-sm"
-        >
-          <button
-            onClick={viewAllRoutes}
-            disabled={!day.events.length}
-            className="flex gap-2 btn-menu"
-          >
-            <Map className="text-brand-primary" size={18} />
-            View all routes
-          </button>
-
-          <button
-            onClick={(e) => {
-              openFillMenu();
-              e.stopPropagation();
-            }}
-            disabled={isSuggestBtnDisabled}
-            className="flex gap-2 btn-menu"
-            ref={openFillButtonRef}
-          >
-            {isSuggestBtnDisabled ? (
-              <LoaderCircle className="animate-spin" size={18} />
-            ) : (
-              <Sparkles className="text-brand-primary" size={18} />
-            )}
-            Fill in day
-          </button>
-          <button
-            onClick={getOptimisedEvents}
-            disabled={isOptimiseBtnDisabled}
-            className="flex gap-2 btn-menu"
-          >
-            {isOptimiseBtnDisabled ? (
-              <LoaderCircle className="animate-spin" size={18} />
-            ) : (
-              <Wand2 className="text-brand-primary" size={18} />
-            )}
-            Optimise day
-          </button>
-        </div>
-      )}
 
       {isFillMenuOpen && (
         <ConfirmModal
-          closeModal={closeFillMenu}
+          closeModal={() => setIsFillMenuOpen(false)}
           title={`Fill Day ${day.day}`}
           confirmText="Fill"
-          modalRef={fillMenuContainerRef}
           confirmAction={() => {}}
           confirmBtnClasses="bg-brand-primary"
           confirmButtonProps={{
@@ -212,8 +197,6 @@ export default function DayCard({
           </div>
         </ConfirmModal>
       )}
-
-      {isFillMenuOpen && <p>Hello</p>}
     </div>
   );
 }

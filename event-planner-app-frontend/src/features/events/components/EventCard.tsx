@@ -19,7 +19,6 @@ import {
   StateGate,
 } from "../../../components";
 import { eventCategories } from "../constants";
-import useMenu from "../../../hooks/useMenu";
 
 import { useParams } from "react-router";
 import { useUpdateEvent } from "../../trips/hooks";
@@ -30,6 +29,12 @@ import { useDispatch } from "react-redux";
 import { setIsMapView, setSelectedEvent } from "../../maps/service/mapSlice";
 import EditEventModal from "./EditEventModal";
 import type { Trip } from "../../trips/types";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "../../../components/ui/dropdown-menu";
 
 interface EventCardProps {
   event: Event;
@@ -38,9 +43,6 @@ interface EventCardProps {
   role: string;
   trip: Trip;
 }
-// TODO: Use shadcn popup for category select.
-// TODO: Allow for name edit
-// TODO: Add show in map function for event cards in list
 
 export function EventCard({
   event,
@@ -51,23 +53,10 @@ export function EventCard({
 }: EventCardProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDateModalOpen, setIsDateModalOpen] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
   const [eventData, setEventData] = useState(event);
   const start = parseISO(eventData.startAt);
   const end = parseISO(eventData.endAt);
-
-  const { openMenu, isMenuOpen, menuContainerRef, openButtonRef } = useMenu({
-    closeOnClick: true,
-  });
-
-  const {
-    openMenu: setEditModalTrue,
-    isMenuOpen: isEditing,
-    menuContainerRef: editModalContainer,
-    openButtonRef: editButtonRef,
-    closeMenu: closeEditModal,
-  } = useMenu({
-    closeOnClick: true,
-  });
 
   const dispatch = useDispatch();
 
@@ -87,6 +76,7 @@ export function EventCard({
     dispatch(setSelectedEvent(event));
     dispatch(setIsMapView(true));
   };
+
   const handleCopyAddress = () => {
     navigator.clipboard.writeText(eventData.address);
     toast.info("Copied!");
@@ -114,66 +104,54 @@ export function EventCard({
             />
           </h3>
 
-          <button
-            ref={openButtonRef}
-            className="p-1 hover:bg-surface-muted rounded transition-colors text-text-secondary"
-            onClick={openMenu}
-          >
-            <MoreVertical size={16} />
-          </button>
+          <DropdownMenu>
+            <DropdownMenuTrigger className="p-1 hover:bg-surface-muted rounded transition-colors text-text-secondary">
+              <MoreVertical size={16} />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="min-w-40">
+              <DropdownMenuItem
+                onClick={handleView}
+                className="flex gap-2 items-center"
+              >
+                <Eye size={16} />
+                View
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={handleCopyAddress}
+                className="flex gap-2 items-center"
+              >
+                <Copy size={16} />
+                Copy Address
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={handleOpenInMaps}
+                className="flex gap-2 items-center"
+              >
+                <ExternalLink size={16} />
+                Open in Maps
+              </DropdownMenuItem>
+
+              {canUserEdit(role) && (
+                <>
+                  <DropdownMenuItem
+                    onClick={() => setIsEditing(true)}
+                    className="flex gap-2 items-center text-text-primary"
+                  >
+                    <Edit size={16} />
+                    Edit
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => setIsModalOpen(true)}
+                    className="flex gap-2 items-center text-error"
+                  >
+                    <Trash size={16} />
+                    Delete
+                  </DropdownMenuItem>
+                </>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
-
-        {isMenuOpen && (
-          <div
-            ref={menuContainerRef}
-            className="absolute top-8 right-2 px-1 bg-surface rounded-md shadow-lg z-10 flex flex-col text-sm min-w-[160px]"
-          >
-            <button
-              onClick={handleView}
-              className="btn-menu text-left flex gap-2 items-center"
-            >
-              <Eye size={16} />
-              View
-            </button>
-            <button
-              onClick={handleCopyAddress}
-              className="btn-menu text-left flex gap-2 items-center"
-            >
-              <Copy size={16} />
-              Copy Address
-            </button>
-            <button
-              onClick={handleOpenInMaps}
-              className="btn-menu text-left flex gap-2 items-center"
-            >
-              <ExternalLink size={16} />
-              Open in Maps
-            </button>
-
-            {canUserEdit(role) && (
-              <>
-                <button
-                  onClick={(e) => {
-                    setEditModalTrue();
-                    e.stopPropagation();
-                  }}
-                  className="btn-menu text-left flex gap-2 items-center"
-                  ref={editButtonRef}
-                >
-                  <Edit size={16} />
-                  Edit
-                </button>
-                <button
-                  onClick={() => setIsModalOpen(true)}
-                  className="btn-menu text-error text-left flex gap-2 items-center"
-                >
-                  <Trash size={16} />
-                  Delete
-                </button>
-              </>
-            )}
-          </div>
-        )}
 
         <EditableSelect
           selectedValue={eventData.category}
@@ -262,11 +240,10 @@ export function EventCard({
         {isEditing && (
           <EditEventModal
             event={event}
-            onClose={closeEditModal}
+            onClose={() => setIsEditing(false)}
             onSave={async (updatedEvent) => {
               await updateEventData(updatedEvent);
             }}
-            editModalContainer={editModalContainer}
           />
         )}
       </div>

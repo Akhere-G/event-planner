@@ -5,7 +5,13 @@ import { logOut } from "../features/auth/services/authSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { toggleDarkMode } from "../features/theme/themeSlice";
 import type { RootState } from "../store";
-import useMenu from "../hooks/useMenu";
+import { useState } from "react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "../components/ui/dropdown-menu";
 
 interface HeaderProps {
   links: { title: string; url: string }[];
@@ -14,18 +20,10 @@ export default function Header({ links }: HeaderProps) {
   const { darkMode } = useSelector((state: RootState) => state.theme);
   const { isAuthenticated } = useSelector((state: RootState) => state.auth);
   const [logout] = useLogoutUserMutation();
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const dispatch = useDispatch();
 
-  const { isMenuOpen, toggleMenu, menuContainerRef, openButtonRef } = useMenu({
-    closeOnClick: true,
-  });
-  const {
-    isMenuOpen: isSidebarOpen,
-    toggleMenu: toggleSidebar,
-    menuContainerRef: sidebarContainerRef,
-    openButtonRef: openSidebarButtonRef,
-  } = useMenu({ closeOnClick: true });
   return (
     <header className="relative w-full z-2 ">
       <div className="z-2 bg-surface min-h-12 max-h-24 h-[6.5vh] w-full flex justify-between items-center p-4 shadow-md">
@@ -44,49 +42,39 @@ export default function Header({ links }: HeaderProps) {
               ))}
             </ul>
           </nav>
-          <div>
-            <button
-              ref={openButtonRef}
-              onClick={toggleMenu}
-              className="p-2.5 bg-brand-primary rounded-full h-10 w-10 "
-            >
+          <DropdownMenu>
+            <DropdownMenuTrigger className="p-2.5 bg-brand-primary rounded-full h-10 w-10 hover:bg-brand-primary/90 transition-colors">
               <User className="text-text-inverse" size={20} />
-            </button>
-            <div
-              ref={menuContainerRef}
-              className={`flex flex-col w-40 card p-0 z-10 absolute right-2 top-full ${isMenuOpen ? "visible opacity-100" : "invisible opacity-0 pointer-events-none"}`}
-            >
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-48">
               {isAuthenticated && (
-                <Link
-                  to="/settings"
-                  className="pt-3 pb-2 hover:bg-surface-muted text-center"
-                >
-                  Settings
-                </Link>
+                <>
+                  <DropdownMenuItem>
+                    <Link to="/settings" className="cursor-pointer">
+                      Settings
+                    </Link>
+                  </DropdownMenuItem>
+                </>
               )}
-              <button
+              <DropdownMenuItem
+                onClick={() => dispatch(toggleDarkMode())}
+                className="flex justify-between items-center"
+              >
+                <span>{darkMode ? "Light Mode" : "Dark Mode"}</span>
+                {darkMode ? <Sun size={16} /> : <Moon size={16} />}
+              </DropdownMenuItem>
+              <DropdownMenuItem
                 onClick={async () => {
                   await logout();
                   dispatch(logOut());
                   window.location.reload();
                 }}
-                className="btn-menu"
+                className="text-error"
               >
                 Logout
-              </button>
-
-              <button
-                onClick={() => dispatch(toggleDarkMode())}
-                className="p-2 pb-3 flex hover:bg-surface-muted rounded-lg transition-colors"
-                aria-label="Toggle Dark Mode"
-              >
-                <span className="w-29">
-                  {darkMode ? "Light Mode" : "Dark Mode"}
-                </span>
-                {darkMode ? <Sun size={20} /> : <Moon size={20} />}
-              </button>
-            </div>
-          </div>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
 
         {/* Mobile Toggle */}
@@ -94,8 +82,7 @@ export default function Header({ links }: HeaderProps) {
           className="btn-secondary md:hidden p-2"
           aria-expanded={isSidebarOpen}
           aria-label="Open Menu"
-          onClick={toggleSidebar}
-          ref={openSidebarButtonRef}
+          onClick={() => setIsSidebarOpen(!isSidebarOpen)}
         >
           <Menu size={24} />
         </button>
@@ -103,8 +90,7 @@ export default function Header({ links }: HeaderProps) {
 
       {/* Mobile Sidebar */}
       <div
-        ref={sidebarContainerRef}
-        className={`fixed z-50 h-full right-0 bg-surface  shadow-md transition-transform
+        className={`fixed z-50 h-full right-0 bg-surface shadow-md transition-transform
         md:hidden flex flex-col items-start gap-4 text-start
         top-0
         ${isSidebarOpen ? "translate-x-0" : "translate-x-full"}`}
@@ -112,9 +98,10 @@ export default function Header({ links }: HeaderProps) {
         <div className="flex pl-2 pt-2 justify-between items-center w-full">
           <p>Menu</p>
           <button
-            className="btn-secondary md:hidden p-2 mr-2 "
+            className="btn-secondary md:hidden p-2 mr-2"
             aria-expanded={isSidebarOpen}
             aria-label="Close Menu"
+            onClick={() => setIsSidebarOpen(false)}
           >
             <X size={16} />
           </button>
@@ -126,6 +113,7 @@ export default function Header({ links }: HeaderProps) {
                 <Link
                   className="block py-2 pl-2 text-left hover:bg-surface-muted rounded-md"
                   to={url}
+                  onClick={() => setIsSidebarOpen(false)}
                 >
                   {title}
                 </Link>
@@ -137,6 +125,7 @@ export default function Header({ links }: HeaderProps) {
               <Link
                 to="/settings"
                 className="block py-2 pl-2 text-left hover:bg-surface-muted rounded-md"
+                onClick={() => setIsSidebarOpen(false)}
               >
                 Settings
               </Link>
@@ -144,9 +133,9 @@ export default function Header({ links }: HeaderProps) {
           </div>
           <button
             onClick={() => dispatch(toggleDarkMode())}
-            className=" py-2 pl-2 text-left hover:bg-surface-muted rounded-md flex items-center gap-2 mx-1 hover:brightness-95"
+            className="py-2 pl-2 text-left hover:bg-surface-muted rounded-md flex items-center gap-2 mx-1 hover:brightness-95"
           >
-            <span className=" ">{darkMode ? "Light Mode" : "Dark Mode"}</span>
+            <span>{darkMode ? "Light Mode" : "Dark Mode"}</span>
             {darkMode ? <Sun size={18} /> : <Moon size={18} />}
           </button>
           {isAuthenticated && (
@@ -167,6 +156,7 @@ export default function Header({ links }: HeaderProps) {
       <div
         className={`fixed inset-0 z-10 bg-black/40 backdrop-blur-sm md:hidden transition-all 
           ${isSidebarOpen ? "opacity-100" : "opacity-0 pointer-events-none"}`}
+        onClick={() => setIsSidebarOpen(false)}
       />
     </header>
   );

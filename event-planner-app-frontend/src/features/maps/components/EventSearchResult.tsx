@@ -16,7 +16,6 @@ import {
   useGetWishlistsQuery,
 } from "../../wishlist/services/wishlistApiSlice";
 import type { CreateWishlistItemPayload, Wishlist } from "../../wishlist/types";
-import useMenu from "../../../hooks/useMenu";
 import AccommodationForm from "../../accommodations/components/AccommodationForm";
 import { useGetTripQuery } from "../../trips/services/tripsApiSlice";
 import { getCityBounds } from "../../maps/utils";
@@ -57,7 +56,7 @@ export function EventSearchResultCard({
   onSaveWishlist,
   onAccommodationSaved,
 }: EventSearchResultCardProps) {
-  const { closeMenu, isMenuOpen, openMenu, openButtonRef, menuContainerRef } = useMenu();
+  const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
   const [isAccommodationOpen, setIsAccommodationOpen] = useState(false);
   const isAccommodation = event.types.includes("lodging");
 
@@ -65,7 +64,7 @@ export function EventSearchResultCard({
     if (isAccommodation) {
       setIsAccommodationOpen(true);
     } else {
-      openMenu();
+      setIsSaveModalOpen(true);
     }
   };
 
@@ -109,12 +108,12 @@ export function EventSearchResultCard({
         )}
 
         <SaveEventModal
-          isOpen={isMenuOpen}
+          isOpen={isSaveModalOpen}
           event={event}
           dates={dates}
           wishlists={wishlists}
           isLoading={isLoading}
-          onClose={closeMenu}
+          onClose={() => setIsSaveModalOpen(false)}
           onSaveEvent={onSaveEvent}
           onSaveWishlist={onSaveWishlist}
         />
@@ -123,7 +122,6 @@ export function EventSearchResultCard({
           <ConfirmModal
             closeModal={() => setIsAccommodationOpen(false)}
             title="Add Accommodation from Search"
-            modalRef={menuContainerRef}
             hideButtons
           >
             <div className="p-4">
@@ -156,7 +154,6 @@ export function EventSearchResultCard({
             </span>
           ) : (
             <button
-              ref={openButtonRef}
               onClick={handleAdd}
               className="flex gap-2 items-center bg-brand-primary"
             >

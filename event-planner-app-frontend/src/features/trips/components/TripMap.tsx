@@ -44,7 +44,6 @@ import { useGetWishlistsQuery } from "../../wishlist/services/wishlistApiSlice";
 import type { WishlistItem } from "../../wishlist/types";
 import { getWishlistColor } from "../../wishlist/utils";
 import WishlistItemCard from "../../wishlist/components/WishlistItemCard";
-import useMenu from "../../../hooks/useMenu";
 import { ConfirmModal } from "../../../components";
 import AddItemForm from "../../wishlist/components/AddItemForm";
 import AccommodationMarkers from "./AccommodationMarkers";
@@ -72,15 +71,9 @@ export default function TripMap({ trip }: { trip: Trip }) {
   } = useSelector((state: RootState) => state.map);
   const darkMode = useSelector((state: RootState) => state.theme.darkMode);
 
-  const {
-    isMenuOpen: isEditingWishlistItem,
-    setIsMenuOpen: setIsEditingWishlistItem,
-    closeMenu: closeEditWishlistItemModal,
-    openButtonRef: editWishlistItemButtonRef,
-    menuContainerRef: editWishlistItemModalRef,
-  } = useMenu();
   const { data: wishlistsResponse } = useGetWishlistsQuery(trip.id);
   const wishlists = wishlistsResponse?.data ?? [];
+  const [isEditingWishlistItem, setIsEditingWishlistItem] = useState(false);
 
   const wishlistIndexById: Record<number, number> = {};
   wishlists.forEach((w, i) => {
@@ -320,7 +313,6 @@ export default function TripMap({ trip }: { trip: Trip }) {
             tripId={trip.id}
             wishlistId={selectedWishlistItem.wishlistId}
             editItem={() => setIsEditingWishlistItem(true)}
-            editButtonRef={editWishlistItemButtonRef}
           />
         </div>
       )}
@@ -355,9 +347,8 @@ export default function TripMap({ trip }: { trip: Trip }) {
 
       {isEditingWishlistItem && selectedWishlistItem && (
         <ConfirmModal
-          closeModal={closeEditWishlistItemModal}
+          closeModal={() => setIsEditingWishlistItem(false)}
           title="Edit wishlist item"
-          modalRef={editWishlistItemModalRef}
           hideButtons
         >
           <AddItemForm

@@ -20,8 +20,13 @@ import { toast } from "sonner";
 import { useParams } from "react-router";
 import { useGetTripQuery } from "../../trips/services/tripsApiSlice";
 import { getCityBounds } from "../../maps/utils";
-import useMenu from "../../../hooks/useMenu";
 import { canUserEdit } from "../../users/utils";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "../../../components/ui/dropdown-menu";
 
 interface AccommodationCardProps {
   accommodation: Accommodation;
@@ -46,10 +51,6 @@ export default function AccommodationCard({
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [accommodationToDelete, setAccommodationToDelete] =
     useState<Accommodation | null>(null);
-
-  const { openMenu, isMenuOpen, menuContainerRef, openButtonRef } = useMenu({
-    closeOnClick: true,
-  });
 
   const shouldShowExpand =
     accommodation.description && accommodation.description.length > 100;
@@ -118,13 +119,45 @@ export default function AccommodationCard({
             <h3 className="font-semibold text-text-main text-lg">
               {accommodation.name}
             </h3>
-            <button
-              ref={openButtonRef}
-              className="p-1 hover:bg-surface-muted rounded transition-colors text-text-secondary"
-              onClick={openMenu}
-            >
-              <MoreVertical size={16} />
-            </button>
+            <DropdownMenu>
+              <DropdownMenuTrigger className="p-1 hover:bg-surface-muted rounded transition-colors text-text-secondary">
+                <MoreVertical size={16} />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem
+                  onClick={handleCopyAddress}
+                  className="flex gap-2 items-center"
+                >
+                  <Copy size={16} />
+                  Copy Address
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={handleOpenInMaps}
+                  className="flex gap-2 items-center"
+                >
+                  <ExternalLink size={16} />
+                  Open in Maps
+                </DropdownMenuItem>
+                {editable && (
+                  <>
+                    <DropdownMenuItem
+                      onClick={() => handleUpdate(accommodation)}
+                      className="flex gap-2 items-center"
+                    >
+                      <Edit2 size={16} />
+                      Edit
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() => handleDelete(accommodation)}
+                      className="flex gap-2 items-center text-error"
+                    >
+                      <Trash2 size={16} />
+                      Delete
+                    </DropdownMenuItem>
+                  </>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
           <div className="flex items-center gap-2 text-text-secondary text-sm mt-1">
             <MapPin size={14} className="shrink-0" />
@@ -164,46 +197,6 @@ export default function AccommodationCard({
                   Show less
                 </button>
               )}
-            </>
-          )}
-        </div>
-      )}
-
-      {isMenuOpen && (
-        <div
-          ref={menuContainerRef}
-          className="absolute top-8 right-2 px-1 bg-surface rounded-md shadow-lg z-10 flex flex-col text-sm min-w-[160px]"
-        >
-          <button
-            onClick={handleCopyAddress}
-            className="btn-menu text-left flex gap-2 items-center"
-          >
-            <Copy size={16} />
-            Copy Address
-          </button>
-          <button
-            onClick={handleOpenInMaps}
-            className="btn-menu text-left flex gap-2 items-center"
-          >
-            <ExternalLink size={16} />
-            Open in Maps
-          </button>
-          {editable && (
-            <>
-              <button
-                className="btn-menu text-left flex gap-2 items-center"
-                title="Edit activity"
-                onClick={() => handleUpdate(accommodation)}
-              >
-                <Edit2 size={16} /> Edit
-              </button>
-              <button
-                onClick={() => handleDelete(accommodation)}
-                className="btn-menu text-error text-left flex gap-2 items-center"
-              >
-                <Trash2 size={16} />
-                Delete
-              </button>
             </>
           )}
         </div>
