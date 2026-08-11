@@ -1,16 +1,16 @@
 import os
+
 import pymysql
 
 pymysql.install_as_MySQLdb()
 
-from flask import Flask
 from dotenv import load_dotenv
-from .extensions import db, migrate, flask_bcrypt
+from flask import Flask, send_from_directory, make_response, jsonify
 from flask_cors import CORS
+
 from .config.dev_config import DevConfig
 from .config.production_config import ProductionConfig
-from flask import send_from_directory
-
+from .extensions import db, flask_bcrypt, migrate, limiter
 
 load_dotenv()
 
@@ -52,31 +52,32 @@ def create_app():
     db.init_app(app)
     migrate.init_app(app, db, directory=migrations_path)
     flask_bcrypt.init_app(app)
+    limiter.init_app(app)
 
     with app.app_context():
         from .models import (
-            User,
-            Itinerary,
-            ItineraryUser,
-            ItineraryEvent,
-            UserRole,
-            Event,
-            Invite,
-            InvitationStatus,
             Accommodation,
+            Event,
+            InvitationStatus,
+            Invite,
+            Itinerary,
+            ItineraryEvent,
+            ItineraryUser,
             PackingItem,
+            User,
+            UserRole,
         )
         from .routes import (
-            auth_bp,
-            itinerary_bp,
-            event_bp,
-            user_bp,
-            itinerary_invites_bp,
-            user_invites_bp,
-            ai_bp,
-            wishlist_bp,
             accommodation_bp,
+            ai_bp,
+            auth_bp,
+            event_bp,
+            itinerary_bp,
+            itinerary_invites_bp,
             packing_item_bp,
+            user_bp,
+            user_invites_bp,
+            wishlist_bp,
         )
 
         app.register_blueprint(auth_bp, url_prefix="/api/auth")
@@ -118,5 +119,11 @@ def create_app():
         @app.errorhandler(404)
         def not_found(e):
             return send_from_directory(app.static_folder, "index.html")
+
+        @app.errorhandler(429)
+        def ratelimit_handler(e):
+            return make_response(
+                jsonify(error=f"ratelimit exceeded {e.description}"), 429
+            )
 
         return app

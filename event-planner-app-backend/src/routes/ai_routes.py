@@ -1,25 +1,28 @@
-from flask import Blueprint, request
-from ..middleware.login_required import login_required
-from ..utils.format_response import api_response
-from ..services.ai_services import get_insights, get_event_suggestions, optimise_events
-from ..services.itineraries_service import is_authorised
-from ..models import UserRole
-from ..exceptions import (
-    UserNotAuthorisedError,
-    ItineraryDoesNotExistError,
-    EventNotFoundError,
-)
 from datetime import datetime
-from ..services.events_service import create_events, update_events
-from ..schemas.event_schema import EventSchema
+
+from flask import Blueprint, request
 from marshmallow import ValidationError
 
+from ..exceptions import (
+    EventNotFoundError,
+    ItineraryDoesNotExistError,
+    UserNotAuthorisedError,
+)
+from ..extensions import limiter
+from ..middleware.login_required import login_required
+from ..models import UserRole
+from ..schemas.event_schema import EventSchema
+from ..services.ai_services import get_event_suggestions, get_insights, optimise_events
+from ..services.events_service import create_events, update_events
+from ..services.itineraries_service import is_authorised
+from ..utils.format_response import api_response
 
 ai_bp = Blueprint("ai", __name__)
 
 
 @ai_bp.route("/insights/<int:itinerary_id>")
 @login_required
+@limiter.limit("10 per minute")
 def get_insights_route(user_id: int, itinerary_id: int):
     try:
         is_authorised(
@@ -38,6 +41,7 @@ def get_insights_route(user_id: int, itinerary_id: int):
 
 @ai_bp.route("/suggest-events/<int:itinerary_id>", methods=["POST"])
 @login_required
+@limiter.limit("10 per minute")
 def get_event_suggestions_route(user_id: int, itinerary_id: int):
     schema = EventSchema(many=True)
 
@@ -87,6 +91,7 @@ def get_event_suggestions_route(user_id: int, itinerary_id: int):
 
 @ai_bp.route("/optimise-events/<int:itinerary_id>", methods=["POST"])
 @login_required
+@limiter.limit("10 per minute")
 def optimise_events_route(user_id: int, itinerary_id: int):
     date = request.json.get("date")
     schema = EventSchema(many=True)

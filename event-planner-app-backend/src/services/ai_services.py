@@ -27,7 +27,7 @@ def get_ai_response(prompt):
     try:
         client_gemini = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
         response = client_gemini.models.generate_content(
-            model="gemini-2.0-flash", contents=prompt
+            model="gemini-3.5-flash", contents=prompt
         )
         if response.text:
             return response.text
@@ -218,7 +218,7 @@ def generate_packing_list(itinerary_id: int):
     {booked_events if booked_events else "General sightseeing"}
 
     Instructions:
-    1. Infer the typical weather for {itinerary.destination} during {itinerary.start_date.strftime('%B')}.
+    1. Infer the typical weather for {itinerary.destination} during {itinerary.start_date.strftime("%B")}.
     2. Categorize items into: "Clothing", "Toiletries", "Electronics", "Documents", "Specialty Gear", or "Misc".
     3. Tailor recommendations directly to the activities and weather (e.g. swimwear/sunscreen for beach/swimming, formal wear for dining, walking shoes, rain jacket, charger, passport/ID, etc.).
     4. Provide appropriate item quantities where applicable (e.g., "5x Shirts", "3x Socks").
@@ -241,4 +241,3 @@ def generate_packing_list(itinerary_id: int):
     except Exception as e:
         print(f"Packing AI JSON parsing failed: {e}")
         return []
-

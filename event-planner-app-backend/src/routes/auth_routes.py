@@ -1,18 +1,21 @@
 from flask import Blueprint, request, session
 from marshmallow import ValidationError
-from ..services.auth_service import register_user, login_user
+
 from ..exceptions import (
+    InvalidCredentialsError,
     UserAlreadyExistsError,
     UserDoesNotExistError,
-    InvalidCredentialsError,
 )
-from ..schemas.user_schema import RegisterSchema, LoginSchema
+from ..extensions import limiter
+from ..schemas.user_schema import LoginSchema, RegisterSchema
+from ..services.auth_service import login_user, register_user
 from ..utils.format_response import api_response
 
 auth_bp = Blueprint("auth", __name__)
 
 
 @auth_bp.route("/register", methods=["POST"])
+@limiter.limit("10 per minute")
 def register_user_route():
     schema = RegisterSchema()
     try:
@@ -43,6 +46,7 @@ def register_user_route():
 
 
 @auth_bp.route("/login", methods=["POST"])
+@limiter.limit("20 per minute")
 def login_user_route():
     schema = LoginSchema()
     try:

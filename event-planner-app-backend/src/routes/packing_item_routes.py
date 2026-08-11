@@ -6,6 +6,7 @@ from ..exceptions import (
     NotFoundError,
     UserNotAuthorisedError,
 )
+from ..extensions import limiter
 from ..middleware.login_required import login_required
 from ..models import UserRole
 from ..schemas.packing_item_schema import PackingItemSchema
@@ -74,6 +75,7 @@ def create_packing_item(user_id: int, itinerary_id: int):
 
 @packing_item_bp.route("/generate", methods=["POST"])
 @login_required
+@limiter.limit("10 per minute")
 def generate_packing_items_route(user_id: int, itinerary_id: int):
     schema = PackingItemSchema(many=True)
     try:
