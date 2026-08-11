@@ -2,7 +2,6 @@ from datetime import datetime
 
 from flask import Blueprint, request
 from marshmallow import ValidationError
-from utils.rate_limit import get_user_or_ip
 
 from ..exceptions import (
     EventNotFoundError,
@@ -17,6 +16,7 @@ from ..services.ai_services import get_event_suggestions, get_insights, optimise
 from ..services.events_service import create_events, update_events
 from ..services.itineraries_service import is_authorised
 from ..utils.format_response import api_response
+from ..utils.rate_limit import get_user_or_ip
 
 ai_bp = Blueprint("ai", __name__)
 
