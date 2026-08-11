@@ -70,8 +70,6 @@ export function EventCard({
     }
   };
 
-  const closeDeleteModal = () => setIsModalOpen(false);
-
   const handleView = () => {
     dispatch(setSelectedEvent(event));
     dispatch(setIsMapView(true));
@@ -220,18 +218,19 @@ export function EventCard({
         {isModalOpen && (
           <ConfirmModal
             title={`Delete '${eventData.name}'`}
-            closeModal={closeDeleteModal}
+            open={isModalOpen}
+            onOpenChange={setIsModalOpen}
             confirmAction={() => handleDelete(eventData.id)}
           />
         )}
 
         {isDateModalOpen && (
           <EditEventDatesModal
-            event={eventData}
+            event={event}
             tripStartDate={trip.startDate}
             tripEndDate={trip.endDate}
-            isOpen={isDateModalOpen}
-            onClose={() => setIsDateModalOpen(false)}
+            open={isDateModalOpen}
+            onOpenChange={setIsDateModalOpen}
             onSave={async (startAt, endAt) => {
               await updateEventData({ startAt, endAt });
             }}
@@ -240,7 +239,8 @@ export function EventCard({
         {isEditing && (
           <EditEventModal
             event={event}
-            onClose={() => setIsEditing(false)}
+            open={isEditing}
+            onOpenChange={setIsEditing}
             onSave={async (updatedEvent) => {
               await updateEventData(updatedEvent);
             }}

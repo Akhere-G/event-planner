@@ -147,7 +147,8 @@ export default function TripSummary({
       </div>
       {modalOpen && (
         <ConfirmModal
-          closeModal={() => setIsModalOpen(false)}
+          open={modalOpen}
+          onOpenChange={setIsModalOpen}
           confirmAction={handleLeave}
           title={`Leave ${trip.name}?`}
           confirmText="Leave"

@@ -301,8 +301,8 @@ export default function WishlistItemCard({
           startDate={startDate}
           endDate={endDate}
           onSchedule={handleSchedule}
-          closeMenu={() => setIsScheduleModalOpen(false)}
-          isMenuOpen={isScheduleModalOpen}
+          open={isScheduleModalOpen}
+          onOpenChange={setIsScheduleModalOpen}
         />
       )}
 
@@ -311,10 +311,11 @@ export default function WishlistItemCard({
           title="Remove wishlist item"
           confirmText="Remove"
           confirmAction={handleDelete}
-          closeModal={() => setShowDeleteConfirm(false)}
+          open={showDeleteConfirm}
+          onOpenChange={setShowDeleteConfirm}
           confirmButtonProps={{ disabled: isDeleting }}
         >
-          <p className="p-4 text-sm text-text-secondary">
+          <p className="py-4 text-sm text-text-secondary">
             Are you sure you want to remove{" "}
             <strong className="text-text-main">{item.name}</strong> from the
             wishlist?

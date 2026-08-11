@@ -182,7 +182,8 @@ export default function WishlistCard({
 
       {isDeleteModalOpen && (
         <ConfirmModal
-          closeModal={() => setIsDeleteModalOpen(false)}
+          open={isDeleteModalOpen}
+          onOpenChange={setIsDeleteModalOpen}
           confirmAction={confirmDelete}
           title={`Delete wishlist ${wishlist.name}?`}
         />

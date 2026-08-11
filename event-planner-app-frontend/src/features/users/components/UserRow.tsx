@@ -110,7 +110,8 @@ export default function UserRow({ user }: { user: User }) {
 
         {isConfirmOpen && (
           <ConfirmModal
-            closeModal={() => setIsConfirmOpen(false)}
+            open={isConfirmOpen}
+            onOpenChange={setIsConfirmOpen}
             confirmAction={remove}
             title={isCurrentUser ? "Leave trip?" : `Remove ${username}?`}
             confirmText={isCurrentUser ? "Leave trip" : `Remove ${username}`}

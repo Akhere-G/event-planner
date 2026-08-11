@@ -381,9 +381,9 @@ export default function TripCalendar({ trip }: { trip: Trip }) {
       </div>
       {selectedEvent && (
         <EventModal
-          isOpen={!!selectedEvent}
+          open={!!selectedEvent}
           event={selectedEvent}
-          onClose={() => setSelectedEvent(null)}
+          onOpenChange={(open) => !open && setSelectedEvent(null)}
         />
       )}
     </div>

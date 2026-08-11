@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { ConfirmModal, FormInput } from "../../../components";
 import type { EventSearchResult } from "../types";
 import type { EventSchema } from "../../events/schemas/eventSchema";
@@ -6,21 +6,21 @@ import type { CreateWishlistItemPayload, Wishlist } from "../../wishlist/types";
 import { toast } from "sonner";
 
 export function SaveEventModal({
-  isOpen,
+  open,
   event,
   dates,
   wishlists,
   isLoading,
-  onClose,
+  onOpenChange,
   onSaveEvent,
   onSaveWishlist,
 }: {
-  isOpen: boolean;
+  open: boolean;
   event: EventSearchResult;
   dates: { title: string; value: string }[];
   wishlists: Wishlist[];
   isLoading: boolean;
-  onClose: () => void;
+  onOpenChange: (open: boolean) => void;
   onSaveEvent: (event: EventSchema) => Promise<void>;
   onSaveWishlist: (payload: Omit<CreateWishlistItemPayload, "tripId">) => Promise<void>;
 }) {
@@ -33,7 +33,6 @@ export function SaveEventModal({
     endAt: "",
     general: "",
   });
-  const menuRef = useRef<HTMLDivElement>(null);
 
   const confirmText = selectedDate
     ? `Save to ${new Date(selectedDate).toLocaleDateString()}`
@@ -65,7 +64,7 @@ export function SaveEventModal({
         endAt: `${selectedDate} ${endAt}`,
       });
       toast.success("Added to itinerary.");
-      onClose();
+      onOpenChange(false);
     } else if (selectedWishlist) {
       await onSaveWishlist({
         name: event.name,
@@ -76,18 +75,16 @@ export function SaveEventModal({
         placeId: event.placeId,
       });
       toast.success("Added to wishlist.");
-      onClose();
+      onOpenChange(false);
     }
   };
 
-  if (!isOpen) return null;
-
   return (
     <ConfirmModal
-      closeModal={onClose}
+      open={open}
+      onOpenChange={onOpenChange}
       confirmAction={handleSave}
       title={`Save ${event.name}`}
-      modalRef={menuRef}
       confirmBtnClasses="btn-primary flex-1"
       confirmText={confirmText}
       confirmButtonProps={{ disabled: isDisabled }}

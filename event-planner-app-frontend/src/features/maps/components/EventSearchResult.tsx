@@ -20,14 +20,11 @@ import AccommodationForm from "../../accommodations/components/AccommodationForm
 import { useGetTripQuery } from "../../trips/services/tripsApiSlice";
 import { getCityBounds } from "../../maps/utils";
 
-// Extracted components
 import { PlaceHeader } from "./PlaceHeader";
 import { PlaceAddress } from "./PlaceAddress";
 import { TagChip } from "./TagChip";
 import { SaveEventModal } from "./SaveEventModal";
 import { ImageCarousel } from "./ImageCarousel";
-
-// Main component
 
 interface EventSearchResultCardProps {
   event: EventSearchResult;
@@ -39,7 +36,9 @@ interface EventSearchResultCardProps {
   cityBounds: { north: number; south: number; east: number; west: number };
   isLoading: boolean;
   onSaveEvent: (event: EventSchema) => Promise<void>;
-  onSaveWishlist: (payload: Omit<CreateWishlistItemPayload, "tripId">) => Promise<void>;
+  onSaveWishlist: (
+    payload: Omit<CreateWishlistItemPayload, "tripId">,
+  ) => Promise<void>;
   onAccommodationSaved: () => void;
 }
 
@@ -108,19 +107,20 @@ export function EventSearchResultCard({
         )}
 
         <SaveEventModal
-          isOpen={isSaveModalOpen}
+          open={isSaveModalOpen}
           event={event}
           dates={dates}
           wishlists={wishlists}
           isLoading={isLoading}
-          onClose={() => setIsSaveModalOpen(false)}
+          onOpenChange={setIsSaveModalOpen}
           onSaveEvent={onSaveEvent}
           onSaveWishlist={onSaveWishlist}
         />
 
         {isAccommodationOpen && (
           <ConfirmModal
-            closeModal={() => setIsAccommodationOpen(false)}
+            open={isAccommodationOpen}
+            onOpenChange={setIsAccommodationOpen}
             title="Add Accommodation from Search"
             hideButtons
           >
@@ -166,8 +166,6 @@ export function EventSearchResultCard({
     </div>
   );
 }
-
-// Connected component
 
 export default function EventSearchResultCardConnected() {
   const { tripId } = useParams();

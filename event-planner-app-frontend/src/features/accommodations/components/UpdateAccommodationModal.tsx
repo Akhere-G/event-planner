@@ -1,12 +1,11 @@
-import { useRef } from "react";
 import ConfirmModal from "../../../components/ConfirmModal";
 import AccommodationForm from "./AccommodationForm";
 import type { Accommodation } from "../types";
 import type { CityBounds } from "../../maps/types";
 
 interface UpdateAccommodationModalProps {
-  isOpen: boolean;
-  onClose: () => void;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
   accommodation: Accommodation | null;
   tripId: number;
   cityBounds: CityBounds;
@@ -15,23 +14,19 @@ interface UpdateAccommodationModalProps {
 }
 
 export default function UpdateAccommodationModal({
-  isOpen,
-  onClose,
+  open,
+  onOpenChange,
   accommodation,
   tripId,
   cityBounds,
   tripStart,
   tripEnd,
 }: UpdateAccommodationModalProps) {
-  const modalRef = useRef<HTMLDivElement>(null);
-
-  if (!isOpen) return null;
-
   return (
     <ConfirmModal
-      closeModal={onClose}
+      open={open}
+      onOpenChange={onOpenChange}
       title="Update Accommodation"
-      modalRef={modalRef}
       hideButtons
     >
       {accommodation && (
@@ -40,8 +35,8 @@ export default function UpdateAccommodationModal({
           tripId={tripId}
           cityBounds={cityBounds}
           selectedAccommodation={accommodation}
-          onSuccess={onClose}
-          onCancel={onClose}
+          onSuccess={() => onOpenChange(false)}
+          onCancel={() => onOpenChange(false)}
           tripStart={tripStart}
           tripEnd={tripEnd}
         />

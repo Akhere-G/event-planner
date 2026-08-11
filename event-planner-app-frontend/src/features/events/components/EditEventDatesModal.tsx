@@ -16,8 +16,8 @@ interface EditEventDatesModalProps {
   tripStartDate: string;
   tripEndDate: string;
   onSave: (startAt: string, endAt: string) => Promise<void> | void;
-  isOpen: boolean;
-  onClose: () => void;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
 }
 
 export default function EditEventDatesModal({
@@ -25,8 +25,8 @@ export default function EditEventDatesModal({
   tripStartDate,
   tripEndDate,
   onSave,
-  isOpen,
-  onClose,
+  open,
+  onOpenChange,
 }: EditEventDatesModalProps) {
   const formatForInput = (isoStr: string) => {
     try {
@@ -58,7 +58,7 @@ export default function EditEventDatesModal({
 
     try {
       await onSave(formattedStart, formattedEnd);
-      onClose();
+      onOpenChange(false);
     } catch (err) {
       if (isApiError(err)) {
         toast.error(err.data.message);
@@ -67,8 +67,6 @@ export default function EditEventDatesModal({
       }
     }
   };
-
-  if (!isOpen) return null;
 
   const minDatetime = `${tripStartDate}T00:00`;
   const maxDatetime = `${tripEndDate}T23:59`;
@@ -101,15 +99,16 @@ export default function EditEventDatesModal({
   }
   return (
     <ConfirmModal
-      closeModal={onClose}
+      open={open}
+      onOpenChange={onOpenChange}
       confirmAction={handleSubmit}
       title="Edit event times"
       confirmButtonProps={{
-        className: "btn-primary",
+        className: "btn-primary py-5",
       }}
       confirmText="Save"
     >
-      <div className="p-4 space-y-4">
+      <div className="space-y-4">
         <p className="text-xs text-text-secondary">
           Update the times for <strong>{event.name}</strong>.
         </p>

@@ -4,7 +4,12 @@ import { useSearchParams } from "react-router";
 import { closeModal } from "../modalSlice";
 import { UsersView } from "../../users/components";
 import InvitesView from "../../invites/components/InviteView";
-import { X } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "../../../components/ui/dialog";
 
 export default function ViewUsersModal() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -35,36 +40,33 @@ export default function ViewUsersModal() {
   const showInvites = () => setSearchParams({ view: "invites" });
 
   return (
-    <div className="card border-0">
-      <div className="flex items-center justify-between mb-4">
-        <header className="flex ">
-          <button
-            className={`p-1 w-20 rounded-none ${isUsersView ? "text-brand-primary" : ""}`}
-            onClick={showUsers}
-          >
-            <h2 className="title">Users</h2>
-            <div
-              className={`pointer-events-none border-b-2 duration-300 border-brand-primary ${isUsersView ? "" : "translate-x-19"}`}
-            />
-          </button>
-          <button
-            className={`p-1 w-16 rounded-none ${isInvitesView ? "text-brand-primary" : ""}`}
-            onClick={showInvites}
-          >
-            <h2 className="title">Invites</h2>
-          </button>
-        </header>
-        <button
-          onClick={() => dispatch(closeModal())}
-          className="p-1 btn-secondary"
-          aria-label="Close"
-        >
-          <X size={20} aria-hidden />
-        </button>
-      </div>
+    <Dialog open={true} onOpenChange={() => dispatch(closeModal())}>
+      <DialogContent className="max-w-4xl">
+        <DialogHeader className="bg-brand-primary text-text-inverse p-4 -mx-4 -mt-4 rounded-t-xl">
+          <div className="flex items-center justify-between">
+            <div className="flex">
+              <button
+                className={`p-1 w-20 rounded-none ${isUsersView ? "text-brand-primary" : ""}`}
+                onClick={showUsers}
+              >
+                <DialogTitle className="title">Users</DialogTitle>
+                <div
+                  className={`pointer-events-none border-b-2 duration-300 border-brand-primary ${isUsersView ? "" : "translate-x-19"}`}
+                />
+              </button>
+              <button
+                className={`p-1 w-16 rounded-none ${isInvitesView ? "text-brand-primary" : ""}`}
+                onClick={showInvites}
+              >
+                <DialogTitle className="title">Invites</DialogTitle>
+              </button>
+            </div>
+          </div>
+        </DialogHeader>
 
-      {isUsersView && <UsersView />}
-      {isInvitesView && <InvitesView />}
-    </div>
+        {isUsersView && <UsersView />}
+        {isInvitesView && <InvitesView />}
+      </DialogContent>
+    </Dialog>
   );
 }

@@ -2,28 +2,27 @@ import ConfirmModal from "../../../components/ConfirmModal";
 import type { Accommodation } from "../types";
 
 interface DeleteAccommodationModalProps {
-  isOpen: boolean;
-  onClose: () => void;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
   accommodation: Accommodation | null;
   onConfirm: () => void;
 }
 
 export default function DeleteAccommodationModal({
-  isOpen,
-  onClose,
+  open,
+  onOpenChange,
   accommodation,
   onConfirm,
 }: DeleteAccommodationModalProps) {
-  if (!isOpen) return null;
-
   return (
     <ConfirmModal
-      closeModal={onClose}
+      open={open}
+      onOpenChange={onOpenChange}
       title="Delete Accommodation"
       confirmText="Delete Accomodation."
       confirmAction={onConfirm}
     >
-      <div className="p-4">
+      <div className="py-4">
         <p className="text-text-main mb-2">
           Are you sure you want to delete this accommodation?
         </p>
