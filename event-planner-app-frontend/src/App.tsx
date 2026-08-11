@@ -16,6 +16,7 @@ import ModalManager from "./features/modal/components/ModalManager";
 
 import RequireAuth from "./components/RequireAuth";
 import RequireGuest from "./components/RequireGuest";
+import Footer from "./layout/Footer";
 
 const AddTrip = lazy(() => import("./pages/AddTrip"));
 const JoinTrip = lazy(() => import("./pages/JoinTrip"));
@@ -26,6 +27,8 @@ const TripPage = lazy(() => import("./pages/TripPage"));
 const Trips = lazy(() => import("./pages/Trips"));
 const Settings = lazy(() => import("./pages/Settings"));
 const About = lazy(() => import("./pages/About"));
+const PrivacyPage = lazy(() => import("./pages/PrivacyPage"));
+const TermsPage = lazy(() => import("./pages/TermsPage"));
 
 function App() {
   const isAuthenticated = useSelector(selectIsAuthenticated);
@@ -63,78 +66,85 @@ function App() {
       <Header links={links} />
       <Toaster position="top-right" richColors />
 
-      <Routes>
-        <Route path="/about" element={<About />} />
+      <main className="min-h-screen">
+        <Routes>
+          <Route path="/about" element={<About />} />
 
-        <Route
-          path="/login"
-          element={
-            <RequireGuest isAuth={isAuth} isLoading={isLoading}>
-              <Login />
-            </RequireGuest>
-          }
-        />
-        <Route
-          path="/register"
-          element={
-            <RequireGuest isAuth={isAuth} isLoading={isLoading}>
-              <Register />
-            </RequireGuest>
-          }
-        />
+          <Route
+            path="/login"
+            element={
+              <RequireGuest isAuth={isAuth} isLoading={isLoading}>
+                <Login />
+              </RequireGuest>
+            }
+          />
+          <Route
+            path="/register"
+            element={
+              <RequireGuest isAuth={isAuth} isLoading={isLoading}>
+                <Register />
+              </RequireGuest>
+            }
+          />
 
-        <Route
-          path="/"
-          element={
-            <RequireAuth isAuth={isAuth} isLoading={isLoading}>
-              <Trips />
-            </RequireAuth>
-          }
-        />
-        <Route
-          path="/addtrip"
-          element={
-            <RequireAuth isAuth={isAuth} isLoading={isLoading}>
-              <AddTrip />
-            </RequireAuth>
-          }
-        />
-        <Route
-          path="/trips/:tripId"
-          element={
-            <RequireAuth isAuth={isAuth} isLoading={isLoading}>
-              <TripPage />
-            </RequireAuth>
-          }
-        />
-        <Route
-          path="/invites"
-          element={
-            <RequireAuth isAuth={isAuth} isLoading={isLoading}>
-              <InvitesPage />
-            </RequireAuth>
-          }
-        />
-        <Route
-          path="/settings"
-          element={
-            <RequireAuth isAuth={isAuth} isLoading={isLoading}>
-              <Settings />
-            </RequireAuth>
-          }
-        />
-        <Route
-          path="/join/:token"
-          element={
-            <RequireAuth isAuth={isAuth} isLoading={isLoading}>
-              <JoinTrip />
-            </RequireAuth>
-          }
-        />
+          <Route
+            path="/"
+            element={
+              <RequireAuth isAuth={isAuth} isLoading={isLoading}>
+                <Trips />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/addtrip"
+            element={
+              <RequireAuth isAuth={isAuth} isLoading={isLoading}>
+                <AddTrip />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/trips/:tripId"
+            element={
+              <RequireAuth isAuth={isAuth} isLoading={isLoading}>
+                <TripPage />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/invites"
+            element={
+              <RequireAuth isAuth={isAuth} isLoading={isLoading}>
+                <InvitesPage />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/settings"
+            element={
+              <RequireAuth isAuth={isAuth} isLoading={isLoading}>
+                <Settings />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/join/:token"
+            element={
+              <RequireAuth isAuth={isAuth} isLoading={isLoading}>
+                <JoinTrip />
+              </RequireAuth>
+            }
+          />
 
-        <Route path="*" element={<Navigate to="/" />} />
-      </Routes>
+          <Route path="/privacy" element={<PrivacyPage />} />
+          <Route path="/terms" element={<TermsPage />} />
+          <Route path="*" element={<Navigate to="/" />} />
+        </Routes>
+      </main>
       <ModalManager />
+
+      <Footer isAuthenticated={isAuth} />
+      {/* // TODO: Remove Modal Manager */}
     </>
   );
 }
