@@ -1,16 +1,16 @@
-from .itineraries_service import get_itinerary_membership, get_itinerary
-from ..models import ItineraryUser
-from ..extensions import db
-from sqlalchemy import select, func
-from ..models import User, UserRole, Invite, InvitationStatus
+from sqlalchemy import func, select
+
 from ..exceptions import (
-    UserDoesNotExistError,
     UserAlreadyExistsError,
+    UserDoesNotExistError,
     UserNotAuthorisedError,
 )
+from ..extensions import db
+from ..models import InvitationStatus, Invite, ItineraryUser, User, UserRole
+from .itineraries_service import get_itinerary, get_itinerary_membership
 
 
-def get_user(email: str = None, id: str = None):
+def get_user(email: int | None = None, id: int | None = None):
     if id:
         stmt = select(User).where(User.id == id)
     else:
@@ -50,7 +50,7 @@ def add_user_to_itinerary(itinerary_id: int, user_id: str, role: str):
 
 
 def update_user_role(
-    user_id: int, itinerary_id: int, other_user_id: str, new_role: str
+    user_id: int, itinerary_id: int, other_user_id: int, new_role: str
 ):
     get_user(id=other_user_id)
     membership = get_itinerary_membership(other_user_id, itinerary_id)
@@ -64,7 +64,7 @@ def update_user_role(
             .where(ItineraryUser.itinerary_id == itinerary_id)
             .where(ItineraryUser.role == UserRole.ADMIN.value)
         ).scalar_one_or_none()
-        if count <= 1:
+        if count == 1:
             raise UserNotAuthorisedError(
                 "You cannot demote yourself when there is only one admin. Appoint another first."
             )
@@ -87,7 +87,7 @@ def remove_user(user_id: int, itinerary_id: int, other_user_id: int):
             .where(ItineraryUser.itinerary_id == itinerary_id)
             .where(ItineraryUser.role == UserRole.ADMIN.value)
         ).scalar_one_or_none()
-        if count <= 1:
+        if count == 1:
             raise UserNotAuthorisedError(
                 "You cannot remove yourself when there is only one admin. Appoint another first."
             )

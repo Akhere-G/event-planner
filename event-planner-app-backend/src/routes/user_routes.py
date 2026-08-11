@@ -1,19 +1,19 @@
 from flask import Blueprint, request
-from ..middleware.login_required import login_required
-from ..services.itineraries_service import get_itinerary_membership, is_authorised
+
 from ..exceptions import (
     ItineraryDoesNotExistError,
-    UserNotAuthorisedError,
     UserDoesNotExistError,
+    UserNotAuthorisedError,
+)
+from ..middleware.login_required import login_required
+from ..models import UserRole
+from ..schemas.user_schema import UserWithRoleSchema
+from ..services.itineraries_service import get_itinerary_membership, is_authorised
+from ..services.users_service import (
+    remove_user,
+    update_user_role,
 )
 from ..utils.format_response import api_response
-from ..schemas.user_schema import UserWithRoleSchema
-from ..services.users_service import (
-    update_user_role,
-    remove_user,
-)
-from ..models import UserRole
-
 
 user_bp = Blueprint("user", __name__)
 
