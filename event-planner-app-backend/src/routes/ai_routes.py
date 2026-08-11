@@ -2,6 +2,7 @@ from datetime import datetime
 
 from flask import Blueprint, request
 from marshmallow import ValidationError
+from utils.rate_limit import get_user_or_ip
 
 from ..exceptions import (
     EventNotFoundError,
@@ -22,6 +23,7 @@ ai_bp = Blueprint("ai", __name__)
 
 @ai_bp.route("/insights/<int:itinerary_id>")
 @login_required
+@limiter.limit("10 per minute", key_func=get_user_or_ip)
 @limiter.limit("10 per minute")
 def get_insights_route(user_id: int, itinerary_id: int):
     try:
@@ -41,6 +43,7 @@ def get_insights_route(user_id: int, itinerary_id: int):
 
 @ai_bp.route("/suggest-events/<int:itinerary_id>", methods=["POST"])
 @login_required
+@limiter.limit("10 per minute", key_func=get_user_or_ip)
 @limiter.limit("10 per minute")
 def get_event_suggestions_route(user_id: int, itinerary_id: int):
     schema = EventSchema(many=True)
@@ -91,6 +94,7 @@ def get_event_suggestions_route(user_id: int, itinerary_id: int):
 
 @ai_bp.route("/optimise-events/<int:itinerary_id>", methods=["POST"])
 @login_required
+@limiter.limit("10 per minute", key_func=get_user_or_ip)
 @limiter.limit("10 per minute")
 def optimise_events_route(user_id: int, itinerary_id: int):
     date = request.json.get("date")

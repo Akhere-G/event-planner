@@ -12,6 +12,7 @@ from ..models import UserRole
 from ..schemas.packing_item_schema import PackingItemSchema
 from ..services import itineraries_service, packing_item_service
 from ..utils.format_response import api_response
+from ..utils.rate_limit import get_user_or_ip
 
 packing_item_bp = Blueprint("packing", __name__)
 
@@ -75,6 +76,7 @@ def create_packing_item(user_id: int, itinerary_id: int):
 
 @packing_item_bp.route("/generate", methods=["POST"])
 @login_required
+@limiter.limit("10 per minute", key_func=get_user_or_ip)
 @limiter.limit("10 per minute")
 def generate_packing_items_route(user_id: int, itinerary_id: int):
     schema = PackingItemSchema(many=True)
