@@ -66,7 +66,7 @@ function App() {
       <Header links={links} />
       <Toaster position="top-right" richColors />
 
-      <main className="min-h-screen">
+      <main className="min-h-[93.5vh] 2xl:min-h-[96vh]">
         <Routes>
           <Route path="/about" element={<About />} />
 
