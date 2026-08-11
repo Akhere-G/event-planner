@@ -203,10 +203,12 @@ export default function AccommodationCard({
       )}
 
       <UpdateAccommodationModal
-        isOpen={isUpdateModalOpen}
-        onClose={() => {
-          setIsUpdateModalOpen(false);
-          setSelectedAccommodation(null);
+        open={isUpdateModalOpen}
+        onOpenChange={(open) => {
+          if (!open) {
+            setIsUpdateModalOpen(false);
+            setSelectedAccommodation(null);
+          }
         }}
         accommodation={selectedAccommodation}
         tripId={tripId}
@@ -216,10 +218,12 @@ export default function AccommodationCard({
       />
 
       <DeleteAccommodationModal
-        isOpen={isDeleteModalOpen}
-        onClose={() => {
-          setIsDeleteModalOpen(false);
-          setAccommodationToDelete(null);
+        open={isDeleteModalOpen}
+        onOpenChange={(open) => {
+          if (!open) {
+            setIsDeleteModalOpen(false);
+            setAccommodationToDelete(null);
+          }
         }}
         accommodation={accommodationToDelete}
         onConfirm={handleDeleteConfirm}

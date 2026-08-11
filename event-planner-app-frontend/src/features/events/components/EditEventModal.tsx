@@ -4,24 +4,28 @@ import UpdateEventForm from "./UpdateEventForm";
 
 export default function EditEventModal({
   event,
-  onClose,
+  open,
+  onOpenChange,
   onSave,
 }: {
   event: Event;
-  onClose: () => void;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
   onSave: (event: Event) => Promise<void>;
 }) {
   return (
     <ConfirmModal
-      closeModal={onClose}
+      open={open}
+      onOpenChange={onOpenChange}
       title={`Edit ${event.name}`}
       confirmAction={() => onSave(event)}
       confirmText="Edit "
       hideButtons
     >
-      <div className="card">
-        <UpdateEventForm initialEvent={event} onClose={onClose} />
-      </div>
+      <UpdateEventForm
+        initialEvent={event}
+        onClose={() => onOpenChange(false)}
+      />
     </ConfirmModal>
   );
 }

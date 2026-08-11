@@ -347,7 +347,8 @@ export default function TripMap({ trip }: { trip: Trip }) {
 
       {isEditingWishlistItem && selectedWishlistItem && (
         <ConfirmModal
-          closeModal={() => setIsEditingWishlistItem(false)}
+          open={isEditingWishlistItem}
+          onOpenChange={setIsEditingWishlistItem}
           title="Edit wishlist item"
           hideButtons
         >

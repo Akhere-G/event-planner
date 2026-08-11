@@ -5,7 +5,12 @@ import type { TripSchema } from "../../trips/schemas/tripSchema";
 import type { Trip } from "../../trips/types";
 import { useDispatch } from "react-redux";
 import { closeModal } from "../modalSlice";
-import { X } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "../../../components/ui/dialog";
 
 export interface EditTripModalProps {
   trip: Trip;
@@ -22,23 +27,18 @@ export default function EditTripModal({ trip }: { trip: Trip }) {
   }
 
   return (
-    <div className="p-4">
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="title">Edit Trip</h2>
-        <button
-          className="p-0"
-          aria-label="Close edit trip modal."
-          onClick={() => dispatch(closeModal())}
-        >
-          <X size={24} />
-        </button>
-      </div>
-      <TripForm
-        submitBtnText="Edit Form"
-        submitAction={onSubmit}
-        isLoading={isLoading}
-        initialData={trip}
-      />
-    </div>
+    <Dialog open={true} onOpenChange={() => dispatch(closeModal())}>
+      <DialogContent className="max-w-2xl">
+        <DialogHeader className="bg-brand-primary text-text-inverse p-4 -mx-4 -mt-4 rounded-t-xl">
+          <DialogTitle>Edit Trip</DialogTitle>
+        </DialogHeader>
+        <TripForm
+          submitBtnText="Edit Form"
+          submitAction={onSubmit}
+          isLoading={isLoading}
+          initialData={trip}
+        />
+      </DialogContent>
+    </Dialog>
   );
 }

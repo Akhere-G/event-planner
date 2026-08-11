@@ -177,11 +177,12 @@ export default function DayCard({
 
       {isFillMenuOpen && (
         <ConfirmModal
-          closeModal={() => setIsFillMenuOpen(false)}
+          open={isFillMenuOpen}
+          onOpenChange={setIsFillMenuOpen}
           title={`Fill Day ${day.day}`}
           confirmText="Fill"
           confirmAction={() => {}}
-          confirmBtnClasses="bg-brand-primary"
+          confirmBtnClasses="bg-brand-primary h-11 px-4"
           confirmButtonProps={{
             type: "submit",
             form: "autofill-itinerary-form",

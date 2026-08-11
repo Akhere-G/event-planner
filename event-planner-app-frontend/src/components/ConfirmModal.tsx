@@ -1,72 +1,71 @@
-import { X } from "lucide-react";
-import type { Ref } from "react";
+import * as React from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "./ui/dialog";
+import { Button } from "./ui/button";
 
-// TODO: convert to shadcn modal
-
-export default function ConfirmModal({
-  closeModal,
-  title,
-  confirmText = "Delete",
-  confirmAction,
-  confirmBtnClasses = "btn-error",
-  modalRef,
-  children,
-  confirmButtonProps,
-  hideButtons = false,
-}: {
-  closeModal: () => void;
+interface ConfirmModalProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
   title: string;
   confirmText?: string;
   confirmAction?: () => void;
   confirmBtnClasses?: string;
-  modalRef?: Ref<HTMLDivElement>;
   children?: React.ReactNode;
   confirmButtonProps?: React.ButtonHTMLAttributes<HTMLButtonElement>;
   hideButtons?: boolean;
-}) {
+  description?: string;
+}
+
+export default function ConfirmModal({
+  open,
+  onOpenChange,
+  title,
+  confirmText = "Delete",
+  confirmAction,
+  confirmBtnClasses = "btn-error",
+  children,
+  confirmButtonProps,
+  hideButtons = false,
+  description,
+}: ConfirmModalProps) {
   return (
-    <div
-      className="backdrop fixed top-0 left-0 right-0 z-50 "
-      onClick={closeModal}
-    >
-      <div
-        className="modal flex items-center justify-center w-fit max-w-15/16 max-h-[90vh] overflow-scroll"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div
-          ref={modalRef}
-          className="card border-brand-primary/80 p-0 overflow-clip w-[90vh] flex flex-col shadow-xl bg-surface text-left"
-        >
-          <div>
-            <div className="p-4 text-text-inverse bg-brand-primary flex gap-2 items-center justify-between">
-              <h3 className="title">{title}</h3>
-              <button
-                onClick={closeModal}
-                className="text-text-inverse btn p-2"
-              >
-                <X size={20} />
-              </button>
-            </div>
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-[90vh] w-[90vh] max-h-[90vh] overflow-hidden flex flex-col bg-surface text-left border-brand-primary/80">
+        <DialogHeader className="bg-brand-primary text-text-inverse p-4 -mx-4 -mt-4 rounded-t-xl">
+          <DialogTitle className="title text-text-inverse">{title}</DialogTitle>
+          {description && (
+            <DialogDescription className="text-text-inverse/80">
+              {description}
+            </DialogDescription>
+          )}
+        </DialogHeader>
 
-            <div className="overflow-scroll max-h-[70vh]">{children}</div>
+        <div className="overflow-scroll max-h-[70vh] flex-1">{children}</div>
 
-            {!hideButtons && (
-              <div className="p-4 mt-4 flex justify-end gap-2">
-                <button onClick={closeModal} className="btn-secondary">
-                  Cancel
-                </button>
-                <button
-                  onClick={confirmAction}
-                  className={confirmBtnClasses}
-                  {...confirmButtonProps}
-                >
-                  {confirmText}
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-    </div>
+        {!hideButtons && (
+          <DialogFooter className="mt-4 p-4 -mx-4 -mb-4 rounded-b-xl border-t bg-muted/50">
+            <button
+              className="btn-secondary"
+              onClick={() => onOpenChange(false)}
+            >
+              Cancel
+            </button>
+            <Button
+              onClick={confirmAction}
+              className={confirmBtnClasses + " py-5"}
+              {...confirmButtonProps}
+            >
+              {confirmText}
+            </Button>
+          </DialogFooter>
+        )}
+      </DialogContent>
+    </Dialog>
   );
 }

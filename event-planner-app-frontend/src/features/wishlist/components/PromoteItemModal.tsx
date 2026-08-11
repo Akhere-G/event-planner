@@ -8,8 +8,8 @@ interface PromoteItemModalProps {
   startDate: string;
   endDate: string;
   onSchedule: (startAt: string, endAt: string) => Promise<void> | void;
-  isMenuOpen: boolean;
-  closeMenu: () => void;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
 }
 
 export default function PromoteItemModal({
@@ -17,8 +17,8 @@ export default function PromoteItemModal({
   startDate,
   endDate,
   onSchedule,
-  isMenuOpen,
-  closeMenu,
+  open,
+  onOpenChange,
 }: PromoteItemModalProps) {
   const [date, setDate] = useState(startDate);
   const [startTime, setStartTime] = useState("10:00");
@@ -41,10 +41,10 @@ export default function PromoteItemModal({
     await onSchedule(startAtStr, endAtStr);
   };
 
-  if (!isMenuOpen) return null;
   return (
     <ConfirmModal
-      closeModal={closeMenu}
+      open={open}
+      onOpenChange={onOpenChange}
       confirmAction={handleSubmit}
       title="Schedule activity"
       confirmButtonProps={{
