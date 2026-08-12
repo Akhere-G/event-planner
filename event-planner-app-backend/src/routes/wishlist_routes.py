@@ -290,7 +290,7 @@ def promote_item_route(user_id: int, itinerary_id: int, wishlist_id: int, item_i
         except ValueError:
             return api_response(
                 success=False,
-                error="Invalid date format. Use ISO 8601.",
+                error="Invalid date format.",
                 status_code=400,
             )
 
