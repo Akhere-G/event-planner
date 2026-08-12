@@ -21,9 +21,10 @@ export function AddEventForm({
 
   const { tripId } = useParams();
   const [addEvent, { isLoading }] = useAddEventMutation();
-  const { register, formState, handleSubmit, setError, setValue } = useForm({
-    resolver: yupResolver(eventSchema),
-  });
+  const { register, formState, handleSubmit, setError, setValue, getValues } =
+    useForm({
+      resolver: yupResolver(eventSchema),
+    });
 
   const addressInputProps = register("address");
   const [key, setKey] = useState(0);
@@ -67,30 +68,41 @@ export function AddEventForm({
   return (
     <>
       <form
-        className="flex gap-4 lg:items-end flex-col lg:flex-row mb-2"
+        className="flex gap-2 xl:items-end flex-col xl:flex-row mb-2"
         onSubmit={handleSubmit(onSubmit)}
       >
-        <LocationInput
-          key={key}
-          label="Address"
-          {...addressInputProps}
-          errorMessage={formState.errors.address?.message}
-          classNames="flex-1"
-          cityBounds={cityBounds}
-          onPlaceSelect={(place) => {
-            setValue("address", place.formatted_address ?? "");
-            setValue("name", place.name ?? "");
-            setValue("latitude", place.geometry?.location?.lat() ?? 0);
-            setValue("longitude", place.geometry?.location?.lng() ?? 0);
-          }}
-        />
-        <div className="flex gap-4 items-end">
+        <div className="flex flex-2 flex-col xl:flex-row gap-2">
+          <FormInput
+            label="Name"
+            {...register("name")}
+            errorMessage={formState.errors.name?.message}
+            formClassNames="min-w-20 flex-1"
+          />
+          <LocationInput
+            key={key}
+            label="Address"
+            {...addressInputProps}
+            errorMessage={formState.errors.address?.message}
+            classNames="flex-1 "
+            cityBounds={cityBounds}
+            onPlaceSelect={(place) => {
+              setValue("address", place.formatted_address ?? "");
+              if (!getValues("name").trim()) {
+                setValue("name", place.name ?? "");
+              }
+              setValue("latitude", place.geometry?.location?.lat() ?? 0);
+              setValue("longitude", place.geometry?.location?.lng() ?? 0);
+            }}
+          />
+        </div>
+
+        <div className="flex flex-1 gap-2 items-end">
           <FormInput
             type="time"
             label="Start Time"
             {...register("startAt")}
             errorMessage={formState.errors.startAt?.message}
-            formClassNames="flex-1 lg:flex-[0.15]"
+            formClassNames="flex-1"
           />
 
           <FormInput
@@ -98,7 +110,7 @@ export function AddEventForm({
             label="End Time"
             {...register("endAt")}
             errorMessage={formState.errors.endAt?.message}
-            formClassNames="flex-1 lg:flex-[0.15]"
+            formClassNames="flex-1"
           />
         </div>
         <button className="btn-primary h-12 mt-2" disabled={isLoading}>
