@@ -22,7 +22,7 @@ event_bp = Blueprint("events", __name__)
 
 @event_bp.route("")
 @login_required
-def get_events_routes(user_id: str, itinerary_id: str):
+def get_events_routes(user_id: int, itinerary_id: int):
     schema = EventSchema(many=True)
     try:
         get_itinerary_membership(user_id, itinerary_id)
