@@ -50,7 +50,7 @@ def add_user_to_itinerary(itinerary_id: int, user_id: str, role: str):
 
 
 def update_user_role(
-    user_id: int, itinerary_id: int, other_user_id: int, new_role: str
+    user_id: int, itinerary_id: int, other_user_id: int, new_role: UserRole
 ):
     get_user(id=other_user_id)
     membership = get_itinerary_membership(other_user_id, itinerary_id)
@@ -97,7 +97,8 @@ def remove_user(user_id: int, itinerary_id: int, other_user_id: int):
         .where(Invite.email == membership.user.email)
     )
     invite = db.session.execute(stmt).scalar_one_or_none()
-    invite.status = InvitationStatus.REVOKED.value
+    if invite:
+        invite.status = InvitationStatus.REVOKED.value
 
     db.session.delete(membership)
     db.session.commit()

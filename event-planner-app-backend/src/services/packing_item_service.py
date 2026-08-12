@@ -58,8 +58,8 @@ def update_packing_item(
         if k in fields:
             setattr(item, k, v)
 
-    if "is_checked" in packing_item_data:
-        item.checked_by_id = user_id if packing_item_data["is_checked"] else None
+    if packing_item_data.get("is_checked"):
+        item.checked_by_id = user_id
 
     item.updated_by_id = user_id
     db.session.commit()
@@ -99,4 +99,3 @@ def generate_and_add_packing_items(user_id: int, itinerary_id: int):
 
     db.session.commit()
     return get_packing_lists(user_id, itinerary_id)
-

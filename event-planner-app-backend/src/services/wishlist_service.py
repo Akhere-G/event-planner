@@ -63,13 +63,9 @@ def update_wishlist(itinerary_id: int, wishlist_id: int, user_id: int, name: str
 
 
 def delete_wishlist(itinerary_id: int, wishlist_id: int):
-    stmt = (
-        select(Wishlist)
-        .where(
-            Wishlist.itinerary_id == itinerary_id,
-            Wishlist.id == wishlist_id,
-        )
-        .options(selectinload(Wishlist.items))
+    stmt = select(Wishlist).where(
+        Wishlist.itinerary_id == itinerary_id,
+        Wishlist.id == wishlist_id,
     )
 
     wishlist = db.session.execute(stmt).scalar_one_or_none()
