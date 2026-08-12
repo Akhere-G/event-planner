@@ -19,9 +19,9 @@ class AccommodationSchema(SQLAlchemyAutoSchema):
 
     @validates_schema
     def validate_date_order(self, data, **kwargs):
-        start_date = data["start_date"]
-        end_date = data["end_date"]
-        if end_date < start_date:
+        start_date = data.get("start_date")
+        end_date = data.get("end_date")
+        if start_date and end_date and end_date < start_date:
             raise ValidationError(
                 "end_date cannot be earlier than start_date", field_name="end_date"
             )
