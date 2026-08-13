@@ -8,7 +8,11 @@ from ..exceptions import (
 from ..middleware.login_required import login_required
 from ..models import UserRole
 from ..schemas.user_schema import UserWithRoleSchema
-from ..services.itineraries_service import get_itinerary_membership, is_authorised
+from ..services.itineraries_service import (
+    get_itinerary_memberships,
+    is_authorised,
+    is_user_in_itinerary,
+)
 from ..services.users_service import (
     remove_user,
     update_user_role,
@@ -23,10 +27,10 @@ user_bp = Blueprint("user", __name__)
 def get_users_routes(user_id: int, itinerary_id: int):
     schema = UserWithRoleSchema(many=True)
     try:
-        result = get_itinerary_membership(user_id, itinerary_id)
-        itinerary = result.itinerary
+        is_user_in_itinerary(user_id, itinerary_id)
+        users = get_itinerary_memberships(user_id, itinerary_id)
         return api_response(
-            data={"users": schema.dump(itinerary.user_memberships)},
+            data={"users": schema.dump(users)},
             success=True,
             message="Fetched users.",
             status_code=200,

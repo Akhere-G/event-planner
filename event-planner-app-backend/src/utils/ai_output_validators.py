@@ -1,5 +1,6 @@
-from typing import Any
 from datetime import datetime
+from typing import Any
+
 from ..models import Event
 
 
@@ -139,6 +140,9 @@ def validate_packing_items(
         is_shared = item.get("is_shared")
 
         if not isinstance(name, str):
+            continue
+
+        if not isinstance(category, str):
             continue
 
         if not isinstance(is_shared, bool):

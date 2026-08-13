@@ -1,64 +1,56 @@
-class UserAlreadyExistsError(Exception):
-    def __init__(self, message="A user with this email already exists."):
-        self.message = message
-        self.status_code = 409
+class AppError(Exception):
+    status_code = 500
+    default_message = "An unexpected error occurred."
+
+    def __init__(self, message: str | None = None):
+        self.message = message or self.default_message
         super().__init__(self.message)
 
 
-class UserDoesNotExistError(Exception):
-    def __init__(self, message="No user exists with this email."):
-        self.message = message
-        self.status_code = 404
-        super().__init__(self.message)
+class UserAlreadyExistsError(AppError):
+    status_code = 409
+    default_message = "A user with this email already exists."
 
 
-class InvalidCredentialsError(Exception):
-    def __init__(self, message="Invalid Credentials."):
-        self.message = message
-        self.status_code = 401
-        super().__init__(self.message)
+class UserDoesNotExistError(AppError):
+    status_code = 404
+    default_message = "No user exists with this email."
 
 
-class ItineraryDoesNotExistError(Exception):
-    def __init__(
-        self,
-        message="This itinernary or user does not exist or this user is not a member of this itinerary.",
-    ):
-        self.message = message
-        self.status_code = 404
-        super().__init__(self.message)
+class InvalidCredentialsError(AppError):
+    status_code = 401
+    default_message = "Invalid credentials."
 
 
-class UserNotAuthorisedError(Exception):
-    def __init__(self, message="You are not authorised to complete this action."):
-        self.message = message
-        self.status_code = 403
-        super().__init__(self.message)
+class ItineraryDoesNotExistError(AppError):
+    status_code = 404
+    default_message = (
+        "This itinerary or user does not exist, "
+        "or this user is not a member of this itinerary."
+    )
 
 
-class EventNotFoundError(Exception):
-    def __init__(self, message="Event not found."):
-        self.message = message
-        self.status_code = 404
-        super().__init__(self.message)
+class UserNotAuthorisedError(AppError):
+    status_code = 403
+    default_message = "You are not authorised to complete this action."
 
 
-class InviteNotFoundError(Exception):
-    def __init__(self, message="Invite not found."):
-        self.message = message
-        self.status_code = 404
-        super().__init__(self.message)
+class EventNotFoundError(AppError):
+    status_code = 404
+    default_message = "Event not found."
 
 
-class BadRequestError(Exception):
-    def __init__(self, message="Bad Request."):
-        self.message = message
-        self.status_code = 400
-        super().__init__(self.message)
+class InviteNotFoundError(AppError):
+    status_code = 404
+    default_message = "Invite not found."
 
 
-class NotFoundError(Exception):
-    def __init__(self, message="Item Not Found."):
-        self.message = message
-        self.status_code = 404
-        super().__init__(self.message)
+class BadRequestError(AppError):
+    status_code = 400
+    default_message = "Bad request."
+
+
+# TODO: remove and replace with specifc errors
+class NotFoundError(AppError):
+    status_code = 404
+    default_message = "Item not found."

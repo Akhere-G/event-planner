@@ -1,31 +1,32 @@
 from flask import Blueprint, request
-from ..middleware.login_required import login_required
-from ..services.events_service import (
-    get_events,
-    create_event,
-    update_event,
-    delete_event,
-)
-from ..services.itineraries_service import is_authorised, get_itinerary_membership
-from ..schemas.event_schema import EventSchema
-from ..schemas.itinerary_schema import UserRole
-from ..utils.format_response import api_response
 from marshmallow import ValidationError
+
 from ..exceptions import (
-    UserNotAuthorisedError,
     EventNotFoundError,
     ItineraryDoesNotExistError,
+    UserNotAuthorisedError,
 )
+from ..middleware.login_required import login_required
+from ..schemas.event_schema import EventSchema
+from ..schemas.itinerary_schema import UserRole
+from ..services.events_service import (
+    create_event,
+    delete_event,
+    get_events,
+    update_event,
+)
+from ..services.itineraries_service import is_authorised, is_user_in_itinerary
+from ..utils.format_response import api_response
 
 event_bp = Blueprint("events", __name__)
 
 
 @event_bp.route("")
 @login_required
-def get_events_routes(user_id: int, itinerary_id: int):
-    schema = EventSchema(many=True)
+def get_events_route(user_id: int, itinerary_id: int):
     try:
-        get_itinerary_membership(user_id, itinerary_id)
+        schema = EventSchema(many=True)
+        is_user_in_itinerary(user_id, itinerary_id)
 
         events = get_events(itinerary_id)
         return api_response(
@@ -36,7 +37,10 @@ def get_events_routes(user_id: int, itinerary_id: int):
         )
     except ItineraryDoesNotExistError as err:
         return api_response(
-            message=err.message, success=False, status_code=err.status_code
+            success=False,
+            message=err.message,
+            error=err.message,
+            status_code=err.status_code,
         )
 
 

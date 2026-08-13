@@ -1,13 +1,13 @@
 from sqlalchemy import func, select
 
 from ..exceptions import (
+    ItineraryDoesNotExistError,
     UserAlreadyExistsError,
     UserDoesNotExistError,
     UserNotAuthorisedError,
 )
 from ..extensions import db
 from ..models import InvitationStatus, Invite, ItineraryUser, User, UserRole
-from .itineraries_service import get_itinerary, get_itinerary_membership
 
 
 def get_user(email: int | None = None, id: int | None = None):
@@ -23,37 +23,46 @@ def get_user(email: int | None = None, id: int | None = None):
     return user
 
 
-def add_user_to_itinerary(itinerary_id: int, user_id: str, role: str):
-    get_itinerary(itinerary_id)
+def add_user_to_itinerary(itinerary_id: int, user_id: int, role: UserRole):
+    try:
+        stmt = (
+            select(ItineraryUser)
+            .where(ItineraryUser.itinerary_id == itinerary_id)
+            .where(ItineraryUser.user_id == user_id)
+        )
 
-    stmt = (
-        select(ItineraryUser)
-        .where(ItineraryUser.itinerary_id == itinerary_id)
-        .where(ItineraryUser.user_id == user_id)
-    )
+        membership = db.session.execute(stmt).scalar_one_or_none()
 
-    membership = db.session.execute(stmt).scalar_one_or_none()
+        if membership:
+            raise UserAlreadyExistsError("User has already been added.")
 
-    if membership:
-        raise UserAlreadyExistsError("User has already been added.")
+        membership = ItineraryUser(
+            itinerary_id=itinerary_id,
+            user_id=user_id,
+            role=role,
+            created_by_id=user_id,
+            updated_by_id=user_id,
+        )
 
-    membership = ItineraryUser(
-        itinerary_id=itinerary_id,
-        user_id=user_id,
-        role=role,
-        created_by_id=user_id,
-        updated_by_id=user_id,
-    )
-
-    db.session.add(membership)
-    return membership
+        db.session.add(membership)
+        return membership
+    except Exception:
+        db.session.rollback()
+        raise
 
 
 def update_user_role(
     user_id: int, itinerary_id: int, other_user_id: int, new_role: UserRole
 ):
     get_user(id=other_user_id)
-    membership = get_itinerary_membership(other_user_id, itinerary_id)
+    stmt = select(ItineraryUser).where(
+        ItineraryUser.user_id == other_user_id,
+        ItineraryUser.itinerary_id == itinerary_id,
+    )
+    membership = db.session.execute(stmt).scalar_one_or_none()
+
+    if not membership:
+        raise ItineraryDoesNotExistError()
 
     if membership.role == UserRole.ADMIN.value:
         if membership.user_id != user_id:
@@ -76,7 +85,14 @@ def update_user_role(
 
 
 def remove_user(user_id: int, itinerary_id: int, other_user_id: int):
-    membership = get_itinerary_membership(other_user_id, itinerary_id)
+    stmt = select(ItineraryUser).where(
+        ItineraryUser.user_id == other_user_id,
+        ItineraryUser.itinerary_id == itinerary_id,
+    )
+    membership = db.session.execute(stmt).scalar_one_or_none()
+
+    if not membership:
+        raise ItineraryDoesNotExistError()
 
     if membership.role == UserRole.ADMIN.value:
         if membership.user_id != user_id:

@@ -1,25 +1,27 @@
 from flask import Blueprint, request
-from ..middleware.login_required import login_required
-from ..services.itineraries_service import is_authorised
-from ..services.accommodation_service import (
-    get_accommodations,
-    get_accommodation,
-    create_accommodation,
-    update_accommodation,
-    delete_accommodation,
-)
-from ..schemas.accommodation_schema import AccommodationSchema
-from ..schemas.itinerary_schema import UserRole
-from ..utils.format_response import api_response
-from ..exceptions import (
-    BadRequestError,
-    NotFoundError,
-    ItineraryDoesNotExistError,
-    UserNotAuthorisedError,
-)
-from ..services.itineraries_service import get_itinerary_membership
 from marshmallow import ValidationError
 
+from ..exceptions import (
+    BadRequestError,
+    ItineraryDoesNotExistError,
+    NotFoundError,
+    UserNotAuthorisedError,
+)
+from ..middleware.login_required import login_required
+from ..schemas.accommodation_schema import AccommodationSchema
+from ..schemas.itinerary_schema import UserRole
+from ..services.accommodation_service import (
+    create_accommodation,
+    delete_accommodation,
+    get_accommodation,
+    get_accommodations,
+    update_accommodation,
+)
+from ..services.itineraries_service import (
+    is_authorised,
+    is_user_in_itinerary,
+)
+from ..utils.format_response import api_response
 
 accommodation_bp = Blueprint("accommodation", __name__)
 
@@ -28,7 +30,7 @@ accommodation_bp = Blueprint("accommodation", __name__)
 @login_required
 def get_accommodations_route(user_id: int, itinerary_id: int):
     try:
-        get_itinerary_membership(user_id, itinerary_id)
+        is_user_in_itinerary(user_id, itinerary_id)
         results = get_accommodations(itinerary_id)
         schema = AccommodationSchema(many=True)
         return api_response(
@@ -82,7 +84,7 @@ def create_accommodation_route(user_id: int, itinerary_id: int):
 @login_required
 def get_accommodation_route(user_id: int, itinerary_id: int, accommodation_id: int):
     try:
-        get_itinerary_membership(user_id, itinerary_id)
+        is_user_in_itinerary(user_id, itinerary_id)
         accommodation = get_accommodation(itinerary_id, accommodation_id)
         if not accommodation:
             return api_response(
