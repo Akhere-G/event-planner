@@ -12,7 +12,7 @@ from ..middleware.login_required import login_required
 from ..schemas.event_schema import EventSchema
 from ..schemas.itinerary_schema import UserRole
 from ..schemas.wishlist_schema import WishlistItemSchema, WishlistSchema
-from ..services.itineraries_service import get_itinerary_membership, is_authorised
+from ..services.itineraries_service import is_authorised, is_user_in_itinerary
 from ..services.wishlist_service import (
     create_wishlist,
     create_wishlist_item,
@@ -34,7 +34,7 @@ wishlist_bp = Blueprint("wishlist", __name__)
 @login_required
 def get_wishlists_route(user_id: int, itinerary_id: int):
     try:
-        get_itinerary_membership(user_id, itinerary_id)
+        is_user_in_itinerary(user_id, itinerary_id)
         results = get_wishlists(itinerary_id)
         schema = WishlistSchema(many=True)
         return api_response(

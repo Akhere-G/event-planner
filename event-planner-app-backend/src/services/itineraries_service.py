@@ -1,14 +1,16 @@
-from ..extensions import db
-from ..models import Itinerary, ItineraryUser, UserRole, User, Invite, InvitationStatus
-from sqlalchemy import select, func
+from datetime import datetime, timedelta, timezone
+
+from sqlalchemy import func, select
+from sqlalchemy.orm import contains_eager, selectinload
+
 from ..exceptions import (
-    UserNotAuthorisedError,
     ItineraryDoesNotExistError,
-    UserDoesNotExistError,
     UserAlreadyExistsError,
+    UserDoesNotExistError,
+    UserNotAuthorisedError,
 )
-from sqlalchemy.orm import selectinload, contains_eager
-from datetime import datetime, timezone, timedelta
+from ..extensions import db
+from ..models import InvitationStatus, Invite, Itinerary, ItineraryUser, User, UserRole
 
 
 def get_invite(itinerary_id: int, email: str):
@@ -22,30 +24,33 @@ def get_invite(itinerary_id: int, email: str):
 
 
 def create_invite(data: dict):
-    membership = get_membership_by_email(data["email"], data["itinerary_id"])
+    try:
+        membership = get_membership_by_email(data["email"], data["itinerary_id"])
 
-    if membership:
-        raise UserAlreadyExistsError("This user is already part of this itinerary!")
+        if membership:
+            raise UserAlreadyExistsError("This user is already part of this itinerary!")
 
-    existing_invite = get_invite(data["itinerary_id"], data["email"])
-    invite = None
+        existing_invite = get_invite(data["itinerary_id"], email=data["email"])
 
-    if existing_invite:
-        if existing_invite.status == InvitationStatus.ACCEPTED.value:
-            raise UserAlreadyExistsError("User has already accepted this invite.")
+        if existing_invite:
+            if existing_invite.status == InvitationStatus.ACCEPTED.value:
+                raise UserAlreadyExistsError("User has already accepted this invite.")
 
-        existing_invite.status = InvitationStatus.PENDING.value
-        existing_invite.role = data.get("role") or existing_invite.role
-        existing_invite.expires_at = datetime.now(timezone.utc) + timedelta(days=7)
-        invite = existing_invite
-        invite.updated_by_id = data["updated_by_id"]
-    else:
-        invite = Invite(**data)
-        db.session.add(invite)
+            existing_invite.status = InvitationStatus.PENDING.value
+            existing_invite.role = data.get("role") or existing_invite.role
+            existing_invite.expires_at = datetime.now(timezone.utc) + timedelta(days=7)
+            invite = existing_invite
+            invite.updated_by_id = data["updated_by_id"]
+        else:
+            invite = Invite(**data)
+            db.session.add(invite)
 
-    db.session.commit()
+        db.session.commit()
 
-    return invite
+        return invite
+    except Exception:
+        db.session.rollback()
+        raise
 
 
 def get_membership_by_email(email: str, itinerary_id: int):
@@ -59,16 +64,6 @@ def get_membership_by_email(email: str, itinerary_id: int):
             select(ItineraryUser)
             .where(ItineraryUser.itinerary_id == itinerary_id)
             .where(ItineraryUser.user_id == user.id)
-            .options(
-                selectinload(ItineraryUser.user),
-                selectinload(ItineraryUser.itinerary).options(
-                    selectinload(Itinerary.events),
-                    selectinload(Itinerary.user_memberships).selectinload(
-                        ItineraryUser.user
-                    ),
-                    selectinload(Itinerary.invites),
-                ),
-            )
         )
 
         membership = db.session.execute(stmt).scalar_one_or_none()
@@ -76,6 +71,21 @@ def get_membership_by_email(email: str, itinerary_id: int):
         return membership
     except UserDoesNotExistError:
         return None
+
+
+def is_user_in_itinerary(user_id: int, itinerary_id: int):
+    stmt = (
+        select(ItineraryUser)
+        .where(ItineraryUser.itinerary_id == itinerary_id)
+        .where(ItineraryUser.user_id == user_id)
+    )
+
+    membership = db.session.execute(stmt).scalar_one_or_none()
+
+    if not membership:
+        raise ItineraryDoesNotExistError()
+
+    return membership
 
 
 def get_itinerary_membership(user_id: int, itinerary_id: int):
@@ -113,22 +123,20 @@ def get_itinerary_count(user_id):
     return db.session.execute(stmt).scalar()
 
 
-def get_itinerary_memberships(user_id: int, limit: int | None = None, offset: int = 0):
+def get_itinerary_memberships(
+    itinerary_id: int, limit: int | None = None, offset: int = 0
+):
     stmt = (
         select(ItineraryUser)
-        .where(ItineraryUser.user_id == user_id)
+        .where(ItineraryUser.itinerary_id == itinerary_id)
         .options(
-            selectinload(ItineraryUser.itinerary).options(
-                selectinload(Itinerary.events),
-                selectinload(Itinerary.user_memberships).selectinload(
-                    ItineraryUser.user
-                ),
-                selectinload(Itinerary.invites),
-            )
+            selectinload(ItineraryUser.itinerary), selectinload(ItineraryUser.user)
         )
-        .limit(limit)
-        .offset(offset)
     )
+
+    if limit is not None and offset is not None:
+        stmt = stmt.limit(limit).offset(offset)
+
     return db.session.execute(stmt).scalars().all()
 
 
@@ -138,8 +146,6 @@ def get_itinerary(itinerary_id: int):
         .where(Itinerary.id == itinerary_id)
         .options(
             selectinload(Itinerary.events),
-            selectinload(Itinerary.user_memberships).selectinload(ItineraryUser.user),
-            selectinload(Itinerary.invites),
         )
     )
 
@@ -171,22 +177,26 @@ def get_itineraries(user_id: int, limit: int | None = None, offset: int = 0):
 
 
 def create_itinerary(user_id: int, data: dict):
-    new_itinerary = Itinerary(**data)
-    db.session.add(new_itinerary)
-    db.session.flush()
+    try:
+        new_itinerary = Itinerary(**data)
+        db.session.add(new_itinerary)
+        db.session.flush()
 
-    new_membership = ItineraryUser(
-        itinerary_id=new_itinerary.id,
-        user_id=user_id,
-        role=UserRole.ADMIN.value,
-        created_by_id=user_id,
-        updated_by_id=user_id,
-    )
+        new_membership = ItineraryUser(
+            itinerary_id=new_itinerary.id,
+            user_id=user_id,
+            role=UserRole.ADMIN.value,
+            created_by_id=user_id,
+            updated_by_id=user_id,
+        )
 
-    db.session.add(new_membership)
-    db.session.commit()
+        db.session.add(new_membership)
+        db.session.commit()
 
-    return new_itinerary
+        return new_itinerary
+    except Exception:
+        db.session.rollback()
+        raise
 
 
 def is_authorised(
@@ -196,34 +206,48 @@ def is_authorised(
     message="You are not authorised to complete this action.",
 ):
     authorised_roles = authorised_roles or [UserRole.ADMIN]
-    membership = get_itinerary_membership(user_id, itinerary_id)
+    stmt = select(ItineraryUser).where(
+        ItineraryUser.user_id == user_id, ItineraryUser.itinerary_id == itinerary_id
+    )
+    membership = db.session.execute(stmt).scalar_one_or_none()
+
+    if not membership:
+        raise ItineraryDoesNotExistError()
 
     if not UserRole.has_value(membership.role, authorised_roles):
         raise UserNotAuthorisedError(message)
 
 
 def update_itinerary(itinerary_id: int, data: dict):
-    stmt = select(Itinerary).where(Itinerary.id == itinerary_id)
-    itinerary = db.session.execute(stmt).scalar_one_or_none()
+    try:
+        stmt = select(Itinerary).where(Itinerary.id == itinerary_id)
+        itinerary = db.session.execute(stmt).scalar_one_or_none()
 
-    if not itinerary:
-        raise ItineraryDoesNotExistError()
+        if not itinerary:
+            raise ItineraryDoesNotExistError()
 
-    for k, v in data.items():
-        if hasattr(itinerary, k):
-            setattr(itinerary, k, v)
+        for k, v in data.items():
+            if hasattr(itinerary, k):
+                setattr(itinerary, k, v)
 
-    db.session.commit()
-    return itinerary
+        db.session.commit()
+        return itinerary
+    except Exception:
+        db.session.rollback()
+        raise
 
 
 def delete_itinerary(itinerary_id: int):
-    stmt = select(Itinerary).where(Itinerary.id == itinerary_id)
+    try:
+        stmt = select(Itinerary).where(Itinerary.id == itinerary_id)
 
-    itinerary = db.session.execute(stmt).scalar_one_or_none()
+        itinerary = db.session.execute(stmt).scalar_one_or_none()
 
-    if not itinerary:
-        raise ItineraryDoesNotExistError()
+        if not itinerary:
+            raise ItineraryDoesNotExistError()
 
-    db.session.delete(itinerary)
-    db.session.commit()
+        db.session.delete(itinerary)
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
+        raise

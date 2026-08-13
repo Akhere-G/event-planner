@@ -22,7 +22,7 @@ packing_item_bp = Blueprint("packing", __name__)
 def get_packing_items_route(user_id: int, itinerary_id: int):
     schema = PackingItemSchema(many=True)
     try:
-        itineraries_service.get_itinerary_membership(user_id, itinerary_id)
+        itineraries_service.is_user_in_itinerary(user_id, itinerary_id)
         packing_items = packing_item_service.get_packing_lists(user_id, itinerary_id)
         return api_response(
             success=True,
@@ -40,7 +40,7 @@ def get_packing_items_route(user_id: int, itinerary_id: int):
 def create_packing_item(user_id: int, itinerary_id: int):
     schema = PackingItemSchema()
     try:
-        itineraries_service.get_itinerary_membership(user_id, itinerary_id)
+        itineraries_service.is_user_in_itinerary(user_id, itinerary_id)
         packing_item = schema.load(request.json)
         if packing_item.get("is_shared"):
             itineraries_service.is_authorised(
@@ -81,7 +81,7 @@ def create_packing_item(user_id: int, itinerary_id: int):
 def generate_packing_items_route(user_id: int, itinerary_id: int):
     schema = PackingItemSchema(many=True)
     try:
-        itineraries_service.get_itinerary_membership(user_id, itinerary_id)
+        itineraries_service.is_user_in_itinerary(user_id, itinerary_id)
         items = packing_item_service.generate_and_add_packing_items(
             user_id, itinerary_id
         )
@@ -107,7 +107,7 @@ def generate_packing_items_route(user_id: int, itinerary_id: int):
 @login_required
 def update_packing_item(user_id: int, itinerary_id: int, packing_item_id: int):
     try:
-        itineraries_service.get_itinerary_membership(user_id, itinerary_id)
+        itineraries_service.is_user_in_itinerary(user_id, itinerary_id)
 
         item = packing_item_service.get_packing_item(
             user_id, itinerary_id, packing_item_id
@@ -149,7 +149,7 @@ def update_packing_item(user_id: int, itinerary_id: int, packing_item_id: int):
 @login_required
 def delete_packing_item(user_id: int, itinerary_id: int, packing_item_id: int):
     try:
-        itineraries_service.get_itinerary_membership(user_id, itinerary_id)
+        itineraries_service.is_user_in_itinerary(user_id, itinerary_id)
         item = packing_item_service.get_packing_item(
             user_id, itinerary_id, packing_item_id
         )

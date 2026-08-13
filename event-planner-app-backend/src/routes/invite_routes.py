@@ -1,20 +1,21 @@
 from flask import Blueprint, request
+from marshmallow import ValidationError
+
+from ..exceptions import (
+    InviteNotFoundError,
+    ItineraryDoesNotExistError,
+    UserAlreadyExistsError,
+    UserNotAuthorisedError,
+)
 from ..middleware.login_required import login_required
-from ..services.itineraries_service import get_itinerary_membership, is_authorised
+from ..schemas.invite_schema import InviteSchemaPrivate
 from ..services.invite_service import (
-    get_invites,
     create_invite,
+    get_invites,
     revoke_invite,
 )
-from ..exceptions import (
-    ItineraryDoesNotExistError,
-    UserNotAuthorisedError,
-    UserAlreadyExistsError,
-    InviteNotFoundError,
-)
+from ..services.itineraries_service import is_authorised, is_user_in_itinerary
 from ..utils.format_response import api_response
-from ..schemas.invite_schema import InviteSchemaPrivate
-from marshmallow import ValidationError
 
 itinerary_invites_bp = Blueprint("invite", __name__)
 
@@ -24,7 +25,7 @@ itinerary_invites_bp = Blueprint("invite", __name__)
 def get_invites_route(user_id: int, itinerary_id: int):
     schema = InviteSchemaPrivate(many=True)
     try:
-        get_itinerary_membership(user_id, itinerary_id)
+        is_user_in_itinerary(user_id, itinerary_id)
         result = get_invites(itinerary_id)
         invites = schema.dump(result)
         return api_response(

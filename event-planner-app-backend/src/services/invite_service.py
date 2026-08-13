@@ -1,26 +1,25 @@
-from ..extensions import db
-from .itineraries_service import get_itinerary
-from .users_service import add_user_to_itinerary
-from ..models import Invite, InvitationStatus, User, Itinerary, UserRole
-from sqlalchemy import select
 from datetime import datetime, timedelta, timezone
+
+from sqlalchemy import or_, select
+
 from ..exceptions import (
-    UserAlreadyExistsError,
-    InviteNotFoundError,
     BadRequestError,
-    UserDoesNotExistError,
+    InviteNotFoundError,
     ItineraryDoesNotExistError,
+    UserAlreadyExistsError,
+    UserDoesNotExistError,
 )
+from ..extensions import db
+from ..models import InvitationStatus, Invite, Itinerary, User, UserRole
 from .itineraries_service import get_membership_by_email
+from .users_service import add_user_to_itinerary
 
 
 def get_invite(
     itinerary_id: int, invite_id: int | None = None, email: str | None = None
 ):
-    if not invite_id and not email:
+    if invite_id is None and email is None:
         return None
-
-    stmt = None
 
     if invite_id:
         stmt = (
@@ -39,54 +38,66 @@ def get_invite(
 
 
 def get_user_invites(user_id: int):
-    return db.session.execute(
-        select(Invite).join(User, User.email == Invite.email).where(User.id == user_id)
-    ).scalars()
+    return (
+        db.session.execute(
+            select(Invite)
+            .join(User, User.email == Invite.email)
+            .where(User.id == user_id)
+        )
+        .scalars()
+        .all()
+    )
 
 
 def get_invites(itinerary_id: int):
-    itinerary = get_itinerary(itinerary_id)
-    return itinerary.invites
+    stmt = select(Invite).where(Invite.itinerary_id == itinerary_id)
+    return db.session.execute(stmt).scalars().all()
 
 
 def create_invite(data: dict):
-    membership = get_membership_by_email(data["email"], data["itinerary_id"])
+    try:
+        membership = get_membership_by_email(data["email"], data["itinerary_id"])
 
-    if membership:
-        raise UserAlreadyExistsError("This user is already part of this itinerary!")
+        if membership:
+            raise UserAlreadyExistsError("This user is already part of this itinerary!")
 
-    existing_invite = get_invite(data["itinerary_id"], email=data["email"])
-    invite = None
+        existing_invite = get_invite(data["itinerary_id"], email=data["email"])
 
-    if existing_invite:
-        if existing_invite.status == InvitationStatus.ACCEPTED.value:
-            raise UserAlreadyExistsError("User has already accepted this invite.")
+        if existing_invite:
+            if existing_invite.status == InvitationStatus.ACCEPTED.value:
+                raise UserAlreadyExistsError("User has already accepted this invite.")
 
-        existing_invite.status = InvitationStatus.PENDING.value
-        existing_invite.role = data.get("role") or existing_invite.role
-        existing_invite.expires_at = datetime.now(timezone.utc) + timedelta(days=7)
-        invite = existing_invite
-        invite.updated_by_id = data["updated_by_id"]
-    else:
-        invite = Invite(**data)
-        db.session.add(invite)
+            existing_invite.status = InvitationStatus.PENDING.value
+            existing_invite.role = data.get("role") or existing_invite.role
+            existing_invite.expires_at = datetime.now(timezone.utc) + timedelta(days=7)
+            invite = existing_invite
+            invite.updated_by_id = data["updated_by_id"]
+        else:
+            invite = Invite(**data)
+            db.session.add(invite)
 
-    db.session.commit()
+        db.session.commit()
 
-    return invite
+        return invite
+    except Exception:
+        db.session.rollback()
+        raise
 
 
 def revoke_invite(user_id: int, itinerary_id: int, invite_id: int):
-    invite = get_invite(itinerary_id=itinerary_id, invite_id=invite_id)
+    try:
+        invite = get_invite(itinerary_id=itinerary_id, invite_id=invite_id)
 
-    if not invite:
-        raise InviteNotFoundError()
+        if not invite:
+            raise InviteNotFoundError()
 
-    invite.status = InvitationStatus.REVOKED.value
-    invite.updated_by_id = user_id
-    db.session.commit()
-
-    return invite
+        invite.status = InvitationStatus.REVOKED.value
+        invite.updated_by_id = user_id
+        db.session.commit()
+        return invite
+    except Exception:
+        db.session.rollback()
+        raise
 
 
 def get_user_invite(user_id: int, token: str):
@@ -104,80 +115,91 @@ def get_user_invite(user_id: int, token: str):
 
 
 def accept_invite(user_id: int, token: str):
-    invite = get_user_invite(user_id, token)
+    try:
+        invite = get_user_invite(user_id, token)
 
-    if invite.expires_at < datetime.now():
-        raise BadRequestError("Invite is expired.")
+        if invite.expires_at < datetime.now(timezone.utc):
+            raise BadRequestError("Invite is expired.")
 
-    if invite.status == InvitationStatus.ACCEPTED.value:
-        raise BadRequestError("Invite has already been accepted.")
+        if invite.status == InvitationStatus.ACCEPTED.value:
+            raise BadRequestError("Invite has already been accepted.")
 
-    if invite.status == InvitationStatus.DECLINED.value:
-        raise BadRequestError("Invite has already been declined.")
+        if invite.status == InvitationStatus.DECLINED.value:
+            raise BadRequestError("Invite has already been declined.")
 
-    if invite.status == InvitationStatus.REVOKED.value:
-        raise BadRequestError("Invite has been revoked.")
+        if invite.status == InvitationStatus.REVOKED.value:
+            raise BadRequestError("Invite has been revoked.")
 
-    invite.status = InvitationStatus.ACCEPTED.value
-    invite.updated_by_id = user_id
+        invite.status = InvitationStatus.ACCEPTED.value
+        invite.updated_by_id = user_id
 
-    membership = add_user_to_itinerary(invite.itinerary_id, user_id, invite.role)
-    db.session.commit()
-    return membership
+        membership = add_user_to_itinerary(invite.itinerary_id, user_id, invite.role)
+        db.session.commit()
+        return membership
+    except Exception:
+        db.session.rollback()
+        raise
 
 
 def decline_invite(user_id: int, token: str):
-    invite = get_user_invite(user_id, token)
+    try:
+        invite = get_user_invite(user_id, token)
 
-    if invite.status == InvitationStatus.ACCEPTED.value:
-        raise BadRequestError("Invite has already been accepted.")
+        if invite.status == InvitationStatus.ACCEPTED.value:
+            raise BadRequestError("Invite has already been accepted.")
 
-    if invite.status == InvitationStatus.DECLINED.value:
-        raise BadRequestError("Invite has already been declined.")
+        if invite.status == InvitationStatus.DECLINED.value:
+            raise BadRequestError("Invite has already been declined.")
 
-    if invite.status == InvitationStatus.REVOKED.value:
-        raise BadRequestError("Invite has been revoked.")
+        if invite.status == InvitationStatus.REVOKED.value:
+            raise BadRequestError("Invite has been revoked.")
 
-    invite.status = InvitationStatus.DECLINED.value
-    invite.updated_by_id = user_id
+        invite.status = InvitationStatus.DECLINED.value
+        invite.updated_by_id = user_id
 
-    db.session.commit()
-    return invite
+        db.session.commit()
+        return invite
+    except Exception:
+        db.session.rollback()
+        raise
 
 
-def join_itinerary(user_id, token):
-    stmt = select(User).where(User.id == user_id)
-    user = db.session.execute(stmt).scalar_one_or_none()
+def join_itinerary(user_id: int, token: str):
+    try:
+        user = db.session.execute(
+            select(User).where(User.id == user_id)
+        ).scalar_one_or_none()
 
-    if not user:
-        raise UserDoesNotExistError()
-    role = None
+        if not user:
+            raise UserDoesNotExistError()
 
-    stmt = select(Itinerary).where(Itinerary.viewer_code == token)
-    itinerary = db.session.execute(stmt).scalar_one_or_none()
+        itinerary = db.session.execute(
+            select(Itinerary).where(
+                or_(
+                    Itinerary.viewer_code == token,
+                    Itinerary.editor_code == token,
+                    Itinerary.admin_code == token,
+                )
+            )
+        ).scalar_one_or_none()
 
-    if itinerary is not None:
-        role = UserRole.VIEWER.value
-    else:
-        stmt = select(Itinerary).where(Itinerary.editor_code == token)
-        itinerary = db.session.execute(stmt).scalar_one_or_none()
-        if itinerary is not None:
+        if not itinerary:
+            raise ItineraryDoesNotExistError()
+
+        if itinerary.viewer_code == token:
+            role = UserRole.VIEWER.value
+        elif itinerary.editor_code == token:
             role = UserRole.EDITOR.value
         else:
-            stmt = select(Itinerary).where(Itinerary.admin_code == token)
-            itinerary = db.session.execute(stmt).scalar_one_or_none()
-            if itinerary is not None:
-                role = UserRole.ADMIN.value
+            role = UserRole.ADMIN.value
 
-    if itinerary is not None:
-        stmt = select(Invite).where(
-            Invite.itinerary_id == itinerary.id, Invite.email == user.email
+        existing_invite = get_invite(
+            itinerary_id=itinerary.id,
+            email=user.email,
         )
-        existing_invite = db.session.execute(stmt).scalars().all()
 
-        if len(existing_invite) > 0:
+        if existing_invite:
             raise UserAlreadyExistsError()
-            # return existing_invite
 
         return create_invite(
             {
@@ -188,5 +210,7 @@ def join_itinerary(user_id, token):
                 "inviter_id": user_id,
             }
         )
-    else:
-        raise ItineraryDoesNotExistError()
+
+    except Exception:
+        db.session.rollback()
+        raise
