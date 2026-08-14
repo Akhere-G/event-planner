@@ -110,9 +110,6 @@ export default function WishlistCard({
             value={name}
             canEdit={canUserEdit(role)}
             setValue={updateWishlistName}
-            textClassName="text-xs text-text-secondary"
-            inputClassName="text-xs"
-            emptyText="Change name"
           />
         </div>
 

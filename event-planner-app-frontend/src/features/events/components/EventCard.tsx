@@ -155,7 +155,7 @@ export function EventCard({
           selectedValue={eventData.category}
           canEdit={canUserEdit(role)}
           defaultElement={
-            <span className="flex items-center self-end gap-1 my-1 px-4 py-1 rounded-full bg-brand-secondary/10 text-brand-secondary text-xs font-semibold uppercase w-min">
+            <span className="flex items-center self-end gap-1  px-4 py-1 rounded-full bg-brand-secondary/10 text-brand-secondary text-xs font-semibold uppercase w-min">
               <Tag size={16} />
               {eventData.category}
             </span>
@@ -177,8 +177,6 @@ export function EventCard({
           setValue={(description) => {
             updateEventData({ description });
           }}
-          textClassName="text-xs text-text-secondary"
-          inputClassName="text-xs"
           emptyText="Add notes"
         />
 
