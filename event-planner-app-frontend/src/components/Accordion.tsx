@@ -19,10 +19,14 @@ export default function Accordion({
   contentStyles?: string;
 }) {
   return (
-    <ShadcnAccordion type="single" defaultValue={defaultIsOpen ? "item-1" : undefined} collapsible>
+    <ShadcnAccordion defaultValue={defaultIsOpen ? ["item-1"] : undefined}>
       <AccordionItem value="item-1">
-        <AccordionTrigger className={`flex cursor-pointer items-center gap-1 p-4 ${headerStyles}`}>
-          <TitleComponent />
+        <AccordionTrigger
+          className={`flex cursor-pointer items-center gap-1 p-4 ${headerStyles}`}
+        >
+          <div className="flex flex-1">
+            <TitleComponent />
+          </div>
         </AccordionTrigger>
         <AccordionContent>
           <div className={`pb-4 text-sm ${contentStyles}`}>
