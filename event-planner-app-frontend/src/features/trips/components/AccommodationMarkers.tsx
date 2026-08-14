@@ -1,5 +1,5 @@
 import { useParams } from "react-router";
-import { useGetAccommodationsQuery } from "../../accommodations/apiSlice";
+import { useGetAccommodationsQuery } from "../../accommodations/accomodationApiSlice";
 import AccommodationMarker from "./AccommodationMarker";
 import { useDispatch, useSelector } from "react-redux";
 import type { RootState } from "../../../store";

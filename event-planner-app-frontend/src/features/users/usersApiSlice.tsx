@@ -1,9 +1,10 @@
 import { apiSlice } from "../api/apiSlice";
+import type { ApiResponse } from "../api/types";
 import type { User } from "./types";
 
 export const userApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
-    getUsers: builder.query<{ data: { users: User[] } }, number>({
+    getUsers: builder.query<ApiResponse<{ users: User[] }>, number>({
       query: (tripId) => `/itineraries/${tripId}/users`,
       providesTags: (result, __, tripId) => {
         const userTags = result
@@ -20,7 +21,10 @@ export const userApiSlice = apiSlice.injectEndpoints({
         ];
       },
     }),
-    removeUser: builder.mutation<void, { tripId: number; userId: number }>({
+    removeUser: builder.mutation<
+      ApiResponse<{ removedUserId: number }>,
+      { tripId: number; userId: number }
+    >({
       query: ({ tripId, userId }) => ({
         url: `/itineraries/${tripId}/users/${userId}`,
         method: "DELETE",
@@ -33,7 +37,7 @@ export const userApiSlice = apiSlice.injectEndpoints({
       ],
     }),
     updateUser: builder.mutation<
-      void,
+      ApiResponse<User>,
       { tripId: number; userId: number; newUserData: Partial<User> }
     >({
       query: ({ tripId, userId, newUserData }) => ({

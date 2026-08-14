@@ -1,28 +1,30 @@
 import { apiSlice } from "../../api/apiSlice";
+import type { ApiResponse } from "../../api/types";
 import type { PackingitemSchema } from "../schema";
 import type { PackingItem } from "../types";
 
 export const packingApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
-    getPackingItems: builder.query<{ data: PackingItem[] }, { tripId: number }>(
-      {
-        query: ({ tripId }) => ({
-          url: `/itineraries/${tripId}/packing_items`,
-        }),
-        providesTags: (result) =>
-          result?.data
-            ? [
-                ...result.data.map(({ id }) => ({
-                  type: "PackingItem" as const,
-                  id,
-                })),
-                { type: "PackingItem", id: "LIST" },
-              ]
-            : [{ type: "PackingItem", id: "LIST" }],
-      }
-    ),
+    getPackingItems: builder.query<
+      ApiResponse<PackingItem[]>,
+      { tripId: number }
+    >({
+      query: ({ tripId }) => ({
+        url: `/itineraries/${tripId}/packing_items`,
+      }),
+      providesTags: (result) =>
+        result?.data
+          ? [
+              ...result.data.map(({ id }) => ({
+                type: "PackingItem" as const,
+                id,
+              })),
+              { type: "PackingItem", id: "LIST" },
+            ]
+          : [{ type: "PackingItem", id: "LIST" }],
+    }),
     addPackingItem: builder.mutation<
-      { data: PackingItem },
+      ApiResponse<PackingItem>,
       { packingItem: PackingitemSchema; tripId: number }
     >({
       query: ({ packingItem, tripId }) => ({
@@ -33,7 +35,7 @@ export const packingApiSlice = apiSlice.injectEndpoints({
       invalidatesTags: [{ type: "PackingItem", id: "LIST" }],
     }),
     updatePackingItem: builder.mutation<
-      { data: PackingItem },
+      ApiResponse<PackingItem>,
       { tripId: number; itemId: number; updates: Partial<PackingItem> }
     >({
       query: ({ tripId, itemId, updates }) => ({
@@ -47,7 +49,7 @@ export const packingApiSlice = apiSlice.injectEndpoints({
       ],
     }),
     deletePackingItem: builder.mutation<
-      { data: number },
+      ApiResponse<number>,
       { tripId: number; itemId: number }
     >({
       query: ({ tripId, itemId }) => ({
@@ -57,7 +59,7 @@ export const packingApiSlice = apiSlice.injectEndpoints({
       invalidatesTags: [{ type: "PackingItem", id: "LIST" }],
     }),
     generatePackingItems: builder.mutation<
-      { data: PackingItem[] },
+      ApiResponse<PackingItem[]>,
       { tripId: number }
     >({
       query: ({ tripId }) => ({

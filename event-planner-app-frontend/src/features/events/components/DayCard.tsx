@@ -15,7 +15,7 @@ import { useDispatch } from "react-redux";
 import { setRoutes } from "../../maps/service/mapSlice";
 import type { Route } from "../../maps/types";
 import AutofillDayForm from "./AutoFillDayForm";
-import { useGetAccommodationsQuery } from "../../accommodations/apiSlice";
+import { useGetAccommodationsQuery } from "../../accommodations/accomodationApiSlice";
 
 import { useState } from "react";
 import {

@@ -7,12 +7,12 @@ import type {
   DeleteWishlistItemPayload,
   DeleteWishlistPayload,
   PromoteWishlistItemPayload,
-  ApiResponse,
   WishlistItem,
   UpdateWishlistPayload,
   VoteForWishlistItemPayload,
 } from "../types";
 import type { Event } from "../../events/types";
+import type { ApiResponse } from "../../api/types";
 
 export const wishlistApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({

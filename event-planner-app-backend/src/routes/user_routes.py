@@ -98,11 +98,11 @@ def remove_user_route(user_id: int, itinerary_id: int, other_user_id: int):
                 itinerary_id=itinerary_id,
                 message="You must be an admin to other remove users.",
             )
-        deleted_user_id = remove_user(
+        removed_user_id = remove_user(
             user_id=user_id, itinerary_id=itinerary_id, other_user_id=other_user_id
         )
         return api_response(
-            data={"deleted_id": deleted_user_id},
+            data={"removed_user_id": removed_user_id},
             success=True,
             message="removed member.",
             status_code=200,
