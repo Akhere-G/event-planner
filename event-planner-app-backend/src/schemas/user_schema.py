@@ -1,16 +1,15 @@
-from ..models import User
-from marshmallow_sqlalchemy import SQLAlchemyAutoSchema, auto_field
 from marshmallow import (
+    Schema,
+    ValidationError,
+    fields,
+    post_dump,
     validate,
     validates_schema,
-    Schema,
-    fields,
-    ValidationError,
-    post_dump,
-    pre_load,
 )
-from ..models import UserRole
-import re
+from marshmallow_sqlalchemy import SQLAlchemyAutoSchema, auto_field
+
+from ..models import User, UserRole
+from .base_schema import BaseSchema
 
 
 class UserSchema(SQLAlchemyAutoSchema):
@@ -25,7 +24,11 @@ class UserSchema(SQLAlchemyAutoSchema):
 
 class UserWithRoleSchema(Schema):
     role = fields.String(
-        validate=validate.OneOf([e.value for e in UserRole]),
+        validate=validate.OneOf(
+            [e.value for e in UserRole],
+            error="Invalid role. Must be one of: {choices}.",
+        ),
+        error_messages={"validator_failed": "Invalid role value."},
         metadata={
             "description": f"Must be one of: {', '.join([e.value for e in UserRole])}"
         },
@@ -52,17 +55,10 @@ class LoginSchema(Schema):
     )
 
 
-class RegisterSchema(SQLAlchemyAutoSchema):
+class RegisterSchema(BaseSchema):
     class Meta:
         model = User
         exclude = ("id",)
-
-    @pre_load
-    def camel_to_snake(self, data, many, partial, **kwargs):
-        return {self._to_snake(k): v for k, v in data.items()}
-
-    def _to_snake(self, s):
-        return re.sub(r"(?<!^)(?=[A-Z])", "_", s).lower()
 
     username = auto_field(
         validate=validate.Length(
@@ -80,7 +76,7 @@ class RegisterSchema(SQLAlchemyAutoSchema):
     password = auto_field(
         load_only=True,
         validate=[
-            validate.Length(min=8, error="Password must be at least 8 character"),
+            validate.Length(min=8, error="Password must be at least 8 characters."),
             validate.Regexp(
                 r"^(?=.*[A-Za-z])(?=.*\d).+$",
                 error="Password must contain at least one letter and one number.",
@@ -105,7 +101,15 @@ class AddOrUpdateUserRoleSchema(Schema):
         required=True, error_messages={"required": "Email is required."}
     )
     role = fields.String(
-        validate=validate.OneOf([e.value for e in UserRole]),
+        required=True,
+        validate=validate.OneOf(
+            [e.value for e in UserRole],
+            error="Invalid role. Must be one of: {choices}.",
+        ),
+        error_messages={
+            "required": "Role is required.",
+            "validator_failed": "Invalid role value.",
+        },
         metadata={
             "description": f"Must be one of: {', '.join([e.value for e in UserRole])}"
         },
