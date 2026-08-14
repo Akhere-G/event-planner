@@ -41,21 +41,21 @@ export default function ViewUsersModal() {
 
   return (
     <Dialog open={true} onOpenChange={() => dispatch(closeModal())}>
-      <DialogContent className="max-w-4xl">
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-scroll">
         <DialogHeader className="bg-brand-primary text-text-inverse p-4 -mx-4 -mt-4 rounded-t-xl">
           <div className="flex items-center justify-between">
             <div className="flex">
               <button
-                className={`p-1 w-20 rounded-none ${isUsersView ? "text-brand-primary" : ""}`}
+                className={`p-1 w-20 rounded-none ${isUsersView ? "font-bold italic " : ""}`}
                 onClick={showUsers}
               >
                 <DialogTitle className="title">Users</DialogTitle>
                 <div
-                  className={`pointer-events-none border-b-2 duration-300 border-brand-primary ${isUsersView ? "" : "translate-x-19"}`}
+                  className={`pointer-events-none border-b-2 duration-300 translate-y-2 ${isUsersView ? "" : "translate-x-19"}`}
                 />
               </button>
               <button
-                className={`p-1 w-16 rounded-none ${isInvitesView ? "text-brand-primary" : ""}`}
+                className={`p-1 w-16 rounded-none ${isInvitesView ? "font-bold italic " : ""}`}
                 onClick={showInvites}
               >
                 <DialogTitle className="title">Invites</DialogTitle>

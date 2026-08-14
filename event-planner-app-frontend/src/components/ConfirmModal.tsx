@@ -37,7 +37,7 @@ export default function ConfirmModal({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-[90vh] w-[90vh] max-h-[90vh] overflow-hidden flex flex-col bg-surface text-left border-brand-primary/80">
-        <DialogHeader className="bg-brand-primary text-text-inverse p-4 -mx-4 -mt-4 rounded-t-xl">
+        <DialogHeader className="bg-brand-primary p-4 -mx-4 -mt-4 rounded-t-xl">
           <DialogTitle className="title text-text-inverse">{title}</DialogTitle>
           {description && (
             <DialogDescription className="text-text-inverse/80">
@@ -58,7 +58,7 @@ export default function ConfirmModal({
             </button>
             <Button
               onClick={confirmAction}
-              className={confirmBtnClasses + " py-5"}
+              className={confirmBtnClasses + " py-5 text-text-inverse"}
               {...confirmButtonProps}
             >
               {confirmText}
