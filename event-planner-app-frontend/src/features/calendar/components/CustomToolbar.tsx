@@ -7,7 +7,7 @@ import {
 } from "date-fns";
 import { CalendarIcon, ChevronLeft, ChevronRight } from "lucide-react";
 import { Views, type View } from "react-big-calendar";
-import { FormInput } from "../../../components";
+import { FormSelect } from "../../../components";
 
 interface CustomToolbarInterface {
   view: View;
@@ -67,7 +67,7 @@ export default function CustomToolbar({
       </div>
 
       <div className="flex gap-4 items ">
-        <FormInput
+        <FormSelect
           value={view}
           onChange={(e) => setView(e.target.value as View)}
           name="view"

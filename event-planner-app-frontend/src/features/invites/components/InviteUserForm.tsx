@@ -1,5 +1,5 @@
 import { useForm } from "react-hook-form";
-import { FormInput } from "../../../components";
+import { FormInput, FormSelect } from "../../../components";
 import { inviteSchema, type InviteSchema } from "../schemas/inviteSchema";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { UserRole } from "../../users/types";
@@ -54,7 +54,7 @@ export default function InviteUserForm() {
         errorMessage={formState.errors.email?.message}
         formClassNames="flex-4/5"
       />
-      <FormInput
+      <FormSelect
         label="Role"
         {...register("role")}
         errorMessage={formState.errors.role?.message}

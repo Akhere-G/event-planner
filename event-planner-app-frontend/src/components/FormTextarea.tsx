@@ -1,20 +1,18 @@
-import { Input } from "./ui/input";
+import { Textarea } from "./ui/textarea";
 import { FormField, type FormFieldProps } from "./FormField";
 
-export interface FormInputProps extends Omit<FormFieldProps, 'children'> {
+export interface FormTextareaProps extends Omit<FormFieldProps, 'children'> {
   value?: string | number;
-  type?: string;
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  onBlur?: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  ref?: React.Ref<HTMLInputElement>;
+  onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
+  onBlur?: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
+  ref?: React.Ref<HTMLTextAreaElement>;
   placeholder?: string;
 }
 
-const FormInput = ({
+const FormTextarea = ({
   label,
   name,
   value,
-  type = "text",
   onChange,
   onBlur = () => {},
   touched = true,
@@ -23,7 +21,7 @@ const FormInput = ({
   ref,
   placeholder,
   ...props
-}: FormInputProps) => {
+}: FormTextareaProps) => {
   const hasError = errorMessage && touched;
 
   return (
@@ -34,11 +32,10 @@ const FormInput = ({
       errorMessage={errorMessage}
       formClassNames={formClassNames}
     >
-      <Input
+      <Textarea
         id={name}
         value={value}
         name={name}
-        type={type}
         onChange={onChange}
         onBlur={onBlur}
         ref={ref}
@@ -50,4 +47,4 @@ const FormInput = ({
   );
 };
 
-export default FormInput;
+export default FormTextarea;

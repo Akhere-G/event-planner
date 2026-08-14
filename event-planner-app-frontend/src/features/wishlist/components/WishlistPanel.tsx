@@ -39,7 +39,7 @@ export default function WishlistPanel({
   const toggleWishlist = (catId: number) => {
     setExpandedCategories((prev) => ({
       ...prev,
-      [catId]: !prev[catId],
+      [catId]: prev[catId] !== undefined ? !prev[catId] : false,
     }));
   };
 

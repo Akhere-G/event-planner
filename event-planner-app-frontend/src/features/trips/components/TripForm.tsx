@@ -5,7 +5,7 @@ import {
   isValid,
   parseISO,
 } from "date-fns";
-import { FormInput, LocationInput } from "../../../components";
+import { FormInput, FormTextarea, LocationInput } from "../../../components";
 import { isValidationError } from "../../api/utils";
 import { tripSchema, type TripSchema } from "../schemas/tripSchema";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -127,7 +127,7 @@ export default function TripForm({
         {...register("name")}
         errorMessage={formState.errors.name?.message}
       />
-      <FormInput
+      <FormTextarea
         label="Description"
         {...register("description")}
         errorMessage={formState.errors.description?.message}

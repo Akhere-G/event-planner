@@ -3,7 +3,7 @@ import { X } from "lucide-react";
 import { toast } from "sonner";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { LocationInput, FormInput } from "../../../components";
+import { LocationInput, FormInput, FormTextarea } from "../../../components";
 import {
   useCreateAccommodationMutation,
   useUpdateAccommodationMutation,
@@ -164,9 +164,8 @@ export default function AccommodationForm({
         />
       </div>
 
-      <FormInput
+      <FormTextarea
         label="Description"
-        textarea
         {...register("description")}
         errorMessage={errors.description?.message}
         formClassNames="w-full"
