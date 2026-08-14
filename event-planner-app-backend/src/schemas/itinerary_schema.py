@@ -1,24 +1,16 @@
-from marshmallow_sqlalchemy import SQLAlchemyAutoSchema, auto_field
-from ..models import Itinerary
-from marshmallow import pre_load
-import re
-from marshmallow import fields, post_dump, Schema, validate
-from ..models import UserRole
+from marshmallow import fields, post_dump, validate
+from marshmallow_sqlalchemy import auto_field
+
+from ..models import Itinerary, UserRole
+from .base_schema import BaseSchema
 from .event_schema import EventSchema
-from .user_schema import UserWithRoleSchema
 from .invite_schema import InviteSchemaPrivate
+from .user_schema import UserWithRoleSchema
 
 
-class ItinerarySchema(SQLAlchemyAutoSchema):
+class ItinerarySchema(BaseSchema):
     class Meta:
         model = Itinerary
-
-    @pre_load
-    def camel_to_snake(self, data, many, partial, **kwargs):
-        return {self._to_snake(k): v for k, v in data.items()}
-
-    def _to_snake(self, s):
-        return re.sub(r"(?<!^)(?=[A-Z])", "_", s).lower()
 
     id = auto_field(dump_only=True)
     name = auto_field(
@@ -38,7 +30,7 @@ class ItinerarySchema(SQLAlchemyAutoSchema):
     )
     longitude = auto_field(
         error_messages={
-            "required": "longitude is required.",
+            "required": "Longitude is required.",
         }
     )
     description = auto_field()
@@ -59,7 +51,7 @@ class ItinerarySchema(SQLAlchemyAutoSchema):
     invites = fields.Nested(InviteSchemaPrivate, many=True, dump_only=True)
 
 
-class ItineraryWithRoleSchema(Schema):
+class ItineraryWithRoleSchema(BaseSchema):
     class Meta:
         model = Itinerary
 
@@ -84,7 +76,7 @@ class ItineraryWithRoleSchema(Schema):
         return itinerary_data
 
 
-class ItinerarySchemaNoInvites(SQLAlchemyAutoSchema):
+class ItinerarySchemaNoInvites(BaseSchema):
     class Meta:
         model = Itinerary
         fields = (
@@ -96,13 +88,6 @@ class ItinerarySchemaNoInvites(SQLAlchemyAutoSchema):
             "events",
             "user_memberships",
         )
-
-    @pre_load
-    def camel_to_snake(self, data, many, partial, **kwargs):
-        return {self._to_snake(k): v for k, v in data.items()}
-
-    def _to_snake(self, s):
-        return re.sub(r"(?<!^)(?=[A-Z])", "_", s).lower()
 
     id = auto_field(dump_only=True)
     name = auto_field(

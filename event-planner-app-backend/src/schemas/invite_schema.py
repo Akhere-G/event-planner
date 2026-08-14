@@ -1,9 +1,11 @@
-from marshmallow_sqlalchemy import SQLAlchemyAutoSchema, auto_field
 from marshmallow import fields, validate
-from ..models import Invite, InvitationStatus, UserRole
+from marshmallow_sqlalchemy import auto_field
+
+from ..models import InvitationStatus, Invite, UserRole
+from .base_schema import BaseSchema
 
 
-class InviteSchema(SQLAlchemyAutoSchema):
+class InviteSchema(BaseSchema):
     class Meta:
         model = Invite
 
@@ -16,12 +18,19 @@ class InviteSchema(SQLAlchemyAutoSchema):
     inviter_id = auto_field(dump_only=True)
 
     role = fields.String(
-        validate=validate.OneOf([r.value for r in UserRole]),
+        validate=validate.OneOf(
+            [r.value for r in UserRole],
+            error="Invalid role. Must be one of: {choices}.",
+        ),
         dump_default=UserRole.VIEWER.value,
+        error_messages={"validator_failed": "Invalid role value."},
     )
 
     status = fields.String(
-        validate=validate.OneOf([s.value for s in InvitationStatus]),
+        validate=validate.OneOf(
+            [s.value for s in InvitationStatus],
+            error="Invalid status. Must be one of: {choices}.",
+        ),
         dump_only=True,
     )
 
@@ -32,7 +41,7 @@ class InviteSchema(SQLAlchemyAutoSchema):
     itinerary = fields.Nested("ItinerarySchemaNoInvites", dump_only=True)
 
 
-class InviteSchemaPrivate(SQLAlchemyAutoSchema):
+class InviteSchemaPrivate(BaseSchema):
     class Meta:
         model = Invite
         fields = (
@@ -51,11 +60,18 @@ class InviteSchemaPrivate(SQLAlchemyAutoSchema):
     inviter_id = auto_field(dump_only=True)
 
     role = fields.String(
-        validate=validate.OneOf([r.value for r in UserRole]),
+        validate=validate.OneOf(
+            [r.value for r in UserRole],
+            error="Invalid role. Must be one of: {choices}.",
+        ),
         dump_default=UserRole.VIEWER.value,
+        error_messages={"validator_failed": "Invalid role value."},
     )
 
     status = fields.String(
-        validate=validate.OneOf([s.value for s in InvitationStatus]),
+        validate=validate.OneOf(
+            [s.value for s in InvitationStatus],
+            error="Invalid status. Must be one of: {choices}.",
+        ),
         dump_only=True,
     )
