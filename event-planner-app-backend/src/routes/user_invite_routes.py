@@ -1,23 +1,17 @@
 from flask import Blueprint
+
 from ..middleware.login_required import login_required
+from ..schemas.invite_schema import InviteSchema
+from ..schemas.itinerary_schema import ItinerarySchema
+from ..schemas.user_schema import UserWithRoleSchema
 from ..services.invite_service import (
-    get_user_invites,
-    get_user_invite,
     accept_invite,
     decline_invite,
+    get_user_invite,
+    get_user_invites,
     join_itinerary,
 )
-from ..schemas.invite_schema import InviteSchema
-from ..schemas.user_schema import UserWithRoleSchema
 from ..utils.format_response import api_response
-from ..exceptions import (
-    InviteNotFoundError,
-    UserAlreadyExistsError,
-    BadRequestError,
-    ItineraryDoesNotExistError,
-    UserDoesNotExistError,
-)
-from ..schemas.itinerary_schema import ItinerarySchema
 
 user_invites_bp = Blueprint("user_invites", __name__)
 
@@ -39,95 +33,51 @@ def get_invites_route(user_id: int):
 @user_invites_bp.route("/<string:token>")
 @login_required
 def get_invite_route(user_id: int, token: str):
-    try:
-        schema = InviteSchema()
-        result = get_user_invite(user_id, token)
+    schema = InviteSchema()
+    result = get_user_invite(user_id, token)
 
-        return api_response(
-            data=schema.dump(result),
-            success=True,
-            message="Fetched user invite.",
-            status_code=200,
-        )
-    except InviteNotFoundError as err:
-        return api_response(
-            message=err.message,
-            success=False,
-            error=err.message,
-            status_code=err.status_code,
-        )
+    return api_response(
+        data=schema.dump(result),
+        success=True,
+        message="Fetched user invite.",
+        status_code=200,
+    )
 
 
 @user_invites_bp.route("/<string:token>/accept", methods=["POST"])
 @login_required
 def accept_invite_route(user_id: int, token: str):
     schema = UserWithRoleSchema()
-    try:
-        result = accept_invite(user_id, token)
-        return api_response(
-            data=schema.dump(result),
-            success=True,
-            message="Accepted invite.",
-            status_code=200,
-        )
-    except (
-        InviteNotFoundError,
-        BadRequestError,
-        ItineraryDoesNotExistError,
-        UserAlreadyExistsError,
-    ) as err:
-        return api_response(
-            message=err.message,
-            success=False,
-            error=err.message,
-            status_code=err.status_code,
-        )
+    result = accept_invite(user_id, token)
+    return api_response(
+        data=schema.dump(result),
+        success=True,
+        message="Accepted invite.",
+        status_code=200,
+    )
 
 
 @user_invites_bp.route("/<token>/decline", methods=["POST"])
 @login_required
 def decline_invite_route(user_id: int, token: str):
     schema = InviteSchema()
-    try:
-        result = decline_invite(user_id, token)
-        return api_response(
-            data=schema.dump(result),
-            success=True,
-            message="Declined invite.",
-            status_code=200,
-        )
-    except (
-        InviteNotFoundError,
-        BadRequestError,
-    ) as err:
-        return api_response(
-            message=err.message,
-            success=False,
-            error=err.message,
-            status_code=err.status_code,
-        )
+    result = decline_invite(user_id, token)
+    return api_response(
+        data=schema.dump(result),
+        success=True,
+        message="Declined invite.",
+        status_code=200,
+    )
 
 
 @user_invites_bp.route("/join/<token>", methods=["POST"])
 @login_required
 def join_itinerary_route(user_id, token):
-    try:
-        schema = ItinerarySchema()
-        itinerary = join_itinerary(user_id, token)
-        return api_response(
-            success=True,
-            message="Joined itinerary",
-            status_code=200,
-            data=schema.dump(itinerary),
-        )
-    except (
-        ItineraryDoesNotExistError,
-        UserDoesNotExistError,
-        UserAlreadyExistsError,
-    ) as err:
-        return api_response(
-            success=False,
-            message=err.message,
-            error=err.message,
-            status_code=err.status_code,
-        )
+    schema = ItinerarySchema()
+    itinerary = join_itinerary(user_id, token)
+    return api_response(
+        success=True,
+        message="Joined itinerary",
+        status_code=200,
+        data=schema.dump(itinerary),
+    )

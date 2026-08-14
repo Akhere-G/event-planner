@@ -1,13 +1,7 @@
 from datetime import datetime
 
 from flask import Blueprint, request
-from marshmallow import ValidationError
 
-from ..exceptions import (
-    EventNotFoundError,
-    ItineraryDoesNotExistError,
-    UserNotAuthorisedError,
-)
 from ..extensions import limiter
 from ..middleware.login_required import login_required
 from ..models import UserRole
@@ -26,19 +20,11 @@ ai_bp = Blueprint("ai", __name__)
 @limiter.limit("10 per minute", key_func=get_user_or_ip)
 @limiter.limit("10 per minute")
 def get_insights_route(user_id: int, itinerary_id: int):
-    try:
-        is_authorised(
-            user_id, itinerary_id, [UserRole.ADMIN, UserRole.EDITOR, UserRole.VIEWER]
-        )
-        insights = get_insights(itinerary_id)
-        return api_response(success=True, data=insights, message="Fetched insights")
-    except (UserNotAuthorisedError, ItineraryDoesNotExistError) as err:
-        return api_response(
-            success=False,
-            error=err.message,
-            message=err.message,
-            status_code=err.status_code,
-        )
+    is_authorised(
+        user_id, itinerary_id, [UserRole.ADMIN, UserRole.EDITOR, UserRole.VIEWER]
+    )
+    insights = get_insights(itinerary_id)
+    return api_response(success=True, data=insights, message="Fetched insights")
 
 
 @ai_bp.route("/suggest-events/<int:itinerary_id>", methods=["POST"])
@@ -76,13 +62,6 @@ def get_event_suggestions_route(user_id: int, itinerary_id: int):
             data=schema.dump(validated_suggestions),
             message="Fetched suggestions.",
         )
-    except (UserNotAuthorisedError, ItineraryDoesNotExistError) as err:
-        return api_response(
-            success=False,
-            error=err.message,
-            message=err.message,
-            status_code=err.status_code,
-        )
     except ValueError:
         return api_response(
             success=False,
@@ -115,28 +94,11 @@ def optimise_events_route(user_id: int, itinerary_id: int):
             data=validated_events,
             message="Optimised events.",
         )
-    except (
-        UserNotAuthorisedError,
-        ItineraryDoesNotExistError,
-        EventNotFoundError,
-    ) as err:
-        return api_response(
-            success=False,
-            error=err.message,
-            message=err.message,
-            status_code=err.status_code,
-        )
+
     except ValueError:
         return api_response(
             success=False,
             error="Invalid format for date.",
             message="Invalid format for date.",
-            status_code=400,
-        )
-    except ValidationError as err:
-        return api_response(
-            message="Bad Request.",
-            success=False,
-            error=err.messages,
             status_code=400,
         )

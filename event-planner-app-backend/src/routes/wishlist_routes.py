@@ -259,56 +259,48 @@ def update_item_route(user_id: int, itinerary_id: int, wishlist_id: int, item_id
 @wishlist_bp.route("/<int:wishlist_id>/items/<int:item_id>/promote", methods=["POST"])
 @login_required
 def promote_item_route(user_id: int, itinerary_id: int, wishlist_id: int, item_id: int):
-    try:
-        is_authorised(
-            user_id=user_id,
-            itinerary_id=itinerary_id,
-            authorised_roles=[UserRole.ADMIN, UserRole.EDITOR],
-            message="You must be an admin or an editor to schedule items.",
-        )
-        if not itinerary_contains_wishlist_item(itinerary_id, item_id):
-            return api_response(
-                success=False,
-                error="Wishlist item does not exists",
-                message="Wishlist item does not exist",
-                status_code=404,
-            )
-
-        start_at_str = request.json.get("startAt")
-        end_at_str = request.json.get("endAt")
-
-        if not start_at_str or not end_at_str:
-            return api_response(
-                success=False,
-                error="startAt and endAt datetimes are required.",
-                status_code=400,
-            )
-
-        try:
-            start_at = datetime.fromisoformat(start_at_str.replace("Z", "+00:00"))
-            end_at = datetime.fromisoformat(end_at_str.replace("Z", "+00:00"))
-        except ValueError:
-            return api_response(
-                success=False,
-                error="Invalid date format.",
-                status_code=400,
-            )
-
-        event = promote_wishlist_item(itinerary_id, item_id, start_at, end_at, user_id)
-        event_schema = EventSchema()
-        return api_response(
-            success=True,
-            data=event_schema.dump(event),
-            message="Promoted wishlist item to scheduled event.",
-            status_code=200,
-        )
-    except (UserNotAuthorisedError, ItineraryDoesNotExistError, BadRequestError) as err:
+    is_authorised(
+        user_id=user_id,
+        itinerary_id=itinerary_id,
+        authorised_roles=[UserRole.ADMIN, UserRole.EDITOR],
+        message="You must be an admin or an editor to schedule items.",
+    )
+    if not itinerary_contains_wishlist_item(itinerary_id, item_id):
         return api_response(
             success=False,
-            message=getattr(err, "message", str(err)),
-            error=getattr(err, "message", str(err)),
-            status_code=getattr(err, "status_code", 400),
+            error="Wishlist item does not exists",
+            message="Wishlist item does not exist",
+            status_code=404,
         )
+
+    start_at_str = request.json.get("startAt")
+    end_at_str = request.json.get("endAt")
+
+    if not start_at_str or not end_at_str:
+        return api_response(
+            success=False,
+            error="startAt and endAt datetimes are required.",
+            status_code=400,
+        )
+
+    try:
+        start_at = datetime.fromisoformat(start_at_str.replace("Z", "+00:00"))
+        end_at = datetime.fromisoformat(end_at_str.replace("Z", "+00:00"))
+    except ValueError:
+        return api_response(
+            success=False,
+            error="Invalid date format.",
+            status_code=400,
+        )
+
+    event = promote_wishlist_item(itinerary_id, item_id, start_at, end_at, user_id)
+    event_schema = EventSchema()
+    return api_response(
+        success=True,
+        data=event_schema.dump(event),
+        message="Promoted wishlist item to scheduled event.",
+        status_code=200,
+    )
 
 
 @wishlist_bp.route("/<int:wishlist_id>/items/<int:item_id>/vote", methods=["POST"])
@@ -317,34 +309,25 @@ def vote_for_wishlist_item_route(
     user_id: int, itinerary_id: int, wishlist_id: int, item_id: int
 ):
     vote = request.json.get("vote")
-    try:
-        if vote is None:
-            raise BadRequestError("Vote is required.")
-        is_authorised(
-            user_id=user_id,
-            itinerary_id=itinerary_id,
-            authorised_roles=[UserRole.ADMIN, UserRole.EDITOR, UserRole.VIEWER],
-            message="You must be an admin or an editor to schedule items.",
-        )
+    if vote is None:
+        raise BadRequestError("Vote is required.")
+    is_authorised(
+        user_id=user_id,
+        itinerary_id=itinerary_id,
+        authorised_roles=[UserRole.ADMIN, UserRole.EDITOR, UserRole.VIEWER],
+        message="You must be an admin or an editor to schedule items.",
+    )
 
-        if not itinerary_contains_wishlist_item(itinerary_id, item_id):
-            return api_response(
-                success=False,
-                error="Wishlist item does not exists",
-                message="Wishlist item does not exist",
-                status_code=404,
-            )
-
-        vote_for_wishlist_item(user_id, item_id, vote)
-
+    if not itinerary_contains_wishlist_item(itinerary_id, item_id):
         return api_response(
-            success=True, message="Voted for wishlist item.", status_code=200
-        )
-
-    except (UserNotAuthorisedError, BadRequestError, ItineraryDoesNotExistError) as err:
-        return api_response(
-            error=err.message,
-            message=err.message,
-            status_code=err.status_code,
             success=False,
+            error="Wishlist item does not exists",
+            message="Wishlist item does not exist",
+            status_code=404,
         )
+
+    vote_for_wishlist_item(user_id, item_id, vote)
+
+    return api_response(
+        success=True, message="Voted for wishlist item.", status_code=200
+    )

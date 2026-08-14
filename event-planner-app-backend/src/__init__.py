@@ -4,10 +4,13 @@ import pymysql
 from dotenv import load_dotenv
 from flask import Flask, jsonify, make_response, send_from_directory
 from flask_cors import CORS
+from marshmallow import ValidationError
 
 from .config.dev_config import DevConfig
 from .config.production_config import ProductionConfig
+from .exceptions import AppError
 from .extensions import bcrypt, db, limiter, migrate
+from .utils.format_response import api_response
 
 pymysql.install_as_MySQLdb()
 load_dotenv()
@@ -31,17 +34,11 @@ def create_app():
 
 
 def configure_app(app: Flask):
-    environment = os.getenv("ENVIRONMENT", "PROD")
+    environment = os.getenv("ENVIRONMENT", "DEV")
     database_url = os.getenv("DATABASE_URL")
 
-    if environment == "DEV":
-        app.config.from_object(DevConfig())
-    else:
+    if environment == "PROD":
         app.config.from_object(ProductionConfig())
-
-    engine_options = {}
-
-    if environment != "DEV":
         cert_path = os.getenv(
             "DB_CA_CERT_PATH",
             "/app/certs/ca.pem",
@@ -54,6 +51,9 @@ def configure_app(app: Flask):
                 }
             }
         }
+    else:
+        app.config.from_object(DevConfig())
+        engine_options = {}
 
     app.config.from_mapping(
         DEBUG=os.getenv("FLASK_DEBUG") == "True",
@@ -70,7 +70,7 @@ def configure_app(app: Flask):
         app,
         supports_credentials=True,
         origins=[
-            os.getenv("FRONTEND_URL"),
+            os.getenv("FRONTEND_URL", "localhost:5173"),
         ],
     )
 
@@ -169,7 +169,7 @@ def register_frontend(app: Flask):
     @app.route("/")
     def serve_frontend():
         return send_from_directory(
-            app.static_folder,
+            app.static_folder or "/static",
             "index.html",
         )
 
@@ -178,7 +178,7 @@ def register_error_handlers(app: Flask):
     @app.errorhandler(404)
     def not_found(error):
         return send_from_directory(
-            app.static_folder,
+            app.static_folder or "/static",
             "index.html",
         )
 
@@ -187,4 +187,19 @@ def register_error_handlers(app: Flask):
         return make_response(
             jsonify(error=f"Rate limit exceeded: {error.description}"),
             429,
+        )
+
+    @app.errorhandler(AppError)
+    def handle_app_error(error):
+        return api_response(
+            success=False,
+            message=error.message,
+            error=error.message,
+            status_code=error.status_code,
+        )
+
+    @app.errorhandler(ValidationError)
+    def handle_validation_error(error):
+        return api_response(
+            success=False, error=error.messages, message="Bad request.", status_code=400
         )
