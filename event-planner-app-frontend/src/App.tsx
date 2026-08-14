@@ -1,5 +1,5 @@
 import { Navigate, Route, Routes } from "react-router";
-import { lazy, useEffect } from "react";
+import { lazy, Suspense, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import "react-tooltip/dist/react-tooltip.css";
 import { Toaster } from "sonner";
@@ -11,12 +11,12 @@ import {
 } from "./features/auth/services/authSlice";
 import { syncDOM } from "./features/theme/themeSlice";
 
-import { Header } from "./layout";
+import { Header, Footer, ErrorBoundary } from "./layout";
 import ModalManager from "./features/modal/components/ModalManager";
 
 import RequireAuth from "./components/RequireAuth";
 import RequireGuest from "./components/RequireGuest";
-import Footer from "./layout/Footer";
+import { ErrorState, LoadingState } from "./components";
 
 const AddTrip = lazy(() => import("./pages/AddTrip"));
 const JoinTrip = lazy(() => import("./pages/JoinTrip"));
@@ -62,90 +62,104 @@ function App() {
   }
 
   return (
-    <>
+    <ErrorBoundary
+      fallback={
+        <div className="container">
+          <ErrorState showReload />
+        </div>
+      }
+    >
       <Header links={links} />
       <Toaster position="top-right" richColors />
 
       <main className="min-h-[93.5vh] 2xl:min-h-[96vh]">
-        <Routes>
-          <Route path="/about" element={<About />} />
+        <Suspense
+          fallback={
+            <div className="container">
+              <LoadingState />
+            </div>
+          }
+        >
+          <Routes>
+            <Route path="/about" element={<About />} />
 
-          <Route
-            path="/login"
-            element={
-              <RequireGuest isAuth={isAuth} isLoading={isLoading}>
-                <Login />
-              </RequireGuest>
-            }
-          />
-          <Route
-            path="/register"
-            element={
-              <RequireGuest isAuth={isAuth} isLoading={isLoading}>
-                <Register />
-              </RequireGuest>
-            }
-          />
+            <Route
+              path="/login"
+              element={
+                <RequireGuest isAuth={isAuth} isLoading={isLoading}>
+                  <Login />
+                </RequireGuest>
+              }
+            />
+            <Route
+              path="/register"
+              element={
+                <RequireGuest isAuth={isAuth} isLoading={isLoading}>
+                  <Register />
+                </RequireGuest>
+              }
+            />
 
-          <Route
-            path="/"
-            element={
-              <RequireAuth isAuth={isAuth} isLoading={isLoading}>
-                <Trips />
-              </RequireAuth>
-            }
-          />
-          <Route
-            path="/addtrip"
-            element={
-              <RequireAuth isAuth={isAuth} isLoading={isLoading}>
-                <AddTrip />
-              </RequireAuth>
-            }
-          />
-          <Route
-            path="/trips/:tripId"
-            element={
-              <RequireAuth isAuth={isAuth} isLoading={isLoading}>
-                <TripPage />
-              </RequireAuth>
-            }
-          />
-          <Route
-            path="/invites"
-            element={
-              <RequireAuth isAuth={isAuth} isLoading={isLoading}>
-                <InvitesPage />
-              </RequireAuth>
-            }
-          />
-          <Route
-            path="/settings"
-            element={
-              <RequireAuth isAuth={isAuth} isLoading={isLoading}>
-                <Settings />
-              </RequireAuth>
-            }
-          />
-          <Route
-            path="/join/:token"
-            element={
-              <RequireAuth isAuth={isAuth} isLoading={isLoading}>
-                <JoinTrip />
-              </RequireAuth>
-            }
-          />
+            <Route
+              path="/"
+              element={
+                <RequireAuth isAuth={isAuth} isLoading={isLoading}>
+                  <Trips />
+                </RequireAuth>
+              }
+            />
+            <Route
+              path="/addtrip"
+              element={
+                <RequireAuth isAuth={isAuth} isLoading={isLoading}>
+                  <AddTrip />
+                </RequireAuth>
+              }
+            />
+            <Route
+              path="/trips/:tripId"
+              element={
+                <RequireAuth isAuth={isAuth} isLoading={isLoading}>
+                  <TripPage />
+                </RequireAuth>
+              }
+            />
+            <Route
+              path="/invites"
+              element={
+                <RequireAuth isAuth={isAuth} isLoading={isLoading}>
+                  <InvitesPage />
+                </RequireAuth>
+              }
+            />
+            <Route
+              path="/settings"
+              element={
+                <RequireAuth isAuth={isAuth} isLoading={isLoading}>
+                  <Settings />
+                </RequireAuth>
+              }
+            />
+            <Route
+              path="/join/:token"
+              element={
+                <RequireAuth isAuth={isAuth} isLoading={isLoading}>
+                  <JoinTrip />
+                </RequireAuth>
+              }
+            />
 
-          <Route path="/privacy" element={<PrivacyPage />} />
-          <Route path="/terms" element={<TermsPage />} />
-          <Route path="*" element={<Navigate to="/" />} />
-        </Routes>
+            <Route path="/privacy" element={<PrivacyPage />} />
+            <Route path="/terms" element={<TermsPage />} />
+            <Route path="*" element={<Navigate to="/" />} />
+          </Routes>
+        </Suspense>
       </main>
       <ModalManager />
 
       <Footer isAuthenticated={isAuth} />
       {/* // TODO: Remove Modal Manager */}
-    </>
+    </ErrorBoundary>
   );
 }
 
