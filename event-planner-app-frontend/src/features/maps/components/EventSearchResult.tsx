@@ -93,9 +93,9 @@ export function EventSearchResultCard({
 
         {event.photos.length > 0 && (
           <Accordion
-            TitleComponent={({ isOpen }) => (
+            TitleComponent={() => (
               <p className="text-xs text-text-secondary">
-                {isOpen ? "Show Less" : "Show More"}
+                Show More
               </p>
             )}
             headerStyles="p-0! pt-2!"
