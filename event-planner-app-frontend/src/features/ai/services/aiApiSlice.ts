@@ -1,16 +1,18 @@
 import { apiSlice } from "../../api/apiSlice";
+import type { ApiResponse } from "../../api/types";
 import type { AutofillConfig } from "../../events/types";
 import type { TripInsight } from "../types";
 
 export const aiApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
-    getTripInsights: builder.query<{ data: TripInsight[] }, { tripId: number }>(
-      {
-        query: ({ tripId }) => `/ai/insights/${tripId}`,
-      },
-    ),
+    getTripInsights: builder.query<
+      ApiResponse<TripInsight[]>,
+      { tripId: number }
+    >({
+      query: ({ tripId }) => `/ai/insights/${tripId}`,
+    }),
     suggestEvents: builder.mutation<
-      { data: Event[] },
+      ApiResponse<Event[]>,
       { tripId: number; body: AutofillConfig }
     >({
       query: ({ tripId, body }) => ({
@@ -24,7 +26,7 @@ export const aiApiSlice = apiSlice.injectEndpoints({
       ],
     }),
     optimiseEvents: builder.mutation<
-      { data: Event[] },
+      ApiResponse<Event[]>,
       { tripId: number; date: string }
     >({
       query: ({ tripId, date }) => ({

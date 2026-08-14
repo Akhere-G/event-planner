@@ -14,7 +14,7 @@ import type { Accommodation } from "../types";
 import { formatDateRange } from "../../../utils/dateFormattors";
 import UpdateAccommodationModal from "./UpdateAccommodationModal";
 import DeleteAccommodationModal from "./DeleteAccommodationModal";
-import { useDeleteAccommodationMutation } from "../apiSlice";
+import { useDeleteAccommodationMutation } from "../accomodationApiSlice";
 import { isApiError } from "../../api/utils";
 import { toast } from "sonner";
 import { useParams } from "react-router";
@@ -32,8 +32,6 @@ interface AccommodationCardProps {
   accommodation: Accommodation;
   deleteFuncProps?: { onSuccess?: () => void };
 }
-
-// TODO: Add dropdown menu for edit, delete and location actions
 
 export default function AccommodationCard({
   accommodation,

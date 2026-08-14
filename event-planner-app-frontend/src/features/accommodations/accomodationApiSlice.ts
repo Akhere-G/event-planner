@@ -1,10 +1,10 @@
 import { apiSlice } from "../api/apiSlice";
+import type { ApiResponse } from "../api/types";
 import type {
   Accommodation,
   CreateAccommodationPayload,
   UpdateAccommodationPayload,
   DeleteAccommodationPayload,
-  ApiResponse,
 } from "./types";
 
 export const accommodationApiSlice = apiSlice.injectEndpoints({

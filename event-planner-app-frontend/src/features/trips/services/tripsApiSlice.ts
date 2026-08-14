@@ -1,6 +1,7 @@
 import type { Trip } from "../types";
 import { type TripSchema } from "../schemas/tripSchema";
 import { apiSlice } from "../../api/apiSlice";
+import type { ApiResponse } from "../../api/types";
 
 export interface GetTripsResult {
   data: { itineraries: Trip[]; hasMore: boolean };
@@ -35,11 +36,11 @@ export const tripsApi = apiSlice.injectEndpoints({
         return currentArg?.offset !== previousArg?.offset;
       },
     }),
-    getTrip: builder.query<{ data: Trip }, number, { status: number }>({
+    getTrip: builder.query<ApiResponse<Trip>, number, { status: number }>({
       query: (id) => `itineraries/${id}`,
       providesTags: (result) => [{ type: "Trips", id: result?.data?.id }],
     }),
-    addTrip: builder.mutation<Trip, TripSchema>({
+    addTrip: builder.mutation<ApiResponse<Trip>, TripSchema>({
       query: (newTrip) => ({
         url: "/itineraries",
         body: newTrip,
@@ -49,7 +50,7 @@ export const tripsApi = apiSlice.injectEndpoints({
       invalidatesTags: [{ type: "Trips", id: "LIST" }],
     }),
     editTrip: builder.mutation<
-      { data: Trip },
+      ApiResponse<Trip>,
       { tripId: number; updatedTrip: Partial<TripSchema> }
     >({
       query: ({ updatedTrip, tripId }) => ({
@@ -62,7 +63,7 @@ export const tripsApi = apiSlice.injectEndpoints({
         { type: "Trips", id: tripId },
       ],
     }),
-    deleteTrip: builder.mutation<void, number>({
+    deleteTrip: builder.mutation<ApiResponse<{ deletedId: number }>, number>({
       query: (id) => ({
         url: `/itineraries/${id}`,
         method: "DELETE",

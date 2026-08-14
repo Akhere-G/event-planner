@@ -1,7 +1,7 @@
 import { useMap } from "@vis.gl/react-google-maps";
 import { Home, LocateIcon, Minus, Plus } from "lucide-react";
 import { DEFAULT_ZOOM, MAX_ZOOM, MIN_ZOOM } from "../constants";
-import { useGetAccommodationsQuery } from "../../accommodations/apiSlice";
+import { useGetAccommodationsQuery } from "../../accommodations/accomodationApiSlice";
 import { useParams } from "react-router";
 import { fitToBounds } from "../utils";
 import { useGetTripQuery } from "../../trips/services/tripsApiSlice";

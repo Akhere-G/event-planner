@@ -7,7 +7,7 @@ import { LocationInput, FormInput } from "../../../components";
 import {
   useCreateAccommodationMutation,
   useUpdateAccommodationMutation,
-} from "../apiSlice";
+} from "../accomodationApiSlice";
 import { isValidationError } from "../../api/utils";
 import {
   accommodationSchema,

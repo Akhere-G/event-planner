@@ -1,10 +1,11 @@
 import { apiSlice } from "../../api/apiSlice";
+import type { ApiResponse } from "../../api/types";
 import type { InviteSchema } from "../schemas/inviteSchema";
 import { type Invite } from "../types";
 
 export const inviteApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
-    getInvites: builder.query<{ data: { invites: Invite[] } }, number>({
+    getInvites: builder.query<ApiResponse<{ invites: Invite[] }>, number>({
       query: (tripId) => `/itineraries/${tripId}/invites`,
       providesTags: (result) => {
         const value = result
@@ -17,7 +18,7 @@ export const inviteApi = apiSlice.injectEndpoints({
       },
     }),
     createInvite: builder.mutation<
-      { data: Invite },
+      ApiResponse<Invite>,
       { tripId: number; invite: InviteSchema }
     >({
       query: ({ tripId, invite }) => ({
@@ -33,7 +34,7 @@ export const inviteApi = apiSlice.injectEndpoints({
       ],
     }),
     revokeInvite: builder.mutation<
-      { data: Invite },
+      ApiResponse<Invite>,
       { tripId: number; inviteId: number }
     >({
       query: ({ tripId, inviteId }) => ({
@@ -47,7 +48,7 @@ export const inviteApi = apiSlice.injectEndpoints({
         { type: "Trips", id: args.tripId },
       ],
     }),
-    joinTrip: builder.mutation<{ data: Invite }, { token: string }>({
+    joinTrip: builder.mutation<ApiResponse<Invite>, { token: string }>({
       query: ({ token }) => ({
         url: `/invites/join/${token}`,
         method: "POST",
@@ -58,7 +59,7 @@ export const inviteApi = apiSlice.injectEndpoints({
         { type: "Invites", id: result?.data?.id },
       ],
     }),
-    getMyInvites: builder.query<{ data: { invites: Invite[] } }, void>({
+    getMyInvites: builder.query<ApiResponse<{ invites: Invite[] }>, void>({
       query: () => `/invites`,
       providesTags: (result) => {
         const value = result
@@ -71,7 +72,7 @@ export const inviteApi = apiSlice.injectEndpoints({
       },
     }),
     acceptInvite: builder.mutation<
-      { data: Invite },
+      ApiResponse<Invite>,
       { token: string; inviteId: number }
     >({
       query: ({ token }) => ({
@@ -85,7 +86,7 @@ export const inviteApi = apiSlice.injectEndpoints({
       ],
     }),
     declineInvite: builder.mutation<
-      { data: Invite },
+      ApiResponse<Invite>,
       { token: string; inviteId: number }
     >({
       query: ({ token }) => ({

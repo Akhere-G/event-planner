@@ -37,10 +37,3 @@ export interface DeleteAccommodationPayload {
   tripId: number;
   accommodationId: number;
 }
-
-export interface ApiResponse<T> {
-  success: boolean;
-  data: T;
-  message?: string;
-  error?: string;
-}

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Plus } from "lucide-react";
-import { useGetAccommodationsQuery } from "../apiSlice";
+import { useGetAccommodationsQuery } from "../accomodationApiSlice";
 import AccommodationForm from "./AccommodationForm";
 import AccommodationCard from "./AccommodationCard";
 import StateGate from "../../../components/StateGate";
