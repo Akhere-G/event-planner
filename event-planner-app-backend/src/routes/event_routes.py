@@ -1,11 +1,5 @@
 from flask import Blueprint, request
-from marshmallow import ValidationError
 
-from ..exceptions import (
-    EventNotFoundError,
-    ItineraryDoesNotExistError,
-    UserNotAuthorisedError,
-)
 from ..middleware.login_required import login_required
 from ..schemas.event_schema import EventSchema
 from ..schemas.itinerary_schema import UserRole
@@ -24,24 +18,16 @@ event_bp = Blueprint("events", __name__)
 @event_bp.route("")
 @login_required
 def get_events_route(user_id: int, itinerary_id: int):
-    try:
-        schema = EventSchema(many=True)
-        is_user_in_itinerary(user_id, itinerary_id)
+    schema = EventSchema(many=True)
+    is_user_in_itinerary(user_id, itinerary_id)
 
-        events = get_events(itinerary_id)
-        return api_response(
-            success=True,
-            data={"events": schema.dump(events)},
-            message="Fetched events from user itineraries.",
-            status_code=200,
-        )
-    except ItineraryDoesNotExistError as err:
-        return api_response(
-            success=False,
-            message=err.message,
-            error=err.message,
-            status_code=err.status_code,
-        )
+    events = get_events(itinerary_id)
+    return api_response(
+        success=True,
+        data={"events": schema.dump(events)},
+        message="Fetched events from user itineraries.",
+        status_code=200,
+    )
 
 
 @event_bp.route("", methods=["POST"])
@@ -49,34 +35,22 @@ def get_events_route(user_id: int, itinerary_id: int):
 def create_events_route(user_id: int, itinerary_id: int):
     schema = EventSchema()
 
-    try:
-        is_authorised(
-            user_id=user_id,
-            itinerary_id=itinerary_id,
-            authorised_roles=[UserRole.ADMIN, UserRole.EDITOR],
-            message="You must be an admin or an editor to add events.",
-        )
-        validated_event = schema.load(request.json)
-        validated_event["created_by_id"] = user_id
-        validated_event["updated_by_id"] = user_id
-        new_event = create_event(itinerary_id, validated_event)
-        return api_response(
-            message="Created new event.",
-            data=schema.dump(new_event),
-            success=True,
-            status_code=201,
-        )
-    except ValidationError as err:
-        return api_response(
-            message="Bad request.", success=False, error=err.messages, status_code=400
-        )
-    except (UserNotAuthorisedError, ItineraryDoesNotExistError) as err:
-        return api_response(
-            message=err.message,
-            success=False,
-            error=err.message,
-            status_code=err.status_code,
-        )
+    is_authorised(
+        user_id=user_id,
+        itinerary_id=itinerary_id,
+        authorised_roles=[UserRole.ADMIN, UserRole.EDITOR],
+        message="You must be an admin or an editor to add events.",
+    )
+    validated_event = schema.load(request.json)
+    validated_event["created_by_id"] = user_id
+    validated_event["updated_by_id"] = user_id
+    new_event = create_event(itinerary_id, validated_event)
+    return api_response(
+        message="Created new event.",
+        data=schema.dump(new_event),
+        success=True,
+        status_code=201,
+    )
 
 
 @event_bp.route("/<int:event_id>", methods=["PATCH"])
@@ -84,65 +58,37 @@ def create_events_route(user_id: int, itinerary_id: int):
 def update_event_route(user_id: int, itinerary_id: int, event_id: int):
     schema = EventSchema(partial=True)
 
-    try:
-        is_authorised(
-            user_id=user_id,
-            itinerary_id=itinerary_id,
-            authorised_roles=[UserRole.ADMIN, UserRole.EDITOR],
-            message="You must be an admin or an editor to update events.",
-        )
-        validated_event = schema.load(request.json)
-        validated_event["updated_by_id"] = user_id
-        updated_event = update_event(itinerary_id, event_id, validated_event)
-        return api_response(
-            message="Updated event.",
-            data=schema.dump(updated_event),
-            success=True,
-            status_code=200,
-        )
-    except ValidationError as err:
-        return api_response(
-            message="Bad request.", success=False, error=err.messages, status_code=400
-        )
-    except (
-        UserNotAuthorisedError,
-        ItineraryDoesNotExistError,
-        EventNotFoundError,
-    ) as err:
-        return api_response(
-            message=err.message,
-            success=False,
-            error=err.message,
-            status_code=err.status_code,
-        )
+    is_authorised(
+        user_id=user_id,
+        itinerary_id=itinerary_id,
+        authorised_roles=[UserRole.ADMIN, UserRole.EDITOR],
+        message="You must be an admin or an editor to update events.",
+    )
+    validated_event = schema.load(request.json)
+    validated_event["updated_by_id"] = user_id
+    updated_event = update_event(itinerary_id, event_id, validated_event)
+    return api_response(
+        message="Updated event.",
+        data=schema.dump(updated_event),
+        success=True,
+        status_code=200,
+    )
 
 
 @event_bp.route("/<int:event_id>", methods=["DELETE"])
 @login_required
 def delete_event_route(user_id: int, itinerary_id: int, event_id: int):
-    try:
-        is_authorised(
-            user_id=user_id,
-            itinerary_id=itinerary_id,
-            authorised_roles=[UserRole.ADMIN, UserRole.EDITOR],
-            message="You must be an admin or an editor to delete events.",
-        )
+    is_authorised(
+        user_id=user_id,
+        itinerary_id=itinerary_id,
+        authorised_roles=[UserRole.ADMIN, UserRole.EDITOR],
+        message="You must be an admin or an editor to delete events.",
+    )
 
-        delete_event(itinerary_id, event_id)
-        return api_response(
-            message="Event removed from itinerary.",
-            success=True,
-            data={"deleted_id": event_id},
-            status_code=200,
-        )
-    except (
-        UserNotAuthorisedError,
-        ItineraryDoesNotExistError,
-        EventNotFoundError,
-    ) as err:
-        return api_response(
-            message=err.message,
-            success=False,
-            error=err.message,
-            status_code=err.status_code,
-        )
+    delete_event(itinerary_id, event_id)
+    return api_response(
+        message="Event removed from itinerary.",
+        success=True,
+        data={"deleted_id": event_id},
+        status_code=200,
+    )
