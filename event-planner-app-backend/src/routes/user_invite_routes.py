@@ -73,11 +73,11 @@ def decline_invite_route(user_id: int, token: str):
 @user_invites_bp.route("/join/<token>", methods=["POST"])
 @login_required
 def join_itinerary_route(user_id, token):
-    schema = ItinerarySchema()
-    itinerary = join_itinerary(user_id, token)
+    schema = InviteSchema()
+    invite = join_itinerary(user_id, token)
     return api_response(
         success=True,
         message="Joined itinerary",
         status_code=200,
-        data=schema.dump(itinerary),
+        data=schema.dump(invite),
     )
