@@ -93,7 +93,6 @@ export default function UserRow({ user }: { user: User }) {
               title: value[0].toUpperCase() + value.substring(1),
               value,
             }))}
-            selectClassName="flex gap-2"
             setValue={updateRole}
           />
         </div>
