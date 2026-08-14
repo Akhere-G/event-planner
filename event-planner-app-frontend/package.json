@@ -16,6 +16,7 @@
     "@tailwindcss/vite": "^4.2.2",
     "@vis.gl/react-google-maps": "^1.8.3",
     "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
     "docx": "^9.7.1",
     "ics": "^3.12.0",
