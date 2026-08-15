@@ -9,6 +9,7 @@ interface LocationInputProps extends Omit<FormFieldProps, "children"> {
   cityBounds?: { north: number; east: number; south: number; west: number };
   onPlaceQuery?: (query: string) => void;
   initialValue?: string;
+  placeholder?: string;
 }
 
 export default function LocationInput({
@@ -20,6 +21,7 @@ export default function LocationInput({
   onPlaceQuery,
   initialValue,
   searchTypes = ["establishment"],
+  placeholder = "Search for a location...",
   ...rest
 }: LocationInputProps) {
   const inputRef = useRef<HTMLInputElement>(null);
@@ -75,7 +77,7 @@ export default function LocationInput({
         {...rest}
         ref={inputRef}
         type="text"
-        placeholder="Search for a location..."
+        placeholder={placeholder}
         onKeyDown={(e) => {
           if (e.key == "Enter" && inputRef.current && onPlaceQuery) {
             onPlaceQuery(inputRef.current?.value);

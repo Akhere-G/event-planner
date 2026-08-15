@@ -127,6 +127,7 @@ export default function AddItemForm({
 
       <div className="mb-2">
         <LocationInput
+          name="location"
           cityBounds={cityBounds}
           onPlaceSelect={(place) => {
             setName(place.name || "");
@@ -137,8 +138,8 @@ export default function AddItemForm({
             }
             setPlaceId(place.place_id);
           }}
-          inputClassNames="text-xs px-2 py-1 h-8 rounded-md bg-surface"
-          placeholder="Search with Google..."
+          formClassNames="text-xs px-2 py-1 h-8 rounded-md bg-surface"
+          placeholder="Search with Google..." // ts-ignore
         />
       </div>
 
