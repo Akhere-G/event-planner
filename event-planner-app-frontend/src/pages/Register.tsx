@@ -7,7 +7,7 @@ import {
 } from "../features/auth/schemas/authSchema";
 import { useRegisterUserMutation } from "../features/auth/services/authApiSlice";
 import { isValidationError } from "../features/api/utils";
-import { Link, useNavigate } from "react-router";
+import { Link, useLocation, useNavigate } from "react-router";
 import { useDispatch } from "react-redux";
 import { setCredentials } from "../features/auth/services/authSlice";
 import { useState } from "react";
@@ -24,6 +24,9 @@ export default function Register() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
+  const location = useLocation();
+  const from = location.state?.from || "/";
+
   const onSubmit = async (formData: RegisterSchema) => {
     setErrorMessage("");
     try {
@@ -34,7 +37,7 @@ export default function Register() {
       const result = await registerUser(formattedFormData).unwrap();
       dispatch(setCredentials(result.data.userId));
 
-      navigate("/trips");
+      navigate(from, { replace: true });
     } catch (err) {
       if (isValidationError(err)) {
         const serverErrors = err.data.error;

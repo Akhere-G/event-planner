@@ -23,7 +23,7 @@ export default function Login() {
   const navigate = useNavigate();
 
   const location = useLocation();
-  const from = location.state?.from?.pathname || "/";
+  const from = location.state?.from || "/";
 
   const onSubmit = async (formData: LoginSchema) => {
     setErrorMessage("");
@@ -74,7 +74,9 @@ export default function Login() {
           <button className="btn-primary mt-2" disabled={result.isLoading}>
             Login
           </button>
-          <Link to="/register">New here? Create an Account.</Link>
+          <Link to="/register" state={{ from }}>
+            New here? Create an Account.
+          </Link>
         </form>
       </div>
     </div>

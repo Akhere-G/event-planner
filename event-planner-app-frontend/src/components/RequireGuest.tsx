@@ -10,7 +10,7 @@ export default function RequireGuest({
   children: React.ReactNode;
 }) {
   const location = useLocation();
-  const from = location.state?.from?.pathname || "/";
+  const from = location.state?.from || "/";
 
   if (isLoading) {
     return <div className="flex justify-center p-4">Checking session...</div>;

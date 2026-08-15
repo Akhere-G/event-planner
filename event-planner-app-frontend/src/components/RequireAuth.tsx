@@ -10,13 +10,14 @@ export default function RequireAuth({
   children: React.ReactNode;
 }) {
   const location = useLocation();
+  const from = location.state?.from ?? location.pathname;
 
   if (isLoading) {
     return <div className="flex justify-center p-4">Loading your trips...</div>;
   }
 
   if (!isAuth) {
-    return <Navigate to="/login" state={{ from: location }} replace />;
+    return <Navigate to="/login" state={{ from }} replace />;
   }
 
   return <>{children}</>;
