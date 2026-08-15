@@ -35,8 +35,6 @@ interface WishlistCardProps {
   isExpanded: boolean;
   onToggle: () => void;
   cityBounds: CityBounds;
-  startDate: string;
-  endDate: string;
   role: string;
 }
 
@@ -47,8 +45,6 @@ export default function WishlistCard({
   isExpanded,
   onToggle,
   cityBounds,
-  startDate,
-  endDate,
   role,
 }: WishlistCardProps) {
   const [name, setName] = useState(wishlist.name);
@@ -88,11 +84,6 @@ export default function WishlistCard({
         toast.error("Could not delete wishlist");
       }
     }
-  };
-
-  const editItem = (item: WishlistItem) => {
-    setSelectedItem(item);
-    setIsAddingItem(true);
   };
 
   const items = [...wishlist.items];
@@ -162,16 +153,7 @@ export default function WishlistCard({
             </div>
           ) : (
             items.map((item) => (
-              <WishlistItemCard
-                wishlistId={wishlist.id}
-                key={item.id}
-                item={item}
-                tripId={tripId}
-                editable={editable}
-                startDate={startDate}
-                endDate={endDate}
-                editItem={editItem}
-              />
+              <WishlistItemCard key={item.id} item={item} editable={editable} />
             ))
           )}
         </div>

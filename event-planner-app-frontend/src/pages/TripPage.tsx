@@ -35,11 +35,8 @@ export default function TripPage() {
         message: "This trip could not be found.",
       }}
     >
-      {isMobile ? (
-        <MobileLayout trip={data!.data} />
-      ) : (
-        <DesktopLayout trip={data!.data} />
-      )}
+      {data && isMobile && <MobileLayout trip={data.data} />}{" "}
+      {data && !isMobile && <DesktopLayout trip={data.data} />}
       {showUsersModal && (
         <ViewUsersModal open={true} onOpenChange={setShowUsersModal} />
       )}

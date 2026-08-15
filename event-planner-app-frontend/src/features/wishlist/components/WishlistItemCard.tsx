@@ -34,6 +34,9 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "../../../components/ui/dropdown-menu";
+import AddItemForm from "./AddItemForm";
+import { CITY_RADIUS } from "../../maps/constants";
+import { useGetTripQuery } from "../../trips/services/tripsApiSlice";
 
 interface WishlistItemViewProps {
   tripId: number;
@@ -41,7 +44,7 @@ interface WishlistItemViewProps {
   editable: boolean;
   onScheduleClick: () => void;
   onDeleteClick: () => void;
-  editItem: (item: WishlistItem) => void;
+  editItem: () => void;
   voteForItem: (payload: VoteForWishlistItemPayload) => void;
   isVoteLoading: boolean;
   userDidUpvote: boolean;
@@ -135,7 +138,7 @@ function WishlistItemView({
                 )}
                 <DropdownMenuItem
                   className="flex gap-2 items-center"
-                  onClick={() => editItem(item)}
+                  onClick={editItem}
                 >
                   <Edit size={16} /> Edit
                 </DropdownMenuItem>
@@ -215,23 +218,20 @@ function WishlistItemView({
 
 interface WishlistItemCardProps {
   item: WishlistItem;
-  tripId: number;
-  wishlistId: number;
   editable: boolean;
-  startDate: string;
-  endDate: string;
-  editItem: (item: WishlistItem) => void;
+  onEdit?: () => void;
 }
 
 export default function WishlistItemCard({
   item,
-  wishlistId,
   editable,
-  startDate,
-  endDate,
-  editItem,
+  onEdit,
 }: WishlistItemCardProps) {
   const tripId = Number(useParams()?.tripId);
+  const { data } = useGetTripQuery(tripId);
+  const trip = data?.data;
+  const [isEditingWishlistItem, setIsEditingWishlistItem] = useState(false);
+
   const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
@@ -243,7 +243,11 @@ export default function WishlistItemCard({
   const userId = useSelector((state: RootState) => state.auth.userId);
   const handleDelete = async () => {
     try {
-      await deleteItem({ tripId, wishlistId, itemId: item.id }).unwrap();
+      await deleteItem({
+        tripId,
+        wishlistId: item.wishlistId,
+        itemId: item.id,
+      }).unwrap();
       toast.success("Item removed from wishlist.");
       setShowDeleteConfirm(false);
     } catch {
@@ -255,7 +259,7 @@ export default function WishlistItemCard({
     try {
       await promoteItem({
         tripId,
-        wishlistId,
+        wishlistId: item.wishlistId,
         itemId: item.id,
         startAt,
         endAt,
@@ -279,6 +283,16 @@ export default function WishlistItemCard({
   const userDidDownvote = item.votes.some(
     (vote) => vote.user.id === userId && !vote.isThumbsUp,
   );
+  const dispatch = useDispatch();
+
+  if (!trip) return null;
+
+  const cityBounds = {
+    north: trip.latitude + CITY_RADIUS,
+    south: trip.latitude - CITY_RADIUS,
+    east: trip.longitude + CITY_RADIUS,
+    west: trip.longitude - CITY_RADIUS,
+  };
 
   return (
     <>
@@ -290,7 +304,7 @@ export default function WishlistItemCard({
           setIsScheduleModalOpen(true);
         }}
         onDeleteClick={() => setShowDeleteConfirm(true)}
-        editItem={editItem}
+        editItem={() => setIsEditingWishlistItem(true)}
         voteForItem={voteForItem}
         isVoteLoading={isVoteLoading}
         userDidUpvote={userDidUpvote}
@@ -300,8 +314,8 @@ export default function WishlistItemCard({
       {isScheduleModalOpen && (
         <PromoteItemModal
           item={item}
-          startDate={startDate}
-          endDate={endDate}
+          startDate={trip.startDate}
+          endDate={trip.endDate}
           onSchedule={handleSchedule}
           open={isScheduleModalOpen}
           onOpenChange={setIsScheduleModalOpen}
@@ -322,6 +336,29 @@ export default function WishlistItemCard({
             <strong className="text-text-main">{item.name}</strong> from the
             wishlist?
           </p>
+        </ConfirmModal>
+      )}
+      {isEditingWishlistItem && (
+        <ConfirmModal
+          open={isEditingWishlistItem}
+          onOpenChange={setIsEditingWishlistItem}
+          title="Edit wishlist item"
+          hideButtons
+        >
+          <AddItemForm
+            cityBounds={cityBounds}
+            onCancel={() => {
+              setIsEditingWishlistItem(false);
+            }}
+            selectedItem={item}
+            tripId={trip.id}
+            wishlistId={item.wishlistId}
+            onSuccess={() => {
+              setIsEditingWishlistItem(false);
+              dispatch(setSelectedWishlistItem(null));
+              onEdit?.();
+            }}
+          />
         </ConfirmModal>
       )}
     </>
