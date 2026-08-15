@@ -1,5 +1,5 @@
 import { Menu, Moon, Sun, User, X } from "lucide-react";
-import { Link } from "react-router";
+import { Link, useLocation } from "react-router";
 import { useLogoutUserMutation } from "../features/auth/services/authApiSlice";
 import { logOut } from "../features/auth/services/authSlice";
 import { useDispatch, useSelector } from "react-redux";
@@ -24,6 +24,10 @@ export default function Header({ links }: HeaderProps) {
 
   const dispatch = useDispatch();
 
+  const location = useLocation();
+
+  const from = location.state?.from || location;
+
   return (
     <header className="relative w-full z-2 ">
       <div className="z-2 bg-surface min-h-12 max-h-24 h-[6.5vh] w-full flex justify-between items-center p-4 shadow-md">
@@ -37,7 +41,9 @@ export default function Header({ links }: HeaderProps) {
             <ul className="gap-6 flex">
               {links.map(({ title, url }) => (
                 <li key={url}>
-                  <Link to={url}>{title}</Link>
+                  <Link to={url} state={{ from }}>
+                    {title}
+                  </Link>
                 </li>
               ))}
             </ul>
@@ -113,6 +119,7 @@ export default function Header({ links }: HeaderProps) {
                 <Link
                   className="block py-2 pl-2 text-left hover:bg-surface-muted rounded-md"
                   to={url}
+                  state={{ from }}
                   onClick={() => setIsSidebarOpen(false)}
                 >
                   {title}
