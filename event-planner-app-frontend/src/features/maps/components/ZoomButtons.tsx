@@ -37,11 +37,7 @@ export function ZoomButtons({
   );
 }
 
-export default function ZoomButtonsConnected({
-  userCoords,
-}: {
-  userCoords: null | { latitude: number; longitude: number };
-}) {
+export default function ZoomButtonsConnected() {
   const params = useParams();
   const tripId = Number(params.tripId);
 
@@ -63,12 +59,14 @@ export default function ZoomButtonsConnected({
   };
 
   const zoomToUser = () => {
-    if (!userCoords || !map) return;
+    if (!navigator || !map) return;
 
-    map.panTo({
-      lat: userCoords?.latitude,
-      lng: userCoords?.longitude,
-    });
+    navigator.geolocation.getCurrentPosition((position) =>
+      map.panTo({
+        lat: position.coords.latitude,
+        lng: position.coords.longitude,
+      }),
+    );
   };
 
   const zoomHome = () => {

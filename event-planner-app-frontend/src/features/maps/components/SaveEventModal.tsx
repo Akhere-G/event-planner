@@ -22,12 +22,16 @@ export function SaveEventModal({
   isLoading: boolean;
   onOpenChange: (open: boolean) => void;
   onSaveEvent: (event: EventSchema) => Promise<void>;
-  onSaveWishlist: (payload: Omit<CreateWishlistItemPayload, "tripId">) => Promise<void>;
+  onSaveWishlist: (
+    payload: Omit<CreateWishlistItemPayload, "tripId">,
+  ) => Promise<void>;
 }) {
   const [selectedDate, setSelectedDate] = useState("");
   const [startAt, setStartAt] = useState("12:00");
   const [endAt, setEndAt] = useState("13:00");
-  const [selectedWishlist, setSelectedWishlist] = useState<Wishlist | null>(null);
+  const [selectedWishlist, setSelectedWishlist] = useState<Wishlist | null>(
+    null,
+  );
   const [errors, setErrors] = useState({
     startAt: "",
     endAt: "",

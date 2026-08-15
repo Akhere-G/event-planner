@@ -10,6 +10,9 @@ import { X } from "lucide-react";
 import WishlistItemCard from "../../wishlist/components/WishlistItemCard";
 import { canUserEdit } from "../../users/utils";
 import { useGetTripQuery } from "../../trips/services/tripsApiSlice";
+import { useEffect } from "react";
+import { useMap } from "@vis.gl/react-google-maps";
+import { fitToBounds } from "../utils";
 
 export default function WishlistMarkers() {
   const tripId = Number(useParams().tripId);
@@ -21,6 +24,8 @@ export default function WishlistMarkers() {
   );
   const { data: wishlistsResponse } = useGetWishlistsQuery(tripId);
   const wishlists = wishlistsResponse?.data ?? [];
+
+  const map = useMap();
 
   const wishlistIndexById: Record<number, number> = {};
   wishlists.forEach((w, i) => {
@@ -37,6 +42,20 @@ export default function WishlistMarkers() {
         )
         .map((item) => ({ ...item, wishlistId: w.id })),
     );
+  useEffect(() => {
+    if (
+      selectedWishlistItem &&
+      selectedWishlistItem.latitude &&
+      selectedWishlistItem.longitude &&
+      map
+    ) {
+      const item = {
+        longitude: selectedWishlistItem.longitude!,
+        latitude: selectedWishlistItem.latitude!,
+      };
+      fitToBounds({ map, events: [item] });
+    }
+  }, [selectedWishlistItem, map]);
 
   if (!trip) return null;
 

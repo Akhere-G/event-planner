@@ -1,7 +1,6 @@
 import { useDispatch, useSelector } from "react-redux";
 import type { RootState } from "../../../store";
 import EventSearchMarker from "./EventSearchMarker";
-import { canUserEdit } from "../../users/utils";
 import { useParams } from "react-router";
 import { useGetTripQuery } from "../../trips/services/tripsApiSlice";
 import { clearSearchEvents } from "../service/mapSlice";
@@ -29,7 +28,7 @@ export default function SearchEventMarkers() {
         <EventSearchMarker key={event.placeId} event={event} />
       ))}
 
-      {canUserEdit(trip.role) && searchEvents.length > 0 && (
+      {searchEvents.length > 0 && (
         <div className="absolute bottom-4 w-full px-4 ">
           <button
             onClick={() => dispatch(clearSearchEvents())}
