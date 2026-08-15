@@ -39,12 +39,12 @@ export default function PackingPage({ trip }: { trip: Trip }) {
   const handleGenerateAI = async () => {
     try {
       await generatePackingItems({ tripId: trip.id }).unwrap();
-      toast.success("AI generated customised packing recommendations!");
+      toast.success("Smart generated customised packing recommendations!");
     } catch (err) {
       if (isApiError(err)) {
         toast.error(err.data.message);
       } else {
-        toast.error("Failed to generate AI packing recommendations");
+        toast.error("Failed to generate packing recommendations");
       }
     }
   };
@@ -66,8 +66,7 @@ export default function PackingPage({ trip }: { trip: Trip }) {
               </span>
             </div>
             <p className="text-sm text-text-secondary">
-              Organise your trip gear and collaborate with your travel
-              companions.
+              Organise your trip gear.
             </p>
 
             {totalItems > 0 && (
@@ -90,12 +89,12 @@ export default function PackingPage({ trip }: { trip: Trip }) {
               {isGenerating ? (
                 <>
                   <Loader2 className="w-5 h-5 animate-spin text-text-inverse" />
-                  <span>Analysing Itinerary...</span>
+                  <span>Building packing list...</span>
                 </>
               ) : (
                 <>
                   <Sparkles className="w-5 h-5 text-text-inverse" />
-                  <span>Generate with AI</span>
+                  <span>Smart generate</span>
                 </>
               )}
             </button>
@@ -112,9 +111,7 @@ export default function PackingPage({ trip }: { trip: Trip }) {
                 Get Ready for {trip.destination}!
               </h3>
               <p className="text-sm text-text-secondary">
-                Let AI analyse your travel dates, infer destination weather, and
-                review your scheduled itinerary events to construct a
-                personalised packing list.
+                Let's us build your packing list for you
               </p>
             </div>
             <button
@@ -124,7 +121,7 @@ export default function PackingPage({ trip }: { trip: Trip }) {
               className="btn-primary flex items-center gap-2 px-6 py-3 text-sm font-semibold shadow-md hover:scale-105 transition-all"
             >
               <Sparkles className="w-5 h-5" />
-              <span>Generate Custom Packing List with AI</span>
+              <span>Generate Custom Packing List</span>
             </button>
           </div>
         )}

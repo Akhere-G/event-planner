@@ -54,6 +54,7 @@ const permissionEnum = {
   DENIED: "DENIED",
   LOADING: "LOADING",
 } as const;
+// TODO move to map feature slice
 
 export default function TripMap({ trip }: { trip: Trip }) {
   const { latitude, longitude, startDate, endDate, events } = trip;
