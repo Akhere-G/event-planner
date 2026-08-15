@@ -48,6 +48,7 @@ import { ConfirmModal } from "../../../components";
 import AddItemForm from "../../wishlist/components/AddItemForm";
 import AccommodationMarkers from "./AccommodationMarkers";
 import AccommodationCard from "../../accommodations/components/AccommodationCard";
+import { useBreakpoint } from "../../../hooks/useBreakpoint";
 
 const permissionEnum = {
   GRANTED: "GRANTED",
@@ -226,8 +227,11 @@ export default function TripMap({ trip }: { trip: Trip }) {
     );
   };
 
+  const breakpoint = useBreakpoint();
+
+  console.log("TripMap breakpoint:", breakpoint);
   return (
-    <div className="relative w-full h-full md:h-[93.5vh] 2xl:h-[96vh] ">
+    <div className="relative w-full h-full sm:h-[93.5vh] 2xl:h-[96vh] ">
       <Map
         mapId="e74fd7bd6c063337caf66343"
         maxZoom={MAX_ZOOM}
@@ -244,6 +248,9 @@ export default function TripMap({ trip }: { trip: Trip }) {
         rotateControl
         tiltInteractionEnabled
         headingInteractionEnabled
+        onZoomChanged={() => {
+          console.log("Map zoom changed to:", map?.getZoom());
+        }}
       >
         {eventMarkers}
         {searchEventMarkers}
