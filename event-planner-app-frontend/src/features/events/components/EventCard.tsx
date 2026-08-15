@@ -4,6 +4,7 @@ import {
   Edit,
   ExternalLink,
   Eye,
+  MapPin,
   MoreVertical,
   Tag,
   Trash,
@@ -167,7 +168,9 @@ export function EventCard({
           selectClassName="flex flex-col items-stretch text-center!"
         />
 
-        <div className="flex gap-2 items-center mb-2">
+        <div className="flex items-center gap-2 text-text-secondary text-sm my-2">
+          <MapPin size={14} className="shrink-0" />
+
           <p className="text-sm text-text-secondary">{eventData.address}</p>
         </div>
 

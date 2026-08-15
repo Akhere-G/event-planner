@@ -29,6 +29,8 @@ import type { User } from "../users/types";
 import { formatDateRange } from "../../utils/dateFormattors";
 import type { Trip } from "./types";
 
+// TODO refactor and move functions to the correct slice
+
 function buildGoogleMapsUrl(event: Event): string {
   return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(event.name)},${encodeURIComponent(event.address)}`;
 }
@@ -61,7 +63,10 @@ const DEFAULT_THEME: DocThemeColors = {
 
 const HALF_INCH_TWIPS = 720;
 
-function normalizeHexColor(value: string, fallback = DEFAULT_THEME.textPrimary): string {
+function normalizeHexColor(
+  value: string,
+  fallback = DEFAULT_THEME.textPrimary,
+): string {
   const trimmed = value.trim();
   const withoutHash = trimmed.startsWith("#") ? trimmed.slice(1) : trimmed;
 

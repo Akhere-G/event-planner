@@ -18,7 +18,7 @@ const PRESET_CATEGORIES = [
 export default function PackingItemForm({
   submitAction,
   isShared = false,
-  actionText = "Add item",
+  actionText = "Add",
   isLoading,
   onCancel,
 }: {
@@ -28,14 +28,15 @@ export default function PackingItemForm({
   isLoading: boolean;
   onCancel?: () => void;
 }) {
-  const { register, formState, handleSubmit, setValue, watch } = useForm<PackingitemSchema>({
-    resolver: yupResolver(packingItemSchema),
-    defaultValues: {
-      category: "Clothing",
-      isShared,
-      name: "",
-    },
-  });
+  const { register, formState, handleSubmit, setValue, watch } =
+    useForm<PackingitemSchema>({
+      resolver: yupResolver(packingItemSchema),
+      defaultValues: {
+        category: "Clothing",
+        isShared,
+        name: "",
+      },
+    });
 
   const selectedCategory = watch("category");
 
@@ -61,13 +62,13 @@ export default function PackingItemForm({
       className="card flex flex-col gap-3 p-4 bg-surface rounded-xl border border-surface-border"
       onSubmit={handleSubmit(onSubmit)}
     >
-      <div className="flex flex-col md:flex-row gap-3 items-stretch md:items-end">
+      <div className="flex flex-col md:flex-row gap-2 items-stretch md:items-end">
         <FormInput
           label="Item Name"
           placeholder="e.g. Swimming Suit, Passport, Power Bank"
           {...register("name")}
           errorMessage={formState.errors.name?.message}
-          formClassNames="flex-1"
+          formClassNames="flex-1 min-w-30"
         />
 
         <div className="flex-0.5 flex flex-col gap-1">
@@ -85,7 +86,7 @@ export default function PackingItemForm({
         <div className="flex items-center gap-2">
           <button
             type="submit"
-            className="btn-primary flex items-center justify-center gap-1.5 h-11 px-4"
+            className="btn-primary flex items-center justify-center gap-1.5 h-10 px-4 text-sm"
             disabled={isLoading}
           >
             <Plus className="w-4 h-4" />
@@ -95,7 +96,7 @@ export default function PackingItemForm({
             <button
               type="button"
               onClick={onCancel}
-              className="btn-secondary h-11 px-4"
+              className="btn-secondary h-10 px-4 text-sm"
               disabled={isLoading}
             >
               Cancel

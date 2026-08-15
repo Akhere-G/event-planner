@@ -111,6 +111,7 @@ export default function TripForm({
       {errorMessage && <p className="errorMessage">{errorMessage}</p>}
 
       <LocationInput
+        name="location"
         label="Destination"
         errorMessage={formState.errors.destination?.message}
         searchTypes={["political"]}

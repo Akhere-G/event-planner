@@ -5,6 +5,8 @@ import { useDispatch, useSelector } from "react-redux";
 import type { RootState } from "../../../store";
 import { setSelectedAccommodation } from "../../maps/service/mapSlice";
 
+// TODO move to accommodation or map feature slice
+
 export default function AccommodationMarkers() {
   const params = useParams();
   const tripId = Number(params.tripId);
