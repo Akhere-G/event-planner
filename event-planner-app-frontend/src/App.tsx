@@ -12,7 +12,6 @@ import {
 import { syncDOM } from "./features/theme/themeSlice";
 
 import { Header, Footer, ErrorBoundary } from "./layout";
-import ModalManager from "./features/modal/components/ModalManager";
 
 import RequireAuth from "./components/RequireAuth";
 import RequireGuest from "./components/RequireGuest";
@@ -155,10 +154,8 @@ function App() {
           </Routes>
         </Suspense>
       </main>
-      <ModalManager />
 
       <Footer isAuthenticated={isAuth} />
-      {/* // TODO: Remove Modal Manager */}
     </ErrorBoundary>
   );
 }

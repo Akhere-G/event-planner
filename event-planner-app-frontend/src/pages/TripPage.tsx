@@ -1,29 +1,22 @@
-import { useParams, useSearchParams } from "react-router";
+import { useParams } from "react-router";
 import { useGetTripQuery } from "../features/trips/services/tripsApiSlice";
 import { StateGate } from "../components";
 import { isFetchBaseQueryError } from "../features/api/utils";
 import { TripDetails, TripMap } from "../features/trips/components";
-import { openModal } from "../features/modal/modalSlice";
-import { ModalType } from "../features/modal/types";
 import { useDispatch, useSelector } from "react-redux";
-import { useEffect } from "react";
-import { isAdmin } from "../features/users/utils";
+import { useState } from "react";
 import { List, Map } from "lucide-react";
 import type { RootState } from "../store";
 import { setIsMapView } from "../features/maps/service/mapSlice";
+import ViewUsersModal from "../features/modal/components/ViewUsersModal";
+
 export default function TripPage() {
   const { isMapView } = useSelector((state: RootState) => state.map);
 
   const { tripId } = useParams();
   const { data, isLoading, isError, error } = useGetTripQuery(Number(tripId));
-  const [searchParams] = useSearchParams();
+  const [showUsersModal, setShowUsersModal] = useState(false);
   const dispatch = useDispatch();
-
-  useEffect(() => {
-    if (searchParams.has("view") && isAdmin(data?.data.role ?? "")) {
-      dispatch(openModal({ type: ModalType.VIEW_USERS, props: null }));
-    }
-  }, [dispatch, searchParams, data?.data.role]);
 
   return (
     <StateGate
@@ -74,6 +67,9 @@ export default function TripPage() {
             </button>
           </div>
         </div>
+      )}
+      {showUsersModal && (
+        <ViewUsersModal open={true} onOpenChange={setShowUsersModal} />
       )}
     </StateGate>
   );

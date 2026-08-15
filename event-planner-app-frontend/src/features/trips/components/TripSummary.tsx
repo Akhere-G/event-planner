@@ -10,9 +10,7 @@ import {
 import type { Trip } from "../types";
 import { formatDateRange } from "../../../utils/dateFormattors";
 import { UserAvatarList } from "../../users/components";
-import { useDispatch, useSelector } from "react-redux";
-import { openModal } from "../../modal/modalSlice";
-import { ModalType } from "../../modal/types";
+import { useSelector } from "react-redux";
 import { isAdmin } from "../../users/utils";
 import { useRemoveUserMutation } from "../../users/usersApiSlice";
 import { isFetchBaseQueryError } from "../../api/utils";
@@ -27,6 +25,11 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "../../../components/ui/dropdown-menu";
+import DeleteTripModal from "../../modal/components/DeleteTripModal";
+import EditTripModal from "../../modal/components/EditTripModal";
+import ViewUsersModal from "../../modal/components/ViewUsersModal";
+
+type ModalType = "edit" | "delete" | "users" | null;
 
 interface TripSummaryProps {
   trip: Trip;
@@ -39,22 +42,25 @@ export default function TripSummary({
   hideTitle,
 }: TripSummaryProps) {
   const [modalOpen, setIsModalOpen] = useState(false);
+  const [modalType, setModalType] = useState<ModalType>(null);
   const { name, description, startDate, endDate, userMemberships } = trip;
   const [removeUser, { isLoading: isRemoveLoading }] = useRemoveUserMutation();
   const { userId } = useSelector((state: RootState) => state.auth);
 
-  const dispatch = useDispatch();
-
   function openUsersView() {
-    dispatch(openModal({ type: ModalType.VIEW_USERS, props: null }));
+    setModalType("users");
   }
 
   const handleEdit = () => {
-    dispatch(openModal({ type: ModalType.EDIT_TRIP, props: { trip } }));
+    setModalType("edit");
   };
 
   const handleDelete = () => {
-    dispatch(openModal({ type: ModalType.DELETE_TRIP, props: { trip } }));
+    setModalType("delete");
+  };
+
+  const handleCloseModal = () => {
+    setModalType(null);
   };
 
   const handleLeave = async () => {
@@ -152,6 +158,26 @@ export default function TripSummary({
           confirmAction={handleLeave}
           title={`Leave ${trip.name}?`}
           confirmText="Leave"
+        />
+      )}
+      {modalType === "edit" && (
+        <EditTripModal
+          trip={trip}
+          open={true}
+          onOpenChange={handleCloseModal}
+        />
+      )}
+      {modalType === "delete" && (
+        <DeleteTripModal
+          trip={trip}
+          open={true}
+          onOpenChange={handleCloseModal}
+        />
+      )}
+      {modalType === "users" && (
+        <ViewUsersModal
+          open={true}
+          onOpenChange={handleCloseModal}
         />
       )}
     </div>
