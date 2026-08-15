@@ -1,12 +1,9 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useMapsLibrary } from "@vis.gl/react-google-maps";
-import StateGate from "./StateGate";
+import { Input } from "./ui/input";
+import { FormField, type FormFieldProps } from "./FormField";
 
-interface LocationInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
-  label?: string;
-  errorMessage?: string;
-  classNames?: string;
-  inputClassNames?: string;
+interface LocationInputProps extends Omit<FormFieldProps, "children"> {
   onPlaceSelect: (place: google.maps.places.PlaceResult) => void;
   searchTypes?: string[];
   cityBounds?: { north: number; east: number; south: number; west: number };
@@ -17,8 +14,7 @@ interface LocationInputProps extends React.InputHTMLAttributes<HTMLInputElement>
 export default function LocationInput({
   label,
   errorMessage,
-  classNames = "",
-  inputClassNames = "",
+  formClassNames = "",
   onPlaceSelect,
   cityBounds,
   onPlaceQuery,
@@ -68,35 +64,24 @@ export default function LocationInput({
   }, [autocomplete, onPlaceSelect]);
 
   return (
-    <div className={`relative ${classNames}`}>
-      <StateGate
-        loadingStateProps={{ isLoading: !placesLibrary, message: "Loading..." }}
-      >
-        <div className="flex flex-col">
-          {label && (
-            <label className="text-xs text-text-secondary pb-1">{label}</label>
-          )}
-
-          <input
-            {...rest}
-            ref={inputRef}
-            type="text"
-            className={`form-input w-full ${inputClassNames}`}
-            placeholder="Search for a location..."
-            onKeyDown={(e) => {
-              if (e.key == "Enter" && inputRef.current && onPlaceQuery) {
-                onPlaceQuery(inputRef.current?.value);
-              }
-            }}
-          />
-
-          {errorMessage && (
-            <span className="absolute text-xs -bottom-5 right-1 text-error">
-              {errorMessage}
-            </span>
-          )}
-        </div>
-      </StateGate>
-    </div>
+    <FormField
+      label={label}
+      name="location"
+      touched={true}
+      errorMessage={errorMessage}
+      formClassNames={formClassNames}
+    >
+      <Input
+        {...rest}
+        ref={inputRef}
+        type="text"
+        placeholder="Search for a location..."
+        onKeyDown={(e) => {
+          if (e.key == "Enter" && inputRef.current && onPlaceQuery) {
+            onPlaceQuery(inputRef.current?.value);
+          }
+        }}
+      />
+    </FormField>
   );
 }
