@@ -11,6 +11,8 @@ import { getDayColor } from "../../events/utils";
 import type { Day } from "../../events/types";
 import type { Wishlist } from "../../wishlist/types";
 import { getWishlistColor } from "../../wishlist/utils";
+import { useGetWishlistsQuery } from "../../wishlist/services/wishlistApiSlice";
+import { useParams } from "react-router";
 
 export function DayFilter({
   days,
@@ -158,11 +160,10 @@ export function DayFilter({
   );
 }
 
-export default function DayFilterConnected({
-  wishlists,
-}: {
-  wishlists: Wishlist[];
-}) {
+export default function DayFilterConnected() {
+  const tripId = Number(useParams().tripId);
+  const { data: wishlistsResponse } = useGetWishlistsQuery(tripId);
+  const wishlists = wishlistsResponse?.data ?? [];
   const { days, showWishlist, hiddenWishlistIds } = useSelector(
     (state: RootState) => state.map,
   );

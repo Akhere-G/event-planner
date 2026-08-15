@@ -19,8 +19,6 @@ interface WishlistPanelProps {
 export default function WishlistPanel({
   tripId,
   role,
-  startDate,
-  endDate,
   latitude,
   longitude,
 }: WishlistPanelProps) {
@@ -90,8 +88,6 @@ export default function WishlistPanel({
               isExpanded={expandedCategories[wishlist.id] ?? true}
               onToggle={() => toggleWishlist(wishlist.id)}
               cityBounds={cityBounds}
-              startDate={startDate}
-              endDate={endDate}
             />
           ))
         )}
