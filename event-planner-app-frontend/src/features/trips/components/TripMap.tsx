@@ -227,7 +227,7 @@ export default function TripMap({ trip }: { trip: Trip }) {
   };
 
   return (
-    <div className="relative w-full h-[93.5vh] 2xl:h-[96vh] ">
+    <div className="relative w-full h-full md:h-[93.5vh] 2xl:h-[96vh] ">
       <Map
         mapId="e74fd7bd6c063337caf66343"
         maxZoom={MAX_ZOOM}
