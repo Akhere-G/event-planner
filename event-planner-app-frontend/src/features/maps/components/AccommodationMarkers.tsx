@@ -3,9 +3,9 @@ import { useGetAccommodationsQuery } from "../../accommodations/accomodationApiS
 import AccommodationMarker from "./AccommodationMarker";
 import { useDispatch, useSelector } from "react-redux";
 import type { RootState } from "../../../store";
-import { setSelectedAccommodation } from "../../maps/service/mapSlice";
-
-// TODO move to accommodation or map feature slice
+import { setSelectedAccommodation } from "../service/mapSlice";
+import AccommodationCard from "../../accommodations/components/AccommodationCard";
+import { X } from "lucide-react";
 
 export default function AccommodationMarkers() {
   const params = useParams();
@@ -29,6 +29,23 @@ export default function AccommodationMarkers() {
           isSelected={selectedAccommodation?.id === accommodation.id}
         />
       ))}
+      {selectedAccommodation && (
+        <div className={`z-2 absolute bottom-0 px-2 md:px-4 pb-5 w-full`}>
+          <button
+            onClick={() => dispatch(setSelectedAccommodation(null))}
+            className="absolute btn-secondary p-1 right-0 -top-4 md:-top-4"
+          >
+            <X size={20} />
+          </button>
+          <AccommodationCard
+            accommodation={selectedAccommodation}
+            key={selectedAccommodation.id}
+            deleteFuncProps={{
+              onSuccess: () => dispatch(setSelectedAccommodation(null)),
+            }}
+          />
+        </div>
+      )}
     </>
   );
 }

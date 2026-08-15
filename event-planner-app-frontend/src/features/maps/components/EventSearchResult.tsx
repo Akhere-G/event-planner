@@ -25,6 +25,7 @@ import { PlaceAddress } from "./PlaceAddress";
 import { TagChip } from "./TagChip";
 import { SaveEventModal } from "./SaveEventModal";
 import { ImageCarousel } from "./ImageCarousel";
+import { canUserEdit } from "../../users/utils";
 
 interface EventSearchResultCardProps {
   event: EventSearchResult;
@@ -40,6 +41,7 @@ interface EventSearchResultCardProps {
     payload: Omit<CreateWishlistItemPayload, "tripId">,
   ) => Promise<void>;
   onAccommodationSaved: () => void;
+  canEdit: boolean;
 }
 
 export function EventSearchResultCard({
@@ -54,6 +56,7 @@ export function EventSearchResultCard({
   onSaveEvent,
   onSaveWishlist,
   onAccommodationSaved,
+  canEdit,
 }: EventSearchResultCardProps) {
   const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
   const [isAccommodationOpen, setIsAccommodationOpen] = useState(false);
@@ -144,22 +147,24 @@ export function EventSearchResultCard({
           </ConfirmModal>
         )}
 
-        <div className="flex justify-end">
-          {event.isAdded ? (
-            <span className="text-xs flex gap-2 bg-brand-primary px-3 py-1 rounded-full">
-              <Check size={16} />
-              Added
-            </span>
-          ) : (
-            <button
-              onClick={handleAdd}
-              className="flex gap-2 items-center bg-brand-primary text-text-inverse"
-            >
-              <Plus size={16} />
-              Add
-            </button>
-          )}
-        </div>
+        {canEdit && (
+          <div className="flex justify-end">
+            {event.isAdded ? (
+              <span className="text-xs flex gap-2 bg-brand-primary px-3 py-1 rounded-full">
+                <Check size={16} />
+                Added
+              </span>
+            ) : (
+              <button
+                onClick={handleAdd}
+                className="flex gap-2 items-center bg-brand-primary text-text-inverse"
+              >
+                <Plus size={16} />
+                Add
+              </button>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
@@ -197,6 +202,7 @@ export default function EventSearchResultCardConnected() {
       if (isFetchBaseQueryError(err)) {
         toast.error((err.data as { message: string }).message);
       }
+      throw err;
     }
   };
 
@@ -233,6 +239,7 @@ export default function EventSearchResultCardConnected() {
       onSaveEvent={handleSaveEvent}
       onSaveWishlist={handleSaveWishlist}
       onAccommodationSaved={updateSearchResults}
+      canEdit={canUserEdit(trip.role)}
     />
   );
 }

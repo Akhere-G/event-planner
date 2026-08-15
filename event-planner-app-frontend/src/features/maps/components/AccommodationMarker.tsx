@@ -7,8 +7,6 @@ import {
 import type { Accommodation } from "../../accommodations/types";
 import { useState } from "react";
 
-// TODO move to accommodation or map feature slice
-
 export default function AccommodationMarker({
   accommodation,
   onSelect,
