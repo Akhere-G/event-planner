@@ -19,7 +19,7 @@ export function ZoomButtons({
 }) {
   return (
     <>
-      <div className="absolute bottom-4 right-2 flex flex-col gap-2">
+      <div className="absolute bottom-4 left-4 flex flex-col gap-2">
         <button onClick={zoomToUser} className="p-2 btn-primary">
           <LocateIcon size={20} />
         </button>
