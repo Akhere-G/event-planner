@@ -1,7 +1,4 @@
-import { useEffect } from "react";
-import { useDispatch } from "react-redux";
-import { useSearchParams } from "react-router";
-import { closeModal } from "../modalSlice";
+import { useState } from "react";
 import { UsersView } from "../../users/components";
 import InvitesView from "../../invites/components/InviteView";
 import {
@@ -11,36 +8,24 @@ import {
   DialogTitle,
 } from "../../../components/ui/dialog";
 
-export default function ViewUsersModal() {
-  const [searchParams, setSearchParams] = useSearchParams();
-  const dispatch = useDispatch();
+interface ViewUsersModalProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}
 
-  useEffect(() => {
-    window.addEventListener(
-      "popstate",
-      function () {
-        setSearchParams({});
+type ViewType = "users" | "invites";
 
-        dispatch(closeModal());
-      },
-      false,
-    );
-  }, [dispatch, setSearchParams]);
+export default function ViewUsersModal({ open, onOpenChange }: ViewUsersModalProps) {
+  const [view, setView] = useState<ViewType>("users");
 
-  useEffect(() => {
-    if (!searchParams.has("view")) {
-      setSearchParams({ view: "users" });
-    }
-  }, [searchParams, setSearchParams]);
+  const isUsersView = view === "users";
+  const isInvitesView = view === "invites";
 
-  const isUsersView = searchParams.get("view") === "users";
-  const isInvitesView = searchParams.get("view") === "invites";
-
-  const showUsers = () => setSearchParams({ view: "users" });
-  const showInvites = () => setSearchParams({ view: "invites" });
+  const showUsers = () => setView("users");
+  const showInvites = () => setView("invites");
 
   return (
-    <Dialog open={true} onOpenChange={() => dispatch(closeModal())}>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-scroll">
         <DialogHeader className="bg-brand-primary text-text-inverse p-4 -mx-4 -mt-4 rounded-t-xl">
           <div className="flex items-center justify-between">

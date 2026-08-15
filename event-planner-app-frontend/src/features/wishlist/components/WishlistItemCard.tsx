@@ -48,6 +48,8 @@ interface WishlistItemViewProps {
   userDidDownvote: boolean;
 }
 
+// TODO: Put schedule button on the bottom right corner
+
 function WishlistItemView({
   tripId,
   item,

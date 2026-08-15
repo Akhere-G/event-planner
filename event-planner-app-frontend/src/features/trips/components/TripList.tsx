@@ -1,10 +1,12 @@
+import { useState } from "react";
 import { Plus } from "lucide-react";
 import type { Trip } from "../types";
 import TripCard from "./TripCard";
 import { Link, useNavigate } from "react-router";
-import { openModal } from "../../modal/modalSlice";
-import { useDispatch } from "react-redux";
-import { ModalType } from "../../modal/types";
+import DeleteTripModal from "../../modal/components/DeleteTripModal";
+import EditTripModal from "../../modal/components/EditTripModal";
+
+type ModalType = "edit" | "delete" | null;
 
 export default function TripList({
   trips,
@@ -16,18 +18,26 @@ export default function TripList({
   hasMore: boolean;
 }) {
   const navigate = useNavigate();
-  const dispatch = useDispatch();
+  const [modalType, setModalType] = useState<ModalType>(null);
+  const [selectedTrip, setSelectedTrip] = useState<Trip | null>(null);
 
   const handleCardClick = (id: number) => {
     navigate(`/trips/${id}`);
   };
 
   function openEditTripModal(trip: Trip) {
-    dispatch(openModal({ type: ModalType.EDIT_TRIP, props: { trip } }));
+    setSelectedTrip(trip);
+    setModalType("edit");
   }
 
   function openDeleteTripModal(trip: Trip) {
-    dispatch(openModal({ type: ModalType.DELETE_TRIP, props: { trip } }));
+    setSelectedTrip(trip);
+    setModalType("delete");
+  }
+
+  function handleCloseModal() {
+    setModalType(null);
+    setSelectedTrip(null);
   }
 
   return (
@@ -54,6 +64,20 @@ export default function TripList({
         <button className="btn-primary" onClick={getMore}>
           Load More
         </button>
+      )}
+      {selectedTrip && modalType === "edit" && (
+        <EditTripModal
+          trip={selectedTrip}
+          open={true}
+          onOpenChange={handleCloseModal}
+        />
+      )}
+      {selectedTrip && modalType === "delete" && (
+        <DeleteTripModal
+          trip={selectedTrip}
+          open={true}
+          onOpenChange={handleCloseModal}
+        />
       )}
     </div>
   );
