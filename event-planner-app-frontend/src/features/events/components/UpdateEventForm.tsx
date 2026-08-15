@@ -81,15 +81,18 @@ export function UpdateEventFormView({
 
   return (
     <>
-      <form className="flex gap-4 flex-col" onSubmit={handleSubmit(onSubmit)}>
+      <form
+        className="flex gap-4 px-1 flex-col"
+        onSubmit={handleSubmit(onSubmit)}
+      >
         <LocationInput
           key={key}
+          initialValue={initialEvent.address}
           label="Address"
           {...addressInputProps}
           errorMessage={formState.errors.address?.message}
-          classNames="flex-1"
+          formClassNames="flex-1"
           cityBounds={cityBounds}
-          initialValue={initialEvent.address}
           onPlaceSelect={(place) => {
             setValue("address", place.formatted_address ?? "");
             setValue("name", place.name ?? "");

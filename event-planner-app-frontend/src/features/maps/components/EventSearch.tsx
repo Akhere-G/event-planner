@@ -65,7 +65,7 @@ export function EventSearch({
     return (
       <div className="absolute top-4 left-1/2 -translate-x-1/2 flex flex-col gap-2 items-center ">
         <button
-          className="z-1 absolute -right-3 -top-2 bg-brand-primary p-1 text-sm"
+          className="z-1 absolute -right-3 -top-2 bg-brand-primary p-1 text-sm text-text-inverse"
           onClick={() => {
             setQuery(null);
             dispatch(clearSearchEvents());
@@ -91,7 +91,7 @@ export function EventSearch({
       {expanded ? (
         <div className="max-w-[77vw] md:max-w-[40vw] relative">
           <button
-            className="z-1 absolute -right-1 -top-2 bg-brand-primary p-1"
+            className="z-1 absolute -right-1 -top-2 bg-brand-primary p-1 text-text-inverse"
             onClick={() => setExpanded(false)}
           >
             <X size={16} />
@@ -101,7 +101,8 @@ export function EventSearch({
               onPlaceSelect={handlePlaceSelect}
               onPlaceQuery={handlePlaceQuery}
               cityBounds={cityBounds}
-              inputClassNames="bg-surface shadow-md"
+              formClassNames="bg-surface shadow-md"
+              name="search"
             />
             <div className="flex gap-2 overflow-x-scroll py-2 rounded-md">
               {searchTags.map(({ label, query, Icon }) => (

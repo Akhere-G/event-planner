@@ -32,7 +32,6 @@ export default function EditableSelect({
   const [open, setOpen] = React.useState(false);
 
   const handleSelect = (value: string) => {
-    console.log({ value });
     setValue(value);
     setOpen(false);
   };

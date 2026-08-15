@@ -83,7 +83,7 @@ export function AddEventForm({
             label="Address"
             {...addressInputProps}
             errorMessage={formState.errors.address?.message}
-            classNames="flex-1 "
+            formClassNames="flex-1 "
             cityBounds={cityBounds}
             onPlaceSelect={(place) => {
               setValue("address", place.formatted_address ?? "");

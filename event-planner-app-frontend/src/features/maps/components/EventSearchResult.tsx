@@ -94,9 +94,7 @@ export function EventSearchResultCard({
         {event.photos.length > 0 && (
           <Accordion
             TitleComponent={() => (
-              <p className="text-xs text-text-secondary">
-                Show More
-              </p>
+              <p className="text-xs text-text-secondary">Show More</p>
             )}
             headerStyles="p-0! pt-2!"
             contentStyles="p-0 pb-2!"
@@ -155,7 +153,7 @@ export function EventSearchResultCard({
           ) : (
             <button
               onClick={handleAdd}
-              className="flex gap-2 items-center bg-brand-primary"
+              className="flex gap-2 items-center bg-brand-primary text-text-inverse"
             >
               <Plus size={16} />
               Add
