@@ -10,16 +10,14 @@ import { useGetTripQuery } from "../../trips/services/tripsApiSlice";
 import { toast } from "sonner";
 import { getCityBounds } from "../../maps/utils";
 
-export function AddEventForm({
-  date,
-  destination,
-}: {
-  date: string;
-  destination: { latitude: number; longitude: number };
-}) {
+export default function AddEventForm({ date }: { date: string }) {
+  const tripId = Number(useParams()?.tripId);
+
+  const { data } = useGetTripQuery(tripId);
+  const trip = data?.data;
+
   const [errorMessage, setErrorMessage] = useState("");
 
-  const { tripId } = useParams();
   const [addEvent, { isLoading }] = useAddEventMutation();
   const { register, formState, handleSubmit, setError, setValue, getValues } =
     useForm({
@@ -29,6 +27,8 @@ export function AddEventForm({
   const addressInputProps = register("address");
   const [key, setKey] = useState(0);
 
+  if (!trip) return null;
+
   async function onSubmit(formState: EventSchema) {
     const event = {
       ...formState,
@@ -37,7 +37,7 @@ export function AddEventForm({
     };
     setErrorMessage("");
     try {
-      await addEvent({ tripId: Number(tripId), event }).unwrap();
+      await addEvent({ tripId, event }).unwrap();
       setValue("address", "");
       setValue("name", "");
       setValue("longitude", 0);
@@ -63,7 +63,7 @@ export function AddEventForm({
     }
   }
 
-  const cityBounds = getCityBounds(destination);
+  const cityBounds = getCityBounds(trip);
 
   return (
     <>
@@ -119,23 +119,5 @@ export function AddEventForm({
       </form>
       {errorMessage && <p className="mt-2 errorMessage">{errorMessage}</p>}
     </>
-  );
-}
-
-export default function AddEventFormConnected({ date }: { date: string }) {
-  const tripId = Number(useParams()?.tripId);
-
-  const { data } = useGetTripQuery(Number(tripId));
-
-  return (
-    data?.data && (
-      <AddEventForm
-        date={date}
-        destination={{
-          latitude: data.data.latitude,
-          longitude: data.data.longitude,
-        }}
-      />
-    )
   );
 }

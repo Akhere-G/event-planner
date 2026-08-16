@@ -6,38 +6,7 @@ import { useParams } from "react-router";
 import { fitToBounds } from "../utils";
 import { useGetTripQuery } from "../../trips/services/tripsApiSlice";
 
-export function ZoomButtons({
-  zoomToUser,
-  zoomHome,
-  zoomIn,
-  zoomOut,
-}: {
-  zoomToUser: () => void;
-  zoomHome: () => void;
-  zoomIn: () => void;
-  zoomOut: () => void;
-}) {
-  return (
-    <>
-      <div className="absolute bottom-4 left-4 flex flex-col gap-2">
-        <button onClick={zoomToUser} className="p-2 btn-primary">
-          <LocateIcon size={20} />
-        </button>
-        <button onClick={zoomHome} className="p-2 btn-primary">
-          <Home size={20} />
-        </button>
-        <button onClick={zoomIn} className="p-2 btn-primary">
-          <Plus size={20} />
-        </button>
-        <button onClick={zoomOut} className="p-2 btn-primary">
-          <Minus size={20} />
-        </button>
-      </div>
-    </>
-  );
-}
-
-export default function ZoomButtonsConnected() {
+export function ZoomButtons() {
   const params = useParams();
   const tripId = Number(params.tripId);
 
@@ -74,11 +43,21 @@ export default function ZoomButtonsConnected() {
   };
 
   return (
-    <ZoomButtons
-      zoomIn={zoomIn}
-      zoomOut={zoomOut}
-      zoomToUser={zoomToUser}
-      zoomHome={zoomHome}
-    />
+    <>
+      <div className="absolute bottom-4 left-4 flex flex-col gap-2">
+        <button onClick={zoomToUser} className="p-2 btn-primary">
+          <LocateIcon size={20} />
+        </button>
+        <button onClick={zoomHome} className="p-2 btn-primary">
+          <Home size={20} />
+        </button>
+        <button onClick={zoomIn} className="p-2 btn-primary">
+          <Plus size={20} />
+        </button>
+        <button onClick={zoomOut} className="p-2 btn-primary">
+          <Minus size={20} />
+        </button>
+      </div>
+    </>
   );
 }

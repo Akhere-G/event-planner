@@ -10,21 +10,32 @@ import { setSearchIndex } from "../service/mapSlice";
 import { useDispatch, useSelector } from "react-redux";
 import type { RootState } from "../../../store";
 
-interface EventSearchMarkerProps {
-  event: EventSearchResult;
-  onSelect: (event: EventSearchResult) => void;
-  scale: number;
-}
-
-const EventSearchMarker = ({
+export default function EventSearchMarker({
   event,
-  onSelect,
-  scale,
-}: EventSearchMarkerProps) => {
+}: {
+  event: EventSearchResult;
+}) {
   const [markerRef, marker] = useAdvancedMarkerRef();
   const [showInfo, setShowInfo] = useState(false);
+  const { searchEvents, searchIndex } = useSelector(
+    (state: RootState) => state.map,
+  );
+
+  const dispatch = useDispatch();
+
+  const onSelect = (event: EventSearchResult) => {
+    const index = searchEvents.findIndex((e) => e.placeId === event.placeId);
+    if (index === -1) return;
+    dispatch(setSearchIndex(index));
+  };
+
+  const currentEvent = searchEvents[searchIndex];
+
+  const isCurrent = currentEvent.placeId === event.placeId;
+  const scale = isCurrent ? 1.5 : 1;
 
   const { name, latitude, longitude } = event;
+
   return (
     <AdvancedMarker
       ref={markerRef}
@@ -56,36 +67,5 @@ const EventSearchMarker = ({
         scale={scale}
       />
     </AdvancedMarker>
-  );
-};
-
-export default function EventSearchMarkerConnected({
-  event,
-}: {
-  event: EventSearchResult;
-}) {
-  const { searchEvents, searchIndex } = useSelector(
-    (state: RootState) => state.map,
-  );
-
-  const dispatch = useDispatch();
-
-  const onSelectSearchMarker = (event: EventSearchResult) => {
-    const index = searchEvents.findIndex((e) => e.placeId === event.placeId);
-    if (index === -1) return;
-    dispatch(setSearchIndex(index));
-  };
-
-  const currentEvent = searchEvents[searchIndex];
-
-  const isCurrent = currentEvent.placeId === event.placeId;
-
-  return (
-    <EventSearchMarker
-      key={event.placeId}
-      event={event}
-      onSelect={onSelectSearchMarker}
-      scale={isCurrent ? 1.5 : 1}
-    />
   );
 }
