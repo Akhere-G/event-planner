@@ -1,6 +1,5 @@
 import { Check, Plus } from "lucide-react";
 import { Accordion, ConfirmModal } from "../../../components";
-import type { EventSearchResult } from "../types";
 import type { RootState } from "../../../store";
 import { useDispatch, useSelector } from "react-redux";
 import { isFetchBaseQueryError } from "../../api/utils";
@@ -15,7 +14,7 @@ import {
   useCreateWishlistItemMutation,
   useGetWishlistsQuery,
 } from "../../wishlist/services/wishlistApiSlice";
-import type { CreateWishlistItemPayload, Wishlist } from "../../wishlist/types";
+import type { CreateWishlistItemPayload } from "../../wishlist/types";
 import AccommodationForm from "../../accommodations/components/AccommodationForm";
 import { useGetTripQuery } from "../../trips/services/tripsApiSlice";
 import { getCityBounds } from "../../maps/utils";
@@ -27,39 +26,76 @@ import { SaveEventModal } from "./SaveEventModal";
 import { ImageCarousel } from "./ImageCarousel";
 import { canUserEdit } from "../../users/utils";
 
-interface EventSearchResultCardProps {
-  event: EventSearchResult;
-  dates: { title: string; value: string }[];
-  wishlists: Wishlist[];
-  tripId: number;
-  tripStart: string;
-  tripEnd: string;
-  cityBounds: { north: number; south: number; east: number; west: number };
-  isLoading: boolean;
-  onSaveEvent: (event: EventSchema) => Promise<void>;
-  onSaveWishlist: (
-    payload: Omit<CreateWishlistItemPayload, "tripId">,
-  ) => Promise<void>;
-  onAccommodationSaved: () => void;
-  canEdit: boolean;
-}
-
-export function EventSearchResultCard({
-  event,
-  dates,
-  wishlists,
-  tripId,
-  tripStart,
-  tripEnd,
-  cityBounds,
-  isLoading,
-  onSaveEvent,
-  onSaveWishlist,
-  onAccommodationSaved,
-  canEdit,
-}: EventSearchResultCardProps) {
+export default function EventSearchResultCard() {
   const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
   const [isAccommodationOpen, setIsAccommodationOpen] = useState(false);
+
+  const { tripId } = useParams();
+  const { searchEvents, searchIndex, days } = useSelector(
+    (state: RootState) => state.map,
+  );
+  const { data: wishlistsResponse } = useGetWishlistsQuery(Number(tripId));
+  const { data: tripData } = useGetTripQuery(Number(tripId));
+
+  const dispatch = useDispatch();
+  const [addEvent, { isLoading: isAddEventLoading }] = useAddEventMutation();
+  const [createWishlist, { isLoading: isCreateWishlistLoading }] =
+    useCreateWishlistItemMutation();
+
+  const currentEvent = searchEvents[searchIndex];
+  const trip = tripData?.data;
+
+  const updateSearchResults = () => {
+    dispatch(
+      updateSearchEvents((e) =>
+        e.placeId === currentEvent.placeId ? { ...e, isAdded: true } : e,
+      ),
+    );
+  };
+
+  const handleSaveEvent = async (event: EventSchema) => {
+    try {
+      await addEvent({ tripId: Number(tripId), event }).unwrap();
+      updateSearchResults();
+    } catch (err) {
+      if (isFetchBaseQueryError(err)) {
+        toast.error((err.data as { message: string }).message);
+      }
+      throw err;
+    }
+  };
+
+  const handleSaveWishlist = async (
+    payload: Omit<CreateWishlistItemPayload, "tripId">,
+  ) => {
+    try {
+      await createWishlist({ ...payload, tripId: Number(tripId) }).unwrap();
+      updateSearchResults();
+    } catch (err) {
+      if (isFetchBaseQueryError(err)) {
+        toast.error((err.data as { message: string }).message);
+      }
+    }
+  };
+
+  if (!currentEvent || !trip) return null;
+
+  const dates = days.map((day) => ({
+    title: format(day.date, "dd MMM"),
+    value: day.date,
+  }));
+
+  const event = currentEvent;
+  const wishlists = wishlistsResponse?.data ?? [];
+  const tripStart = trip.startDate;
+  const tripEnd = trip.endDate;
+  const cityBounds = getCityBounds(trip);
+  const isLoading = isAddEventLoading || isCreateWishlistLoading;
+  const onSaveEvent = handleSaveEvent;
+  const onSaveWishlist = handleSaveWishlist;
+  const onAccommodationSaved = updateSearchResults;
+  const canEdit = canUserEdit(trip.role);
+
   const isAccommodation = event.types.includes("lodging");
 
   const handleAdd = () => {
@@ -127,7 +163,7 @@ export function EventSearchResultCard({
           >
             <div className="p-4">
               <AccommodationForm
-                tripId={tripId}
+                tripId={Number(tripId)}
                 cityBounds={cityBounds}
                 selectedAccommodation={{
                   name: event.name,
@@ -167,79 +203,5 @@ export function EventSearchResultCard({
         )}
       </div>
     </div>
-  );
-}
-
-export default function EventSearchResultCardConnected() {
-  const { tripId } = useParams();
-  const { searchEvents, searchIndex, days } = useSelector(
-    (state: RootState) => state.map,
-  );
-  const { data: wishlists } = useGetWishlistsQuery(Number(tripId));
-  const { data: tripData } = useGetTripQuery(Number(tripId));
-
-  const dispatch = useDispatch();
-  const [addEvent, { isLoading: isAddEventLoading }] = useAddEventMutation();
-  const [createWishlist, { isLoading: isCreateWishlistLoading }] =
-    useCreateWishlistItemMutation();
-
-  const currentEvent = searchEvents[searchIndex];
-  const trip = tripData?.data;
-
-  const updateSearchResults = () => {
-    dispatch(
-      updateSearchEvents((e) =>
-        e.placeId === currentEvent.placeId ? { ...e, isAdded: true } : e,
-      ),
-    );
-  };
-
-  const handleSaveEvent = async (event: EventSchema) => {
-    try {
-      await addEvent({ tripId: Number(tripId), event }).unwrap();
-      updateSearchResults();
-    } catch (err) {
-      if (isFetchBaseQueryError(err)) {
-        toast.error((err.data as { message: string }).message);
-      }
-      throw err;
-    }
-  };
-
-  const handleSaveWishlist = async (
-    payload: Omit<CreateWishlistItemPayload, "tripId">,
-  ) => {
-    try {
-      await createWishlist({ ...payload, tripId: Number(tripId) }).unwrap();
-      updateSearchResults();
-    } catch (err) {
-      if (isFetchBaseQueryError(err)) {
-        toast.error((err.data as { message: string }).message);
-      }
-    }
-  };
-
-  if (!currentEvent || !trip) return null;
-
-  const dates = days.map((day) => ({
-    title: format(day.date, "dd MMM"),
-    value: day.date,
-  }));
-
-  return (
-    <EventSearchResultCard
-      event={currentEvent}
-      dates={dates}
-      wishlists={wishlists?.data ?? []}
-      tripId={Number(tripId)}
-      tripStart={trip.startDate}
-      tripEnd={trip.endDate}
-      cityBounds={getCityBounds(trip)}
-      isLoading={isAddEventLoading || isCreateWishlistLoading}
-      onSaveEvent={handleSaveEvent}
-      onSaveWishlist={handleSaveWishlist}
-      onAccommodationSaved={updateSearchResults}
-      canEdit={canUserEdit(trip.role)}
-    />
   );
 }

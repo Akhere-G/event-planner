@@ -13,13 +13,17 @@ import { searchTags } from "../../maps/constants";
 import type { RootState } from "../../../store";
 import { toast } from "sonner";
 
-export function EventSearch({
+export default function EventSearch({
   destination,
-  onPlaceSelect,
 }: {
   destination: { latitude: number; longitude: number };
-  onPlaceSelect: (eventSearchResult: EventSearchResult[]) => void;
 }) {
+  const onPlaceSelect = (places: EventSearchResult[]) => {
+    if (!map) return;
+    fitToBounds({ map, events: places });
+    dispatch(setSearchEvents(places));
+  };
+
   const [expanded, setExpanded] = useState(false);
   const [query, setQuery] = useState<string | null>(null);
 
@@ -129,24 +133,5 @@ export function EventSearch({
         </div>
       )}
     </div>
-  );
-}
-
-export default function EventSearchConnected({
-  destination,
-}: {
-  destination: { latitude: number; longitude: number };
-}) {
-  const map = useMap();
-  const dispatch = useDispatch();
-
-  const onPlaceSelect = (places: EventSearchResult[]) => {
-    if (!map) return;
-    fitToBounds({ map, events: places });
-    dispatch(setSearchEvents(places));
-  };
-
-  return (
-    <EventSearch onPlaceSelect={onPlaceSelect} destination={destination} />
   );
 }

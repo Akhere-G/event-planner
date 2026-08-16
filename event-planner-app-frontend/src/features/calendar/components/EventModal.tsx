@@ -1,4 +1,4 @@
-import EventCardConnected from "../../events/components/EventCard";
+import EventCard from "../../events/components/EventCard";
 import type { Event } from "../../events/types";
 import { Dialog, DialogContent } from "../../../components/ui/dialog";
 
@@ -18,7 +18,7 @@ export default function EventModal({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl pt-10">
-        <EventCardConnected
+        <EventCard
           event={event}
           onDelete={() => onOpenChange(false)}
           onEdit={() => onOpenChange(false)}

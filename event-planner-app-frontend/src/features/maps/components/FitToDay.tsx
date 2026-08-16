@@ -4,33 +4,52 @@ import { useSelector } from "react-redux";
 import type { RootState } from "../../../store";
 import { useMap } from "@vis.gl/react-google-maps";
 import { fitToBounds } from "../../maps/utils";
-import type { Day } from "../../events/types";
 import { getDayColor } from "../../events/utils";
 import { useGetWishlistsQuery } from "../../wishlist/services/wishlistApiSlice";
 import { useParams } from "react-router";
 import type { Wishlist } from "../../wishlist/types";
 import { getWishlistColor } from "../../wishlist/utils";
 
-interface FitToDayProps {
-  days: Day[];
-  fitToDay: (day: string) => void;
-  fitToAll: () => void;
-  wishlists: Wishlist[];
-  hiddenWishlistIds: number[];
-  fitToWishlist: (Wishlist: Wishlist) => void;
-  showWishlist: boolean;
-}
-
-export function FitToDay({
-  days,
-  fitToDay,
-  fitToAll,
-  wishlists,
-  hiddenWishlistIds,
-  fitToWishlist,
-  showWishlist,
-}: FitToDayProps) {
+export function FitToDay() {
   const [expanded, setExpanded] = useState(false);
+
+  const { days, hiddenWishlistIds, showWishlist } = useSelector(
+    (state: RootState) => state.map,
+  );
+  const params = useParams();
+  const tripId = Number(params.tripId);
+  const { data } = useGetWishlistsQuery(tripId);
+  const wishlists = data?.data ?? [];
+  const map = useMap();
+
+  const selectedEvents = days
+    .filter((day) => day.show)
+    .flatMap((day) => day.events);
+
+  const fitToAll = () => {
+    if (map) fitToBounds({ map, events: selectedEvents });
+  };
+
+  const fitToDay = (date: string) => {
+    const selectedEvents = days.find((day) => day.date === date)?.events;
+    if (!selectedEvents) {
+      console.error("Could not find events for this date");
+      return;
+    }
+    if (map) fitToBounds({ map, events: selectedEvents });
+  };
+
+  const fitToWishlist = (wishlist: Wishlist) => {
+    const itemsWithLocations = wishlist.items.filter(
+      (i) => i.latitude && i.longitude && !i.isPromoted,
+    );
+    if (map)
+      fitToBounds({
+        map,
+        events: itemsWithLocations as { latitude: number; longitude: number }[],
+      });
+  };
+
   const daysWithEvents = days.filter(
     (day) => day.events.length > 0 && day.show,
   );
@@ -128,55 +147,5 @@ export function FitToDay({
         </button>
       )}
     </div>
-  );
-}
-
-export default function FitToDayConnected() {
-  const { days, hiddenWishlistIds, showWishlist } = useSelector(
-    (state: RootState) => state.map,
-  );
-  const params = useParams();
-  const tripId = Number(params.tripId);
-  const { data } = useGetWishlistsQuery(tripId);
-  const wishlists = data?.data ?? [];
-  const map = useMap();
-
-  const selectedEvents = days
-    .filter((day) => day.show)
-    .flatMap((day) => day.events);
-
-  const fitToAll = () => {
-    if (map) fitToBounds({ map, events: selectedEvents });
-  };
-
-  const fitToDay = (date: string) => {
-    const selectedEvents = days.find((day) => day.date === date)?.events;
-    if (!selectedEvents) {
-      console.error("Could not find events for this date");
-      return;
-    }
-    if (map) fitToBounds({ map, events: selectedEvents });
-  };
-
-  const fitToWishlist = (wishlist: Wishlist) => {
-    const itemsWithLocations = wishlist.items.filter(
-      (i) => i.latitude && i.longitude && !i.isPromoted,
-    );
-    if (map)
-      fitToBounds({
-        map,
-        events: itemsWithLocations as { latitude: number; longitude: number }[],
-      });
-  };
-  return (
-    <FitToDay
-      hiddenWishlistIds={hiddenWishlistIds}
-      wishlists={wishlists}
-      days={days}
-      fitToAll={fitToAll}
-      fitToDay={fitToDay}
-      fitToWishlist={fitToWishlist}
-      showWishlist={showWishlist}
-    />
   );
 }

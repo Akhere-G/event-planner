@@ -3,39 +3,33 @@ import { Layers3, X } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import type { RootState } from "../../../store";
 import {
-  setDays,
+  setDays as updateDayes,
   toggleWishlist,
   toggleWishlistId,
 } from "../../maps/service/mapSlice";
 import { getDayColor } from "../../events/utils";
 import type { Day } from "../../events/types";
-import type { Wishlist } from "../../wishlist/types";
 import { getWishlistColor } from "../../wishlist/utils";
 import { useGetWishlistsQuery } from "../../wishlist/services/wishlistApiSlice";
 import { useParams } from "react-router";
 
-export function DayFilter({
-  days,
-  setDays,
-  showWishlist,
-  onToggleWishlist,
-  wishlists,
-  hiddenWishlistIds,
-  onToggleWishlistId,
-}: {
-  days: Day[];
-  setDays: (days: Day[]) => void;
-  showWishlist: boolean;
-  onToggleWishlist: () => void;
-  wishlists: Wishlist[];
-  hiddenWishlistIds: number[];
-  onToggleWishlistId: (id: number) => void;
-}) {
+export default function DayFilter() {
   const [expanded, setExpanded] = useState(false);
-  const daysWithEvents = days.filter((day) => day.events.length > 0);
 
+  const tripId = Number(useParams().tripId);
+  const { data: wishlistsResponse } = useGetWishlistsQuery(tripId);
+  const wishlists = wishlistsResponse?.data ?? [];
+  const { days, showWishlist, hiddenWishlistIds } = useSelector(
+    (state: RootState) => state.map,
+  );
+  const daysWithEvents = days.filter((day) => day.events.length > 0);
   const allChecked = daysWithEvents.every((day) => day.show);
   const noneChecked = daysWithEvents.every((day) => !day.show);
+  const dispatch = useDispatch();
+
+  const setDays = (days: Day[]) => dispatch(updateDayes(days));
+  const onToggleWishlist = () => dispatch(toggleWishlist());
+  const onToggleWishlistId = (id: number) => dispatch(toggleWishlistId(id));
 
   const toggleDay = (date: string) => {
     setDays(
@@ -157,26 +151,5 @@ export function DayFilter({
         </button>
       )}
     </div>
-  );
-}
-
-export default function DayFilterConnected() {
-  const tripId = Number(useParams().tripId);
-  const { data: wishlistsResponse } = useGetWishlistsQuery(tripId);
-  const wishlists = wishlistsResponse?.data ?? [];
-  const { days, showWishlist, hiddenWishlistIds } = useSelector(
-    (state: RootState) => state.map,
-  );
-  const dispatch = useDispatch();
-  return (
-    <DayFilter
-      days={days}
-      setDays={(days) => dispatch(setDays(days))}
-      showWishlist={showWishlist}
-      onToggleWishlist={() => dispatch(toggleWishlist())}
-      wishlists={wishlists}
-      hiddenWishlistIds={hiddenWishlistIds}
-      onToggleWishlistId={(id) => dispatch(toggleWishlistId(id))}
-    />
   );
 }
