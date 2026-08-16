@@ -1,7 +1,7 @@
 import { Copy, ExternalLink } from "lucide-react";
 import { toast } from "sonner";
 
-export function PlaceAddress({
+export default function PlaceAddress({
   name,
   address,
   placeId,

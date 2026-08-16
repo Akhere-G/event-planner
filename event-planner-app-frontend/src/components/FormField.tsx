@@ -7,7 +7,7 @@ export interface FormFieldProps {
   children: React.ReactNode;
 }
 
-export function FormField({
+export default function FormField({
   label,
   name,
   touched = true,

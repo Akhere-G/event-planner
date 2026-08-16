@@ -1,6 +1,6 @@
-import { FormField, type FormFieldProps } from "./FormField";
+import FormField, { type FormFieldProps } from "./FormField";
 
-export interface FormSelectProps extends Omit<FormFieldProps, 'children'> {
+export interface FormSelectProps extends Omit<FormFieldProps, "children"> {
   value?: string | number;
   onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
   onBlur?: (e: React.ChangeEvent<HTMLSelectElement>) => void;

@@ -1,7 +1,7 @@
 import { Textarea } from "./ui/textarea";
-import { FormField, type FormFieldProps } from "./FormField";
+import FormField, { type FormFieldProps } from "./FormField";
 
-export interface FormTextareaProps extends Omit<FormFieldProps, 'children'> {
+export interface FormTextareaProps extends Omit<FormFieldProps, "children"> {
   value?: string | number;
   onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
   onBlur?: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;

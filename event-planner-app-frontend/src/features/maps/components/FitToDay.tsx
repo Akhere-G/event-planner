@@ -10,7 +10,7 @@ import { useParams } from "react-router";
 import type { Wishlist } from "../../wishlist/types";
 import { getWishlistColor } from "../../wishlist/utils";
 
-export function FitToDay() {
+export default function FitToDay() {
   const [expanded, setExpanded] = useState(false);
 
   const { days, hiddenWishlistIds, showWishlist } = useSelector(

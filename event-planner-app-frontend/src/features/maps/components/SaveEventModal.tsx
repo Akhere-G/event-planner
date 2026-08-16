@@ -5,7 +5,7 @@ import type { EventSchema } from "../../events/schemas/eventSchema";
 import type { CreateWishlistItemPayload, Wishlist } from "../../wishlist/types";
 import { toast } from "sonner";
 
-export function SaveEventModal({
+export default function SaveEventModal({
   open,
   event,
   dates,
