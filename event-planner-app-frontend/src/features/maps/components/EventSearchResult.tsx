@@ -19,11 +19,11 @@ import AccommodationForm from "../../accommodations/components/AccommodationForm
 import { useGetTripQuery } from "../../trips/services/tripsApiSlice";
 import { getCityBounds } from "../../maps/utils";
 
-import { PlaceHeader } from "./PlaceHeader";
-import { PlaceAddress } from "./PlaceAddress";
-import { TagChip } from "./TagChip";
-import { SaveEventModal } from "./SaveEventModal";
-import { ImageCarousel } from "./ImageCarousel";
+import PlaceHeader from "./PlaceHeader";
+import PlaceAddress from "./PlaceAddress";
+import TagChip from "./TagChip";
+import SaveEventModal from "./SaveEventModal";
+import ImageCarousel from "./ImageCarousel";
 import { canUserEdit } from "../../users/utils";
 
 export default function EventSearchResultCard() {

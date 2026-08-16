@@ -1,7 +1,7 @@
 import { Input } from "./ui/input";
-import { FormField, type FormFieldProps } from "./FormField";
+import FormField, { type FormFieldProps } from "./FormField";
 
-export interface FormInputProps extends Omit<FormFieldProps, 'children'> {
+export interface FormInputProps extends Omit<FormFieldProps, "children"> {
   value?: string | number;
   type?: string;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;

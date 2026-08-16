@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useMapsLibrary } from "@vis.gl/react-google-maps";
 import { Input } from "./ui/input";
-import { FormField, type FormFieldProps } from "./FormField";
+import FormField, { type FormFieldProps } from "./FormField";
 
 interface LocationInputProps extends Omit<FormFieldProps, "children"> {
   onPlaceSelect: (place: google.maps.places.PlaceResult) => void;

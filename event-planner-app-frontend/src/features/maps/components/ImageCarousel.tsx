@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 
-export function ImageCarousel({
+export default function ImageCarousel({
   photos,
   name,
 }: {

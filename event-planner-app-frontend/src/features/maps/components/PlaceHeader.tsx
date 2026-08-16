@@ -1,6 +1,6 @@
 import { Star, Tag as TagIcon } from "lucide-react";
 
-export function PlaceHeader({
+export default function PlaceHeader({
   name,
   rating,
   totalReviews,

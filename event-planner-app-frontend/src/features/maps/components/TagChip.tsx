@@ -1,6 +1,6 @@
 import type { Tag } from "../types";
 
-export function TagChip({ color, text }: Tag) {
+export default function TagChip({ color, text }: Tag) {
   return (
     <div
       style={{ backgroundColor: color }}

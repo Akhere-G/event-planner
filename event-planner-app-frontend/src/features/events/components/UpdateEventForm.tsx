@@ -11,18 +11,20 @@ import { toast } from "sonner";
 import { getCityBounds } from "../../maps/utils";
 import type { Event } from "../types";
 
-export function UpdateEventFormView({
-  destination,
+export default function UpdateEventFormView({
   initialEvent,
   onClose,
 }: {
-  destination: { latitude: number; longitude: number };
   initialEvent: Event;
   onClose: () => void;
 }) {
   const [errorMessage, setErrorMessage] = useState("");
 
-  const { tripId } = useParams();
+  const tripId = Number(useParams()?.tripId);
+
+  const { data } = useGetTripQuery(Number(tripId));
+  const trip = data?.data;
+
   const [updateEvent, { isLoading: isUpdateLoading }] =
     useUpdateEventMutation();
 
@@ -77,7 +79,9 @@ export function UpdateEventFormView({
     }
   }
 
-  const cityBounds = getCityBounds(destination);
+  if (!trip) return null;
+
+  const cityBounds = getCityBounds(trip);
 
   return (
     <>
@@ -130,30 +134,5 @@ export function UpdateEventFormView({
       </form>
       {errorMessage && <p className="mt-2 errorMessage">{errorMessage}</p>}
     </>
-  );
-}
-
-export default function UpdateEventForm({
-  initialEvent,
-  onClose,
-}: {
-  initialEvent: Event;
-  onClose: () => void;
-}) {
-  const tripId = Number(useParams()?.tripId);
-
-  const { data } = useGetTripQuery(Number(tripId));
-
-  return (
-    data?.data && (
-      <UpdateEventFormView
-        destination={{
-          latitude: data.data.latitude,
-          longitude: data.data.longitude,
-        }}
-        initialEvent={initialEvent}
-        onClose={onClose}
-      />
-    )
   );
 }

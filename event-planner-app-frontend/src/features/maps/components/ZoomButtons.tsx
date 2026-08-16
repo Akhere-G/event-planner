@@ -6,7 +6,7 @@ import { useParams } from "react-router";
 import { fitToBounds } from "../utils";
 import { useGetTripQuery } from "../../trips/services/tripsApiSlice";
 
-export function ZoomButtons() {
+export default function ZoomButtons() {
   const params = useParams();
   const tripId = Number(params.tripId);
 
