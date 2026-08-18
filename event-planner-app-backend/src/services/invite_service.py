@@ -206,6 +206,7 @@ def join_itinerary(user_id: int, token: str):
                 "email": user.email,
                 "itinerary_id": itinerary.id,
                 "role": role,
+                "created_by_id": user_id,
                 "updated_by_id": user_id,
                 "inviter_id": user_id,
             }
