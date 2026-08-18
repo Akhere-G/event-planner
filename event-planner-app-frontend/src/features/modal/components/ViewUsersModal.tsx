@@ -15,7 +15,10 @@ interface ViewUsersModalProps {
 
 type ViewType = "users" | "invites";
 
-export default function ViewUsersModal({ open, onOpenChange }: ViewUsersModalProps) {
+export default function ViewUsersModal({
+  open,
+  onOpenChange,
+}: ViewUsersModalProps) {
   const [view, setView] = useState<ViewType>("users");
 
   const isUsersView = view === "users";
@@ -49,7 +52,7 @@ export default function ViewUsersModal({ open, onOpenChange }: ViewUsersModalPro
           </div>
         </DialogHeader>
 
-        {isUsersView && <UsersView />}
+        {isUsersView && <UsersView showInvites={showInvites} />}
         {isInvitesView && <InvitesView />}
       </DialogContent>
     </Dialog>
