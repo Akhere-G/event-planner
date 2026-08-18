@@ -1,9 +1,15 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type HTMLAttributes } from "react";
 import { useMapsLibrary } from "@vis.gl/react-google-maps";
 import { Input } from "./ui/input";
-import FormField, { type FormFieldProps } from "./FormField";
+import FormField from "./FormField";
 
-interface LocationInputProps extends Omit<FormFieldProps, "children"> {
+type ParentType = HTMLAttributes<HTMLInputElement>;
+interface LocationInputProps extends ParentType {
+  label?: string;
+  name: string;
+  touched?: boolean;
+  errorMessage?: string;
+  formClassNames?: string;
   onPlaceSelect: (place: google.maps.places.PlaceResult) => void;
   searchTypes?: string[];
   cityBounds?: { north: number; east: number; south: number; west: number };

@@ -1,6 +1,10 @@
+import type { SelectHTMLAttributes } from "react";
 import FormField, { type FormFieldProps } from "./FormField";
 
-export interface FormSelectProps extends Omit<FormFieldProps, "children"> {
+type Parent = Omit<FormFieldProps, "children"> &
+  SelectHTMLAttributes<HTMLSelectElement>;
+
+export interface FormSelectProps extends Parent {
   value?: string | number;
   onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
   onBlur?: (e: React.ChangeEvent<HTMLSelectElement>) => void;
