@@ -41,6 +41,7 @@ export default function useUpdateEvent({
       if (isFetchBaseQueryError(err)) {
         toast.error((err.data as { message: string }).message);
       }
+      throw err;
     }
   }
 

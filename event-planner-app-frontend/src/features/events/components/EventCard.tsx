@@ -70,8 +70,9 @@ export default function EventCard({
     try {
       setEventData((prev) => ({ ...prev, ...newData }));
       await handleEdit(event.id, newData);
-    } catch {
+    } catch (err) {
       setEventData(oldData);
+      throw err;
     }
   };
 
@@ -104,8 +105,7 @@ export default function EventCard({
                 canEdit={canUserEdit(trip.role)}
                 textClassNames="text-lg"
                 setValue={(name) => {
-                  updateEventData({ name });
-                  handleEdit(eventData.id, { name });
+                  void updateEventData({ name });
                 }}
               />
             </h3>
@@ -169,7 +169,7 @@ export default function EventCard({
               </span>
             }
             setValue={(category) => {
-              updateEventData({ category });
+              void updateEventData({ category });
             }}
             options={eventCategories}
             selectClassName="flex flex-col items-stretch text-center!"
@@ -189,7 +189,7 @@ export default function EventCard({
             textClassNames="text-xs"
             inputClassNames="text-xs"
             setValue={(description) => {
-              updateEventData({ description });
+              void updateEventData({ description });
             }}
             emptyText="Add notes"
           />
