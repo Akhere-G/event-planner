@@ -22,7 +22,7 @@ user_bp = Blueprint("user", __name__)
 def get_users_routes(user_id: int, itinerary_id: int):
     schema = UserWithRoleSchema(many=True)
     is_user_in_itinerary(user_id, itinerary_id)
-    users = get_itinerary_memberships(user_id, itinerary_id)
+    users = get_itinerary_memberships(itinerary_id)
     return api_response(
         data={"users": schema.dump(users)},
         success=True,
