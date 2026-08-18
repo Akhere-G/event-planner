@@ -1,9 +1,13 @@
-import { Link, useMatch } from "react-router";
+import { useMatch } from "react-router";
 import { useGetUsersQuery } from "../usersApiSlice";
 import { StateGate } from "../../../components";
 import UsersTable from "./UsersTable";
 
-export default function UsersView() {
+export default function UsersView({
+  showInvites,
+}: {
+  showInvites: () => void;
+}) {
   const params = useMatch("/trips/:tripId")?.params;
   const tripId = Number(params?.tripId);
 
@@ -16,12 +20,12 @@ export default function UsersView() {
           <UsersTable users={data?.data.users ?? []} />
         </div>
         {!isError && !isLoading && (
-          <Link
-            to={`/trips/${tripId}?view=invites`}
+          <button
+            onClick={showInvites}
             className="btn-primary px-4 py-2 rounded-md"
           >
             Invite User
-          </Link>
+          </button>
         )}
       </div>
     </StateGate>
