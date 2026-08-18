@@ -22,7 +22,7 @@ export const inviteApi = apiSlice.injectEndpoints({
       { tripId: number; invite: InviteSchema }
     >({
       query: ({ tripId, invite }) => ({
-        url: `itineraries/${tripId}/invites`,
+        url: `/itineraries/${tripId}/invites`,
         method: "POST",
         body: invite,
       }),
@@ -38,7 +38,7 @@ export const inviteApi = apiSlice.injectEndpoints({
       { tripId: number; inviteId: number }
     >({
       query: ({ tripId, inviteId }) => ({
-        url: `itineraries/${tripId}/invites/${inviteId}`,
+        url: `/itineraries/${tripId}/invites/${inviteId}`,
         method: "DELETE",
       }),
       invalidatesTags: (result, _, args) => [

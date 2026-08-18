@@ -100,7 +100,7 @@ export const wishlistApiSlice = apiSlice.injectEndpoints({
       VoteForWishlistItemPayload
     >({
       query: ({ tripId, wishlistId, wishlistItemId, vote }) => ({
-        url: `itineraries/${tripId}/wishlists/${wishlistId}/items/${wishlistItemId}/vote`,
+        url: `/itineraries/${tripId}/wishlists/${wishlistId}/items/${wishlistItemId}/vote`,
         method: "POST",
         body: { vote },
       }),
