@@ -138,7 +138,7 @@ export default function AddItemForm({
             }
             setPlaceId(place.place_id);
           }}
-          formClassNames="text-xs px-2 py-1 h-8 rounded-md bg-surface"
+          className="text-xs px-2 py-1 h-8 rounded-md bg-surface"
           placeholder="Search with Google..." // ts-ignore
         />
       </div>
