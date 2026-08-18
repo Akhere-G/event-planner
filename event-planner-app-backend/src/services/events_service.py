@@ -25,7 +25,7 @@ def get_event(itinerary_id: int, event_id: int):
 def get_events(itinerary_id: int):
     stmt = (
         select(Event)
-        .join(Event.id == ItineraryEvent.event_id)
+        .join(ItineraryEvent, Event.id == ItineraryEvent.event_id)
         .where(ItineraryEvent.itinerary_id == itinerary_id)
     )
 
@@ -59,7 +59,12 @@ def create_events(itinerary_id: int, data: list[dict], created_by_id: int):
     try:
         ids = []
         for d in data:
-            event = Event(**d)
+            event_data = {
+                **d,
+                "created_by_id": created_by_id,
+                "updated_by_id": created_by_id,
+            }
+            event = Event(**event_data)
             db.session.add(event)
             db.session.flush()
 

@@ -64,8 +64,11 @@ def update_packing_item(
             if k in fields:
                 setattr(item, k, v)
 
-        if packing_item_data.get("is_checked"):
-            item.checked_by_id = user_id
+        if "is_checked" in packing_item_data:
+            item.checked_by_id = user_id if packing_item_data["is_checked"] else None
+
+        if "is_shared" in packing_item_data and not packing_item_data["is_shared"]:
+            item.owner_id = user_id
 
         item.updated_by_id = user_id
         db.session.commit()
