@@ -371,14 +371,12 @@ export default function TripCalendar({ trip }: { trip: Trip }) {
           }}
         />
       </div>
-      <div className="grid gap-4 mt-4">
-        <CalendarEventList
-          events={eventsForSelectedDay}
-          currentDate={currentDate}
-          setSelectedEvent={(event: Event) => setSelectedEvent(event)}
-          setDraggedEvent={setDraggedEvent}
-        />
-      </div>
+      <CalendarEventList
+        events={eventsForSelectedDay}
+        currentDate={currentDate}
+        setSelectedEvent={(event: Event) => setSelectedEvent(event)}
+        setDraggedEvent={setDraggedEvent}
+      />
       {selectedEvent && (
         <EventModal
           open={!!selectedEvent}
