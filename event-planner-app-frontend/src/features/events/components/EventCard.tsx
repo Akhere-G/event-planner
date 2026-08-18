@@ -102,6 +102,7 @@ export default function EventCard({
               <EditableText
                 value={eventData.name}
                 canEdit={canUserEdit(trip.role)}
+                textClassNames="text-lg"
                 setValue={(name) => {
                   updateEventData({ name });
                   handleEdit(eventData.id, { name });
@@ -162,7 +163,7 @@ export default function EventCard({
             selectedValue={eventData.category}
             canEdit={canUserEdit(trip.role)}
             defaultElement={
-              <span className="flex items-center self-end gap-1  px-4 py-1 rounded-full bg-brand-secondary/10 text-brand-secondary text-xs font-semibold uppercase w-min">
+              <span className="flex items-center self-end gap-1  px-4 py-1 rounded-full bg-brand-secondary/10 text-brand-secondary text-xs font-semibold uppercase w-min ">
                 <Tag size={16} />
                 {eventData.category}
               </span>
@@ -177,12 +178,16 @@ export default function EventCard({
           <div className="flex items-center gap-2 text-text-secondary text-sm my-2">
             <MapPin size={14} className="shrink-0" />
 
-            <p className="text-sm text-text-secondary">{eventData.address}</p>
+            <p className="text-text-secondary text-xs truncate">
+              {eventData.address}
+            </p>
           </div>
 
           <EditableText
             value={eventData?.description ?? ""}
             canEdit={canUserEdit(trip.role)}
+            textClassNames="text-xs"
+            inputClassNames="text-xs"
             setValue={(description) => {
               updateEventData({ description });
             }}
@@ -190,9 +195,9 @@ export default function EventCard({
           />
 
           <div className="mt-2 flex gap-4 justify-between text-xs text-text-secondary">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 ">
               <Clock size={16} className="text-brand-primary" />
-              <div className="flex gap-1 text-xs!">
+              <div className="flex gap-1 text-sm ">
                 {canUserEdit(trip.role) ? (
                   <>
                     <button
