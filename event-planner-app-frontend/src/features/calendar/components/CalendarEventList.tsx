@@ -24,7 +24,7 @@ export default function CalendarEventList({
     );
   }
   return (
-    <>
+    <div className="flex flex-col gap-2 mt-4">
       {events.map((event) => {
         return (
           <div
@@ -37,6 +37,6 @@ export default function CalendarEventList({
           </div>
         );
       })}
-    </>
+    </div>
   );
 }
