@@ -118,7 +118,6 @@ export default function EditEventDatesModal({
           name="startAt"
           value={startAt}
           onChange={(e) => updateStartTime(e.target.value)}
-          // @ts-expect-error min is used by base input component
           min={minDatetime}
           max={maxDatetime}
         />
@@ -128,7 +127,6 @@ export default function EditEventDatesModal({
           name="endAt"
           value={endAt}
           onChange={(e) => setEndAt(e.target.value)}
-          // @ts-expect-error min is used by base input component
           min={minDatetime}
           max={maxDatetime}
         />
