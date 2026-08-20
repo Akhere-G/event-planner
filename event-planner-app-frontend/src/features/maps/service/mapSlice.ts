@@ -40,6 +40,18 @@ export const mapSlice = createSlice({
     setDays: (state, action: PayloadAction<Day[]>) => {
       state.days = action.payload;
     },
+    setDayOpen: (state, action: PayloadAction<string>) => {
+      const date = action.payload;
+      state.days = state.days.map((day) =>
+        day.date === date ? { ...day, isOpen: true } : day,
+      );
+    },
+    toggleDayOpen: (state, action: PayloadAction<string>) => {
+      const date = action.payload;
+      state.days = state.days.map((day) =>
+        day.date === date ? { ...day, isOpen: !day.isOpen } : day,
+      );
+    },
     setSearchEvents: (state, action: PayloadAction<EventSearchResult[]>) => {
       state.searchEvents = action.payload;
       state.searchIndex = 0; // Reset index on new search
@@ -113,6 +125,8 @@ export const mapSlice = createSlice({
 
 export const {
   setDays,
+  setDayOpen,
+  toggleDayOpen,
   setSearchEvents,
   setSearchIndex,
   setSelectedEvent,

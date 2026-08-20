@@ -12,7 +12,7 @@ import { useParams } from "react-router";
 import { toast } from "sonner";
 import { useGetTripQuery } from "../../trips/services/tripsApiSlice";
 import { useDispatch } from "react-redux";
-import { setRoutes } from "../../maps/service/mapSlice";
+import { setRoutes, toggleDayOpen } from "../../maps/service/mapSlice";
 import type { Route } from "../../maps/types";
 import AutofillDayForm from "./AutoFillDayForm";
 import { useGetAccommodationsQuery } from "../../accommodations/accomodationApiSlice";
@@ -26,11 +26,9 @@ import {
 } from "../../../components/ui/dropdown-menu";
 
 export default function DayCard({
-  defaultIsOpen,
   day,
   canEdit,
 }: {
-  defaultIsOpen: boolean;
   canEdit: boolean;
   day: Day;
 }) {
@@ -39,13 +37,20 @@ export default function DayCard({
   const { data } = useGetAccommodationsQuery(tripId);
   const accommodations = data?.data ?? [];
 
+  const dispatch = useDispatch();
+
   const [suggestEvents, { isLoading: isSuggestLoading }] =
     useSuggestEventsMutation();
   const [optimiseEvents, { isLoading: isOptimiseLoading }] =
     useOptimiseEventsMutation();
-  const dispatch = useDispatch();
 
   const [isFillMenuOpen, setIsFillMenuOpen] = useState(false);
+
+  const isOpen = day.isOpen;
+
+  const handleToggleOpen = () => {
+    dispatch(toggleDayOpen(day.date));
+  };
 
   interface Autofill extends AutofillConfig {
     date: string;
@@ -107,7 +112,7 @@ export default function DayCard({
   return (
     <div className="relative">
       <Accordion
-        defaultIsOpen={defaultIsOpen}
+        open={isOpen}
         TitleComponent={() => (
           <div className="flex justify-between gap-2 items-center w-full relative">
             <div className="flex flex-col items-start">
@@ -173,6 +178,7 @@ export default function DayCard({
             {canEdit && <AddEventForm date={day.date} />}
           </div>
         )}
+        onOpenChange={handleToggleOpen}
       />
 
       {isFillMenuOpen && (

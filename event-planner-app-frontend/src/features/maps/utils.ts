@@ -1,14 +1,5 @@
-import type { Day, Event } from "../events/types";
-import { makeDays } from "../events/utils";
 import { DEFAULT_PADDING } from "./constants";
 import type { EventSearchResult, Tag } from "./types";
-
-export const getDaysWithFilter = (
-  events: Event[],
-  startDate: string,
-  endDate: string,
-): Day[] =>
-  makeDays(events, startDate, endDate).map((day) => ({ ...day, show: true }));
 
 export const getBoundsForEvents = (
   events: { latitude: number; longitude: number }[],
