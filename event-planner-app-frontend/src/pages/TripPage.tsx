@@ -3,7 +3,8 @@ import { useGetTripQuery } from "../features/trips/services/tripsApiSlice";
 import { StateGate } from "../components";
 import { isFetchBaseQueryError } from "../features/api/utils";
 import { TripDetails, TripMap } from "../features/trips/components";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useDispatch } from "react-redux";
 import ViewUsersModal from "../features/modal/components/ViewUsersModal";
 import {
   ResizableHandle,
@@ -12,15 +13,46 @@ import {
 } from "../components/ui/resizable";
 import type { Trip } from "../features/trips/types";
 import { useBreakpoint } from "../hooks/useBreakpoint";
+import { setDays } from "../features/maps/service/mapSlice";
+import { getDaysWithFilter } from "../features/events/utils";
+import { format, isAfter, isBefore, isSameDay, startOfToday } from "date-fns";
+
+function getDefaultOpenDate(startDate: string, endDate: string) {
+  const today = startOfToday();
+  const tripStart = new Date(startDate);
+  const tripEnd = new Date(endDate);
+
+  if (
+    isSameDay(today, tripStart) ||
+    isSameDay(today, tripEnd) ||
+    (isAfter(today, tripStart) && isBefore(today, tripEnd))
+  ) {
+    return format(today, "yyyy-MM-dd");
+  }
+
+  return format(tripStart, "yyyy-MM-dd");
+}
 
 export default function TripPage() {
   const { tripId } = useParams();
   const { data, isLoading, isError, error } = useGetTripQuery(Number(tripId));
   const [showUsersModal, setShowUsersModal] = useState(false);
+  const dispatch = useDispatch();
 
   const breakpoint = useBreakpoint();
 
   const isMobile = ["xs", "sm"].includes(breakpoint);
+
+  useEffect(() => {
+    if (data?.data) {
+      const { events, startDate, endDate } = data.data;
+      const defaultOpenDate = getDefaultOpenDate(startDate, endDate);
+      dispatch(
+        setDays(getDaysWithFilter(events, startDate, endDate, defaultOpenDate)),
+      );
+    }
+  }, [data, dispatch]);
+
   return (
     <StateGate
       containerClasses="container"

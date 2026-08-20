@@ -15,6 +15,7 @@ export type Day = {
   events: Event[];
   day: number;
   show: boolean;
+  isOpen: boolean;
 };
 
 export interface AutofillConfig {

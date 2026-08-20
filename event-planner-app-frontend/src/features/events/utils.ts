@@ -1,4 +1,4 @@
-import { addDays, differenceInDays, format, parseISO } from "date-fns";
+import { addDays, differenceInDays, format } from "date-fns";
 import type { Day, Event } from "./types";
 
 export function makeDays(
@@ -6,12 +6,13 @@ export function makeDays(
   startStr: string,
   endStr: string,
   show = true,
+  defaultOpenDate?: string,
 ): Day[] {
   function getDate(dateStr: Date | string) {
     return format(dateStr, "yyyy-MM-dd");
   }
-  const startDate = parseISO(startStr);
-  const endDate = parseISO(endStr);
+  const startDate = new Date(startStr);
+  const endDate = new Date(endStr);
 
   if (endDate < startDate) return [];
 
@@ -36,8 +37,20 @@ export function makeDays(
     events,
     day: differenceInDays(date, startDate) + 1,
     show,
+    isOpen: defaultOpenDate ? date === defaultOpenDate : false,
   }));
 }
+
+export const getDaysWithFilter = (
+  events: Event[],
+  startDate: string,
+  endDate: string,
+  defaultOpenDate?: string,
+): Day[] =>
+  makeDays(events, startDate, endDate, true, defaultOpenDate).map((day) => ({
+    ...day,
+    show: true,
+  }));
 
 export const getDayColor = (day: number) => {
   const brandPrimaries = [

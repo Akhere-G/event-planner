@@ -4,8 +4,8 @@ import { useDispatch, useSelector } from "react-redux";
 import type { RootState } from "../../../store";
 
 import type { Trip } from "../../trips/types";
-import { setDays, setSearchEvents } from "../service/mapSlice";
-import { fitToBounds, formatPlace, getDaysWithFilter } from "../utils";
+import { setSearchEvents } from "../service/mapSlice";
+import { fitToBounds, formatPlace } from "../utils";
 import { CITY_RADIUS, DEFAULT_ZOOM, MAX_ZOOM, MIN_ZOOM } from "../constants";
 import { EventSearch, DayFilter, FitToDay, RouteDetails, ZoomButtons } from ".";
 import AccommodationMarkers from "./AccommodationMarkers";
@@ -15,7 +15,7 @@ import WishlistMarkers from "./WishlistMarkers";
 import UserCoords from "./UserCoords";
 
 export default function TripMap({ trip }: { trip: Trip }) {
-  const { latitude, longitude, startDate, endDate, events } = trip;
+  const { latitude, longitude } = trip;
   const dispatch = useDispatch();
   const { days } = useSelector((state: RootState) => state.map);
   const darkMode = useSelector((state: RootState) => state.theme.darkMode);
@@ -40,10 +40,6 @@ export default function TripMap({ trip }: { trip: Trip }) {
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [map, latitude, longitude]);
-
-  useEffect(() => {
-    dispatch(setDays(getDaysWithFilter(events, startDate, endDate)));
-  }, [events, startDate, endDate, dispatch]);
 
   const placesLibrary = useMapsLibrary("places");
 
