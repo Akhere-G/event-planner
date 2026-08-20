@@ -15,6 +15,7 @@ import { toast } from "sonner";
 
 export default function Register() {
   const [errorMessage, setErrorMessage] = useState("");
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
 
   const [registerUser, result] = useRegisterUserMutation();
   const { formState, register, handleSubmit, setError } = useForm({
@@ -29,6 +30,14 @@ export default function Register() {
 
   const onSubmit = async (formData: RegisterSchema) => {
     setErrorMessage("");
+
+    if (!agreedToTerms) {
+      toast.error(
+        "Please agree to the Terms and Conditions and Privacy Policy before registering.",
+      );
+      return;
+    }
+
     try {
       const formattedFormData = {
         ...formData,
@@ -85,6 +94,33 @@ export default function Register() {
             {...register("repeatPassword")}
             errorMessage={formState.errors.repeatPassword?.message}
           />
+          <label className="flex items-start gap-3 text-sm ">
+            <input
+              type="checkbox"
+              checked={agreedToTerms}
+              onChange={(e) => setAgreedToTerms(e.target.checked)}
+              className="mt-1 h-4 w-4 rounded border-surface-border text-brand-primary focus:ring-brand-primary"
+            />
+            <span>
+              I agree to the{" "}
+              <Link
+                to="/terms"
+                target="_blank"
+                className="font-semibold text-brand-primary underline underline-offset-2"
+              >
+                Terms and Conditions
+              </Link>{" "}
+              and{" "}
+              <Link
+                to="/privacy"
+                target="_blank"
+                className="font-semibold text-brand-primary underline underline-offset-2"
+              >
+                Privacy Policy
+              </Link>
+              .
+            </span>
+          </label>
           <button className="btn-primary mt-2" disabled={result.isLoading}>
             Register
           </button>
