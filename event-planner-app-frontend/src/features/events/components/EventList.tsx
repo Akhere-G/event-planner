@@ -29,27 +29,23 @@ export default function EventList({ events }: { events: Event[] }) {
   }, [events, selectedEvent]);
 
   return (
-    <div className="flex flex-col gap-2 mb-4">
-      <StateGate
-        emptyStateProps={{
-          isEmpty: events.length === 0,
-          height: 50,
-          message: "Nothing planned yet.",
-        }}
-      >
-        <>
-          {events.map((event, i) => (
-            <React.Fragment key={event.id}>
-              <div id={`event-card-${event.id}`}>
-                <EventCard event={event} />
-              </div>
-              {i !== events.length - 1 && (
-                <EventActions from={event} to={events[i + 1]} />
-              )}
-            </React.Fragment>
-          ))}
-        </>
-      </StateGate>
-    </div>
+    <StateGate
+      emptyStateProps={{
+        isEmpty: events.length === 0,
+        height: 50,
+        message: "Nothing planned yet.",
+      }}
+    >
+      <div className="flex flex-col gap-2 mb-4">
+        {events.map((event, i) => (
+          <div key={event.id} id={`event-card-${event.id}`}>
+            <EventCard event={event} />
+            {i !== events.length - 1 && (
+              <EventActions from={event} to={events[i + 1]} />
+            )}
+          </div>
+        ))}
+      </div>
+    </StateGate>
   );
 }
