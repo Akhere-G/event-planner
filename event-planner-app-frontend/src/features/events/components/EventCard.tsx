@@ -9,7 +9,7 @@ import {
   Tag,
   Trash,
 } from "lucide-react";
-import { format, parseISO } from "date-fns";
+import { format } from "date-fns";
 import { type Event } from "../types";
 import { canUserEdit } from "../../users/utils";
 import { useState } from "react";
@@ -49,8 +49,8 @@ export default function EventCard({
   const [isDateModalOpen, setIsDateModalOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [eventData, setEventData] = useState(event);
-  const start = parseISO(eventData.startAt);
-  const end = parseISO(eventData.endAt);
+  const start = new Date(eventData.startAt);
+  const end = new Date(eventData.endAt);
 
   const tripId = Number(useParams()?.tripId);
   const { data, isLoading, isError } = useGetTripQuery(Number(tripId));

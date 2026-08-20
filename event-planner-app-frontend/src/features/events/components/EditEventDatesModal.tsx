@@ -5,7 +5,6 @@ import {
   differenceInMilliseconds,
   format,
   isValid,
-  parseISO,
 } from "date-fns";
 import type { Event } from "../types";
 import { ConfirmModal, FormInput } from "../../../components";
@@ -30,7 +29,7 @@ export default function EditEventDatesModal({
 }: EditEventDatesModalProps) {
   const formatForInput = (isoStr: string) => {
     try {
-      return format(parseISO(isoStr), "yyyy-MM-dd'T'HH:mm");
+      return format(isoStr, "yyyy-MM-dd'T'HH:mm");
     } catch {
       return "";
     }
