@@ -3,7 +3,6 @@ import {
   differenceInMilliseconds,
   format,
   isValid,
-  parseISO,
 } from "date-fns";
 import { FormInput, FormTextarea, LocationInput } from "../../../components";
 import { isValidationError } from "../../api/utils";
@@ -91,9 +90,9 @@ export default function TripForm({
     const currentStartStr = getValues("startDate");
     const currentEndStr = getValues("endDate");
 
-    const currentStart = parseISO(currentStartStr);
-    const currentEnd = parseISO(currentEndStr);
-    const nextStart = parseISO(newStartStr);
+    const currentStart = new Date(currentStartStr);
+    const currentEnd = new Date(currentEndStr);
+    const nextStart = new Date(newStartStr);
 
     if (isValid(currentStart) && isValid(currentEnd) && isValid(nextStart)) {
       const duration = differenceInMilliseconds(currentEnd, currentStart);

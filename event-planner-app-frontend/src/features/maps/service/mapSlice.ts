@@ -54,7 +54,7 @@ export const mapSlice = createSlice({
     },
     setSearchEvents: (state, action: PayloadAction<EventSearchResult[]>) => {
       state.searchEvents = action.payload;
-      state.searchIndex = 0; // Reset index on new search
+      state.searchIndex = 0;
     },
     updateSearchEvents: (state, action: PayloadAction<UpdateFunc>) => {
       state.searchEvents = state.searchEvents.map(action.payload);

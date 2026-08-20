@@ -16,20 +16,13 @@ import {
   WidthType,
 } from "docx";
 import { createEvents } from "ics";
-import {
-  differenceInHours,
-  differenceInMinutes,
-  format,
-  parseISO,
-} from "date-fns";
+import { differenceInHours, differenceInMinutes, format } from "date-fns";
 import { toast } from "sonner";
 import type { Day, Event } from "../events/types";
 import { makeDays } from "../events/utils";
 import type { User } from "../users/types";
 import { formatDateRange } from "../../utils/dateFormattors";
 import type { Trip } from "./types";
-
-// TODO refactor and move functions to the correct slice
 
 function buildGoogleMapsUrl(event: Event): string {
   return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(event.name)},${encodeURIComponent(event.address)}`;
@@ -396,7 +389,7 @@ function buildDayActivityTable(events: Event[], colors: DocThemeColors): Table {
             buildValueCell(
               [
                 buildTextParagraph(
-                  `${format(parseISO(event.startAt), "p")} – ${format(parseISO(event.endAt), "p")}`,
+                  `${format(event.startAt, "p")} – ${format(event.endAt, "p")}`,
                   colors.textPrimary,
                 ),
               ],
@@ -430,7 +423,7 @@ function buildDaySection(
   day: Day,
   colors: DocThemeColors,
 ): Array<Paragraph | Table> {
-  const dayLabel = format(parseISO(day.date), "EEE d MMM");
+  const dayLabel = format(day.date, "EEE d MMM");
   const sorted = sortEventsByStart(day.events);
   const children: Array<Paragraph | Table> = [
     new Paragraph({
