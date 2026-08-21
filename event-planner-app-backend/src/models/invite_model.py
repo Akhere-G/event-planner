@@ -1,11 +1,13 @@
-from ..extensions import Base
-from sqlalchemy.orm import Mapped, mapped_column, relationship
-from sqlalchemy import Integer, String, ForeignKey, Enum, DateTime, UniqueConstraint
-from .itinerary_user_model import UserRole
 import enum
-from datetime import datetime, timedelta, timezone
 import secrets
+from datetime import datetime, timedelta, timezone
+
+from sqlalchemy import DateTime, Enum, ForeignKey, Integer, String, UniqueConstraint
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+
+from ..extensions import Base
 from .audit_mixins import AuditMixin
+from .itinerary_user_model import UserRole
 
 
 class InvitationStatus(enum.Enum):
@@ -22,7 +24,7 @@ class Invite(Base, AuditMixin):
         ForeignKey("itineraries.id", ondelete="CASCADE")
     )
     email: Mapped[str] = mapped_column(String(255), index=True)
-    inviter_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
+    inviter_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="SET NULL"))
     role: Mapped[UserRole] = mapped_column(
         Enum("admin", "editor", "viewer", name="userrole"),
         default=UserRole.VIEWER.value,

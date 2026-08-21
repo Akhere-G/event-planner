@@ -1,14 +1,16 @@
-from ..extensions import Base
+from datetime import date
+
 from sqlalchemy import (
-    Integer,
-    String,
+    Date,
     Float,
     ForeignKey,
-    Date,
+    Integer,
+    String,
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+
+from ..extensions import Base
 from .audit_mixins import AuditMixin
-from datetime import date
 from .itinerary_model import Itinerary
 
 
@@ -27,5 +29,10 @@ class Accommodation(Base, AuditMixin):
     start_date: Mapped[date] = mapped_column(Date, index=True)
     end_date: Mapped[date] = mapped_column(Date)
 
-    # Relationships
     itinerary: Mapped["Itinerary"] = relationship(back_populates="accommodations")
+    creator: Mapped["User"] = relationship(  # type: ignore  # noqa: F821
+        "User", foreign_keys="[Accommodation.created_by_id]"
+    )
+    last_editor: Mapped["User"] = relationship(  # type: ignore  # noqa: F821
+        "User", foreign_keys="[Accommodation.updated_by_id]"
+    )
