@@ -1,7 +1,8 @@
 from datetime import datetime, timezone
+from typing import Optional
+
 from sqlalchemy import DateTime, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column
-from typing import Optional
 
 
 class AuditMixin:
@@ -14,5 +15,9 @@ class AuditMixin:
         onupdate=lambda: datetime.now(timezone.utc),
     )
 
-    created_by_id: Mapped[Optional[int]] = mapped_column(ForeignKey("users.id"))
-    updated_by_id: Mapped[Optional[int]] = mapped_column(ForeignKey("users.id"))
+    created_by_id: Mapped[Optional[int]] = mapped_column(
+        ForeignKey("users.id", ondelete="SET NULL"),
+    )
+    updated_by_id: Mapped[Optional[int]] = mapped_column(
+        ForeignKey("users.id", ondelete="SET NULL"),
+    )

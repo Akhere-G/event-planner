@@ -12,6 +12,8 @@ from ..extensions import Base
 from . import User
 from .audit_mixins import AuditMixin
 
+# TODO: add creator and last editor relationships
+
 
 class Wishlist(Base, AuditMixin):
     __tablename__ = "wishlist_categories"
@@ -22,11 +24,16 @@ class Wishlist(Base, AuditMixin):
     )
     name: Mapped[str] = mapped_column(String(100))
 
-    # Relationships
     items: Mapped[list["WishlistItem"]] = relationship(
         back_populates="wishlist",
         cascade="all, delete-orphan",
         passive_deletes=True,
+    )
+    creator: Mapped["User"] = relationship(  # type: ignore  # noqa: F821
+        "User", foreign_keys="[Wishlist.created_by_id]"
+    )
+    last_editor: Mapped["User"] = relationship(  # type: ignore  # noqa: F821
+        "User", foreign_keys="[Wishlist.updated_by_id]"
     )
 
     __table_args__ = (
@@ -48,11 +55,17 @@ class WishlistItem(Base, AuditMixin):
     longitude: Mapped[float] = mapped_column(Float, nullable=True)
     description: Mapped[str] = mapped_column(String(1000), nullable=True)
     place_id: Mapped[str] = mapped_column(String(255), nullable=True)
-
     is_promoted: Mapped[bool] = mapped_column(Boolean, default=False)
+
     wishlist: Mapped["Wishlist"] = relationship(back_populates="items")
     votes: Mapped[list["WishlistItemVote"]] = relationship(
         back_populates="wishlist_item"
+    )
+    creator: Mapped["User"] = relationship(  # type: ignore  # noqa: F821
+        "User", foreign_keys="[WishlistItem.created_by_id]"
+    )
+    last_editor: Mapped["User"] = relationship(  # type: ignore  # noqa: F821
+        "User", foreign_keys="[WishlistItem.updated_by_id]"
     )
 
 
@@ -71,5 +84,12 @@ class WishlistItemVote(Base, AuditMixin):
         primary_key=True,
     )
     is_thumbs_up: Mapped[bool] = mapped_column(Boolean)
+
     wishlist_item: Mapped["WishlistItem"] = relationship(back_populates="votes")
     user: Mapped["User"] = relationship(foreign_keys="[WishlistItemVote.user_id]")
+    creator: Mapped["User"] = relationship(  # type: ignore  # noqa: F821
+        "User", foreign_keys="[WishlistItemVote.created_by_id]"
+    )
+    last_editor: Mapped["User"] = relationship(  # type: ignore  # noqa: F821
+        "User", foreign_keys="[WishlistItemVote.updated_by_id]"
+    )

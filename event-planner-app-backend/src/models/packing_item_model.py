@@ -7,6 +7,9 @@ from .user_model import User
 from typing import Optional
 
 
+# TODO: add creator and last editor relationships
+
+
 class PackingItem(Base, AuditMixin):
     __tablename__ = "packing_items"
 
@@ -27,7 +30,10 @@ class PackingItem(Base, AuditMixin):
 
     is_checked: Mapped[bool] = mapped_column(Boolean, default=False)
     checked_by_id: Mapped[Optional[int]] = mapped_column(
-        Integer, ForeignKey("users.id", ondelete="SET NULL"), default=None, nullable=True
+        Integer,
+        ForeignKey("users.id", ondelete="SET NULL"),
+        default=None,
+        nullable=True,
     )
     checked_by: Mapped[Optional["User"]] = relationship(
         "User", foreign_keys=[checked_by_id]
@@ -36,3 +42,9 @@ class PackingItem(Base, AuditMixin):
         "Itinerary", back_populates="packing_items"
     )  # type: ignore # noqa: F821
     user: Mapped[Optional["User"]] = relationship("User", foreign_keys=[owner_id])  # type: ignore # noqa: F821
+    creator: Mapped["User"] = relationship(  # type: ignore  # noqa: F821
+        "User", foreign_keys="[PackingItem.created_by_id]"
+    )
+    last_editor: Mapped["User"] = relationship(  # type: ignore  # noqa: F821
+        "User", foreign_keys="[PackingItem.updated_by_id]"
+    )
