@@ -318,21 +318,21 @@ def vote_for_wishlist_item(
         wishlist_item_vote = db.session.execute(stmt).scalar_one_or_none()
 
         if wishlist_item_vote:
-            existing_vote = 1 if wishlist_item_vote.isThumbsUp else -1
+            existing_vote = 1 if wishlist_item_vote.is_thumbs_up else -1
 
             if existing_vote == vote:
                 db.session.delete(wishlist_item_vote)
                 db.session.commit()
                 return
 
-            wishlist_item_vote.isThumbsUp = vote == 1
+            wishlist_item_vote.is_thumbs_up = vote == 1
             wishlist_item_vote.updated_by_id = user_id
 
         else:
             wishlist_item_vote = WishlistItemVote(
                 wishlist_item_id=item_id,
                 user_id=user_id,
-                isThumbsUp=vote == 1,
+                is_thumbs_up=vote == 1,
                 created_by_id=user_id,
                 updated_by_id=user_id,
             )
