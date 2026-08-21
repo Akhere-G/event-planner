@@ -35,7 +35,9 @@ class Itinerary(Base, AuditMixin):
     )
 
     events: Mapped[List[Event]] = relationship(
-        secondary="itinerary_events", order_by="Event.start_at"
+        back_populates="itinerary",
+        cascade="all, delete-orphan",
+        order_by="Event.start_at",
     )
 
     invites: Mapped[List["Invite"]] = relationship(  # type: ignore  # noqa: F821
@@ -45,7 +47,10 @@ class Itinerary(Base, AuditMixin):
         back_populates="itinerary", cascade="all, delete-orphan", passive_deletes=True
     )
     packing_items: Mapped[List["PackingItem"]] = relationship(  # type: ignore  # noqa: F821
-        "PackingItem", back_populates="itinerary", cascade="all, delete-orphan", passive_deletes=True
+        "PackingItem",
+        back_populates="itinerary",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
     )
     creator: Mapped["User"] = relationship(  # type: ignore  # noqa: F821
         "User", foreign_keys="[Itinerary.created_by_id]"
