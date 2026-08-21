@@ -70,6 +70,6 @@ class WishlistItemVote(Base, AuditMixin):
         index=True,
         primary_key=True,
     )
-    isThumbsUp: Mapped[bool] = mapped_column(Boolean)
+    is_thumbs_up: Mapped[bool] = mapped_column(Boolean)
     wishlist_item: Mapped["WishlistItem"] = relationship(back_populates="votes")
     user: Mapped["User"] = relationship(foreign_keys="[WishlistItemVote.user_id]")
