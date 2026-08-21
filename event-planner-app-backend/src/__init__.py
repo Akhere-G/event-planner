@@ -2,12 +2,13 @@ import os
 
 import pymysql
 from dotenv import load_dotenv
-from flask import Flask, jsonify, make_response, send_from_directory
+from flask import Flask, send_from_directory
 from flask_cors import CORS
 from marshmallow import ValidationError
 
 from .config.dev_config import DevConfig
 from .config.production_config import ProductionConfig
+from .config.testing_config import TestConfig
 from .exceptions import AppError
 from .extensions import bcrypt, db, limiter, migrate
 from .utils.format_response import api_response
@@ -16,15 +17,15 @@ pymysql.install_as_MySQLdb()
 load_dotenv()
 
 
-def create_app():
+def create_app(testing=False):
     app = Flask(
         __name__,
         static_folder="../static",
         static_url_path="/",
     )
 
-    configure_app(app)
-    initialise_extensions(app)
+    configure_app(app, testing)
+    initialise_extensions(app, testing)
     register_models()
     register_blueprints(app)
     register_error_handlers(app)
@@ -33,12 +34,15 @@ def create_app():
     return app
 
 
-def configure_app(app: Flask):
+def configure_app(app: Flask, testing: bool):
     environment = os.getenv("ENVIRONMENT", "DEV")
-    database_url = os.getenv("DATABASE_URL")
 
-    if environment == "PROD":
-        app.config.from_object(ProductionConfig())
+    if testing:
+        config = TestConfig()
+        engine_options = {}
+    elif environment == "PROD":
+        config = ProductionConfig()
+
         cert_path = os.getenv(
             "DB_CA_CERT_PATH",
             "/app/certs/ca.pem",
@@ -52,18 +56,19 @@ def configure_app(app: Flask):
             }
         }
     else:
-        app.config.from_object(DevConfig())
+        config = DevConfig()
         engine_options = {}
 
+    app.config.from_object(config)
     app.config.from_mapping(
-        DEBUG=os.getenv("FLASK_DEBUG") == "True",
-        SQLALCHEMY_DATABASE_URI=database_url,
+        DEBUG=config.DEBUG,
+        SQLALCHEMY_DATABASE_URI=config.SQLALCHEMY_DATABASE_URI,
         SQLALCHEMY_TRACK_MODIFICATIONS=False,
         SQLALCHEMY_ENGINE_OPTIONS=engine_options,
         ALEMBIC_CONTEXT={
             "render_as_batch": True,
         },
-        SECRET_KEY=os.getenv("FLASK_SECRET_KEY"),
+        SECRET_KEY=config.SECRET_KEY,
     )
 
     CORS(
@@ -75,11 +80,12 @@ def configure_app(app: Flask):
     )
 
 
-def initialise_extensions(app: Flask):
+def initialise_extensions(app: Flask, testing: bool):
     db.init_app(app)
     migrate.init_app(app, db)
     bcrypt.init_app(app)
-    limiter.init_app(app)
+    if not testing:
+        limiter.init_app(app)
 
 
 def register_models():
@@ -183,9 +189,11 @@ def register_error_handlers(app: Flask):
 
     @app.errorhandler(429)
     def ratelimit_handler(error):
-        return make_response(
-            jsonify(error=f"Rate limit exceeded: {error.description}"),
-            429,
+        return api_response(
+            success=False,
+            message=f"Rate limit exceeded: {error.description}",
+            error=f"Rate limit exceeded: {error.description}",
+            status_code=429,
         )
 
     @app.errorhandler(AppError)
