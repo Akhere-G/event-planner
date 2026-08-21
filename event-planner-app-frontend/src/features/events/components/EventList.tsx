@@ -1,4 +1,3 @@
-import React from "react";
 import type { Event } from "../types";
 import EventCard from "./EventCard";
 import { StateGate } from "../../../components";
