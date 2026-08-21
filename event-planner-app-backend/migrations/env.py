@@ -10,7 +10,6 @@ from src.models import (
     Itinerary,
     ItineraryUser,
     UserRole,
-    ItineraryEvent,
     Event,
     Invite,
 )

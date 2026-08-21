@@ -89,7 +89,6 @@ def register_models():
         InvitationStatus,
         Invite,
         Itinerary,
-        ItineraryEvent,
         ItineraryUser,
         PackingItem,
         User,

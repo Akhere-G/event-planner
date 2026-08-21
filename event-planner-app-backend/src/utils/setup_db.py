@@ -4,7 +4,6 @@ from ..models import (
     User,
     Itinerary,
     ItineraryUser,
-    ItineraryEvent,
     UserRole,
     Event,
     Invite,

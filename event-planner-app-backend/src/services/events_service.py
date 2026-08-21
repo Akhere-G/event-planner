@@ -5,29 +5,21 @@ from ..exceptions import (
     EventNotFoundError,
 )
 from ..extensions import db
-from ..models import Event, ItineraryEvent
+from ..models import Event
 from .itineraries_service import get_itinerary
 
 
 def get_event(itinerary_id: int, event_id: int):
-    stmt = (
-        select(Event)
-        .join(ItineraryEvent)
-        .where(
-            ItineraryEvent.itinerary_id == itinerary_id,
-            Event.id == event_id,
-        )
+    stmt = select(Event).where(
+        Event.itinerary_id == itinerary_id,
+        Event.id == event_id,
     )
 
     return db.session.execute(stmt).scalar_one_or_none()
 
 
 def get_events(itinerary_id: int):
-    stmt = (
-        select(Event)
-        .join(ItineraryEvent, Event.id == ItineraryEvent.event_id)
-        .where(ItineraryEvent.itinerary_id == itinerary_id)
-    )
+    stmt = select(Event).where(Event.itinerary_id == itinerary_id)
 
     results = db.session.execute(stmt).scalars().all()
     return results
@@ -35,19 +27,8 @@ def get_events(itinerary_id: int):
 
 def create_event(itinerary_id: int, data: dict):
     try:
-        event = Event(**data)
+        event = Event(**data, itinerary_id=itinerary_id)
         db.session.add(event)
-        db.session.flush()
-
-        itinerary_event = ItineraryEvent(
-            itinerary_id=itinerary_id,
-            event_id=event.id,
-            created_by_id=data["created_by_id"],
-            updated_by_id=data["updated_by_id"],
-        )
-
-        db.session.add(itinerary_event)
-
         db.session.commit()
         return event
     except Exception:
@@ -63,19 +44,12 @@ def create_events(itinerary_id: int, data: list[dict], created_by_id: int):
                 **d,
                 "created_by_id": created_by_id,
                 "updated_by_id": created_by_id,
+                "itinerary_id": itinerary_id,
             }
             event = Event(**event_data)
             db.session.add(event)
             db.session.flush()
 
-            itinerary_event = ItineraryEvent(
-                itinerary_id=itinerary_id,
-                event_id=event.id,
-                created_by_id=created_by_id,
-                updated_by_id=created_by_id,
-            )
-
-            db.session.add(itinerary_event)
             ids.append(event.id)
 
         db.session.commit()
