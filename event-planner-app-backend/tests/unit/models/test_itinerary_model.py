@@ -17,6 +17,8 @@ def test_itinerary_creation(itinerary):
     assert itinerary.editor_code is not None
 
 
-def test_itinerary_has_timestamps(itinerary):
+def test_itinerary_has_audit_fields(user, itinerary):
     assert itinerary.created_at is not None
     assert itinerary.updated_at is not None
+    assert itinerary.updated_by_id == user.id
+    assert itinerary.created_by_id == user.id

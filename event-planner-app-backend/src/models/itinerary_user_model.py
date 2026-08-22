@@ -1,7 +1,9 @@
-from ..extensions import Base
-from sqlalchemy.orm import mapped_column, Mapped, relationship
-from sqlalchemy import ForeignKey, Enum
 import enum
+
+from sqlalchemy import Enum, ForeignKey
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+
+from ..extensions import Base
 from .audit_mixins import AuditMixin
 
 
