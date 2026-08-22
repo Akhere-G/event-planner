@@ -10,7 +10,7 @@ from ..extensions import db
 from ..models import InvitationStatus, Invite, ItineraryUser, User, UserRole
 
 
-def get_user(email: int | None = None, id: int | None = None):
+def get_user(email: str | None = None, id: int | None = None):
     if id:
         stmt = select(User).where(User.id == id)
     else:
