@@ -31,7 +31,7 @@ class Itinerary(Base, AuditMixin):
     )
 
     user_memberships: Mapped[List["ItineraryUser"]] = relationship(  # type: ignore  # noqa: F821
-        back_populates="itinerary", cascade="all, delete-orphan"
+        back_populates="itinerary", cascade="all, delete-orphan", passive_deletes=True
     )
 
     events: Mapped[List[Event]] = relationship(

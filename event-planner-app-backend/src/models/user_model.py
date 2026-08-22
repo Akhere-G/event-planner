@@ -14,7 +14,9 @@ class User(Base):
     password: Mapped[str] = mapped_column(String(256))
 
     itinerary_memberships: Mapped[List["ItineraryUser"]] = relationship(  # type: ignore  # noqa: F821
-        back_populates="user", foreign_keys="[ItineraryUser.user_id]"
+        back_populates="user",
+        foreign_keys="[ItineraryUser.user_id]",
+        passive_deletes=True,
     )
 
     created_at: Mapped[datetime] = mapped_column(

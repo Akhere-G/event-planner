@@ -53,6 +53,7 @@ def create_invite(data: dict):
         raise
 
 
+# TODO: simplify
 def get_membership_by_email(email: str, itinerary_id: int):
     try:
         stmt = select(User).where(User.email == email)
