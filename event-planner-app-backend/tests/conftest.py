@@ -10,6 +10,7 @@ def _db_setup():
     app = create_app(testing=True)
     with app.app_context():
         db.create_all()
+        db.session.execute(db.text("PRAGMA foreign_keys=ON"))
         yield app
         db.drop_all()
 

@@ -55,7 +55,7 @@ def get_invites(itinerary_id: int):
 
 
 def create_invite(data: dict):
-    try:
+    try:  # TODO: remove dependency on itinerary_service
         membership = get_membership_by_email(data["email"], data["itinerary_id"])
 
         if membership:

@@ -263,7 +263,7 @@ JSON FORMAT:
         geocoded_events = []
 
         for event in valid_suggestions:
-            try:
+            try:  # TODO: use util function
                 results = gmaps.geocode(f"{event['name']}, {event['address']}")
 
                 if not results:
