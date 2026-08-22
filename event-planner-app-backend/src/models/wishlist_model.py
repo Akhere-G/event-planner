@@ -35,6 +35,10 @@ class Wishlist(Base, AuditMixin):
     last_editor: Mapped["User"] = relationship(  # type: ignore  # noqa: F821
         "User", foreign_keys="[Wishlist.updated_by_id]"
     )
+    itinerary: Mapped["Itinerary"] = relationship(  # type: ignore # noqa: F821
+        "Itinerary",
+        back_populates="wishlists",
+    )
 
     __table_args__ = (
         UniqueConstraint("itinerary_id", "name", name="uq_itinerary_wishlist_name"),
@@ -59,7 +63,7 @@ class WishlistItem(Base, AuditMixin):
 
     wishlist: Mapped["Wishlist"] = relationship(back_populates="items")
     votes: Mapped[list["WishlistItemVote"]] = relationship(
-        back_populates="wishlist_item"
+        back_populates="wishlist_item", passive_deletes=True
     )
     creator: Mapped["User"] = relationship(  # type: ignore  # noqa: F821
         "User", foreign_keys="[WishlistItem.created_by_id]"

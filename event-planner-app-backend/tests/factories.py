@@ -91,7 +91,7 @@ class InviteFactory(factory.alchemy.SQLAlchemyModelFactory):
 
     itinerary = factory.SubFactory(ItineraryFactory)
     creator = factory.SubFactory(UserFactory)
-    inviter = factory.SelfAttribute("creator")
+    inviter_id = factory.LazyAttribute(lambda obj: obj.creator.id)
 
     email = factory.Sequence(lambda n: f"invite{n}@example.com")
     role = UserRole.VIEWER.value
