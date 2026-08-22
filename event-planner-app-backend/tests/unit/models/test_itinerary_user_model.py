@@ -62,13 +62,13 @@ def test_duplicate_itinerary_user_is_rejected(
     itinerary,
     itinerary_user,
 ):
-    duplicate = ItineraryUser(
-        itinerary_id=itinerary.id,
-        user_id=user.id,
-        role=UserRole.VIEWER.value,
-    )
-
-    db.session.add(duplicate)
-
     with pytest.raises(IntegrityError):
+        duplicate = ItineraryUser(
+            itinerary_id=itinerary.id,
+            user_id=user.id,
+            role=UserRole.VIEWER.value,
+        )
+
+        db.session.add(duplicate)
+
         db.session.flush()

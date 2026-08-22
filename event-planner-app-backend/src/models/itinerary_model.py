@@ -38,10 +38,15 @@ class Itinerary(Base, AuditMixin):
         back_populates="itinerary",
         cascade="all, delete-orphan",
         order_by="Event.start_at",
+        passive_deletes=True,
+    )
+
+    wishlists: Mapped[List["Wishlist"]] = relationship(  # type: ignore  # noqa: F821
+        back_populates="itinerary", cascade="all, delete-orphan", passive_deletes=True
     )
 
     invites: Mapped[List["Invite"]] = relationship(  # type: ignore  # noqa: F821
-        back_populates="itinerary", cascade="all, delete-orphan"
+        back_populates="itinerary", cascade="all, delete-orphan", passive_deletes=True
     )
     accommodations: Mapped[List["Accommodation"]] = relationship(  # type: ignore  # noqa: F821
         back_populates="itinerary", cascade="all, delete-orphan", passive_deletes=True

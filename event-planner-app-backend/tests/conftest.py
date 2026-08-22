@@ -2,7 +2,25 @@ import pytest
 from src import create_app
 from src.extensions import db
 
-from .factories import EventFactory, ItineraryFactory, ItineraryUserFactory, UserFactory
+from .factories import (
+    EventFactory,
+    InviteFactory,
+    ItineraryFactory,
+    ItineraryUserFactory,
+    UserFactory,
+    WishlistFactory,
+    WishlistItemFactory,
+    WishlistItemVoteFactory,
+)
+
+
+@pytest.fixture(autouse=True)
+def reset_factory_sequences():
+    UserFactory.reset_sequence()
+    ItineraryFactory.reset_sequence()
+    ItineraryUserFactory.reset_sequence()
+    EventFactory.reset_sequence()
+    InviteFactory.reset_sequence()
 
 
 @pytest.fixture(scope="session")
@@ -57,9 +75,44 @@ def itinerary_user(app, user, itinerary):
 
 
 @pytest.fixture
-def event(app, user, itinerary):
+def event(app, user, itinerary, itinerary_user):
     event = EventFactory(
         itinerary=itinerary,
         creator=user,
     )
     return event
+
+
+@pytest.fixture
+def uninvited_user(app, itinerary_user):
+    return UserFactory()
+
+
+@pytest.fixture
+def invite(app, user, itinerary, itinerary_user, uninvited_user):
+    return InviteFactory(itinerary=itinerary, creator=user, email=uninvited_user.email)
+
+
+@pytest.fixture
+def wishlist(app, user, itinerary, itinerary_user):
+    return WishlistFactory(
+        itinerary=itinerary,
+        creator=user,
+    )
+
+
+@pytest.fixture
+def wishlist_item(app, user, wishlist):
+    return WishlistItemFactory(
+        wishlist=wishlist,
+        creator=user,
+    )
+
+
+@pytest.fixture
+def wishlist_item_vote(app, user, wishlist_item):
+    return WishlistItemVoteFactory(
+        wishlist_item=wishlist_item,
+        user=user,
+        creator=user,
+    )
