@@ -21,6 +21,9 @@ def reset_factory_sequences():
     ItineraryUserFactory.reset_sequence()
     EventFactory.reset_sequence()
     InviteFactory.reset_sequence()
+    WishlistFactory.reset_sequence()
+    WishlistItemFactory.reset_sequence()
+    WishlistItemVoteFactory.reset_sequence()
 
 
 @pytest.fixture(scope="session")

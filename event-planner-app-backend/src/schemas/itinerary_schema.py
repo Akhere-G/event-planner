@@ -1,4 +1,4 @@
-from marshmallow import fields, post_dump, validate
+from marshmallow import ValidationError, fields, post_dump, validate, validates_schema
 from marshmallow_sqlalchemy import auto_field
 
 from ..models import Itinerary, UserRole
@@ -49,6 +49,16 @@ class ItinerarySchema(BaseSchema):
     events = fields.Nested(EventSchema, many=True, dump_only=True)
     user_memberships = fields.Nested(UserWithRoleSchema, many=True, dump_only=True)
     invites = fields.Nested(InviteSchemaPrivate, many=True, dump_only=True)
+
+    @validates_schema
+    def validate_times(self, data, **kwargs):
+        start = data.get("start_date")
+        end = data.get("end_date")
+
+        if start and end and end < start:
+            raise ValidationError(
+                "End date must be after the start date.", field_name="end_date"
+            )
 
 
 class ItineraryWithRoleSchema(BaseSchema):
