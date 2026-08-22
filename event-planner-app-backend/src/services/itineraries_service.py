@@ -1,56 +1,13 @@
-from datetime import datetime, timedelta, timezone
-
 from sqlalchemy import func, select
 from sqlalchemy.orm import contains_eager, selectinload
 
 from ..exceptions import (
     ItineraryDoesNotExistError,
-    UserAlreadyExistsError,
     UserDoesNotExistError,
     UserNotAuthorisedError,
 )
 from ..extensions import db
-from ..models import InvitationStatus, Invite, Itinerary, ItineraryUser, User, UserRole
-
-
-def get_invite(itinerary_id: int, email: str):
-    stmt = (
-        select(Invite)
-        .where(Invite.email == email)
-        .where(Invite.itinerary_id == itinerary_id)
-    )
-
-    return db.session.execute(stmt).scalar_one_or_none()
-
-
-def create_invite(data: dict):
-    try:
-        membership = get_membership_by_email(data["email"], data["itinerary_id"])
-
-        if membership:
-            raise UserAlreadyExistsError("This user is already part of this itinerary!")
-
-        existing_invite = get_invite(data["itinerary_id"], email=data["email"])
-
-        if existing_invite:
-            if existing_invite.status == InvitationStatus.ACCEPTED.value:
-                raise UserAlreadyExistsError("User has already accepted this invite.")
-
-            existing_invite.status = InvitationStatus.PENDING.value
-            existing_invite.role = data.get("role") or existing_invite.role
-            existing_invite.expires_at = datetime.now(timezone.utc) + timedelta(days=7)
-            invite = existing_invite
-            invite.updated_by_id = data["updated_by_id"]
-        else:
-            invite = Invite(**data)
-            db.session.add(invite)
-
-        db.session.commit()
-
-        return invite
-    except Exception:
-        db.session.rollback()
-        raise
+from ..models import Itinerary, ItineraryUser, User, UserRole
 
 
 # TODO: simplify
@@ -169,6 +126,7 @@ def get_itineraries(user_id: int, limit: int | None = None, offset: int = 0):
         .options(
             contains_eager(Itinerary.user_memberships).selectinload(ItineraryUser.user),
             selectinload(Itinerary.events),
+            selectinload(Itinerary.invites),
         )
     )
 

@@ -91,6 +91,12 @@ def revoke_invite(user_id: int, itinerary_id: int, invite_id: int):
         if not invite:
             raise InviteNotFoundError()
 
+        if invite.status == InvitationStatus.ACCEPTED.value:
+            raise BadRequestError("Invite has already been accepted.")
+
+        if invite.status == InvitationStatus.DECLINED.value:
+            raise BadRequestError("Invite has already been declined.")
+
         invite.status = InvitationStatus.REVOKED.value
         invite.updated_by_id = user_id
         db.session.commit()
@@ -118,7 +124,16 @@ def accept_invite(user_id: int, token: str):
     try:
         invite = get_user_invite(user_id, token)
 
-        if invite.expires_at < datetime.now(timezone.utc):
+        expires_at = invite.expires_at
+
+        if expires_at.tzinfo is None:
+            expires_at = expires_at.replace(tzinfo=timezone.utc)
+        else:
+            expires_at = expires_at.astimezone(timezone.utc)
+
+        now = datetime.now(timezone.utc)
+
+        if expires_at < now:
             raise BadRequestError("Invite is expired.")
 
         if invite.status == InvitationStatus.ACCEPTED.value:

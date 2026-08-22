@@ -70,6 +70,15 @@ def update_wishlist(
         if not wishlist:
             raise BadRequestError("Wishlist not found.")
 
+        exisiting_wishlist = db.session.execute(
+            select(Wishlist).where(
+                Wishlist.itinerary_id == itinerary_id, Wishlist.name == name
+            )
+        ).scalar_one_or_none()
+
+        if exisiting_wishlist:
+            raise BadRequestError(f"Wishlist with the name '{name}' already exists.")
+
         wishlist.name = name
         wishlist.updated_by_id = user_id
 

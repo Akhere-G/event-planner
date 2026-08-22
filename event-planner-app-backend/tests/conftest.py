@@ -26,7 +26,7 @@ def reset_factory_sequences():
     WishlistItemVoteFactory.reset_sequence()
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture()
 def _db_setup():
     app = create_app(testing=True)
     with app.app_context():
