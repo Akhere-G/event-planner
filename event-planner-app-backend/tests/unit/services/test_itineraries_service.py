@@ -26,8 +26,8 @@ def test_get_membership_by_email_success(user, itinerary_user, itinerary):
     assert membership.itinerary_id == itinerary.id
 
 
-def test_get_membership_by_email_not_member(uninvited_user, itinerary):
-    assert get_membership_by_email(uninvited_user.email, itinerary.id) is None
+def test_get_membership_by_email_not_member(invited_user, itinerary):
+    assert get_membership_by_email(invited_user.email, itinerary.id) is None
 
 
 def test_get_membership_by_email_user_not_found(itinerary):
@@ -40,9 +40,9 @@ def test_is_user_in_itinerary_success(user, itinerary_user, itinerary):
     assert membership.itinerary_id == itinerary.id
 
 
-def test_is_user_in_itinerary_not_found(uninvited_user, itinerary):
+def test_is_user_in_itinerary_not_found(invited_user, itinerary):
     with pytest.raises(ItineraryDoesNotExistError):
-        is_user_in_itinerary(uninvited_user.id, itinerary.id)
+        is_user_in_itinerary(invited_user.id, itinerary.id)
 
 
 def test_get_itinerary_membership_success(user, itinerary_user, itinerary):
@@ -53,17 +53,17 @@ def test_get_itinerary_membership_success(user, itinerary_user, itinerary):
     assert membership.itinerary == itinerary
 
 
-def test_get_itinerary_membership_not_found(uninvited_user, itinerary):
+def test_get_itinerary_membership_not_found(invited_user, itinerary):
     with pytest.raises(ItineraryDoesNotExistError):
-        get_itinerary_membership(uninvited_user.id, itinerary.id)
+        get_itinerary_membership(invited_user.id, itinerary.id)
 
 
 def test_get_itinerary_count(user, itinerary_user):
     assert get_itinerary_count(user.id) == 1
 
 
-def test_get_itinerary_count_zero(uninvited_user):
-    assert get_itinerary_count(uninvited_user.id) == 0
+def test_get_itinerary_count_zero(invited_user):
+    assert get_itinerary_count(invited_user.id) == 0
 
 
 def test_get_itinerary_memberships(itinerary, itinerary_user):
@@ -132,9 +132,9 @@ def test_is_authorised_unauthorised_role(user, itinerary_user, itinerary):
         is_authorised(user.id, itinerary.id, [UserRole.ADMIN])
 
 
-def test_is_authorised_not_member(uninvited_user, itinerary):
+def test_is_authorised_not_member(invited_user, itinerary):
     with pytest.raises(ItineraryDoesNotExistError):
-        is_authorised(uninvited_user.id, itinerary.id)
+        is_authorised(invited_user.id, itinerary.id)
 
 
 def test_update_itinerary_success(itinerary):
