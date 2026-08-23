@@ -200,7 +200,7 @@ def test_promote_wishlist_item_success(admin_user, wishlist_item):
 def test_promote_wishlist_item_already_promoted(admin_user, wishlist_item):
     wishlist_item.is_promoted = True
 
-    db.session.commit()
+    db.session.flush()
 
     start_at = datetime(2026, 8, 20, 10, 0)
     end_at = datetime(2026, 8, 20, 12, 0)

@@ -84,10 +84,15 @@ def test_create_event_editor_success(editor_client, itinerary):
     final_count = db.session.execute(
         select(func.count()).where(Event.itinerary_id == itinerary.id)
     ).scalar()
+    assert initial_count == 0
+
     assert final_count == initial_count + 1
 
     new_event = db.session.execute(
-        select(Event).where(Event.name == "New Event")
+        select(Event).where(
+            Event.name == "New Event",
+            Event.itinerary_id == itinerary.id,
+        )
     ).scalar_one_or_none()
     assert new_event is not None
     assert new_event.address == "123 Test St"

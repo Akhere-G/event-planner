@@ -16,7 +16,6 @@ def test_user_creation(admin_user):
 def test_users_have_unique_emails(admin_user):
     with pytest.raises(IntegrityError):  # IntegrityError for duplicate email
         UserFactory(email=admin_user.email)
-        db.session.commit()
 
 
 def test_user_has_timestamps(admin_user):

@@ -15,6 +15,9 @@ from src.models import (
     WishlistItemVote,
 )
 
+TEST_PASSWORD = "password123"
+TEST_PASSWORD_HASH = bcrypt.generate_password_hash(TEST_PASSWORD).decode("utf-8")
+
 
 class UserFactory(factory.alchemy.SQLAlchemyModelFactory):
     class Meta:
@@ -24,9 +27,7 @@ class UserFactory(factory.alchemy.SQLAlchemyModelFactory):
 
     username = factory.Sequence(lambda n: f"user{n}")
     email = factory.Sequence(lambda n: f"user{n}@example.com")
-    password = factory.LazyAttribute(
-        lambda obj: bcrypt.generate_password_hash("password123").decode("utf-8")
-    )
+    password = TEST_PASSWORD_HASH
 
 
 class ItineraryFactory(factory.alchemy.SQLAlchemyModelFactory):

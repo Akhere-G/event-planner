@@ -63,7 +63,7 @@ def test_update_user_role_success(admin_user, itinerary, admin_itinerary_user):
         role=UserRole.ADMIN.value,
         creator=admin_user,
     )
-    db.session.commit()
+    db.session.flush()
     updated = update_user_role(
         admin_user.id, itinerary.id, admin_user.id, UserRole.EDITOR.value
     )

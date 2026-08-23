@@ -29,22 +29,30 @@ from .factories import (
 @pytest.fixture(scope="session")
 def _db_setup():
     app = create_app(testing=True)
+
     with app.app_context():
         db.create_all()
         db.session.execute(db.text("PRAGMA foreign_keys=ON"))
-        yield app
+
+    yield app
+
+    with app.app_context():
         db.drop_all()
 
 
 @pytest.fixture
 def app(_db_setup):
-    connection = db.engine.connect()
-    transaction = connection.begin()
-    db.session.bind = connection
-    yield _db_setup
-    db.session.rollback()
-    transaction.rollback()
-    connection.close()
+    with _db_setup.app_context():
+        connection = db.engine.connect()
+        transaction = connection.begin()
+        db.session.bind = connection
+
+        yield _db_setup
+
+        db.session.rollback()
+        transaction.rollback()
+        db.session.remove()
+        connection.close()
 
 
 @pytest.fixture

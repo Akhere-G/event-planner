@@ -45,7 +45,7 @@ def test_login_user_success(app):
 def test_login_user_email_case_and_whitespace_insensitive(app):
     password_hash = bcrypt.generate_password_hash("mysecretpassword").decode("utf-8")
     existing_user = UserFactory(email="loginuser@example.com", password=password_hash)
-    db.session.commit()
+    db.session.flush()
     user_id = login_user("  LOGINUSER@EXAMPLE.COM  ", "mysecretpassword")
     assert user_id == existing_user.id
 
