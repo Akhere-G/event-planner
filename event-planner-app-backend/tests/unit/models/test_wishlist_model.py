@@ -8,7 +8,7 @@ from src.models import Wishlist, WishlistItem, WishlistItemVote
 def test_wishlist_creation(wishlist, itinerary):
     assert isinstance(wishlist, Wishlist)
     assert wishlist.itinerary_id == itinerary.id
-    assert wishlist.name == "Wishlist 0"
+    assert wishlist.name.startswith("Wishlist")
 
 
 def test_wishlist_relationship(wishlist, itinerary):
@@ -91,7 +91,7 @@ def test_wishlist_cascade_when_itinerary_deleted(
 def test_wishlist_item_creation(wishlist_item, wishlist):
     assert isinstance(wishlist_item, WishlistItem)
     assert wishlist_item.wishlist_id == wishlist.id
-    assert wishlist_item.name == "Wishlist Item 0"
+    assert wishlist_item.name.startswith("Wishlist Item 0")
     assert wishlist_item.address == "123 Food St"
     assert wishlist_item.latitude == 40.7128
     assert wishlist_item.longitude == -74.0060

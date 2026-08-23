@@ -52,12 +52,12 @@ def test_register_bad_password(client):
     assert response.status_code == 400
 
 
-def test_register_existing_email(client, user):
+def test_register_existing_email(client, admin_user):
     response = client.post(
         "/api/auth/register",
         json={
             "username": "testuser2",
-            "email": user.email,
+            "email": admin_user.email,
             "password": "password123",
             "repeat_password": "password123",
         },
@@ -65,10 +65,10 @@ def test_register_existing_email(client, user):
     assert response.status_code == 409
 
 
-def test_login_success(client, user):
+def test_login_success(client, admin_user):
     response = client.post(
         "/api/auth/login",
-        json={"email": user.email, "password": "password123"},
+        json={"email": admin_user.email, "password": "password123"},
     )
     assert response.status_code == 200
     data = response.get_json()
@@ -80,7 +80,7 @@ def test_login_success(client, user):
     ).scalar_one_or_none()
 
     assert result is not None
-    assert result.email == user.email
+    assert result.email == admin_user.email
 
 
 def test_login_invalid_credentials(client):
@@ -91,10 +91,10 @@ def test_login_invalid_credentials(client):
     assert response.status_code == 401
 
 
-def test_login_correct_email_wrong_password(client, user):
+def test_login_correct_email_wrong_password(client, admin_user):
     response = client.post(
         "/api/auth/login",
-        json={"email": user.email, "password": "wrongpassword"},
+        json={"email": admin_user.email, "password": "wrongpassword"},
     )
     assert response.status_code == 401
 

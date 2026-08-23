@@ -153,7 +153,7 @@ def test_remove_user_success(
     admin_user, itinerary, admin_itinerary_user, viewer_user, viewer_itinerary_user
 ):
     removed_id = remove_user(admin_user.id, itinerary.id, viewer_user.id)
-    assert removed_id == admin_user.id
+    assert removed_id == viewer_user.id
 
 
 def test_remove_user_not_found(admin_user, itinerary):

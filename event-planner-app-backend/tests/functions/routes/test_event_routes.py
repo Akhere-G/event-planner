@@ -4,15 +4,15 @@ from src.models import Event
 from src.extensions import db
 
 
-def test_get_events_success(admin_client, itinerary, admin_event):
+def test_get_events_success(admin_client, itinerary, event):
     response = admin_client.get(f"/api/itineraries/{itinerary.id}/events")
     assert response.status_code == 200
     data = response.get_json()
     assert data["success"] is True
     assert "events" in data["data"]
     assert len(data["data"]["events"]) == 1
-    assert data["data"]["events"][0]["id"] == admin_event.id
-    assert data["data"]["events"][0]["name"] == admin_event.name
+    assert data["data"]["events"][0]["id"] == event.id
+    assert data["data"]["events"][0]["name"] == event.name
 
 
 def test_get_events_unauthenticated_unauthorised(client, itinerary):
@@ -143,9 +143,9 @@ def test_create_event_non_member_unauthorised(non_member_client, itinerary):
     assert response.status_code == 404
 
 
-def test_update_event_admin_success(admin_client, itinerary, admin_event):
+def test_update_event_admin_success(admin_client, itinerary, event):
     response = admin_client.patch(
-        f"/api/itineraries/{itinerary.id}/events/{admin_event.id}",
+        f"/api/itineraries/{itinerary.id}/events/{event.id}",
         json={"name": "Updated Event"},
     )
     assert response.status_code == 200
@@ -153,15 +153,15 @@ def test_update_event_admin_success(admin_client, itinerary, admin_event):
     assert data["success"] is True
 
     updated_event = db.session.execute(
-        select(Event).where(Event.id == admin_event.id)
+        select(Event).where(Event.id == event.id)
     ).scalar_one_or_none()
     assert updated_event is not None
     assert updated_event.name == "Updated Event"
 
 
-def test_update_event_editor_success(editor_client, itinerary, admin_event):
+def test_update_event_editor_success(editor_client, itinerary, event):
     response = editor_client.patch(
-        f"/api/itineraries/{itinerary.id}/events/{admin_event.id}",
+        f"/api/itineraries/{itinerary.id}/events/{event.id}",
         json={"name": "Updated Event"},
     )
     assert response.status_code == 200
@@ -169,80 +169,76 @@ def test_update_event_editor_success(editor_client, itinerary, admin_event):
     assert data["success"] is True
 
     updated_event = db.session.execute(
-        select(Event).where(Event.id == admin_event.id)
+        select(Event).where(Event.id == event.id)
     ).scalar_one_or_none()
     assert updated_event is not None
     assert updated_event.name == "Updated Event"
 
 
-def test_update_event_viewer_unauthorised(viewer_client, itinerary, admin_event):
+def test_update_event_viewer_unauthorised(viewer_client, itinerary, event):
     response = viewer_client.patch(
-        f"/api/itineraries/{itinerary.id}/events/{admin_event.id}",
+        f"/api/itineraries/{itinerary.id}/events/{event.id}",
         json={"name": "Updated Event"},
     )
     assert response.status_code == 403
 
 
-def test_update_event_unauthenticated_unauthorised(client, itinerary, admin_event):
+def test_update_event_unauthenticated_unauthorised(client, itinerary, event):
     response = client.patch(
-        f"/api/itineraries/{itinerary.id}/events/{admin_event.id}",
+        f"/api/itineraries/{itinerary.id}/events/{event.id}",
         json={"name": "Updated Event"},
     )
     assert response.status_code == 401
 
 
-def test_update_event_non_member_unauthorised(
-    non_member_client, itinerary, admin_event
-):
+def test_update_event_non_member_unauthorised(non_member_client, itinerary, event):
     response = non_member_client.patch(
-        f"/api/itineraries/{itinerary.id}/events/{admin_event.id}",
+        f"/api/itineraries/{itinerary.id}/events/{event.id}",
         json={"name": "Updated Event"},
     )
     assert response.status_code == 404
 
 
-def test_delete_event_admin_success(admin_client, itinerary, admin_event):
-    response = admin_client.delete(
-        f"/api/itineraries/{itinerary.id}/events/{admin_event.id}"
-    )
+def test_delete_event_admin_success(admin_client, itinerary, event):
+    response = admin_client.delete(f"/api/itineraries/{itinerary.id}/events/{event.id}")
     assert response.status_code == 200
     data = response.get_json()
     assert data["success"] is True
 
     deleted_event = db.session.execute(
-        select(Event).where(Event.id == admin_event.id)
+        select(Event).where(Event.id == event.id)
     ).scalar_one_or_none()
     assert deleted_event is None
 
 
-def test_delete_event_editor_success(editor_client, itinerary, admin_event):
+def test_delete_event_editor_success(editor_client, itinerary, event):
     response = editor_client.delete(
-        f"/api/itineraries/{itinerary.id}/events/{admin_event.id}"
+        f"/api/itineraries/{itinerary.id}/events/{event.id}"
     )
     assert response.status_code == 200
     data = response.get_json()
     assert data["success"] is True
 
     deleted_event = db.session.execute(
-        select(Event).where(Event.id == admin_event.id)
+        select(Event).where(Event.id == event.id)
     ).scalar_one_or_none()
     assert deleted_event is None
 
 
-def test_delete_event_viewer_unauthorised(viewer_client, itinerary, admin_event):
+def test_delete_event_viewer_unauthorised(viewer_client, itinerary, event):
     response = viewer_client.delete(
-        f"/api/itineraries/{itinerary.id}/events/{admin_event.id}"
+        f"/api/itineraries/{itinerary.id}/events/{event.id}"
     )
     assert response.status_code == 403
 
 
-def test_delete_event_unauthenticated_unauthorised(client, itinerary, admin_event):
-    response = client.delete(f"/api/itineraries/{itinerary.id}/events/{admin_event.id}")
+def test_delete_event_unauthenticated_unauthorised(client, itinerary, event):
+    response = client.delete(f"/api/itineraries/{itinerary.id}/events/{event.id}")
     assert response.status_code == 401
 
 
-def test_delete_event_non_member_forbidden(non_member_client, itinerary, admin_event):
+def test_delete_event_non_member_forbidden(non_member_client, itinerary, event):
     response = non_member_client.delete(
-        f"/api/itineraries/{itinerary.id}/events/{admin_event.id}"
+        f"/api/itineraries/{itinerary.id}/events/{event.id}"
     )
     assert response.status_code == 404

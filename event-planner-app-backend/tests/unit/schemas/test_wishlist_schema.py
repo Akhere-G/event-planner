@@ -31,7 +31,6 @@ def test_wishlist_schema_requires_name():
 def test_wishlist_item_schema_loads_valid_data():
     result = WishlistItemSchema().load(
         {
-            "wishlist_id": 1,
             "name": "Le Jules Verne",
             "address": "Eiffel Tower",
             "latitude": 48.8584,
@@ -41,7 +40,6 @@ def test_wishlist_item_schema_loads_valid_data():
         }
     )
 
-    assert result["wishlist_id"] == 1
     assert result["name"] == "Le Jules Verne"
     assert result["address"] == "Eiffel Tower"
     assert result["latitude"] == 48.8584
@@ -60,7 +58,6 @@ def test_wishlist_item_schema_requires_name():
 def test_wishlist_item_schema_allows_optional_fields_to_be_none():
     result = WishlistItemSchema().load(
         {
-            "wishlist_id": 1,
             "name": "Restaurant",
             "address": None,
             "latitude": None,

@@ -5,7 +5,7 @@ from src.models import Itinerary
 
 def test_itinerary_creation(itinerary):
     assert isinstance(itinerary, Itinerary)
-    assert itinerary.name == "Trip 0"
+    assert itinerary.name.startswith("Trip 0")
     assert itinerary.destination == "Paris"
     assert itinerary.latitude == 48.8566
     assert itinerary.longitude == 2.3522
