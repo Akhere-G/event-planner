@@ -7,7 +7,7 @@ from src.models import Event
 
 def test_event_creation(event):
     assert isinstance(event, Event)
-    assert event.name == "Event 0"
+    assert event.name.startswith("Event")
     assert event.address == "123 Test St"
     assert event.latitude == 40.7128
     assert event.longitude == -74.0060

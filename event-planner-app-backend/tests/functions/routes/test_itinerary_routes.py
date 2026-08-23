@@ -71,9 +71,9 @@ def test_get_itinerary_not_member(non_member_client, itinerary):
     assert response.status_code == 404
 
 
-def test_create_itinerary_success(auth_client, user):
+def test_create_itinerary_success(auth_client, admin_user):
     initial_count = db.session.execute(
-        select(func.count()).where(ItineraryUser.user_id == user.id)
+        select(func.count()).where(ItineraryUser.user_id == admin_user.id)
     ).scalar()
 
     response = auth_client.post(
@@ -92,7 +92,7 @@ def test_create_itinerary_success(auth_client, user):
     assert data["success"] is True
 
     final_count = db.session.execute(
-        select(func.count()).where(ItineraryUser.user_id == user.id)
+        select(func.count()).where(ItineraryUser.user_id == admin_user.id)
     ).scalar()
     assert final_count == initial_count + 1
 
@@ -107,7 +107,7 @@ def test_create_itinerary_success(auth_client, user):
     membership = db.session.execute(
         select(ItineraryUser).where(
             ItineraryUser.itinerary_id == created_itinerary_id,
-            ItineraryUser.user_id == user.id,
+            ItineraryUser.user_id == admin_user.id,
         )
     ).scalar_one_or_none()
     assert membership is not None

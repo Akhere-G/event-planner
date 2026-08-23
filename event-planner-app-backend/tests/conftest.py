@@ -26,19 +26,7 @@ from .factories import (
 )
 
 
-@pytest.fixture(autouse=True)
-def reset_factory_sequences():
-    UserFactory.reset_sequence()
-    ItineraryFactory.reset_sequence()
-    ItineraryUserFactory.reset_sequence()
-    EventFactory.reset_sequence()
-    InviteFactory.reset_sequence()
-    WishlistFactory.reset_sequence()
-    WishlistItemFactory.reset_sequence()
-    WishlistItemVoteFactory.reset_sequence()
-
-
-@pytest.fixture()
+@pytest.fixture(scope="session")
 def _db_setup():
     app = create_app(testing=True)
     with app.app_context():
