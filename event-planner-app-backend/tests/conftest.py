@@ -1,7 +1,18 @@
 import pytest
+from flask.testing import FlaskClient
 from src import create_app
 from src.extensions import db
-from src.models import UserRole
+from src.models import (
+    Event,
+    Invite,
+    Itinerary,
+    ItineraryUser,
+    User,
+    UserRole,
+    Wishlist,
+    WishlistItem,
+    WishlistItemVote,
+)
 
 from .factories import (
     EventFactory,
@@ -49,131 +60,105 @@ def app(_db_setup):
 
 
 @pytest.fixture
-def client(app):
+def client(app) -> FlaskClient:
     return app.test_client()
 
 
 @pytest.fixture
-def user(app):
-    return UserFactory()
-
-
-@pytest.fixture
-def auth_client(client, user):
+def auth_client(client, admin_user) -> FlaskClient:
     with client.session_transaction() as session:
-        session["user_id"] = user.id
+        session["user_id"] = admin_user.id
 
     return client
 
 
 @pytest.fixture
-def admin_user(app):
+def admin_user(app) -> User:
     return UserFactory()
 
 
 @pytest.fixture
-def admin_itinerary(app, admin_user):
+def itinerary(app, admin_user) -> Itinerary:
     return ItineraryFactory(creator=admin_user)
 
 
 @pytest.fixture
-def admin_itinerary_user(app, admin_user, admin_itinerary):
+def admin_itinerary_user(app, admin_user, itinerary) -> ItineraryUser:
     return ItineraryUserFactory(
         user=admin_user,
-        itinerary=admin_itinerary,
+        itinerary=itinerary,
         role=UserRole.ADMIN.value,
         creator=admin_user,
     )
 
 
 @pytest.fixture
-def editor_user(app):
+def editor_user(app) -> User:
     return UserFactory()
 
 
 @pytest.fixture
-def editor_itinerary_user(app, editor_user, admin_itinerary, admin_user):
+def editor_itinerary_user(app, editor_user, itinerary, admin_user) -> ItineraryUser:
     return ItineraryUserFactory(
         user=editor_user,
-        itinerary=admin_itinerary,
+        itinerary=itinerary,
         role=UserRole.EDITOR.value,
         creator=admin_user,
     )
 
 
 @pytest.fixture
-def viewer_user(app):
+def viewer_user(app) -> User:
     return UserFactory()
 
 
 @pytest.fixture
-def viewer_itinerary_user(app, viewer_user, admin_itinerary, admin_user):
+def viewer_itinerary_user(app, viewer_user, itinerary, admin_user) -> ItineraryUser:
     return ItineraryUserFactory(
         user=viewer_user,
-        itinerary=admin_itinerary,
+        itinerary=itinerary,
         role=UserRole.VIEWER.value,
         creator=admin_user,
     )
 
 
 @pytest.fixture
-def admin_client(client, admin_user, admin_itinerary_user):
+def admin_client(client, admin_user, admin_itinerary_user) -> FlaskClient:
     with client.session_transaction() as session:
         session["user_id"] = admin_user.id
     return client
 
 
 @pytest.fixture
-def editor_client(client, editor_user, editor_itinerary_user):
+def editor_client(client, editor_user, editor_itinerary_user) -> FlaskClient:
     with client.session_transaction() as session:
         session["user_id"] = editor_user.id
     return client
 
 
 @pytest.fixture
-def viewer_client(client, viewer_user, viewer_itinerary_user):
+def viewer_client(client, viewer_user, viewer_itinerary_user) -> FlaskClient:
     with client.session_transaction() as session:
         session["user_id"] = viewer_user.id
     return client
 
 
 @pytest.fixture
-def admin_event(app, admin_user, admin_itinerary, admin_itinerary_user):
+def event(app, admin_user, itinerary, admin_itinerary_user) -> Event:
     event = EventFactory(
-        itinerary=admin_itinerary,
+        itinerary=itinerary,
         creator=admin_user,
     )
     return event
 
 
 @pytest.fixture
-def itinerary(app, admin_user):
-    itinerary = ItineraryFactory(creator=admin_user)
-    return itinerary
-
-
-@pytest.fixture
-def itinerary_user(app, admin_user, admin_itinerary):
-    itinerary_user = ItineraryUserFactory(user=admin_user, itinerary=admin_itinerary, creator=admin_user)
-    return itinerary_user
-
-
-@pytest.fixture
-def event(app, admin_user, admin_itinerary, admin_itinerary_user):
-    event = EventFactory(
-        itinerary=admin_itinerary,
-        creator=admin_user,
-    )
-    return event
-
-
-@pytest.fixture
-def invited_user(app, admin_itinerary):
+def invited_user(app, itinerary) -> User:
     return UserFactory()
 
 
 @pytest.fixture
-def invited_user_client(client, invited_user):
+def invited_user_client(client, invited_user) -> FlaskClient:
     with client.session_transaction() as session:
         session["user_id"] = invited_user.id
 
@@ -181,20 +166,22 @@ def invited_user_client(client, invited_user):
 
 
 @pytest.fixture
-def invite(app, admin_user, admin_itinerary, admin_itinerary_user):
-    return InviteFactory(itinerary=admin_itinerary, creator=admin_user, email="invited@example.com")
+def invite(app, admin_user, itinerary, admin_itinerary_user, invited_user) -> Invite:
+    return InviteFactory(
+        itinerary=itinerary, creator=admin_user, email=invited_user.email
+    )
 
 
 @pytest.fixture
-def wishlist(app, admin_user, admin_itinerary, admin_itinerary_user):
+def wishlist(app, admin_user, itinerary, admin_itinerary_user) -> Wishlist:
     return WishlistFactory(
-        itinerary=admin_itinerary,
+        itinerary=itinerary,
         creator=admin_user,
     )
 
 
 @pytest.fixture
-def wishlist_item(app, admin_user, wishlist):
+def wishlist_item(app, admin_user, wishlist) -> WishlistItem:
     return WishlistItemFactory(
         wishlist=wishlist,
         creator=admin_user,
@@ -202,21 +189,21 @@ def wishlist_item(app, admin_user, wishlist):
 
 
 @pytest.fixture
-def wishlist_item_vote(app, user, wishlist_item):
+def wishlist_item_vote(app, admin_user, wishlist_item) -> WishlistItemVote:
     return WishlistItemVoteFactory(
         wishlist_item=wishlist_item,
-        user=user,
-        creator=user,
+        user=admin_user,
+        creator=admin_user,
     )
 
 
 @pytest.fixture
-def non_member_user(app):
+def non_member_user(app) -> User:
     return UserFactory()
 
 
 @pytest.fixture
-def non_member_client(client, non_member_user):
+def non_member_client(client, non_member_user) -> FlaskClient:
     with client.session_transaction() as session:
         session["user_id"] = non_member_user.id
     return client

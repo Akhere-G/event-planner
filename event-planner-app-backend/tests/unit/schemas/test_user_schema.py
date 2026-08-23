@@ -77,16 +77,16 @@ def test_register_schema_rejects_mismatched_passwords():
 
 
 @pytest.mark.parametrize("role", ["admin", "editor", "viewer"])
-def test_user_with_role_accepts_valid_role(role, user):
+def test_user_with_role_accepts_valid_role(role, admin_user):
     result = UserWithRoleSchema().dump(
         {
-            "user": user,
+            "user": admin_user,
             "role": role,
         }
     )
 
     assert result["role"] == role
-    assert result["username"] == user.username
+    assert result["username"] == admin_user.username
 
 
 def test_user_with_role_rejects_invalid_role():

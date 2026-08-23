@@ -17,11 +17,11 @@ def test_event_creation(event):
     assert event.category == "food"
 
 
-def test_event_has_audit_fields(user, event):
+def test_event_has_audit_fields(admin_user, event):
     assert event.created_at is not None
     assert event.updated_at is not None
-    assert event.updated_by_id == user.id
-    assert event.created_by_id == user.id
+    assert event.updated_by_id == admin_user.id
+    assert event.created_by_id == admin_user.id
 
 
 def test_event_belongs_to_itinerary(event, itinerary):
@@ -29,7 +29,7 @@ def test_event_belongs_to_itinerary(event, itinerary):
     assert event.itinerary == itinerary
 
 
-def test_event_cascade_when_itinerary_deleted(user, itinerary, event):
+def test_event_cascade_when_itinerary_deleted(itinerary, event):
     event_id = event.id
     db.session.delete(itinerary)
     db.session.flush()

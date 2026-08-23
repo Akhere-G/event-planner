@@ -19,10 +19,10 @@ from src.services.itineraries_service import (
 from tests.factories import ItineraryUserFactory
 
 
-def test_get_membership_by_email_success(user, itinerary_user, itinerary):
-    membership = get_membership_by_email(user.email, itinerary.id)
+def test_get_membership_by_email_success(admin_user, admin_itinerary_user, itinerary):
+    membership = get_membership_by_email(admin_user.email, itinerary.id)
     assert membership is not None
-    assert membership.user_id == user.id
+    assert membership.user_id == admin_user.id
     assert membership.itinerary_id == itinerary.id
 
 
@@ -34,9 +34,9 @@ def test_get_membership_by_email_user_not_found(itinerary):
     assert get_membership_by_email("nonexistent@example.com", itinerary.id) is None
 
 
-def test_is_user_in_itinerary_success(user, itinerary_user, itinerary):
-    membership = is_user_in_itinerary(user.id, itinerary.id)
-    assert membership.user_id == user.id
+def test_is_user_in_itinerary_success(admin_user, admin_itinerary_user, itinerary):
+    membership = is_user_in_itinerary(admin_user.id, itinerary.id)
+    assert membership.user_id == admin_user.id
     assert membership.itinerary_id == itinerary.id
 
 
@@ -45,11 +45,11 @@ def test_is_user_in_itinerary_not_found(invited_user, itinerary):
         is_user_in_itinerary(invited_user.id, itinerary.id)
 
 
-def test_get_itinerary_membership_success(user, itinerary_user, itinerary):
-    membership = get_itinerary_membership(user.id, itinerary.id)
-    assert membership.user_id == user.id
+def test_get_itinerary_membership_success(admin_user, admin_itinerary_user, itinerary):
+    membership = get_itinerary_membership(admin_user.id, itinerary.id)
+    assert membership.user_id == admin_user.id
     assert membership.itinerary_id == itinerary.id
-    assert membership.user == user
+    assert membership.user == admin_user
     assert membership.itinerary == itinerary
 
 
@@ -58,22 +58,22 @@ def test_get_itinerary_membership_not_found(invited_user, itinerary):
         get_itinerary_membership(invited_user.id, itinerary.id)
 
 
-def test_get_itinerary_count(user, itinerary_user):
-    assert get_itinerary_count(user.id) == 1
+def test_get_itinerary_count(admin_user, admin_itinerary_user):
+    assert get_itinerary_count(admin_user.id) == 1
 
 
 def test_get_itinerary_count_zero(invited_user):
     assert get_itinerary_count(invited_user.id) == 0
 
 
-def test_get_itinerary_memberships(itinerary, itinerary_user):
+def test_get_itinerary_memberships(itinerary, admin_itinerary_user):
     memberships = get_itinerary_memberships(itinerary.id)
     assert len(memberships) == 1
-    assert memberships[0].user_id == itinerary_user.user_id
-    assert memberships[0].itinerary_id == itinerary_user.itinerary_id
+    assert memberships[0].user_id == admin_itinerary_user.user_id
+    assert memberships[0].itinerary_id == admin_itinerary_user.itinerary_id
 
 
-def test_get_itinerary_memberships_pagination(itinerary, itinerary_user):
+def test_get_itinerary_memberships_pagination(itinerary, admin_itinerary_user):
     memberships = get_itinerary_memberships(itinerary.id, limit=1, offset=0)
     assert len(memberships) == 1
 
@@ -88,12 +88,12 @@ def test_get_itinerary_not_found(app):
         get_itinerary(99999)
 
 
-def test_get_itineraries(user, itinerary_user, itinerary):
-    result = get_itineraries(user.id, 10, 0)
-    assert result == [{"itinerary": itinerary, "role": "viewer"}]
+def test_get_itineraries(admin_user, admin_itinerary_user, itinerary):
+    result = get_itineraries(admin_user.id, 10, 0)
+    assert result == [{"itinerary": itinerary, "role": "admin"}]
 
 
-def test_create_itinerary_success(user):
+def test_create_itinerary_success(admin_user):
     data = {
         "name": "New Trip",
         "destination": "Tokyo",
@@ -102,34 +102,37 @@ def test_create_itinerary_success(user):
         "description": "Tokyo trip",
         "start_date": date(2026, 9, 1),
         "end_date": date(2026, 9, 5),
-        "created_by_id": user.id,
-        "updated_by_id": user.id,
+        "created_by_id": admin_user.id,
+        "updated_by_id": admin_user.id,
     }
-    new_itinerary = create_itinerary(user.id, data)
+    new_itinerary = create_itinerary(admin_user.id, data)
     assert new_itinerary.id is not None
     assert new_itinerary.name == "New Trip"
-    assert new_itinerary.created_by_id == user.id
-    assert new_itinerary.updated_by_id == user.id
+    assert new_itinerary.created_by_id == admin_user.id
+    assert new_itinerary.updated_by_id == admin_user.id
     assert new_itinerary.viewer_code is not None
     assert new_itinerary.editor_code is not None
     assert new_itinerary.admin_code is not None
 
-    membership = is_user_in_itinerary(user.id, new_itinerary.id)
+    membership = is_user_in_itinerary(admin_user.id, new_itinerary.id)
     assert membership.role == UserRole.ADMIN.value
-    assert membership.created_by_id == user.id
-    assert membership.updated_by_id == user.id
+    assert membership.created_by_id == admin_user.id
+    assert membership.updated_by_id == admin_user.id
 
 
-def test_is_authorised_success(user, itinerary):
+def test_is_authorised_success(admin_user, itinerary):
     ItineraryUserFactory(
-        user=user, itinerary=itinerary, role=UserRole.ADMIN.value, creator=user
+        user=admin_user,
+        itinerary=itinerary,
+        role=UserRole.ADMIN.value,
+        creator=admin_user,
     )
-    is_authorised(user.id, itinerary.id, [UserRole.ADMIN])
+    is_authorised(admin_user.id, itinerary.id, [UserRole.ADMIN])
 
 
-def test_is_authorised_unauthorised_role(user, itinerary_user, itinerary):
+def test_is_authorised_unauthorised_role(viewer_user, viewer_itinerary_user, itinerary):
     with pytest.raises(UserNotAuthorisedError):
-        is_authorised(user.id, itinerary.id, [UserRole.ADMIN])
+        is_authorised(viewer_user.id, itinerary.id, [UserRole.ADMIN])
 
 
 def test_is_authorised_not_member(invited_user, itinerary):

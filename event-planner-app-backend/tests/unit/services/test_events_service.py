@@ -44,7 +44,7 @@ def test_get_events_empty(itinerary):
     assert events == []
 
 
-def test_create_event_success(user, itinerary):
+def test_create_event_success(admin_user, itinerary):
     event_data = {
         "name": "New Event",
         "address": "456 New St",
@@ -54,8 +54,8 @@ def test_create_event_success(user, itinerary):
         "start_at": datetime(2026, 8, 21, 14, 0),
         "end_at": datetime(2026, 8, 21, 16, 0),
         "category": "sightseeing",
-        "created_by_id": user.id,
-        "updated_by_id": user.id,
+        "created_by_id": admin_user.id,
+        "updated_by_id": admin_user.id,
     }
 
     event = create_event(itinerary.id, event_data)
@@ -73,7 +73,7 @@ def test_create_event_rollback_on_error(itinerary):
         create_event(itinerary.id, event_data)
 
 
-def test_create_events_success(user, itinerary):
+def test_create_events_success(admin_user, itinerary):
     events_data = [
         {
             "name": "Event 1",
@@ -95,12 +95,12 @@ def test_create_events_success(user, itinerary):
         },
     ]
 
-    ids = create_events(itinerary.id, events_data, user.id)
+    ids = create_events(itinerary.id, events_data, admin_user.id)
     assert len(ids) == 2
     assert all(id is not None for id in ids)
 
 
-def test_create_events_rollback_on_error(user, itinerary):
+def test_create_events_rollback_on_error(admin_user, itinerary):
     events_data = [
         {
             "name": "Valid Event",
@@ -117,17 +117,17 @@ def test_create_events_rollback_on_error(user, itinerary):
     ]
 
     with pytest.raises(Exception):
-        create_events(itinerary.id, events_data, user.id)
+        create_events(itinerary.id, events_data, admin_user.id)
 
 
-def test_update_event_success(event, user):
+def test_update_event_success(event, admin_user):
     updated = update_event(
         event.itinerary_id,
         event.id,
         {
             "name": "Updated Event",
             "address": "Updated Address",
-            "updated_by_id": user.id,
+            "updated_by_id": admin_user.id,
         },
     )
     assert updated.name == "Updated Event"
@@ -139,7 +139,7 @@ def test_update_event_not_found(itinerary):
         update_event(itinerary.id, 99999, {"name": "Updated"})
 
 
-def test_update_event_invalid_time(event, user):
+def test_update_event_invalid_time(event, admin_user):
     with pytest.raises(ValidationError):
         update_event(
             event.itinerary_id,
@@ -147,12 +147,12 @@ def test_update_event_invalid_time(event, user):
             {
                 "start_at": datetime(2026, 8, 20, 12, 0),
                 "end_at": datetime(2026, 8, 20, 10, 0),  # End before start
-                "updated_by_id": user.id,
+                "updated_by_id": admin_user.id,
             },
         )
 
 
-def test_update_events_success(itinerary, user):
+def test_update_events_success(itinerary, admin_user):
     event1 = EventFactory(
         itinerary=itinerary,
         name="Event 1",
@@ -171,20 +171,20 @@ def test_update_events_success(itinerary, user):
         {"id": event2.id, "name": "Updated Event 2"},
     ]
 
-    updated_events = update_events(itinerary.id, update_data, user.id)
+    updated_events = update_events(itinerary.id, update_data, admin_user.id)
     assert len(updated_events) == 2
     assert updated_events[0].name == "Updated Event 1"
     assert updated_events[1].name == "Updated Event 2"
 
 
-def test_update_events_not_found(itinerary, user):
+def test_update_events_not_found(itinerary, admin_user):
     update_data = [{"id": 99999, "name": "Updated"}]
 
     with pytest.raises(EventNotFoundError):
-        update_events(itinerary.id, update_data, user.id)
+        update_events(itinerary.id, update_data, admin_user.id)
 
 
-def test_update_events_invalid_time(itinerary, user):
+def test_update_events_invalid_time(itinerary, admin_user):
     event = EventFactory(
         itinerary=itinerary,
         start_at=datetime(2026, 8, 20, 10, 0),
@@ -200,7 +200,7 @@ def test_update_events_invalid_time(itinerary, user):
     ]
 
     with pytest.raises(ValidationError):
-        update_events(itinerary.id, update_data, user.id)
+        update_events(itinerary.id, update_data, admin_user.id)
 
 
 def test_delete_event_success(event):

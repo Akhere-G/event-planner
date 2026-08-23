@@ -29,9 +29,9 @@ def test_register_user_email_normalization(app):
     assert db_user.email == "testuser@example.com"
 
 
-def test_register_user_already_exists(app, user):
+def test_register_user_already_exists(app, admin_user):
     with pytest.raises(UserAlreadyExistsError):
-        register_user("duplicate", user.email, "password123")
+        register_user("duplicate", admin_user.email, "password123")
 
 
 def test_login_user_success(app):
@@ -45,16 +45,16 @@ def test_login_user_success(app):
 def test_login_user_email_case_and_whitespace_insensitive(app):
     password_hash = bcrypt.generate_password_hash("mysecretpassword").decode("utf-8")
     existing_user = UserFactory(email="loginuser@example.com", password=password_hash)
-
+    db.session.commit()
     user_id = login_user("  LOGINUSER@EXAMPLE.COM  ", "mysecretpassword")
     assert user_id == existing_user.id
 
 
 def test_login_user_non_existent_email(app):
-    with pytest.raises(UserDoesNotExistError) as exc_info:
+    with pytest.raises(InvalidCredentialsError) as exc_info:
         login_user("nonexistent@example.com", "password123")
 
-    assert exc_info.value.message == "Invalid Credentials."
+    assert exc_info.value.message == "Invalid credentials."
 
 
 def test_login_user_invalid_password(app):

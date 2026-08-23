@@ -16,11 +16,11 @@ def test_wishlist_relationship(wishlist, itinerary):
     assert wishlist.creator is not None
 
 
-def test_wishlist_has_audit_fields(wishlist, user):
+def test_wishlist_has_audit_fields(wishlist, admin_user):
     assert wishlist.created_at is not None
     assert wishlist.updated_at is not None
-    assert wishlist.created_by_id == user.id
-    assert wishlist.updated_by_id == user.id
+    assert wishlist.created_by_id == admin_user.id
+    assert wishlist.updated_by_id == admin_user.id
 
 
 def test_wishlist_name_must_be_unique_per_itinerary(
@@ -40,7 +40,7 @@ def test_wishlist_name_must_be_unique_per_itinerary(
 
 def test_same_wishlist_name_allowed_in_different_itineraries(
     wishlist,
-    user,
+    admin_user,
 ):
     from src.models import Itinerary
 
@@ -52,8 +52,8 @@ def test_same_wishlist_name_allowed_in_different_itineraries(
         description="Another trip",
         start_date=wishlist.itinerary.start_date,
         end_date=wishlist.itinerary.end_date,
-        created_by_id=user.id,
-        updated_by_id=user.id,
+        created_by_id=admin_user.id,
+        updated_by_id=admin_user.id,
     )
 
     db.session.add(other_itinerary)
@@ -62,8 +62,8 @@ def test_same_wishlist_name_allowed_in_different_itineraries(
     other_wishlist = Wishlist(
         itinerary_id=other_itinerary.id,
         name=wishlist.name,
-        created_by_id=user.id,
-        updated_by_id=user.id,
+        created_by_id=admin_user.id,
+        updated_by_id=admin_user.id,
     )
 
     db.session.add(other_wishlist)
@@ -107,11 +107,11 @@ def test_wishlist_item_relationship(wishlist_item, wishlist):
     assert wishlist_item.wishlist == wishlist
 
 
-def test_wishlist_item_has_audit_fields(wishlist_item, user):
+def test_wishlist_item_has_audit_fields(wishlist_item, admin_user):
     assert wishlist_item.created_at is not None
     assert wishlist_item.updated_at is not None
-    assert wishlist_item.created_by_id == user.id
-    assert wishlist_item.updated_by_id == user.id
+    assert wishlist_item.created_by_id == admin_user.id
+    assert wishlist_item.updated_by_id == admin_user.id
 
 
 def test_wishlist_cascades_to_items_when_deleted(
@@ -133,44 +133,44 @@ def test_wishlist_cascades_to_items_when_deleted(
 def test_wishlist_item_vote_creation(
     wishlist_item_vote,
     wishlist_item,
-    user,
+    admin_user,
 ):
     assert isinstance(wishlist_item_vote, WishlistItemVote)
     assert wishlist_item_vote.wishlist_item_id == wishlist_item.id
-    assert wishlist_item_vote.user_id == user.id
+    assert wishlist_item_vote.user_id == admin_user.id
     assert wishlist_item_vote.is_thumbs_up is True
 
 
 def test_wishlist_item_vote_relationships(
     wishlist_item_vote,
     wishlist_item,
-    user,
+    admin_user,
 ):
     assert wishlist_item_vote.wishlist_item == wishlist_item
-    assert wishlist_item_vote.user == user
+    assert wishlist_item_vote.user == admin_user
 
 
 def test_wishlist_item_vote_has_audit_fields(
     wishlist_item_vote,
-    user,
+    admin_user,
 ):
     assert wishlist_item_vote.created_at is not None
     assert wishlist_item_vote.updated_at is not None
-    assert wishlist_item_vote.created_by_id == user.id
-    assert wishlist_item_vote.updated_by_id == user.id
+    assert wishlist_item_vote.created_by_id == admin_user.id
+    assert wishlist_item_vote.updated_by_id == admin_user.id
 
 
 def test_duplicate_vote_for_same_user_and_item_is_rejected(
     wishlist_item_vote,
     wishlist_item,
-    user,
+    admin_user,
 ):
     duplicate = WishlistItemVote(
         wishlist_item_id=wishlist_item.id,
-        user_id=user.id,
+        user_id=admin_user.id,
         is_thumbs_up=False,
-        created_by_id=user.id,
-        updated_by_id=user.id,
+        created_by_id=admin_user.id,
+        updated_by_id=admin_user.id,
     )
 
     db.session.add(duplicate)
@@ -199,13 +199,13 @@ def test_vote_cascade_when_wishlist_item_deleted(
 
 
 def test_vote_cascade_when_user_deleted(
-    user,
+    admin_user,
     wishlist_item_vote,
 ):
     item_id = wishlist_item_vote.wishlist_item_id
     user_id = wishlist_item_vote.user_id
 
-    db.session.delete(user)
+    db.session.delete(admin_user)
     db.session.flush()
 
     result = db.session.execute(

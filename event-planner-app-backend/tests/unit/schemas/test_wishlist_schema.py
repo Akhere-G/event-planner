@@ -77,12 +77,12 @@ def test_wishlist_item_schema_allows_optional_fields_to_be_none():
     assert result["place_id"] is None
 
 
-def test_wishlist_item_vote_schema_serialises_user(user):
-    result = WishlistItemVoteSchema().dump({"user": user})
+def test_wishlist_item_vote_schema_serialises_user(admin_user):
+    result = WishlistItemVoteSchema().dump({"user": admin_user})
 
-    assert result["user"]["id"] == user.id
-    assert result["user"]["username"] == user.username
-    assert result["user"]["email"] == user.email
+    assert result["user"]["id"] == admin_user.id
+    assert result["user"]["username"] == admin_user.username
+    assert result["user"]["email"] == admin_user.email
 
 
 def test_wishlist_schema_serialises_items(wishlist):
