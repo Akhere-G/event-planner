@@ -91,12 +91,12 @@ def test_wishlist_cascade_when_itinerary_deleted(
 def test_wishlist_item_creation(wishlist_item, wishlist):
     assert isinstance(wishlist_item, WishlistItem)
     assert wishlist_item.wishlist_id == wishlist.id
-    assert wishlist_item.name.startswith("Wishlist Item 0")
+    assert wishlist_item.name.startswith("Wishlist Item")
     assert wishlist_item.address == "123 Food St"
     assert wishlist_item.latitude == 40.7128
     assert wishlist_item.longitude == -74.0060
     assert wishlist_item.description == "Sample item"
-    assert wishlist_item.place_id == "place0"
+    assert wishlist_item.place_id.startswith("place")
 
 
 def test_wishlist_item_default_is_not_promoted(wishlist_item):

@@ -126,7 +126,7 @@ def test_create_invite_existing_accepted(admin_user, itinerary):
         updated_by_id=admin_user.id,
     )
     db.session.add(invite)
-    db.session.commit()
+    db.session.flush()
 
     invite_data = {
         "email": admin_user.email,
@@ -150,7 +150,7 @@ def test_revoke_invite_success(admin_user, invite):
 def test_revoke_invite_already_accepted(admin_user, invite):
     invite.status = InvitationStatus.ACCEPTED.value
 
-    db.session.commit()
+    db.session.flush()
 
     with pytest.raises(BadRequestError) as exc_info:
         revoke_invite(admin_user.id, invite.itinerary_id, invite.id)
@@ -160,7 +160,7 @@ def test_revoke_invite_already_accepted(admin_user, invite):
 def test_revoke_invite_already_declined(admin_user, invite):
     invite.status = InvitationStatus.DECLINED.value
 
-    db.session.commit()
+    db.session.flush()
 
     with pytest.raises(BadRequestError) as exc_info:
         revoke_invite(admin_user.id, invite.itinerary_id, invite.id)
@@ -196,7 +196,7 @@ def test_accept_invite_success(invited_user, invite):
 def test_accept_invite_expired(invited_user, invite):
     invite.expires_at = datetime.now(timezone.utc) - timedelta(days=1)
 
-    db.session.commit()
+    db.session.flush()
 
     with pytest.raises(BadRequestError) as exc_info:
         accept_invite(invited_user.id, invite.token)
@@ -206,7 +206,7 @@ def test_accept_invite_expired(invited_user, invite):
 def test_accept_invite_already_accepted(invited_user, invite):
     invite.status = InvitationStatus.ACCEPTED.value
 
-    db.session.commit()
+    db.session.flush()
 
     with pytest.raises(BadRequestError) as exc_info:
         accept_invite(invited_user.id, invite.token)
@@ -216,7 +216,7 @@ def test_accept_invite_already_accepted(invited_user, invite):
 def test_accept_invite_already_declined(invited_user, invite):
     invite.status = InvitationStatus.DECLINED.value
 
-    db.session.commit()
+    db.session.flush()
 
     with pytest.raises(BadRequestError) as exc_info:
         accept_invite(invited_user.id, invite.token)
@@ -226,7 +226,7 @@ def test_accept_invite_already_declined(invited_user, invite):
 def test_accept_invite_revoked(invited_user, invite):
     invite.status = InvitationStatus.REVOKED.value
 
-    db.session.commit()
+    db.session.flush()
 
     with pytest.raises(BadRequestError) as exc_info:
         accept_invite(invited_user.id, invite.token)
@@ -242,7 +242,7 @@ def test_decline_invite_success(invited_user, invite):
 def test_decline_invite_already_accepted(invited_user, invite):
     invite.status = InvitationStatus.ACCEPTED.value
 
-    db.session.commit()
+    db.session.flush()
 
     with pytest.raises(BadRequestError) as exc_info:
         decline_invite(invited_user.id, invite.token)
@@ -252,7 +252,7 @@ def test_decline_invite_already_accepted(invited_user, invite):
 def test_decline_invite_already_declined(invited_user, invite):
     invite.status = InvitationStatus.DECLINED.value
 
-    db.session.commit()
+    db.session.flush()
 
     with pytest.raises(BadRequestError) as exc_info:
         decline_invite(invited_user.id, invite.token)
@@ -262,7 +262,7 @@ def test_decline_invite_already_declined(invited_user, invite):
 def test_decline_invite_revoked(invited_user, invite):
     invite.status = InvitationStatus.REVOKED.value
 
-    db.session.commit()
+    db.session.flush()
 
     with pytest.raises(BadRequestError) as exc_info:
         decline_invite(invited_user.id, invite.token)
