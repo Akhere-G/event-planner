@@ -1,5 +1,5 @@
 import { yupResolver } from "@hookform/resolvers/yup";
-import { FormInput } from "../components";
+import { FormInput, PasswordInput } from "../components";
 import { useForm } from "react-hook-form";
 import {
   registerSchema,
@@ -82,14 +82,12 @@ export default function Register() {
             {...register("email")}
             errorMessage={formState.errors.email?.message}
           />
-          <FormInput
-            type="password"
+          <PasswordInput
             label="Password"
             {...register("password")}
             errorMessage={formState.errors.password?.message}
           />
-          <FormInput
-            type="password"
+          <PasswordInput
             label="Repeat Password"
             {...register("repeatPassword")}
             errorMessage={formState.errors.repeatPassword?.message}
