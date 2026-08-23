@@ -6,9 +6,9 @@ from src.models import InvitationStatus, Invite, UserRole
 from tests.factories import InviteFactory
 
 
-def test_invite_creation(invite, user, uninvited_user):
+def test_invite_creation(invite, user, invited_user):
     assert isinstance(invite, Invite)
-    assert invite.email == uninvited_user.email
+    assert invite.email == invited_user.email
     assert invite.inviter_id == user.id
     assert invite.role == UserRole.VIEWER.value
     assert invite.status == InvitationStatus.PENDING.value
@@ -28,10 +28,10 @@ def test_invite_belongs_to_itinerary(invite, itinerary):
     assert invite.itinerary == itinerary
 
 
-def test_duplicate_invite_is_rejected(invite, user, itinerary, uninvited_user):
+def test_duplicate_invite_is_rejected(invite, user, itinerary, invited_user):
     with pytest.raises(IntegrityError):
         duplicate = InviteFactory(
-            itinerary=itinerary, creator=user, email=uninvited_user.email
+            itinerary=itinerary, creator=user, email=invited_user.email
         )
         db.session.flush(duplicate)
 

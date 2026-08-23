@@ -177,7 +177,7 @@ def test_remove_user_self_multiple_admins(user, itinerary):
 
 
 def test_remove_user_revokes_invite(
-    user, itinerary, uninvited_user, itinerary_user, invite
+    user, itinerary, invited_user, itinerary_user, invite
 ):
     itinerary_user.role = UserRole.ADMIN.value
 
@@ -185,13 +185,13 @@ def test_remove_user_revokes_invite(
 
     invite.status = InvitationStatus.ACCEPTED.value
     ItineraryUserFactory(
-        user=uninvited_user,
+        user=invited_user,
         itinerary=itinerary,
         role=UserRole.VIEWER.value,
         creator=user,
     )
 
-    remove_user(user.id, itinerary.id, uninvited_user.id)
+    remove_user(user.id, itinerary.id, invited_user.id)
 
     db.session.refresh(invite)
     assert invite.status == InvitationStatus.REVOKED.value

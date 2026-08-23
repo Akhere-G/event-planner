@@ -32,7 +32,7 @@ def login_user(email: str, password: str):
     user = session.execute(stmt).scalar_one_or_none()
 
     if not user:
-        raise UserDoesNotExistError("Invalid Credentials.")
+        raise InvalidCredentialsError()
     if bcrypt.check_password_hash(user.password, password):
         return user.id
     else:

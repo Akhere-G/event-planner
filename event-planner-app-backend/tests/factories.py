@@ -1,7 +1,7 @@
 from datetime import date, datetime
 
 import factory
-from src.extensions import db
+from src.extensions import bcrypt, db
 from src.models import (
     Event,
     InvitationStatus,
@@ -24,7 +24,9 @@ class UserFactory(factory.alchemy.SQLAlchemyModelFactory):
 
     username = factory.Sequence(lambda n: f"user{n}")
     email = factory.Sequence(lambda n: f"user{n}@example.com")
-    password = "password123"
+    password = factory.LazyAttribute(
+        lambda obj: bcrypt.generate_password_hash("password123").decode("utf-8")
+    )
 
 
 class ItineraryFactory(factory.alchemy.SQLAlchemyModelFactory):

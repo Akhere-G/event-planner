@@ -47,8 +47,8 @@ def test_get_invite_no_params(itinerary):
     assert result is None
 
 
-def test_get_user_invites(uninvited_user, invite):
-    invites = get_user_invites(uninvited_user.id)
+def test_get_user_invites(invited_user, invite):
+    invites = get_user_invites(invited_user.id)
     assert len(invites) == 1
     assert invites[0].id == invite.id
 
@@ -69,9 +69,9 @@ def test_get_invites_empty(itinerary):
     assert invites == []
 
 
-def test_create_invite_success(user, itinerary, uninvited_user):
+def test_create_invite_success(user, itinerary, invited_user):
     invite_data = {
-        "email": uninvited_user.email,
+        "email": invited_user.email,
         "itinerary_id": itinerary.id,
         "role": UserRole.VIEWER.value,
         "inviter_id": user.id,
@@ -81,7 +81,7 @@ def test_create_invite_success(user, itinerary, uninvited_user):
 
     invite = create_invite(invite_data)
     assert invite.id is not None
-    assert invite.email == uninvited_user.email
+    assert invite.email == invited_user.email
     assert invite.status == InvitationStatus.PENDING.value
 
 
@@ -173,8 +173,8 @@ def test_revoke_invite_not_found(user, itinerary):
         revoke_invite(user.id, itinerary.id, 99999)
 
 
-def test_get_user_invite_success(uninvited_user, invite):
-    result = get_user_invite(uninvited_user.id, invite.token)
+def test_get_user_invite_success(invited_user, invite):
+    result = get_user_invite(invited_user.id, invite.token)
     assert result is not None
     assert result.id == invite.id
 
@@ -184,89 +184,89 @@ def test_get_user_invite_not_found(user):
         get_user_invite(user.id, "invalid_token")
 
 
-def test_accept_invite_success(uninvited_user, invite):
-    membership = accept_invite(uninvited_user.id, invite.token)
+def test_accept_invite_success(invited_user, invite):
+    membership = accept_invite(invited_user.id, invite.token)
     assert membership is not None
-    assert membership.user_id == uninvited_user.id
+    assert membership.user_id == invited_user.id
     assert membership.itinerary_id == invite.itinerary_id
 
     db.session.refresh(invite)
     assert invite.status == InvitationStatus.ACCEPTED.value
 
 
-def test_accept_invite_expired(uninvited_user, invite):
+def test_accept_invite_expired(invited_user, invite):
     invite.expires_at = datetime.now(timezone.utc) - timedelta(days=1)
 
     db.session.commit()
 
     with pytest.raises(BadRequestError) as exc_info:
-        accept_invite(uninvited_user.id, invite.token)
+        accept_invite(invited_user.id, invite.token)
     assert "expired" in str(exc_info.value).lower()
 
 
-def test_accept_invite_already_accepted(uninvited_user, invite):
+def test_accept_invite_already_accepted(invited_user, invite):
     invite.status = InvitationStatus.ACCEPTED.value
 
     db.session.commit()
 
     with pytest.raises(BadRequestError) as exc_info:
-        accept_invite(uninvited_user.id, invite.token)
+        accept_invite(invited_user.id, invite.token)
     assert "already been accepted" in str(exc_info.value)
 
 
-def test_accept_invite_already_declined(uninvited_user, invite):
+def test_accept_invite_already_declined(invited_user, invite):
     invite.status = InvitationStatus.DECLINED.value
 
     db.session.commit()
 
     with pytest.raises(BadRequestError) as exc_info:
-        accept_invite(uninvited_user.id, invite.token)
+        accept_invite(invited_user.id, invite.token)
     assert "already been declined" in str(exc_info.value)
 
 
-def test_accept_invite_revoked(uninvited_user, invite):
+def test_accept_invite_revoked(invited_user, invite):
     invite.status = InvitationStatus.REVOKED.value
 
     db.session.commit()
 
     with pytest.raises(BadRequestError) as exc_info:
-        accept_invite(uninvited_user.id, invite.token)
+        accept_invite(invited_user.id, invite.token)
     assert "revoked" in str(exc_info.value).lower()
 
 
-def test_decline_invite_success(uninvited_user, invite):
-    declined = decline_invite(uninvited_user.id, invite.token)
+def test_decline_invite_success(invited_user, invite):
+    declined = decline_invite(invited_user.id, invite.token)
     assert declined.status == InvitationStatus.DECLINED.value
-    assert declined.updated_by_id == uninvited_user.id
+    assert declined.updated_by_id == invited_user.id
 
 
-def test_decline_invite_already_accepted(uninvited_user, invite):
+def test_decline_invite_already_accepted(invited_user, invite):
     invite.status = InvitationStatus.ACCEPTED.value
 
     db.session.commit()
 
     with pytest.raises(BadRequestError) as exc_info:
-        decline_invite(uninvited_user.id, invite.token)
+        decline_invite(invited_user.id, invite.token)
     assert "already been accepted" in str(exc_info.value)
 
 
-def test_decline_invite_already_declined(uninvited_user, invite):
+def test_decline_invite_already_declined(invited_user, invite):
     invite.status = InvitationStatus.DECLINED.value
 
     db.session.commit()
 
     with pytest.raises(BadRequestError) as exc_info:
-        decline_invite(uninvited_user.id, invite.token)
+        decline_invite(invited_user.id, invite.token)
     assert "already been declined" in str(exc_info.value)
 
 
-def test_decline_invite_revoked(uninvited_user, invite):
+def test_decline_invite_revoked(invited_user, invite):
     invite.status = InvitationStatus.REVOKED.value
 
     db.session.commit()
 
     with pytest.raises(BadRequestError) as exc_info:
-        decline_invite(uninvited_user.id, invite.token)
+        decline_invite(invited_user.id, invite.token)
     assert "revoked" in str(exc_info.value).lower()
 
 
