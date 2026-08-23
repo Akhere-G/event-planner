@@ -8,21 +8,20 @@ from src.exceptions import (
     UserAlreadyExistsError,
     UserDoesNotExistError,
 )
-from src.models import InvitationStatus, UserRole
+from src.extensions import db
+from src.models import InvitationStatus, Invite, UserRole
 from src.services.invite_service import (
-    get_invite,
-    get_user_invites,
-    get_invites,
-    create_invite,
-    revoke_invite,
-    get_user_invite,
     accept_invite,
+    create_invite,
     decline_invite,
+    get_invite,
+    get_invites,
+    get_user_invite,
+    get_user_invites,
     join_itinerary,
+    revoke_invite,
 )
 from tests.factories import InviteFactory, ItineraryUserFactory, UserFactory
-from src.models import Invite
-from src.extensions import db
 
 
 def test_get_invite_by_id(invite):
@@ -53,8 +52,8 @@ def test_get_user_invites(invited_user, invite):
     assert invites[0].id == invite.id
 
 
-def test_get_user_invites_empty(user):
-    invites = get_user_invites(user.id)
+def test_get_user_invites_empty(admin_user):
+    invites = get_user_invites(admin_user.id)
     assert invites == []
 
 
@@ -69,14 +68,14 @@ def test_get_invites_empty(itinerary):
     assert invites == []
 
 
-def test_create_invite_success(user, itinerary, invited_user):
+def test_create_invite_success(admin_user, itinerary, invited_user):
     invite_data = {
         "email": invited_user.email,
         "itinerary_id": itinerary.id,
         "role": UserRole.VIEWER.value,
-        "inviter_id": user.id,
-        "created_by_id": user.id,
-        "updated_by_id": user.id,
+        "inviter_id": admin_user.id,
+        "created_by_id": admin_user.id,
+        "updated_by_id": admin_user.id,
     }
 
     invite = create_invite(invite_data)
@@ -85,28 +84,28 @@ def test_create_invite_success(user, itinerary, invited_user):
     assert invite.status == InvitationStatus.PENDING.value
 
 
-def test_create_invite_user_already_member(user, itinerary, itinerary_user):
+def test_create_invite_user_already_member(admin_user, itinerary, admin_itinerary_user):
     invite_data = {
-        "email": user.email,
+        "email": admin_user.email,
         "itinerary_id": itinerary.id,
         "role": UserRole.VIEWER.value,
-        "inviter_id": user.id,
-        "created_by_id": user.id,
-        "updated_by_id": user.id,
+        "inviter_id": admin_user.id,
+        "created_by_id": admin_user.id,
+        "updated_by_id": admin_user.id,
     }
 
     with pytest.raises(UserAlreadyExistsError):
         create_invite(invite_data)
 
 
-def test_create_invite_existing_pending(user, itinerary, invite):
+def test_create_invite_existing_pending(admin_user, itinerary, invite):
     invite_data = {
         "email": invite.email,
         "itinerary_id": itinerary.id,
         "role": UserRole.EDITOR.value,
-        "inviter_id": user.id,
-        "created_by_id": user.id,
-        "updated_by_id": user.id,
+        "inviter_id": admin_user.id,
+        "created_by_id": admin_user.id,
+        "updated_by_id": admin_user.id,
     }
 
     updated_invite = create_invite(invite_data)
@@ -115,62 +114,62 @@ def test_create_invite_existing_pending(user, itinerary, invite):
     assert updated_invite.status == InvitationStatus.PENDING.value
 
 
-def test_create_invite_existing_accepted(user, itinerary):
+def test_create_invite_existing_accepted(admin_user, itinerary):
 
     invite = Invite(
-        email=user.email,
+        email=admin_user.email,
         itinerary_id=itinerary.id,
         role=UserRole.VIEWER.value,
         status=InvitationStatus.ACCEPTED.value,
-        inviter_id=user.id,
-        created_by_id=user.id,
-        updated_by_id=user.id,
+        inviter_id=admin_user.id,
+        created_by_id=admin_user.id,
+        updated_by_id=admin_user.id,
     )
     db.session.add(invite)
     db.session.commit()
 
     invite_data = {
-        "email": user.email,
+        "email": admin_user.email,
         "itinerary_id": itinerary.id,
         "role": UserRole.VIEWER.value,
-        "inviter_id": user.id,
-        "created_by_id": user.id,
-        "updated_by_id": user.id,
+        "inviter_id": admin_user.id,
+        "created_by_id": admin_user.id,
+        "updated_by_id": admin_user.id,
     }
 
     with pytest.raises(UserAlreadyExistsError):
         create_invite(invite_data)
 
 
-def test_revoke_invite_success(user, invite):
-    revoked = revoke_invite(user.id, invite.itinerary_id, invite.id)
+def test_revoke_invite_success(admin_user, invite):
+    revoked = revoke_invite(admin_user.id, invite.itinerary_id, invite.id)
     assert revoked.status == InvitationStatus.REVOKED.value
-    assert revoked.updated_by_id == user.id
+    assert revoked.updated_by_id == admin_user.id
 
 
-def test_revoke_invite_already_accepted(user, invite):
+def test_revoke_invite_already_accepted(admin_user, invite):
     invite.status = InvitationStatus.ACCEPTED.value
 
     db.session.commit()
 
     with pytest.raises(BadRequestError) as exc_info:
-        revoke_invite(user.id, invite.itinerary_id, invite.id)
+        revoke_invite(admin_user.id, invite.itinerary_id, invite.id)
     assert "already been accepted" in str(exc_info.value)
 
 
-def test_revoke_invite_already_declined(user, invite):
+def test_revoke_invite_already_declined(admin_user, invite):
     invite.status = InvitationStatus.DECLINED.value
 
     db.session.commit()
 
     with pytest.raises(BadRequestError) as exc_info:
-        revoke_invite(user.id, invite.itinerary_id, invite.id)
+        revoke_invite(admin_user.id, invite.itinerary_id, invite.id)
     assert "already been declined" in str(exc_info.value)
 
 
-def test_revoke_invite_not_found(user, itinerary):
+def test_revoke_invite_not_found(admin_user, itinerary):
     with pytest.raises(InviteNotFoundError):
-        revoke_invite(user.id, itinerary.id, 99999)
+        revoke_invite(admin_user.id, itinerary.id, 99999)
 
 
 def test_get_user_invite_success(invited_user, invite):
@@ -179,9 +178,9 @@ def test_get_user_invite_success(invited_user, invite):
     assert result.id == invite.id
 
 
-def test_get_user_invite_not_found(user):
+def test_get_user_invite_not_found(admin_user):
     with pytest.raises(InviteNotFoundError):
-        get_user_invite(user.id, "invalid_token")
+        get_user_invite(admin_user.id, "invalid_token")
 
 
 def test_accept_invite_success(invited_user, invite):
@@ -270,21 +269,21 @@ def test_decline_invite_revoked(invited_user, invite):
     assert "revoked" in str(exc_info.value).lower()
 
 
-def test_join_itinerary_viewer_code(user, itinerary):
-    invite = join_itinerary(user.id, itinerary.viewer_code)
+def test_join_itinerary_viewer_code(admin_user, itinerary):
+    invite = join_itinerary(admin_user.id, itinerary.viewer_code)
     assert invite is not None
-    assert invite.email == user.email
+    assert invite.email == admin_user.email
     assert invite.role == UserRole.VIEWER.value
 
 
-def test_join_itinerary_editor_code(user, itinerary):
-    invite = join_itinerary(user.id, itinerary.editor_code)
+def test_join_itinerary_editor_code(admin_user, itinerary):
+    invite = join_itinerary(admin_user.id, itinerary.editor_code)
     assert invite is not None
     assert invite.role == UserRole.EDITOR.value
 
 
-def test_join_itinerary_admin_code(user, itinerary):
-    invite = join_itinerary(user.id, itinerary.admin_code)
+def test_join_itinerary_admin_code(admin_user, itinerary):
+    invite = join_itinerary(admin_user.id, itinerary.admin_code)
     assert invite is not None
     assert invite.role == UserRole.ADMIN.value
 
@@ -294,11 +293,11 @@ def test_join_itinerary_user_not_found(itinerary):
         join_itinerary(99999, itinerary.viewer_code)
 
 
-def test_join_itinerary_invalid_code(user):
+def test_join_itinerary_invalid_code(admin_user):
     with pytest.raises(ItineraryDoesNotExistError):
-        join_itinerary(user.id, "invalid_code")
+        join_itinerary(admin_user.id, "invalid_code")
 
 
-def test_join_itinerary_already_member(user, itinerary, itinerary_user):
+def test_join_itinerary_already_member(admin_user, itinerary, admin_itinerary_user):
     with pytest.raises(UserAlreadyExistsError):
-        join_itinerary(user.id, itinerary.viewer_code)
+        join_itinerary(admin_user.id, itinerary.viewer_code)

@@ -18,7 +18,7 @@ class WishlistItemSchema(BaseSchema):
         model = WishlistItem
 
     id = auto_field(dump_only=True)
-    wishlist_id = auto_field()
+    wishlist_id = auto_field(dump_only=True)
     name = auto_field(
         error_messages={
             "required": "Item name is required.",

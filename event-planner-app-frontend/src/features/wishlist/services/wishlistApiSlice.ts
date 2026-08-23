@@ -56,8 +56,8 @@ export const wishlistApiSlice = apiSlice.injectEndpoints({
       ApiResponse<WishlistItem>,
       CreateWishlistItemPayload
     >({
-      query: ({ tripId, ...itemData }) => ({
-        url: `/itineraries/${tripId}/wishlists/${itemData.wishlistId}/items`,
+      query: ({ tripId, wishlistId, ...itemData }) => ({
+        url: `/itineraries/${tripId}/wishlists/${wishlistId}/items`,
         method: "POST",
         body: itemData,
       }),

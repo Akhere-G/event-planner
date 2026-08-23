@@ -6,21 +6,21 @@ from src.models import InvitationStatus, Invite, UserRole
 from tests.factories import InviteFactory
 
 
-def test_invite_creation(invite, user, invited_user):
+def test_invite_creation(invite, admin_user, invited_user):
     assert isinstance(invite, Invite)
     assert invite.email == invited_user.email
-    assert invite.inviter_id == user.id
+    assert invite.inviter_id == admin_user.id
     assert invite.role == UserRole.VIEWER.value
     assert invite.status == InvitationStatus.PENDING.value
     assert invite.token is not None
     assert invite.expires_at is not None
 
 
-def test_invite_has_audit_fields(user, invite):
+def test_invite_has_audit_fields(admin_user, invite):
     assert invite.created_at is not None
     assert invite.updated_at is not None
-    assert invite.updated_by_id == user.id
-    assert invite.created_by_id == user.id
+    assert invite.updated_by_id == admin_user.id
+    assert invite.created_by_id == admin_user.id
 
 
 def test_invite_belongs_to_itinerary(invite, itinerary):
@@ -28,10 +28,10 @@ def test_invite_belongs_to_itinerary(invite, itinerary):
     assert invite.itinerary == itinerary
 
 
-def test_duplicate_invite_is_rejected(invite, user, itinerary, invited_user):
+def test_duplicate_invite_is_rejected(invite, admin_user, itinerary, invited_user):
     with pytest.raises(IntegrityError):
         duplicate = InviteFactory(
-            itinerary=itinerary, creator=user, email=invited_user.email
+            itinerary=itinerary, creator=admin_user, email=invited_user.email
         )
         db.session.flush(duplicate)
 
