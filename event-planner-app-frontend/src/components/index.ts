@@ -1,6 +1,7 @@
 export { default as FormInput } from "./FormInput";
 export { default as FormTextarea } from "./FormTextarea";
 export { default as FormSelect } from "./FormSelect";
+export { default as PasswordInput } from "./PasswordInput";
 export { default as ProtectedRoute } from "./ProtectedRoute";
 export { default as EmptyState } from "./EmptyState";
 export { default as ErrorState } from "./ErrorState";

@@ -1,5 +1,5 @@
 import { useForm } from "react-hook-form";
-import { FormInput } from "../components";
+import { FormInput, PasswordInput } from "../components";
 import { useLoginUserMutation } from "../features/auth/services/authApiSlice";
 import { yupResolver } from "@hookform/resolvers/yup";
 import {
@@ -65,10 +65,9 @@ export default function Login() {
             errorMessage={formState.errors.email?.message}
             {...register("email")}
           />
-          <FormInput
+          <PasswordInput
             errorMessage={formState.errors.password?.message}
             label="Password"
-            type="password"
             {...register("password")}
           />
           <button className="btn-primary mt-2" disabled={result.isLoading}>
