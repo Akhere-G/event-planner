@@ -50,8 +50,8 @@ export default function Register() {
     } catch (err) {
       if (isValidationError(err)) {
         const serverErrors = err.data.error;
-
-        setErrorMessage(serverErrors.general?.join(", ") ?? "");
+        if (typeof serverErrors == "string")
+          setErrorMessage(serverErrors ?? "");
 
         Object.entries(serverErrors).forEach(([key, messages]) => {
           setError(key as keyof RegisterSchema, {
@@ -86,11 +86,13 @@ export default function Register() {
             label="Password"
             {...register("password")}
             errorMessage={formState.errors.password?.message}
+            data-testId="password"
           />
           <PasswordInput
             label="Repeat Password"
             {...register("repeatPassword")}
             errorMessage={formState.errors.repeatPassword?.message}
+            data-testId="repeatPassword"
           />
           <label className="flex items-start gap-3 text-sm ">
             <input

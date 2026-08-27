@@ -39,8 +39,9 @@ export default function Login() {
     } catch (err) {
       if (isValidationError(err)) {
         const serverErrors = err.data.error;
-
-        setErrorMessage(serverErrors.general?.join(", ") ?? "");
+        console.log(serverErrors);
+        if (typeof serverErrors == "string")
+          setErrorMessage(serverErrors ?? "");
 
         Object.entries(serverErrors).forEach(([k, messages]) => {
           setError(k as keyof LoginSchema, {
