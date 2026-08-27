@@ -2,6 +2,12 @@ venv
 __pycache__
 database.db
 .env*
+event-planner-app-frontend/.agents
+# testing 
+
+event-planner-app-frontend/coverage
+playwright-report
+test-results
 
 # Logs
 logs
