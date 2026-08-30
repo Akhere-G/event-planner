@@ -65,9 +65,9 @@ export default function RouteCarousel({
   const currentRoute = routes[activeIndex];
 
   return (
-    <div className="fixed bottom-6 left-0 w-full z-20 pointer-events-none">
-      <div className="md:px-4">
-        <div className="flex justify-between items-center pointer-events-auto">
+    <div className="fixed bottom-2 left-0 w-full z-20">
+      <div className="md:px-2">
+        <div className="flex justify-between pointer-events-auto">
           {!isSingleRoute && (
             <div className="flex gap-2">
               <button
@@ -94,7 +94,7 @@ export default function RouteCarousel({
 
         <div
           ref={scrollRef}
-          className="flex overflow-x-hidden snap-x snap-mandatory pointer-events-auto"
+          className="flex overflow-x-hidden snap-x snap-mandatory pointer-events-auto "
         >
           {routes.map((route, idx) => {
             const apiData = legResults[idx]?.routes[0]?.legs[0];
@@ -103,11 +103,11 @@ export default function RouteCarousel({
               <div
                 key={idx}
                 className={`
-                  snap-center shrink-0 p-1 
-                  ${isSingleRoute ? "w-full" : "w-full md:pr-4"}
+                  snap-center min-w-screen
+                  ${isSingleRoute ? "w-full pr-4" : "w-full "}
                 `}
               >
-                <div className="card min-h-55 max-h-[40vh] flex flex-col">
+                <div className="card h-55 flex flex-col w-[calc(100vw-1rem)]">
                   <div className="flex justify-between items-end mb-4 pb-2 border-b gap-2">
                     <div className="flex flex-col">
                       <span className="text-[0.625rem] font-bold uppercase">
@@ -151,11 +151,42 @@ export default function RouteCarousel({
                         {apiData.steps?.map((step, sIdx) => (
                           <div
                             key={sIdx}
-                            className="mb-2 pb-2 border-b text-text-primary text-sm border-surface-border last:border-0"
-                            dangerouslySetInnerHTML={{
-                              __html: step.instructions,
-                            }}
-                          />
+                            className="grid grid-cols-12 gap-1 mb-2 pb-2 border-b text-text-primary text-sm border-surface-border last:border-0 items-baseline"
+                          >
+                            {step.duration && (
+                              <p className="text-xs mr-1 col-1">
+                                {step.duration.text}
+                              </p>
+                            )}
+
+                            <p className="col-span-11">
+                              <span
+                                dangerouslySetInnerHTML={{
+                                  __html: step.instructions,
+                                }}
+                              />
+                              {step.travel_mode === "TRANSIT" && (
+                                <span>
+                                  {" "}
+                                  from
+                                  <span className="font-bold">
+                                    {" "}
+                                    {step.transit?.arrival_stop.name}{" "}
+                                  </span>
+                                  to
+                                  <span className="font-bold">
+                                    {" "}
+                                    {step.transit?.departure_stop.name}{" "}
+                                  </span>
+                                  via
+                                  <span className="font-bold">
+                                    {" "}
+                                    {step.transit?.line.short_name}
+                                  </span>
+                                </span>
+                              )}
+                            </p>
+                          </div>
                         ))}
                       </div>
                     </div>
