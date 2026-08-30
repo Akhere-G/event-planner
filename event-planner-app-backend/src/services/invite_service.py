@@ -214,7 +214,9 @@ def join_itinerary(user_id: int, token: str):
         )
 
         if existing_invite:
-            raise UserAlreadyExistsError()
+            return existing_invite  # don't return error just return
+        if itinerary.created_by_id == user_id:
+            raise UserAlreadyExistsError("This is the trip you created!")
 
         return create_invite(
             {
