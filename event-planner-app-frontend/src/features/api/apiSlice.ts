@@ -8,7 +8,7 @@ import {
 import { toast } from "sonner";
 const baseUrl =
   import.meta.env.VITE_API_URL ||
-  "https://tripapp-752853711822.europe-west2.run.app/api";
+  "/api";
 
 const baseQuery = fetchBaseQuery({ baseUrl, credentials: "include" });
 
