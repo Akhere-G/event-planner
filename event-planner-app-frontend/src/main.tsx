@@ -11,14 +11,17 @@ window.addEventListener("vite:preloadError", () => {
   window.location.reload();
 });
 
+const mapsAPIKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+
+if (!mapsAPIKey) {
+  console.error("No maps api key present!");
+}
+
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <BrowserRouter>
       <Provider store={store}>
-        <APIProvider
-          apiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY}
-          libraries={["places"]}
-        >
+        <APIProvider apiKey={mapsAPIKey} libraries={["places"]}>
           <App />
         </APIProvider>
       </Provider>
