@@ -11,7 +11,7 @@ window.addEventListener("vite:preloadError", () => {
   window.location.reload();
 });
 
-const mapsAPIKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+const mapsAPIKey = "AIzaSyAzLmSK-RsggriUFdkHmir3A3kzJp4iyGU";
 
 if (!mapsAPIKey) {
   console.error("No maps api key present!");
