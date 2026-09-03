@@ -13,6 +13,8 @@ import {
   DropdownMenuTrigger,
 } from "../components/ui/dropdown-menu";
 
+import NotificationBell from "../features/notifications/components/NotificationBell";
+
 interface HeaderProps {
   links: { title: string; url: string }[];
 }
@@ -48,6 +50,7 @@ export default function Header({ links }: HeaderProps) {
               ))}
             </ul>
           </nav>
+          {isAuthenticated && <NotificationBell />}
           <DropdownMenu>
             <DropdownMenuTrigger className="p-2.5 bg-brand-primary rounded-full h-10 w-10 hover:bg-brand-primary/90 transition-colors">
               <User className="text-text-inverse" size={20} />
@@ -84,14 +87,18 @@ export default function Header({ links }: HeaderProps) {
         </div>
 
         {/* Mobile Toggle */}
-        <button
-          className="btn-secondary md:hidden p-2"
-          aria-expanded={isSidebarOpen}
-          aria-label="Open Menu"
-          onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-        >
-          <Menu size={24} />
-        </button>
+        <div className="flex gap-2 items-center">
+          {isAuthenticated && <NotificationBell />}
+
+          <button
+            className="btn-secondary md:hidden p-2"
+            aria-expanded={isSidebarOpen}
+            aria-label="Open Menu"
+            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+          >
+            <Menu size={24} />
+          </button>
+        </div>
       </div>
 
       {/* Mobile Sidebar */}
