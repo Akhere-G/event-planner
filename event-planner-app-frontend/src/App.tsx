@@ -29,6 +29,8 @@ const About = lazy(() => import("./pages/About"));
 const PrivacyPage = lazy(() => import("./pages/PrivacyPage"));
 const TermsPage = lazy(() => import("./pages/TermsPage"));
 
+import NotificationsPrompt from "./features/notifications/components/NotificationsPrompt";
+
 function App() {
   const isAuthenticated = useSelector(selectIsAuthenticated);
   const { isLoading, data } = useCheckUserQuery();
@@ -70,6 +72,8 @@ function App() {
     >
       <Header links={links} />
       <Toaster position="top-right" richColors />
+      {isAuth && <NotificationsPrompt />}
+
 
       <main className="min-h-[93.5vh] 2xl:min-h-[96vh]">
         <Suspense

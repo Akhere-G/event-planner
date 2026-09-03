@@ -98,3 +98,5 @@ websockets==16.0
 Werkzeug==3.1.7
 wrapt==2.3.0
 yarl==1.23.0
+pywebpush==2.0.0
+
