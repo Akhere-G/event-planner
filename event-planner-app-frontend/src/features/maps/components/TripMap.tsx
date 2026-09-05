@@ -17,14 +17,9 @@ import UserCoords from "./UserCoords";
 export default function TripMap({ trip }: { trip: Trip }) {
   const { latitude, longitude } = trip;
   const dispatch = useDispatch();
-  const { days } = useSelector((state: RootState) => state.map);
   const darkMode = useSelector((state: RootState) => state.theme.darkMode);
 
   const map = useMap();
-
-  const selectedEvents = days
-    .filter((day) => day.show)
-    .flatMap((day) => day.events);
 
   const cityBounds = {
     north: latitude + CITY_RADIUS,
@@ -36,7 +31,7 @@ export default function TripMap({ trip }: { trip: Trip }) {
   useEffect(() => {
     if (!map) return;
 
-    fitToBounds({ map, events: selectedEvents, defaultBounds: cityBounds });
+    fitToBounds({ map, events: [], defaultBounds: cityBounds });
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [map, latitude, longitude]);
