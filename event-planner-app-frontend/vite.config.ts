@@ -12,7 +12,7 @@ export default defineConfig({
     VitePWA({
       strategies: "injectManifest",
       srcDir: "src",
-      filename: "sw.ts",
+      filename: "sw.js",
       registerType: "autoUpdate",
       includeAssets: [
         "favicon.ico",
@@ -49,6 +49,5 @@ export default defineConfig({
         globPatterns: ["**/*.{js,css,html,ico,png,svg}"],
       },
     }),
-
   ],
 });
