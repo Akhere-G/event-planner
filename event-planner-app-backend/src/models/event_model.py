@@ -19,8 +19,8 @@ class Event(Base, AuditMixin):
     latitude: Mapped[float] = mapped_column(Float)
     longitude: Mapped[float] = mapped_column(Float)
     description: Mapped[Optional[str]] = mapped_column(String(256), nullable=True)
-    start_at: Mapped[datetime] = mapped_column(DateTime)
-    end_at: Mapped[datetime] = mapped_column(DateTime)
+    start_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    end_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
     category: Mapped[str] = mapped_column(String(256))
 
     creator: Mapped["User"] = relationship(  # type: ignore  # noqa: F821

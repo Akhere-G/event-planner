@@ -46,12 +46,14 @@ export default function UpdateEventFormView({
   }, [initialEvent, setValue]);
 
   async function onSubmit(formState: EventSchema) {
+    if (!trip) return;
     setErrorMessage("");
     try {
       await updateEvent({
         tripId: Number(tripId),
         eventId: initialEvent.id,
         updatedEvent: formState,
+        timezone: trip.timezone,
       }).unwrap();
       setValue("address", "");
       setValue("name", "");

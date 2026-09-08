@@ -45,6 +45,7 @@ export default function TripForm({
     };
 
     for (const key of Object.keys(defaultValues)) {
+      // ensure that if start_at or end_at aer set, they are converted from UTC to trip timezone
       setValue(key as keyof TripSchema, defaultValues[key as keyof TripSchema]);
     }
   }, [initialData, setValue]);
