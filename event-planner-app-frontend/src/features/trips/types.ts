@@ -10,6 +10,7 @@ export interface Trip {
   longitude: number;
   role: string;
   description?: string;
+  timezone: string;
   startDate: string;
   endDate: string;
   userMemberships: User[];

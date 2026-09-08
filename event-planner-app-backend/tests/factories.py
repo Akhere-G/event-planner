@@ -1,4 +1,4 @@
-from datetime import date, datetime
+from datetime import date, datetime, timezone
 
 import factory
 from src.extensions import bcrypt, db
@@ -40,6 +40,7 @@ class ItineraryFactory(factory.alchemy.SQLAlchemyModelFactory):
     destination = "Paris"
     latitude = 48.8566
     longitude = 2.3522
+    timezone = "Europe/Paris"
     description = "Sample trip"
     start_date = date(2026, 8, 1)
     end_date = date(2026, 8, 3)
@@ -78,8 +79,8 @@ class EventFactory(factory.alchemy.SQLAlchemyModelFactory):
     latitude = 40.7128
     longitude = -74.0060
     description = "Sample event"
-    start_at = datetime(2026, 8, 20, 10, 0)
-    end_at = datetime(2026, 8, 20, 12, 0)
+    start_at = datetime(2026, 8, 20, 10, 0, tzinfo=timezone.utc)
+    end_at = datetime(2026, 8, 20, 12, 0, tzinfo=timezone.utc)
     category = "food"
 
     created_by_id = factory.LazyAttribute(lambda obj: obj.creator.id)

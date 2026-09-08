@@ -1,8 +1,8 @@
 from ..extensions import Base
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy import Integer, String, Date, Float
-from datetime import date
 from typing import Optional
+from datetime import date
 from typing import List
 from .audit_mixins import AuditMixin
 from .event_model import Event
@@ -18,6 +18,7 @@ class Itinerary(Base, AuditMixin):
     latitude: Mapped[float] = mapped_column(Float)
     longitude: Mapped[float] = mapped_column(Float)
     description: Mapped[Optional[str]] = mapped_column(String(255))
+    timezone: Mapped[Optional[str]] = mapped_column(String(64), nullable=True)
     start_date: Mapped[date] = mapped_column(Date, index=True)
     end_date: Mapped[date] = mapped_column(Date)
     viewer_code: Mapped[str] = mapped_column(

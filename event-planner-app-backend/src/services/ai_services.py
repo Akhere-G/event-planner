@@ -10,6 +10,7 @@ from google import genai
 from groq import Groq
 
 from ..utils import ai_output_validators
+from ..utils.location_utils import get_place_details
 from .itineraries_service import get_itinerary
 
 logger = logging.getLogger(__name__)
@@ -88,7 +89,7 @@ def get_ai_response(prompt: str) -> str:
             client_groq = Groq(api_key=groq_api_key)
 
             completion = client_groq.chat.completions.create(
-                model="llama-3.1-8b-instant",
+                model="openai/gpt-oss-20b",
                 messages=[
                     {
                         "role": "system",
@@ -176,13 +177,14 @@ def get_event_suggestions(
     )
 
     requested_date = date.strftime("%Y-%m-%d")
+    timezone = itinerary.timezone
 
     prompt = f"""
 You are an expert travel planner API.
 
 Suggest a perfectly sequenced itinerary segment of 3-4 real-world
 restaurants and activities in {itinerary.destination} for
-{requested_date}.
+{requested_date}. The events will take place in the {timezone} timezone.
 
 CRITICAL USER PROFILES & PREFERENCES:
 
@@ -218,6 +220,7 @@ REQUIREMENTS:
 7. Do not overlap events.
 8. Return ONLY a JSON array.
 9. Do not use markdown code blocks.
+10. The start_at and end_at MUST be formatted as UTC ISO 8601 strings, but represent the intended time in the {timezone} timezone.
 
 JSON FORMAT:
 
@@ -252,33 +255,20 @@ JSON FORMAT:
         if not valid_suggestions:
             return []
 
-        maps_api_key = os.getenv("GOOGLE_MAPS_API_KEY")
-
-        if not maps_api_key:
-            logger.error("GOOGLE_MAPS_API_KEY is not configured.")
-            return []
-
-        gmaps = googlemaps.Client(key=maps_api_key)
-
         geocoded_events = []
 
         for event in valid_suggestions:
-            try:  # TODO: use util function
-                results = gmaps.geocode(f"{event['name']}, {event['address']}")
-
-                if not results:
-                    logger.warning(
-                        "Could not geocode suggested venue: %s",
-                        event["name"],
-                    )
-                    continue
-
-                location = results[0]["geometry"]["location"]
+            try:
+                details = get_place_details(
+                    name=event["name"],
+                    address=event.get("address"),
+                )
 
                 event_with_location = {
                     **event,
-                    "latitude": location["lat"],
-                    "longitude": location["lng"],
+                    "latitude": details["latitude"],
+                    "longitude": details["longitude"],
+                    "address": details.get("formatted_address") or event.get("address"),
                 }
 
                 geocoded_events.append(event_with_location)
@@ -288,7 +278,6 @@ JSON FORMAT:
                     "Failed to geocode venue: %s",
                     event.get("name"),
                 )
-
         return geocoded_events
 
     except (ValueError, RuntimeError) as exc:
@@ -304,6 +293,7 @@ def optimise_events(
     event_date: datetime,
 ):
     itinerary = get_itinerary(itinerary_id)
+    timezone = itinerary.timezone
 
     events = [
         event
@@ -358,6 +348,9 @@ Constraints:
 
 7. SAFETY:
    If an event cannot be sensibly optimised, keep its original times.
+
+8. TIMEZONE:
+   The start_at and end_at MUST be formatted as UTC ISO 8601 strings, but represent the intended time in the {timezone} timezone.
 
 Return ONLY a JSON array.
 

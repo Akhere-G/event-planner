@@ -1,6 +1,6 @@
 # tests/schemas/test_event_schema.py
 
-from datetime import datetime
+from datetime import datetime, timezone
 
 import pytest
 from marshmallow import ValidationError
@@ -42,12 +42,12 @@ def test_event_schema_requires_fields(field):
     "start_at,end_at",
     [
         (
-            datetime(2026, 8, 20, 12, 0),  # noqa: DTZ001
-            datetime(2026, 8, 20, 10, 0),  # noqa: DTZ001
+            datetime(2026, 8, 20, 12, 0, tzinfo=timezone.utc),
+            datetime(2026, 8, 20, 10, 0, tzinfo=timezone.utc),
         ),
         (
-            datetime(2026, 8, 20, 10, 0),  # noqa: DTZ001
-            datetime(2026, 8, 20, 10, 0),  # noqa: DTZ001
+            datetime(2026, 8, 20, 10, 0, tzinfo=timezone.utc),
+            datetime(2026, 8, 20, 10, 0, tzinfo=timezone.utc),
         ),
     ],
 )
@@ -72,3 +72,33 @@ def test_event_schema_rejects_id_on_load():
 
     with pytest.raises(ValidationError):
         EventSchema().load(data)
+
+
+def test_event_schema_rejects_naive_datetime():
+    """Test that naive datetimes are rejected"""
+    data = {
+        **VALID_EVENT_DATA,
+        "start_at": datetime(2026, 8, 20, 10, 0),
+        "end_at": datetime(2026, 8, 20, 12, 0, tzinfo=timezone.utc),
+    }
+
+    with pytest.raises(ValidationError) as exc_info:
+        EventSchema().load(data)
+
+    assert "start_at" in exc_info.value.messages
+
+
+def test_event_schema_converts_to_utc():
+    """Test that non-UTC timezone-aware datetimes are converted to UTC"""
+    from zoneinfo import ZoneInfo
+
+    tokyo_time = datetime(2026, 8, 20, 19, 0, tzinfo=ZoneInfo("Asia/Tokyo"))
+    data = {
+        **VALID_EVENT_DATA,
+        "start_at": tokyo_time,
+        "end_at": datetime(2026, 8, 20, 12, 0, tzinfo=timezone.utc),
+    }
+
+    result = EventSchema().load(data)
+
+    assert result["start_at"] == datetime(2026, 8, 20, 10, 0, tzinfo=timezone.utc)
