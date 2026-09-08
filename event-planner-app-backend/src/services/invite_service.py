@@ -78,10 +78,30 @@ def create_invite(data: dict):
 
         db.session.commit()
 
+        create_invite_notification(invite, data["email"])
         return invite
     except Exception:
         db.session.rollback()
         raise
+
+
+def create_invite_notification(invite, email):
+    try:
+        target_user = db.session.execute(
+            select(User).where(User.email == email)
+        ).scalar_one_or_none()
+        if target_user:
+            from .notification_service import send_push_notification
+
+            trip_name = invite.itinerary.name if invite.itinerary else "a trip"
+            send_push_notification(
+                user_id=target_user.id,
+                title="New Trip Invitation",
+                message=f"You have been invited to join {trip_name}!",
+                link_url="/invites",
+            )
+    except Exception as e:
+        print(f"Failed to send invite push notification: {e}")
 
 
 def revoke_invite(user_id: int, itinerary_id: int, invite_id: int):

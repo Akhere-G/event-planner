@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 
 import pytest
 from marshmallow import ValidationError
@@ -31,8 +31,8 @@ def test_get_events_success(itinerary):
     for i in range(3):
         EventFactory(
             itinerary=itinerary,
-            start_at=datetime(2026, 8, 20, 10 + i, 0),
-            end_at=datetime(2026, 8, 20, 12 + i, 0),
+            start_at=datetime(2026, 8, 20, 10 + i, 0, tzinfo=timezone.utc),
+            end_at=datetime(2026, 8, 20, 12 + i, 0, tzinfo=timezone.utc),
         )
 
     events = get_events(itinerary.id)
@@ -51,8 +51,8 @@ def test_create_event_success(admin_user, itinerary):
         "latitude": 51.5074,
         "longitude": -0.1278,
         "description": "New event description",
-        "start_at": datetime(2026, 8, 21, 14, 0),
-        "end_at": datetime(2026, 8, 21, 16, 0),
+        "start_at": datetime(2026, 8, 21, 14, 0, tzinfo=timezone.utc),
+        "end_at": datetime(2026, 8, 21, 16, 0, tzinfo=timezone.utc),
         "category": "sightseeing",
         "created_by_id": admin_user.id,
         "updated_by_id": admin_user.id,
@@ -80,8 +80,8 @@ def test_create_events_success(admin_user, itinerary):
             "address": "Address 1",
             "latitude": 40.7128,
             "longitude": -74.0060,
-            "start_at": datetime(2026, 8, 20, 10, 0),
-            "end_at": datetime(2026, 8, 20, 12, 0),
+            "start_at": datetime(2026, 8, 20, 10, 0, tzinfo=timezone.utc),
+            "end_at": datetime(2026, 8, 20, 12, 0, tzinfo=timezone.utc),
             "category": "food",
         },
         {
@@ -89,8 +89,8 @@ def test_create_events_success(admin_user, itinerary):
             "address": "Address 2",
             "latitude": 51.5074,
             "longitude": -0.1278,
-            "start_at": datetime(2026, 8, 21, 10, 0),
-            "end_at": datetime(2026, 8, 21, 12, 0),
+            "start_at": datetime(2026, 8, 21, 10, 0, tzinfo=timezone.utc),
+            "end_at": datetime(2026, 8, 21, 12, 0, tzinfo=timezone.utc),
             "category": "sightseeing",
         },
     ]
@@ -107,8 +107,8 @@ def test_create_events_rollback_on_error(admin_user, itinerary):
             "address": "Address",
             "latitude": 40.7128,
             "longitude": -74.0060,
-            "start_at": datetime(2026, 8, 20, 10, 0),
-            "end_at": datetime(2026, 8, 20, 12, 0),
+            "start_at": datetime(2026, 8, 20, 10, 0, tzinfo=timezone.utc),
+            "end_at": datetime(2026, 8, 20, 12, 0, tzinfo=timezone.utc),
             "category": "food",
         },
         {
@@ -145,8 +145,8 @@ def test_update_event_invalid_time(event, admin_user):
             event.itinerary_id,
             event.id,
             {
-                "start_at": datetime(2026, 8, 20, 12, 0),
-                "end_at": datetime(2026, 8, 20, 10, 0),  # End before start
+                "start_at": datetime(2026, 8, 20, 12, 0, tzinfo=timezone.utc),
+                "end_at": datetime(2026, 8, 20, 10, 0, tzinfo=timezone.utc),  # End before start
                 "updated_by_id": admin_user.id,
             },
         )
@@ -156,14 +156,14 @@ def test_update_events_success(itinerary, admin_user):
     event1 = EventFactory(
         itinerary=itinerary,
         name="Event 1",
-        start_at=datetime(2026, 8, 20, 10, 0),
-        end_at=datetime(2026, 8, 20, 12, 0),
+        start_at=datetime(2026, 8, 20, 10, 0, tzinfo=timezone.utc),
+        end_at=datetime(2026, 8, 20, 12, 0, tzinfo=timezone.utc),
     )
     event2 = EventFactory(
         itinerary=itinerary,
         name="Event 2",
-        start_at=datetime(2026, 8, 21, 10, 0),
-        end_at=datetime(2026, 8, 21, 12, 0),
+        start_at=datetime(2026, 8, 21, 10, 0, tzinfo=timezone.utc),
+        end_at=datetime(2026, 8, 21, 12, 0, tzinfo=timezone.utc),
     )
 
     update_data = [
@@ -187,15 +187,15 @@ def test_update_events_not_found(itinerary, admin_user):
 def test_update_events_invalid_time(itinerary, admin_user):
     event = EventFactory(
         itinerary=itinerary,
-        start_at=datetime(2026, 8, 20, 10, 0),
-        end_at=datetime(2026, 8, 20, 12, 0),
+        start_at=datetime(2026, 8, 20, 10, 0, tzinfo=timezone.utc),
+        end_at=datetime(2026, 8, 20, 12, 0, tzinfo=timezone.utc),
     )
 
     update_data = [
         {
             "id": event.id,
-            "start_at": datetime(2026, 8, 20, 12, 0),
-            "end_at": datetime(2026, 8, 20, 10, 0),
+            "start_at": datetime(2026, 8, 20, 12, 0, tzinfo=timezone.utc),
+            "end_at": datetime(2026, 8, 20, 10, 0, tzinfo=timezone.utc),
         }
     ]
 

@@ -5,6 +5,7 @@ import {
   isTomorrow,
   isYesterday,
 } from "date-fns";
+import { fromZonedTime, formatInTimeZone } from "date-fns-tz";
 
 export const formatDateRange = (startAt: string, endAt: string) => {
   const endDate = new Date(endAt);
@@ -40,4 +41,26 @@ export const formatDateRelative = (date: string | number | Date) => {
   if (tommorrow) return format(dateVal, "E dd MMM") + " (Tomorrow)";
   if (sameYear) return format(dateVal, "E dd MMM");
   return format(dateVal, "E dd MMM yyyy");
+};
+
+export const convertTripTimezoneToUtc = (
+  localDateString: string,
+  timeZone: string,
+): string => {
+  if (!localDateString || !timeZone) {
+    throw new Error("Date and timezone are required");
+  }
+
+  return fromZonedTime(localDateString, timeZone).toISOString();
+};
+
+export const convertUtcToTripTimezone = (
+  utcDateString: string,
+  timeZone: string,
+): string => {
+  if (!utcDateString || !timeZone) {
+    throw new Error("Date and timezone are required");
+  }
+
+  return formatInTimeZone(utcDateString, timeZone, "yyyy-MM-dd HH:mm");
 };

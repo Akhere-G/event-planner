@@ -44,6 +44,7 @@ class ItinerarySchema(BaseSchema):
             "required": "End date is required.",
         }
     )
+    timezone = auto_field(dump_only=True)
     created_at = auto_field(dump_only=True)
 
     events = fields.Nested(EventSchema, many=True, dump_only=True)
@@ -116,6 +117,7 @@ class ItinerarySchemaNoInvites(BaseSchema):
             "required": "End date is required.",
         }
     )
+    timezone = auto_field(dump_only=True)
     created_at = auto_field(dump_only=True)
 
     events = fields.Nested(EventSchema, many=True, dump_only=True)

@@ -13,6 +13,9 @@ import {
   DropdownMenuTrigger,
 } from "../components/ui/dropdown-menu";
 
+import NotificationBell from "../features/notifications/components/NotificationBell";
+import { useBreakpoint } from "../hooks/useBreakpoint";
+
 interface HeaderProps {
   links: { title: string; url: string }[];
 }
@@ -27,7 +30,8 @@ export default function Header({ links }: HeaderProps) {
   const location = useLocation();
 
   const from = location.state?.from || location;
-
+  const breakpoint = useBreakpoint();
+  const isMobile = ["xs", "sm"].includes(breakpoint);
   return (
     <header className="relative w-full z-2 ">
       <div className="z-2 bg-surface min-h-12 max-h-24 h-[6.5vh] w-full flex justify-between items-center p-4 shadow-md">
@@ -48,6 +52,7 @@ export default function Header({ links }: HeaderProps) {
               ))}
             </ul>
           </nav>
+          <NotificationBell />
           <DropdownMenu>
             <DropdownMenuTrigger className="p-2.5 bg-brand-primary rounded-full h-10 w-10 hover:bg-brand-primary/90 transition-colors">
               <User className="text-text-inverse" size={20} />
@@ -84,14 +89,20 @@ export default function Header({ links }: HeaderProps) {
         </div>
 
         {/* Mobile Toggle */}
-        <button
-          className="btn-secondary md:hidden p-2"
-          aria-expanded={isSidebarOpen}
-          aria-label="Open Menu"
-          onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-        >
-          <Menu size={24} />
-        </button>
+        {isMobile && (
+          <div className="flex gap-2 items-center">
+            {isAuthenticated && <NotificationBell />}
+
+            <button
+              className="btn-secondary md:hidden p-2"
+              aria-expanded={isSidebarOpen}
+              aria-label="Open Menu"
+              onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+            >
+              <Menu size={24} />
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Mobile Sidebar */}
