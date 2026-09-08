@@ -55,7 +55,12 @@ export default function EventSearchResultCard() {
 
   const handleSaveEvent = async (event: EventSchema) => {
     try {
-      await addEvent({ tripId: Number(tripId), event }).unwrap();
+      if (!trip) return;
+      await addEvent({
+        tripId: Number(tripId),
+        event,
+        timezone: trip.timezone,
+      }).unwrap();
       updateSearchResults();
     } catch (err) {
       if (isFetchBaseQueryError(err)) {
