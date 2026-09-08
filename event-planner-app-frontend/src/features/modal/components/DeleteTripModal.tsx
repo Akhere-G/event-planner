@@ -10,6 +10,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "../../../components/ui/dialog";
+import { usePostHog } from "@posthog/react";
 
 interface DeleteTripModalProps {
   trip: Trip;
@@ -17,14 +18,23 @@ interface DeleteTripModalProps {
   onOpenChange: (open: boolean) => void;
 }
 
-export default function DeleteTripModal({ trip, open, onOpenChange }: DeleteTripModalProps) {
+export default function DeleteTripModal({
+  trip,
+  open,
+  onOpenChange,
+}: DeleteTripModalProps) {
   const [deleteTrip, { isLoading }] = useDeleteTripMutation();
 
   const { name } = trip;
 
+  const posthog = usePostHog();
   const handleDelete = async () => {
     try {
       await deleteTrip(trip.id).unwrap();
+      posthog?.capture("trip_deleted", {
+        trip_id: trip.id,
+      });
+
       onOpenChange(false);
     } catch (err) {
       if (isFetchBaseQueryError(err)) {
@@ -41,10 +51,7 @@ export default function DeleteTripModal({ trip, open, onOpenChange }: DeleteTrip
         </DialogHeader>
         <DialogDescription>This action cannot be undone.</DialogDescription>
         <DialogFooter>
-          <button
-            className="btn-secondary"
-            onClick={() => onOpenChange(false)}
-          >
+          <button className="btn-secondary" onClick={() => onOpenChange(false)}>
             Cancel
           </button>
           <button

@@ -16,6 +16,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "../../../components/ui/dropdown-menu";
+import { usePostHog } from "@posthog/react";
 
 export default function InviteRow({ invite }: { invite: Invite }) {
   const params = useMatch("/trips/:tripId")?.params;
@@ -25,6 +26,7 @@ export default function InviteRow({ invite }: { invite: Invite }) {
   const [revokeInvite, { isLoading: revokeIsLoading }] =
     useRevokeInviteMutation();
   const { email, role } = invite;
+  const posthog = usePostHog();
 
   async function reinvite() {
     try {
@@ -32,6 +34,7 @@ export default function InviteRow({ invite }: { invite: Invite }) {
         tripId,
         invite: { email: email.toLowerCase(), role },
       }).unwrap();
+      posthog?.capture("invite_created", { trip_id: tripId, role });
     } catch (err) {
       if (isFetchBaseQueryError(err)) {
         toast.error((err.data as { message: string }).message);
@@ -42,6 +45,7 @@ export default function InviteRow({ invite }: { invite: Invite }) {
   async function revoke() {
     try {
       await revokeInvite({ tripId, inviteId: invite.id }).unwrap();
+      posthog?.capture("invite_revoked", { trip_id: tripId });
     } catch (err) {
       if (isFetchBaseQueryError(err)) {
         toast.error((err.data as { message: string }).message);

@@ -15,6 +15,7 @@ import { ConfirmModal, EditableSelect } from "../../../components";
 import { toast } from "sonner";
 import { useSelector } from "react-redux";
 import type { RootState } from "../../../store";
+import { usePostHog } from "@posthog/react";
 
 export default function UserRow({ user }: { user: User }) {
   const { userId } = useSelector((state: RootState) => state.auth);
@@ -28,6 +29,7 @@ export default function UserRow({ user }: { user: User }) {
 
   const isCurrentUser = id === userId;
   const formattedUsername = username + (isCurrentUser ? " (You)" : "");
+  const posthog = usePostHog();
 
   useEffect(() => {
     setUserRole(user.role);
@@ -36,6 +38,11 @@ export default function UserRow({ user }: { user: User }) {
   async function remove() {
     try {
       await removeUser({ tripId, userId: user.id }).unwrap();
+      posthog?.capture(
+        isCurrentUser ? "user_left_trip" : "user_removed_from_trip",
+        { trip_id: tripId },
+      );
+
       setIsConfirmOpen(false);
     } catch (err) {
       if (isFetchBaseQueryError(err)) {

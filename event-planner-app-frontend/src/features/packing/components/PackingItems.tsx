@@ -6,6 +6,7 @@ import PackingItemForm from "./PackingItemForm";
 import type { PackingitemSchema } from "../schema";
 import { useAddPackingItemMutation } from "../services/packingApiSlice";
 import { Plus, Tag } from "lucide-react";
+import { usePostHog } from "@posthog/react";
 
 export default function PackingItems({
   packingItems,
@@ -18,12 +19,15 @@ export default function PackingItems({
 }) {
   const [addPackingItem, { isLoading }] = useAddPackingItemMutation();
   const [showAddForm, setShowAddForm] = useState(false);
-
+  const posthog = usePostHog();
   async function submitAction(packingItem: PackingitemSchema) {
     await addPackingItem({
       packingItem: { ...packingItem, isShared },
       tripId,
     }).unwrap();
+    posthog?.capture("packing_item_created", {
+      trip_id: tripId,
+    });
     setShowAddForm(false);
   }
 

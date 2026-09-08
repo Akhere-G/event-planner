@@ -12,6 +12,7 @@ import { useDispatch } from "react-redux";
 import { setCredentials } from "../features/auth/services/authSlice";
 import { useState } from "react";
 import { toast } from "sonner";
+import { usePostHog } from "@posthog/react";
 
 export default function Register() {
   const [errorMessage, setErrorMessage] = useState("");
@@ -27,6 +28,7 @@ export default function Register() {
 
   const location = useLocation();
   const from = location.state?.from || "/";
+  const posthog = usePostHog();
 
   const onSubmit = async (formData: RegisterSchema) => {
     setErrorMessage("");
@@ -44,7 +46,13 @@ export default function Register() {
         email: formData.email.toLowerCase(),
       };
       const result = await registerUser(formattedFormData).unwrap();
-      dispatch(setCredentials(result.data.userId));
+      dispatch(setCredentials(result.data.id));
+      posthog?.capture("user_registered", {
+        user_id: result.data.id,
+        email: result.data.email,
+        username: result.data.username,
+        signup_method: "email",
+      });
 
       navigate(from, { replace: true });
     } catch (err) {

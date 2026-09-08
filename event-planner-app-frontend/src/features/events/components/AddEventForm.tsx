@@ -9,6 +9,7 @@ import { useState } from "react";
 import { useGetTripQuery } from "../../trips/services/tripsApiSlice";
 import { toast } from "sonner";
 import { getCityBounds } from "../../maps/utils";
+import { usePostHog } from "@posthog/react";
 
 export default function AddEventForm({ date }: { date: string }) {
   const tripId = Number(useParams()?.tripId);
@@ -26,7 +27,7 @@ export default function AddEventForm({ date }: { date: string }) {
 
   const addressInputProps = register("address");
   const [key, setKey] = useState(0);
-
+  const posthog = usePostHog();
   if (!trip) return null;
 
   async function onSubmit(formState: EventSchema) {
@@ -40,6 +41,11 @@ export default function AddEventForm({ date }: { date: string }) {
     setErrorMessage("");
     try {
       await addEvent({ tripId, event, timezone: trip.timezone }).unwrap();
+      posthog?.capture("event_created", {
+        trip_id: trip.id,
+        category: formState.category,
+      });
+
       setValue("address", "");
       setValue("name", "");
       setValue("longitude", 0);

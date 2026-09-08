@@ -24,6 +24,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "../../../components/ui/dropdown-menu";
+import { usePostHog } from "@posthog/react";
 
 export default function DayCard({
   day,
@@ -38,6 +39,7 @@ export default function DayCard({
   const accommodations = data?.data ?? [];
 
   const dispatch = useDispatch();
+  const posthog = usePostHog();
 
   const [suggestEvents, { isLoading: isSuggestLoading }] =
     useSuggestEventsMutation();
@@ -57,7 +59,14 @@ export default function DayCard({
   }
   const getSuggestions = async (autoFillData: Autofill) => {
     try {
-      await suggestEvents({ tripId, body: autoFillData }).unwrap();
+      await suggestEvents({
+        tripId,
+        body: autoFillData,
+      }).unwrap();
+      posthog?.capture("ai_fill_days_generated", {
+        trip_id: tripId,
+        ...autoFillData,
+      });
       setIsFillMenuOpen(false);
     } catch {
       toast.error("Could not get suggestions.");
@@ -67,6 +76,9 @@ export default function DayCard({
   const getOptimisedEvents = async () => {
     try {
       await optimiseEvents({ tripId, date: day.date }).unwrap();
+      posthog?.capture("ai_optimise_events_used", {
+        trip_id: tripId,
+      });
     } catch {
       toast.error("Could not get suggestions.");
     }
@@ -104,6 +116,7 @@ export default function DayCard({
       });
     }
     dispatch(setRoutes(routes));
+    posthog?.capture("day_routes_viewed", { trip_id: tripId });
   };
 
   const isSuggestBtnDisabled = isSuggestLoading || isFetching;

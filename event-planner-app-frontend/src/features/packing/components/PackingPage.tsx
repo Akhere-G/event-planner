@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { StateGate } from "../../../components";
 import type { Trip } from "../../trips/types";
 import {
@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { isApiError } from "../../api/utils";
+import { usePostHog } from "@posthog/react";
 
 type PackingSubTab = "personal" | "shared";
 
@@ -24,6 +25,7 @@ export default function PackingPage({ trip }: { trip: Trip }) {
   });
   const [generatePackingItems, { isLoading: isGenerating }] =
     useGeneratePackingItemsMutation();
+  const posthog = usePostHog();
   const [activeTab, setActiveTab] = useState<PackingSubTab>("personal");
 
   const packingItems = data?.data ?? [];
@@ -36,9 +38,18 @@ export default function PackingPage({ trip }: { trip: Trip }) {
   const progressPercent =
     totalItems > 0 ? Math.round((checkedItems / totalItems) * 100) : 0;
 
+  useEffect(() => {
+    posthog?.capture("packing_page_viewed", {
+      trip_id: trip.id,
+    });
+  }, [posthog, trip.id]);
+
   const handleGenerateAI = async () => {
     try {
       await generatePackingItems({ tripId: trip.id }).unwrap();
+      posthog?.capture("packing_items_generated", {
+        trip_id: trip.id,
+      });
       toast.success("Smart generated customised packing recommendations!");
     } catch (err) {
       if (isApiError(err)) {

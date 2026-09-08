@@ -30,23 +30,30 @@ const PrivacyPage = lazy(() => import("./pages/PrivacyPage"));
 const TermsPage = lazy(() => import("./pages/TermsPage"));
 
 import NotificationsPrompt from "./features/notifications/components/NotificationsPrompt";
+import { usePostHog } from "@posthog/react";
 
 function App() {
   const isAuthenticated = useSelector(selectIsAuthenticated);
   const { isLoading, data } = useCheckUserQuery();
   const dispatch = useDispatch();
 
+  const posthog = usePostHog();
+
   useEffect(() => {
     dispatch(syncDOM());
   }, [dispatch]);
 
   useEffect(() => {
-    if (data?.data?.userId) {
-      dispatch(setCredentials(data.data.userId));
+    if (data?.data?.id) {
+      dispatch(setCredentials(data.data.id));
+      posthog?.identify(String(data.data.id), {
+        email: data.data.email,
+        username: data.data.username,
+      });
     }
-  }, [data, dispatch]);
+  }, [data, dispatch, posthog]);
 
-  const isAuth = isAuthenticated || !!data?.data?.userId;
+  const isAuth = isAuthenticated || !!data?.data?.id;
 
   const links = [{ title: "About", url: "/about" }];
   if (isAuth) {
@@ -73,7 +80,6 @@ function App() {
       <Header links={links} />
       <Toaster position="top-right" richColors />
       {isAuth && <NotificationsPrompt />}
-
 
       <main className="min-h-[93.5vh] 2xl:min-h-[96vh]">
         <Suspense

@@ -1,12 +1,18 @@
-from ..extensions import bcrypt
-from ..models import User
-from ..extensions import db
-from ..exceptions import (
-    UserAlreadyExistsError,
-    UserDoesNotExistError,
-    InvalidCredentialsError,
-)
 from sqlalchemy import select
+
+from ..exceptions import (
+    InvalidCredentialsError,
+    UserAlreadyExistsError,
+)
+from ..extensions import bcrypt, db
+from ..models import User
+
+
+def get_user(user_id: str | None):
+    if not user_id:
+        return None
+    stmt = select(User).where(User.id == user_id)
+    return db.session.execute(stmt).scalar_one_or_none()
 
 
 def register_user(username: str, email: str, password: str):
@@ -21,7 +27,7 @@ def register_user(username: str, email: str, password: str):
     new_user = User(username=username, email=email, password=password_hash)
     db.session.add(new_user)
     db.session.commit()
-    return new_user.id
+    return {"id": new_user.id, "email": new_user.email, "username": new_user.username}
 
 
 def login_user(email: str, password: str):
@@ -34,6 +40,10 @@ def login_user(email: str, password: str):
     if not user:
         raise InvalidCredentialsError()
     if bcrypt.check_password_hash(user.password, password):
-        return user.id
+        return {
+            "id": user.id,
+            "email": user.email,
+            "username": user.username,
+        }
     else:
         raise InvalidCredentialsError()

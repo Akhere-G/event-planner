@@ -25,6 +25,7 @@ import TagChip from "./TagChip";
 import SaveEventModal from "./SaveEventModal";
 import ImageCarousel from "./ImageCarousel";
 import { canUserEdit } from "../../users/utils";
+import { usePostHog } from "@posthog/react";
 
 export default function EventSearchResultCard() {
   const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
@@ -44,6 +45,7 @@ export default function EventSearchResultCard() {
 
   const currentEvent = searchEvents[searchIndex];
   const trip = tripData?.data;
+  const posthog = usePostHog();
 
   const updateSearchResults = () => {
     dispatch(
@@ -61,6 +63,10 @@ export default function EventSearchResultCard() {
         event,
         timezone: trip.timezone,
       }).unwrap();
+      posthog?.capture("event_created", {
+        trip_id: trip.id,
+        category: event.category,
+      });
       updateSearchResults();
     } catch (err) {
       if (isFetchBaseQueryError(err)) {

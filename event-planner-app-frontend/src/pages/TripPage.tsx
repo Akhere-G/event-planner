@@ -16,6 +16,7 @@ import { useBreakpoint } from "../hooks/useBreakpoint";
 import { setDays } from "../features/maps/service/mapSlice";
 import { getDaysWithFilter } from "../features/events/utils";
 import { format, isAfter, isBefore, isSameDay, startOfToday } from "date-fns";
+import { usePostHog } from "@posthog/react";
 
 function getDefaultOpenDate(startDate: string, endDate: string) {
   const today = startOfToday();
@@ -42,6 +43,13 @@ export default function TripPage() {
   const breakpoint = useBreakpoint();
 
   const isMobile = ["xs", "sm"].includes(breakpoint);
+  const posthog = usePostHog();
+
+  useEffect(() => {
+    posthog?.capture("trip_viewed", {
+      trip_id: tripId,
+    });
+  }, [posthog, tripId]);
 
   useEffect(() => {
     if (data?.data) {

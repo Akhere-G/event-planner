@@ -7,6 +7,7 @@ import { useCreateInviteMutation } from "../services/inviteApiSlice";
 import { useMatch } from "react-router";
 import { isValidationError } from "../../api/utils";
 import { useState } from "react";
+import { usePostHog } from "@posthog/react";
 
 export default function InviteUserForm() {
   const [errorMessage, setErrorMessage] = useState("");
@@ -18,6 +19,7 @@ export default function InviteUserForm() {
   const { register, formState, handleSubmit, setError } = useForm({
     resolver: yupResolver(inviteSchema),
   });
+  const posthog = usePostHog();
 
   async function onSubmit(invite: InviteSchema) {
     const formattedInvite = {
@@ -26,6 +28,10 @@ export default function InviteUserForm() {
     };
     try {
       createInvite({ tripId, invite: formattedInvite }).unwrap();
+      posthog?.capture("invite_sent", {
+        role: invite.role,
+        trip_id: tripId,
+      });
     } catch (err) {
       if (isValidationError(err)) {
         const serverErrors = err.data.error;
