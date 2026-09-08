@@ -30,6 +30,8 @@ export default function AddEventForm({ date }: { date: string }) {
   if (!trip) return null;
 
   async function onSubmit(formState: EventSchema) {
+    if (!trip) return;
+
     const event = {
       ...formState,
       startAt: `${date} ${formState.startAt}`,
@@ -37,7 +39,7 @@ export default function AddEventForm({ date }: { date: string }) {
     };
     setErrorMessage("");
     try {
-      await addEvent({ tripId, event }).unwrap();
+      await addEvent({ tripId, event, timezone: trip.timezone }).unwrap();
       setValue("address", "");
       setValue("name", "");
       setValue("longitude", 0);

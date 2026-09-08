@@ -2,6 +2,7 @@ import type { Trip } from "../types";
 import { type TripSchema } from "../schemas/tripSchema";
 import { apiSlice } from "../../api/apiSlice";
 import type { ApiResponse } from "../../api/types";
+import { convertUtcToTripTimezone } from "../../../utils/dateFormattors";
 
 export interface GetTripsResult {
   data: { itineraries: Trip[]; hasMore: boolean };
@@ -36,8 +37,28 @@ export const tripsApi = apiSlice.injectEndpoints({
         return currentArg?.offset !== previousArg?.offset;
       },
     }),
-    getTrip: builder.query<ApiResponse<Trip>, number, { status: number }>({
+
+    getTrip: builder.query<ApiResponse<Trip>, number>({
       query: (id) => `/itineraries/${id}`,
+      transformResponse: (response: ApiResponse<Trip>) => {
+        if (!response.data || !response.data.events || !response.data.timezone)
+          return response;
+        const timezone = response.data.timezone;
+
+        const transformedEvents = response.data.events.map((event) => ({
+          ...event,
+          startAt: convertUtcToTripTimezone(event.startAt, timezone),
+          endAt: convertUtcToTripTimezone(event.endAt, timezone),
+        }));
+
+        return {
+          ...response,
+          data: {
+            ...response.data,
+            events: transformedEvents,
+          },
+        };
+      },
       providesTags: (result) => [{ type: "Trips", id: result?.data?.id }],
     }),
     addTrip: builder.mutation<ApiResponse<Trip>, TripSchema>({

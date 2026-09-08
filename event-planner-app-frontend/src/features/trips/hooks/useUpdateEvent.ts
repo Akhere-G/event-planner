@@ -5,6 +5,7 @@ import {
   useUpdateEventMutation,
 } from "../../events/service/eventApiSlice";
 import type { Event } from "../../events/types";
+import { useGetTripQuery } from "../services/tripsApiSlice";
 
 export default function useUpdateEvent({
   tripId,
@@ -15,6 +16,9 @@ export default function useUpdateEvent({
   onDelete?: () => void;
   onEdit?: () => void;
 }) {
+  const { data } = useGetTripQuery(Number(tripId));
+  const trip = data?.data;
+
   const [deleteEvent] = useDeleteEventMutation();
   const [updateEvent] = useUpdateEventMutation();
 
@@ -30,11 +34,13 @@ export default function useUpdateEvent({
   }
 
   async function handleEdit(eventId: number, updatedEvent: Partial<Event>) {
+    if (!trip) return;
     try {
       await updateEvent({
         tripId: Number(tripId),
         eventId,
         updatedEvent,
+        timezone: trip.timezone,
       }).unwrap();
       onEdit();
     } catch (err) {

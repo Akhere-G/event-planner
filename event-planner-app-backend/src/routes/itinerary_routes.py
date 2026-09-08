@@ -1,3 +1,5 @@
+import datetime
+
 from flask import Blueprint, request
 
 from ..middleware.login_required import login_required
@@ -11,6 +13,7 @@ from ..services.itineraries_service import (
     is_authorised,
     update_itinerary,
 )
+from ..services.timezone_service import get_timezone_for_coordinates
 from ..utils.format_response import api_response
 
 itinerary_bp = Blueprint("itinerary", __name__)
@@ -60,6 +63,24 @@ def create_itinerary_route(user_id):
     validated_data = schema.load(request.json)
     validated_data["created_by_id"] = user_id
     validated_data["updated_by_id"] = user_id
+
+    # Get timezone
+    start_date = validated_data.get("start_date")
+    timestamp = None
+    if start_date:
+        if isinstance(start_date, datetime.date) and not isinstance(
+            start_date, datetime.datetime
+        ):
+            start_date = datetime.datetime.combine(start_date, datetime.time.min)
+        timestamp = int(start_date.timestamp())
+
+    timezone = get_timezone_for_coordinates(
+        latitude=validated_data.get("latitude"),
+        longitude=validated_data.get("longitude"),
+        timestamp=timestamp,
+    )
+    validated_data["timezone"] = timezone
+
     new_itinerary = create_itinerary(user_id, validated_data)
 
     return api_response(
