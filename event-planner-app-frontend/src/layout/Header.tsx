@@ -15,6 +15,7 @@ import {
 
 import NotificationBell from "../features/notifications/components/NotificationBell";
 import { useBreakpoint } from "../hooks/useBreakpoint";
+import { usePostHog } from "@posthog/react";
 
 interface HeaderProps {
   links: { title: string; url: string }[];
@@ -24,7 +25,7 @@ export default function Header({ links }: HeaderProps) {
   const { isAuthenticated } = useSelector((state: RootState) => state.auth);
   const [logout] = useLogoutUserMutation();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-
+  const posthog = usePostHog();
   const dispatch = useDispatch();
 
   const location = useLocation();
@@ -77,6 +78,7 @@ export default function Header({ links }: HeaderProps) {
               <DropdownMenuItem
                 onClick={async () => {
                   await logout();
+                  posthog?.reset();
                   dispatch(logOut());
                   window.location.reload();
                 }}

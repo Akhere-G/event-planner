@@ -37,6 +37,7 @@ import {
 import AddItemForm from "./AddItemForm";
 import { CITY_RADIUS } from "../../maps/constants";
 import { useGetTripQuery } from "../../trips/services/tripsApiSlice";
+import { usePostHog } from "@posthog/react";
 
 interface WishlistItemViewProps {
   tripId: number;
@@ -234,7 +235,7 @@ export default function WishlistItemCard({
 
   const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-
+  const posthog = usePostHog();
   const [deleteItem, { isLoading: isDeleting }] =
     useDeleteWishlistItemMutation();
   const [promoteItem] = usePromoteWishlistItemMutation();
@@ -264,7 +265,7 @@ export default function WishlistItemCard({
         startAt,
         endAt,
       }).unwrap();
-
+      posthog?.capture("wishlist_item_promoted", { trip_id: tripId });
       setIsScheduleModalOpen(false);
       toast.success("Successfully scheduled event!");
     } catch (err) {

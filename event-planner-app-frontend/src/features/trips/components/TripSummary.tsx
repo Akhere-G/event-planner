@@ -28,6 +28,7 @@ import {
 import DeleteTripModal from "../../modal/components/DeleteTripModal";
 import EditTripModal from "../../modal/components/EditTripModal";
 import ViewUsersModal from "../../modal/components/ViewUsersModal";
+import { usePostHog } from "@posthog/react";
 
 type ModalType = "edit" | "delete" | "users" | null;
 
@@ -46,6 +47,8 @@ export default function TripSummary({
   const { name, description, startDate, endDate, userMemberships } = trip;
   const [removeUser, { isLoading: isRemoveLoading }] = useRemoveUserMutation();
   const { userId } = useSelector((state: RootState) => state.auth);
+
+  const posthog = usePostHog();
 
   function openUsersView() {
     setModalType("users");
@@ -66,6 +69,7 @@ export default function TripSummary({
   const handleLeave = async () => {
     try {
       await removeUser({ tripId: trip.id, userId: userId! }).unwrap();
+      posthog?.capture("user_left_trip", { trip_id: trip.id, role: trip.role });
     } catch (err) {
       if (isFetchBaseQueryError(err)) {
         toast.error((err.data as { message: string }).message);
@@ -88,16 +92,20 @@ export default function TripSummary({
           <DropdownMenuContent align="end">
             <DropdownMenuItem
               disabled={isRemoveLoading}
-              onClick={() =>
-                exportToCalendar(trip.name, trip.events, trip.userMemberships)
-              }
+              onClick={() => {
+                exportToCalendar(trip.name, trip.events, trip.userMemberships);
+                posthog?.capture("export_to_calendar", { trip_id: trip.id });
+              }}
               className="flex gap-2 items-center"
             >
               <Calendar size={16} />
               Export to calendar
             </DropdownMenuItem>
             <DropdownMenuItem
-              onClick={() => exportToDoc(trip)}
+              onClick={() => {
+                exportToDoc(trip);
+                posthog?.capture("export_to_doc", { trip_id: trip.id });
+              }}
               className="flex gap-2 items-center"
             >
               <FileText size={16} />
@@ -175,10 +183,7 @@ export default function TripSummary({
         />
       )}
       {modalType === "users" && (
-        <ViewUsersModal
-          open={true}
-          onOpenChange={handleCloseModal}
-        />
+        <ViewUsersModal open={true} onOpenChange={handleCloseModal} />
       )}
     </div>
   );

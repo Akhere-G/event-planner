@@ -5,9 +5,11 @@ import { useDispatch, useSelector } from "react-redux";
 import type { RootState } from "../store";
 import { THEMES } from "../features/theme/constants";
 import { setTheme, toggleDarkMode } from "../features/theme/themeSlice";
+import { usePostHog } from "@posthog/react";
 
 export default function SettingsPage() {
   const { darkMode, theme } = useSelector((state: RootState) => state.theme);
+  const posthog = usePostHog();
   const dispatch = useDispatch();
   return (
     <div className="container">
@@ -26,7 +28,13 @@ export default function SettingsPage() {
               <button
                 aria-label={`Change Theme to ${t.name}`}
                 key={t.name}
-                onClick={() => dispatch(setTheme(t.id))}
+                onClick={() => {
+                  dispatch(setTheme(t.id));
+                  posthog?.capture("theme_changed", {
+                    theme: t.name,
+                    darkMode,
+                  });
+                }}
                 className={`py-2 rounded-lg border text-sm transition-all cursor-pointer  ${
                   theme === t.id
                     ? "border-brand-primary bg-brand-primary/10 text-brand-primary font-bold"
@@ -46,7 +54,14 @@ export default function SettingsPage() {
             <span className="text-text-main font-medium">Dark Mode</span>
             <button
               aria-label="Toggle dark mode"
-              onClick={() => dispatch(toggleDarkMode())}
+              onClick={() => {
+                dispatch(toggleDarkMode());
+
+                posthog?.capture("toggled_darkmode", {
+                  theme: theme,
+                  darkMode,
+                });
+              }}
               className={`w-12 h-6 rounded-full transition-colors cursor-pointer relative ${
                 darkMode ? "bg-brand-primary" : "bg-surface-muted"
               }`}

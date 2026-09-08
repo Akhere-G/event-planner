@@ -1,9 +1,10 @@
 import type { LoginSchema, RegisterSchema } from "../schemas/authSchema";
 import { apiSlice } from "../../api/apiSlice";
+import type { User } from "../../users/types";
 
 export interface AuthResponse {
   message: string;
-  data: { userId: number };
+  data: User;
 }
 
 export const authApi = apiSlice.injectEndpoints({

@@ -9,10 +9,12 @@ import {
 import type { Invite } from "../types";
 import { getStatusConfig } from "../utils";
 import { Link } from "react-router";
+import { usePostHog } from "@posthog/react";
 
 export default function MyInviteCard({ invite }: { invite: Invite }) {
   const [accept, { isLoading: isAcceptLoading }] = useAcceptInviteMutation();
   const [decline, { isLoading: isDeclineLoading }] = useDeclineInviteMutation();
+  const posthog = usePostHog();
 
   const { Icon, statusStyles, status } = getStatusConfig(
     invite.status,
@@ -22,6 +24,10 @@ export default function MyInviteCard({ invite }: { invite: Invite }) {
   const acceptInvite = async () => {
     try {
       await accept({ inviteId: invite.id, token: invite.token ?? "" }).unwrap();
+      posthog?.capture("invite_accepted", {
+        role: invite.role,
+        trip_id: invite.itineraryId,
+      });
     } catch (err) {
       if (isFetchBaseQueryError(err)) {
         toast.error((err.data as { message: string }).message);
@@ -35,6 +41,10 @@ export default function MyInviteCard({ invite }: { invite: Invite }) {
         inviteId: invite.id,
         token: invite.token ?? "",
       }).unwrap();
+      posthog?.capture("invite_declined", {
+        role: invite.role,
+        trip_id: invite.itineraryId,
+      });
     } catch (err) {
       if (isFetchBaseQueryError(err)) {
         toast.error((err.data as { message: string }).message);

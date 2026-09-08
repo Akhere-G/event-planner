@@ -8,6 +8,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "../../../components/ui/dialog";
+import { usePostHog } from "@posthog/react";
 
 interface EditTripModalProps {
   trip: Trip;
@@ -21,9 +22,14 @@ export default function EditTripModal({
   onOpenChange,
 }: EditTripModalProps) {
   const [editTrip, { isLoading }] = useEditTripMutation();
+  const posthog = usePostHog();
 
   async function onSubmit(updatedTrip: TripSchema) {
     await editTrip({ tripId: trip.id, updatedTrip }).unwrap();
+    posthog?.capture("trip_edited", {
+      trip_id: trip.id,
+    });
+
     onOpenChange(false);
   }
 

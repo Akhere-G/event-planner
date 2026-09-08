@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Plus } from "lucide-react";
 import { useGetAccommodationsQuery } from "../accomodationApiSlice";
 import AccommodationForm from "./AccommodationForm";
@@ -8,6 +8,7 @@ import type { CityBounds } from "../../maps/types";
 import type { Trip } from "../../trips/types";
 import { useDispatch } from "react-redux";
 import { setSelectedAccommodation } from "../../maps/service/mapSlice";
+import { usePostHog } from "@posthog/react";
 
 interface AccommodationPageProps {
   cityBounds: CityBounds;
@@ -31,6 +32,14 @@ export default function AccommodationPage({
   const accommodations = accommodationsData?.data || [];
 
   const showForm = showAddForm;
+
+  const posthog = usePostHog();
+
+  useEffect(() => {
+    posthog?.capture("accommodation_page_viewed", {
+      trip_id: trip.id,
+    });
+  }, [posthog, trip.id]);
 
   const closeForm = () => {
     setShowAddForm(false);

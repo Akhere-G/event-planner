@@ -4,6 +4,8 @@ import { TripCalendar } from "../../calendar/components";
 import { DayList } from "../../events/components";
 import WishlistPanel from "../../wishlist/components/WishlistPanel";
 import type { Trip } from "../types";
+import { useEffect } from "react";
+import { usePostHog } from "@posthog/react";
 
 type ActivityView = "list" | "calendar";
 
@@ -18,6 +20,15 @@ export default function TripActivities({ trip }: { trip: Trip }) {
   const [searchParams, setSearchParams] = useSearchParams();
   const activityView: ActivityView =
     searchParams.get("activityView") === "calendar" ? "calendar" : "list";
+
+  const posthog = usePostHog();
+
+  useEffect(() => {
+    posthog?.capture("activities_page_viewed", {
+      trip_id: trip.id,
+      view: activityView,
+    });
+  }, [posthog, trip.id, activityView]);
 
   const setActivityView = (view: ActivityView) => {
     setSearchParams((current) => {

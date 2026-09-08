@@ -4,17 +4,27 @@ import { useDispatch } from "react-redux";
 import type { Event } from "../types";
 import { useState } from "react";
 import { TravelModes } from "../../maps/constants";
+import { usePostHog } from "@posthog/react";
+import { useParams } from "react-router";
 
 export default function EventActions({ from, to }: { from: Event; to: Event }) {
+  const tripId = Number(useParams()?.tripId);
   const [mode, setMode] = useState(google?.maps?.TravelMode?.WALKING ?? "");
   const dispatch = useDispatch();
+  const posthog = usePostHog();
 
   const mapsUrl = `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(from.address)}&destination=${encodeURIComponent(to.address)}&travelmode=${mode.toLowerCase()}`;
 
+  const handleGetDirections = () => {
+    dispatch(setRoutes([{ from, to, mode }]));
+    posthog?.capture("route_directions_viewed", {
+      trip_id: tripId,
+    });
+  };
   return (
     <div className="flex justify-start items-center gap-2">
       <button
-        onClick={() => dispatch(setRoutes([{ from, to, mode }]))}
+        onClick={handleGetDirections}
         className="btn p-1 transition-colors hover:bg-surface-muted flex gap-1 items-center"
       >
         <Route size={12} />

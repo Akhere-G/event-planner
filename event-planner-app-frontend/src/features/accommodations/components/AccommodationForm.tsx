@@ -15,6 +15,8 @@ import {
 } from "../schemas/accommodationSchema";
 import type { CityBounds } from "../../maps/types";
 import type { Accommodation } from "../types";
+import { usePostHog } from "@posthog/react";
+import { differenceInDays } from "date-fns";
 
 interface AccommodationFormProps {
   tripId: number;
@@ -38,6 +40,7 @@ export default function AccommodationForm({
   const [errorMessage, setErrorMessage] = useState("");
   const [updateAccommodation] = useUpdateAccommodationMutation();
   const [createAccommodation] = useCreateAccommodationMutation();
+  const posthog = usePostHog();
 
   const isEditing = !!selectedAccommodation?.id;
 
@@ -85,6 +88,13 @@ export default function AccommodationForm({
         toast.success("Accommodation updated!");
       } else {
         await createAccommodation(basePayload).unwrap();
+        posthog?.capture("accommodation_created", {
+          duration_days: differenceInDays(
+            new Date(formState.endDate),
+            new Date(formState.startDate),
+          ),
+          trip_id: tripId,
+        });
         toast.success("Accommodation added!");
       }
 

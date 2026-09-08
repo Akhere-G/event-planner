@@ -3,12 +3,14 @@ import { useJoinTripMutation } from "../features/invites/services/inviteApiSlice
 import { useEffect, useRef } from "react";
 import { isApiError } from "../features/api/utils";
 import { toast } from "sonner";
+import { usePostHog } from "@posthog/react";
 
 export default function JoinTrip() {
   const [joinTrip, { isLoading, error }] = useJoinTripMutation();
   const navigate = useNavigate();
   const { token } = useParams();
   const hasAttemptedJoin = useRef(false);
+  const posthog = usePostHog();
 
   useEffect(() => {
     if (hasAttemptedJoin.current) return;
@@ -18,6 +20,11 @@ export default function JoinTrip() {
       try {
         if (!token) return navigate("/");
         const { data: invite } = await joinTrip({ token }).unwrap();
+        posthog?.capture("trip_joined", {
+          role: invite.role,
+          trip_id: invite.itineraryId,
+        });
+
         navigate(`/invites?inviteid=${invite.id}`);
       } catch (err) {
         if (isApiError(err)) {

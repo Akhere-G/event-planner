@@ -2,6 +2,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { isFetchBaseQueryError, type APIError } from "../../api/utils";
 import { useCreateWishlistMutation } from "../services/wishlistApiSlice";
+import { usePostHog } from "@posthog/react";
 
 interface AddWishlistFormProps {
   tripId: number;
@@ -14,6 +15,7 @@ export default function AddWishlistForm({
 }: AddWishlistFormProps) {
   const [name, setName] = useState("");
   const [createWishlist] = useCreateWishlistMutation();
+  const posthog = usePostHog();
 
   const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -21,6 +23,10 @@ export default function AddWishlistForm({
 
     try {
       await createWishlist({ tripId, name: name.trim() }).unwrap();
+      posthog?.capture("wishlist_created", {
+        name: name.trim(),
+        trip_id: tripId,
+      });
       setName("");
       toast.success("Wishlist created!");
       onSuccess();

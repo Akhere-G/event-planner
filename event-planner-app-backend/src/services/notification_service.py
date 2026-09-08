@@ -1,8 +1,8 @@
-from datetime import datetime, timedelta, timezone
 import json
 import logging
 import os
-from typing import Dict, Optional, Tuple, List
+from datetime import datetime, timedelta, timezone
+from typing import Dict, List, Optional, Tuple
 
 from pywebpush import WebPushException, webpush
 from sqlalchemy import func, select
@@ -18,15 +18,21 @@ DEFAULT_VAPID_PUBLIC_KEY = os.getenv(
     "BIoMAfVOMDXb1EMepDcZ7-mhdH86N2cSbDVupelNjnjYmMCtpEx2aPCg_hojww-SMeLlpNWChzcBICGJEE74I2o",
 )
 DEFAULT_VAPID_PRIVATE_KEY = os.getenv("VAPID_PRIVATE_KEY", "")
-DEFAULT_VAPID_CLAIMS_SUB = os.getenv("VAPID_CLAIMS_SUB", "mailto:admin@eventplanner.app")
+DEFAULT_VAPID_CLAIMS_SUB = os.getenv(
+    "VAPID_CLAIMS_SUB", "mailto:admin@eventplanner.app"
+)
 
 
 def get_vapid_public_key() -> str:
     return os.getenv("VAPID_PUBLIC_KEY", DEFAULT_VAPID_PUBLIC_KEY)
 
 
-def subscribe_user(user_id: int, endpoint: str, p256dh: str, auth: str) -> NotificationSubscription:
-    stmt = select(NotificationSubscription).where(NotificationSubscription.endpoint == endpoint)
+def subscribe_user(
+    user_id: int, endpoint: str, p256dh: str, auth: str
+) -> NotificationSubscription:
+    stmt = select(NotificationSubscription).where(
+        NotificationSubscription.endpoint == endpoint
+    )
     subscription = db.session.execute(stmt).scalar_one_or_none()
 
     if subscription:
@@ -47,7 +53,9 @@ def subscribe_user(user_id: int, endpoint: str, p256dh: str, auth: str) -> Notif
 
 
 def unsubscribe_user(user_id: int, endpoint: Optional[str] = None) -> bool:
-    stmt = select(NotificationSubscription).where(NotificationSubscription.user_id == user_id)
+    stmt = select(NotificationSubscription).where(
+        NotificationSubscription.user_id == user_id
+    )
     if endpoint:
         stmt = stmt.where(NotificationSubscription.endpoint == endpoint)
 
@@ -59,7 +67,9 @@ def unsubscribe_user(user_id: int, endpoint: Optional[str] = None) -> bool:
     return True
 
 
-def get_user_notifications(user_id: int, limit: int = 50) -> Tuple[List[Notification], int]:
+def get_user_notifications(
+    user_id: int, limit: int = 50
+) -> Tuple[List[Notification], int]:
     notifications_stmt = (
         select(Notification)
         .where(Notification.user_id == user_id)
@@ -129,7 +139,9 @@ def send_push_notification(
         logger.warning("VAPID_PRIVATE_KEY not set. Push dispatch skipped.")
         return notification
 
-    stmt = select(NotificationSubscription).where(NotificationSubscription.user_id == user_id)
+    stmt = select(NotificationSubscription).where(
+        NotificationSubscription.user_id == user_id
+    )
     subscriptions = db.session.execute(stmt).scalars().all()
     print(f"no. subscriptions {len(subscriptions)}")
     payload = json.dumps(
@@ -140,9 +152,7 @@ def send_push_notification(
         }
     )
 
-    claims: Dict[str, str | int] = {
-        "sub":  DEFAULT_VAPID_CLAIMS_SUB
-    }
+    claims: Dict[str, str | int] = {"sub": DEFAULT_VAPID_CLAIMS_SUB}
 
     for sub in subscriptions:
         try:
@@ -184,7 +194,9 @@ def check_upcoming_event_reminders(minutes_ahead: int = 30) -> int:
         mins_remaining = max(1, int(time_diff.total_seconds() / 60))
         suffix = "s" if mins_remaining > 1 else ""
 
-        members_stmt = select(ItineraryUser).where(ItineraryUser.itinerary_id == event.itinerary_id)
+        members_stmt = select(ItineraryUser).where(
+            ItineraryUser.itinerary_id == event.itinerary_id
+        )
         memberships = db.session.execute(members_stmt).scalars().all()
         print(f"No. memberships {len(memberships)}")
 

@@ -2,7 +2,7 @@ from flask import Blueprint, request, session
 
 from ..extensions import limiter
 from ..schemas.user_schema import LoginSchema, RegisterSchema
-from ..services.auth_service import login_user, register_user
+from ..services.auth_service import get_user, login_user, register_user
 from ..utils.format_response import api_response
 
 auth_bp = Blueprint("auth", __name__)
@@ -14,10 +14,10 @@ def register_user_route():
     schema = RegisterSchema()
     data = schema.load(request.json)
     data.pop("repeat_password", None)
-    user_id = register_user(**data)
-    session["user_id"] = user_id
+    user = register_user(**data)
+    session["user_id"] = user["id"]
     return api_response(
-        data={"user_id": user_id},
+        data=user,
         message="Successfully registered an account.",
         success=True,
         status_code=200,
@@ -29,10 +29,10 @@ def register_user_route():
 def login_user_route():
     schema = LoginSchema()
     data = schema.load(request.json)
-    user_id = login_user(**data)  # type: ignore
-    session["user_id"] = user_id
+    user = login_user(**data)  # type: ignore
+    session["user_id"] = user["id"]
     return api_response(
-        data={"user_id": user_id},
+        data=user,
         message="Successfully logged in",
         success=True,
         status_code=200,
@@ -50,8 +50,7 @@ def logout_user_route():
 @auth_bp.route("/check", methods=["GET"])
 def check_auth():
     user_id = session.get("user_id")
-    if user_id:
-        return api_response(
-            success=True, data={"user_id": user_id}, message="User is authenticated."
-        )
+    user = get_user(user_id)
+    if user:
+        return api_response(success=True, data=user, message="User is authenticated.")
     return api_response(success=False, message="Not authenticated.", status_code=401)

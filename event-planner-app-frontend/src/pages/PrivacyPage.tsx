@@ -4,7 +4,7 @@ export default function PrivacyPage() {
       <div className="card">
         <h1 className="title">Privacy Policy</h1>
         <p className="text-text-secondary text-sm mt-2">
-          Last updated: 11 August 2026
+          Last updated: 9 September 2026
         </p>
       </div>
 
@@ -28,7 +28,7 @@ export default function PrivacyPage() {
         </p>
 
         <p>
-          <strong>Email:</strong>
+          <strong>Email:</strong>{" "}
           <a
             href="mailto:akhereaihoeghinlan@gmail.com"
             className="text-brand-primary underline"
@@ -99,7 +99,41 @@ export default function PrivacyPage() {
 
         <p>You should therefore only share a trip with people you trust.</p>
 
-        <h3>1.4 Information we currently do not collect</h3>
+        <h3>1.4 Analytics and technical information</h3>
+
+        <p>
+          We use analytics tools to understand how users interact with TripTrack
+          and to improve the application. These tools may collect information
+          about your use of the service, including:
+        </p>
+
+        <ul>
+          <li>Pages and features you use</li>
+          <li>Actions you take within TripTrack</li>
+          <li>Information about trips and features you interact with</li>
+          <li>Whether certain features, including AI features, are used</li>
+          <li>Application environment, such as development or production</li>
+          <li>
+            Technical information associated with the operation of the
+            application
+          </li>
+        </ul>
+
+        <p>
+          For example, we may record events such as creating a trip, adding an
+          activity, sending or accepting an invitation, using an AI feature,
+          viewing a feature, or changing certain application preferences.
+        </p>
+
+        <p>
+          We aim to collect only the information necessary for understanding
+          product usage and improving TripTrack. We do not intentionally send
+          passwords, authentication tokens, payment information, or the contents
+          of private AI prompts or AI responses to our product analytics
+          provider.
+        </p>
+
+        <h3>1.5 Information we currently do not collect</h3>
 
         <p>
           TripTrack currently does not allow users to upload files, photographs,
@@ -107,15 +141,9 @@ export default function PrivacyPage() {
         </p>
 
         <p>
-          We also do not currently collect additional technical information such
-          as IP addresses, browser information or device identifiers for
-          analytics purposes.
-        </p>
-
-        <p>
-          We may introduce additional technical or analytics data collection in
-          the future. If we do, we will update this Privacy Policy before or
-          when the relevant processing begins, as appropriate.
+          We may introduce additional types of information collection in the
+          future. If we do, we will update this Privacy Policy as appropriate
+          before or when the relevant processing begins.
         </p>
 
         <h2>2. How We Use Your Information</h2>
@@ -132,7 +160,9 @@ export default function PrivacyPage() {
             Display trip locations and activities using mapping functionality.
           </li>
           <li>Provide TripTrack's AI features.</li>
-          <li>Maintain, secure and improve TripTrack.</li>
+          <li>Understand how users use TripTrack and improve the service.</li>
+          <li>Measure the use and effectiveness of TripTrack features.</li>
+          <li>Maintain and secure TripTrack.</li>
           <li>Detect, investigate and resolve technical problems.</li>
           <li>Respond to requests and enquiries.</li>
           <li>Comply with applicable legal obligations.</li>
@@ -163,8 +193,9 @@ export default function PrivacyPage() {
         <p>
           We may process information where this is necessary for our legitimate
           interests, such as maintaining, securing and improving TripTrack,
-          provided that those interests are not overridden by your rights and
-          freedoms.
+          understanding product usage, monitoring application performance and
+          developing new features, provided that those interests are not
+          overridden by your rights and freedoms.
         </p>
 
         <h3>Legal obligations</h3>
@@ -174,6 +205,14 @@ export default function PrivacyPage() {
           obligation.
         </p>
 
+        <h3>Consent</h3>
+
+        <p>
+          Where consent is required by applicable law, we will obtain your
+          consent before carrying out the relevant processing. You may withdraw
+          consent where processing is based on consent.
+        </p>
+
         <h2>4. AI Features</h2>
 
         <p>TripTrack provides AI-powered features including:</p>
@@ -181,6 +220,9 @@ export default function PrivacyPage() {
         <ul>
           <li>AI Plan Day</li>
           <li>AI Optimise Day</li>
+          <li>AI event suggestions</li>
+          <li>AI features that help populate trip days</li>
+          <li>AI-generated trip insights</li>
         </ul>
 
         <p>
@@ -204,6 +246,14 @@ export default function PrivacyPage() {
         </p>
 
         <p>
+          TripTrack may also collect analytics information about the use of its
+          AI features. For example, we may record that an AI feature was used,
+          whether an AI result was generated or accepted, and which type of AI
+          feature was used. Product analytics information is used to understand
+          feature usage and improve TripTrack.
+        </p>
+
+        <p>
           You should avoid entering sensitive personal information into
           TripTrack, particularly information that is not necessary for planning
           your trip.
@@ -223,8 +273,10 @@ export default function PrivacyPage() {
         <h2>5. Third-Party Services</h2>
 
         <p>
-          TripTrack uses third-party services to operate and improve the
-          application.
+          TripTrack uses third-party services to operate, secure, monitor and
+          improve the application. These providers may process personal
+          information on our behalf or as otherwise described in their own
+          privacy policies.
         </p>
 
         <h3>Google Cloud</h3>
@@ -250,19 +302,50 @@ export default function PrivacyPage() {
         <h3>Sentry</h3>
 
         <p>
-          TripTrack intends to use Sentry for error reporting and application
-          monitoring. Sentry may receive technical information associated with
-          application errors so that we can identify, investigate and resolve
-          problems.
+          TripTrack uses Sentry for error reporting and application monitoring.
+          Sentry may receive technical information associated with application
+          errors so that we can identify, investigate and resolve problems.
         </p>
 
         <h3>PostHog</h3>
 
         <p>
-          TripTrack intends to use PostHog for application monitoring and
-          analytics. If analytics are enabled, PostHog may process information
-          about how users interact with TripTrack in order to help us understand
-          application usage and improve the service.
+          TripTrack uses PostHog for product analytics and application
+          monitoring. PostHog helps us understand how users interact with
+          TripTrack, measure feature usage, identify problems and improve the
+          service.
+        </p>
+
+        <p>
+          Depending on how you use TripTrack, PostHog may receive information
+          such as your TripTrack user identifier and, where configured, account
+          information such as your email address and username. It may also
+          receive analytics events describing actions you take within TripTrack,
+          such as creating or deleting a trip, creating an activity, sending or
+          responding to an invitation, using an AI feature, viewing certain
+          features or changing application preferences.
+        </p>
+
+        <p>
+          Analytics events may contain limited contextual information needed to
+          understand product usage, such as a trip identifier, destination, trip
+          duration, feature type or user role. We do not intentionally send
+          passwords, authentication tokens, payment information, or the contents
+          of private AI prompts or AI responses to PostHog.
+        </p>
+
+        <p>
+          PostHog may use cookies, local storage or similar technologies to
+          provide analytics functionality and associate activity with a user or
+          device. Where applicable law requires consent for these technologies,
+          we will obtain the appropriate consent before using them.
+        </p>
+
+        <p>
+          PostHog may process information outside the United Kingdom. Where
+          personal information is transferred internationally, we will take
+          appropriate steps to ensure that the transfer is carried out in
+          accordance with applicable data protection law.
         </p>
 
         <h2>6. Sharing Your Information With Other TripTrack Users</h2>
@@ -308,6 +391,13 @@ export default function PrivacyPage() {
         <p>
           At present, TripTrack does not automatically delete inactive accounts
           or old trips after a defined period.
+        </p>
+
+        <p>
+          Analytics information may be retained by our analytics providers for
+          as long as necessary for legitimate business, security and analytical
+          purposes, subject to applicable retention requirements and the
+          providers' policies.
         </p>
 
         <p>
@@ -405,9 +495,15 @@ export default function PrivacyPage() {
         </p>
 
         <p>
-          If we introduce analytics, advertising or other non-essential cookies
-          or similar technologies, we will provide appropriate information and,
-          where required, obtain consent before using them.
+          TripTrack may also use analytics technologies, including technologies
+          provided by PostHog, to understand how users interact with the
+          application.
+        </p>
+
+        <p>
+          Where applicable law requires consent before using non-essential
+          cookies or similar technologies, we will provide appropriate
+          information and obtain consent before using them.
         </p>
 
         <h2>13. Changes to This Privacy Policy</h2>
@@ -434,7 +530,7 @@ export default function PrivacyPage() {
         </p>
 
         <p>
-          <strong>Email:</strong>
+          <strong>Email:</strong>{" "}
           <a
             href="mailto:akhereaihoeghinlan@gmail.com"
             className="text-brand-primary underline"

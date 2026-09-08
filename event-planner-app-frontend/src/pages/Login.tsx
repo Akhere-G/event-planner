@@ -12,6 +12,7 @@ import { useDispatch } from "react-redux";
 import { Link, useLocation, useNavigate } from "react-router";
 import { setCredentials } from "../features/auth/services/authSlice";
 import { toast } from "sonner";
+import { usePostHog } from "@posthog/react";
 
 export default function Login() {
   const [errorMessage, setErrorMessage] = useState("");
@@ -25,6 +26,7 @@ export default function Login() {
   const location = useLocation();
   const from = location.state?.from || "/";
 
+  const posthog = usePostHog();
   const onSubmit = async (formData: LoginSchema) => {
     setErrorMessage("");
     try {
@@ -33,7 +35,13 @@ export default function Login() {
         email: formData.email.toLowerCase(),
       };
       const result = await loginUser(formattedFormData).unwrap();
-      dispatch(setCredentials(result.data.userId));
+      dispatch(setCredentials(result.data.id));
+      posthog?.capture("user_logged_in", {
+        user_id: result.data.id,
+        email: result.data.email,
+        username: result.data.username,
+        signin_method: "email",
+      });
 
       navigate(from, { replace: true });
     } catch (err) {

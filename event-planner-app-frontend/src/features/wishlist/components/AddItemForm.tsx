@@ -9,6 +9,7 @@ import {
 import { isFetchBaseQueryError } from "../../api/utils";
 import type { CityBounds } from "../../maps/types";
 import type { WishlistItem } from "../types";
+import { usePostHog } from "@posthog/react";
 
 interface AddItemFormProps {
   tripId: number;
@@ -36,6 +37,7 @@ export default function AddItemForm({
   const [updateItem] = useUpdateWishlistItemMutation();
 
   const [createItem] = useCreateWishlistItemMutation();
+  const posthog = usePostHog();
 
   const formId = `additemform-${wishlistId}`;
 
@@ -92,6 +94,10 @@ export default function AddItemForm({
           longitude,
           placeId,
         }).unwrap();
+        posthog?.capture("wishlist_item_created", {
+          trip_id: tripId,
+        });
+
         toast.success("Wishlist item added!");
       }
 
