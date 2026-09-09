@@ -377,7 +377,7 @@ export default function HomePage() {
                   </p>
                 </div>
                 <div
-                  className={`bg-slate-50 relative max-h-[420px] ${
+                  className={`bg-slate-50 relative h-[400px] ${
                     index % 2 === 0
                       ? "order-1 lg:order-2"
                       : "order-1 lg:order-1"
@@ -388,7 +388,7 @@ export default function HomePage() {
                     alt={feature.title}
                     width={800}
                     height={400}
-                    className="w-full h-full object-contain"
+                    className="w-full h-full object-cover"
                   />
                 </div>
               </div>
