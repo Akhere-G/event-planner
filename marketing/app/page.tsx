@@ -37,7 +37,7 @@ function Logo({
     </span>
   );
 }
-
+const url = process.env.NEXT_PUBLIC_BASE_URL || "https://triptrack.uk";
 function HeroMockup() {
   return (
     <div className="bg-white rounded-2xl overflow-hidden shadow-2xl border border-slate-100 w-full">
@@ -156,7 +156,7 @@ function Navbar() {
         <div className="max-w-7xl mx-auto h-16 flex items-center gap-10">
           <Logo light={!scrolled} />
           <div className="hidden md:flex gap-8 flex-1">
-            {["Trips", "Add Trip", "Invites", "About"].map((l) => (
+            {[].map((l) => (
               <Link
                 key={l}
                 href="#"
@@ -172,7 +172,7 @@ function Navbar() {
           </div>
           <div className="hidden md:flex gap-3 items-center ml-auto">
             <Link
-              href="#"
+              href={`${url}/login`}
               className={`text-sm font-medium transition-colors ${
                 scrolled
                   ? "text-slate-900 hover:text-slate-700"
@@ -182,7 +182,7 @@ function Navbar() {
               Sign in
             </Link>
             <Link
-              href="/register"
+              href={`${url}/register`}
               className="bg-brand-primary text-white text-sm font-semibold px-6 py-2.5 rounded-full hover:bg-brand-primary/90 transition-colors"
             >
               Get Started
@@ -265,7 +265,7 @@ export default function HomePage() {
             </p>
             <div className="flex gap-4 flex-wrap">
               <Link
-                href="/register"
+                href={`${url}/register`}
                 className="bg-brand-primary text-white text-base font-bold px-8 py-3.5 rounded-full hover:bg-brand-primary/90 transition-colors shadow-lg shadow-brand-primary/20"
               >
                 Start planning
@@ -280,7 +280,7 @@ export default function HomePage() {
           </div>
 
           <div className="flex justify-center animate-fadeUp order-2">
-            <div className="animate-float w-full lg:scale-110 md:origin-center md:-ml-3 lg:mr-3">
+            <div className="animate-float w-full lg:scale-105 md:origin-center md:-ml-3 lg:mr-3">
               <HeroMockup />
             </div>
           </div>
@@ -523,47 +523,6 @@ export default function HomePage() {
                 Plan your trips and collaborate with friends
               </p>
             </div>
-            <div>
-              <div className="text-xs font-bold text-white/40 tracking-widest mb-4">
-                PLAN
-              </div>
-              {["Trips", "Invites", "New trip"].map((l) => (
-                <div key={l} className="mb-3">
-                  <Link
-                    href="#"
-                    className="text-sm text-white/65 hover:text-white/90 transition-colors"
-                  >
-                    {l}
-                  </Link>
-                </div>
-              ))}
-            </div>
-            <div>
-              <div className="text-xs font-bold text-white/40 tracking-widest mb-4">
-                ACCOUNT
-              </div>
-              <div className="mb-3">
-                <Link
-                  href="#"
-                  className="text-sm text-white/65 hover:text-white/90 transition-colors"
-                >
-                  User Settings
-                </Link>
-              </div>
-            </div>
-            <div>
-              <div className="text-xs font-bold text-white/40 tracking-widest mb-4">
-                CONNECT
-              </div>
-              <div className="mb-3">
-                <Link
-                  href="#"
-                  className="text-sm text-white/65 hover:text-white/90 transition-colors"
-                >
-                  About Project
-                </Link>
-              </div>
-            </div>
           </div>
           <div className="border-t border-white/10 pt-8 flex items-center justify-between flex-wrap gap-4">
             <div className="flex gap-6 items-center flex-wrap">
@@ -572,13 +531,13 @@ export default function HomePage() {
                 © 2026 TripTrack. Built for travellers.
               </span>
               <Link
-                href="#"
+                href={`${url}/privacy`}
                 className="text-xs text-white/45 hover:text-white/70 transition-colors"
               >
                 Privacy
               </Link>
               <Link
-                href="#"
+                href={`${url}/terms`}
                 className="text-xs text-white/45 hover:text-white/70 transition-colors"
               >
                 Terms
