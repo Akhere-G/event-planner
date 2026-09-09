@@ -42,7 +42,7 @@ export default function AccommodationMarker({
 
       <Pin
         background={"var(--color-brand-primary)"}
-        glyphSrc={"/house.svg"}
+        glyphSrc={"/app/house.svg"}
         glyphColor={"var(--color-text-inverse)"}
         borderColor={"var(--color-surface-border)"}
         scale={isSelected ? 1.3 : 1}
