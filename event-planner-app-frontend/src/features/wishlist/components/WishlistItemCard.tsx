@@ -17,10 +17,10 @@ import {
   usePromoteWishlistItemMutation,
   useVoteForWishlistItemMutation,
 } from "../services/wishlistApiSlice";
-import { isFetchBaseQueryError } from "../../api/utils";
+import { isApiError, isFetchBaseQueryError } from "../../api/utils";
 import PromoteItemModal from "./PromoteItemModal";
 import ConfirmModal from "../../../components/ConfirmModal";
-import type { VoteForWishlistItemPayload, WishlistItem } from "../types";
+import type { WishlistItem } from "../types";
 import { useDispatch, useSelector } from "react-redux";
 import {
   setIsMapView,
@@ -40,13 +40,12 @@ import { useGetTripQuery } from "../../trips/services/tripsApiSlice";
 import { usePostHog } from "@posthog/react";
 
 interface WishlistItemViewProps {
-  tripId: number;
   item: WishlistItem;
   editable: boolean;
   onScheduleClick: () => void;
   onDeleteClick: () => void;
   editItem: () => void;
-  voteForItem: (payload: VoteForWishlistItemPayload) => void;
+  voteForItem: (vote: number) => void;
   isVoteLoading: boolean;
   userDidUpvote: boolean;
   userDidDownvote: boolean;
@@ -55,7 +54,6 @@ interface WishlistItemViewProps {
 // TODO: Put schedule button on the bottom right corner
 
 function WishlistItemView({
-  tripId,
   item,
   editable,
   onScheduleClick,
@@ -171,14 +169,7 @@ function WishlistItemView({
       <div className="flex gap-2 mt-2">
         <button
           className={`p-1 group hover:bg-success/5 hover:text-success flex items-center gap-1 transition-colors duration-300 ${userDidUpvote ? "bg-success/5 text-success" : ""}`}
-          onClick={() =>
-            voteForItem({
-              tripId,
-              wishlistId: item.wishlistId,
-              wishlistItemId: item.id,
-              vote: 1,
-            })
-          }
+          onClick={() => voteForItem(1)}
           disabled={isVoteLoading}
         >
           <ThumbsUp
@@ -193,14 +184,7 @@ function WishlistItemView({
 
         <button
           className={`p-1 group hover:bg-error/5 hover:text-error flex items-center gap-1 transition-colors duration-300 ${userDidDownvote ? "bg-error/5 text-error" : ""}`}
-          onClick={() =>
-            voteForItem({
-              tripId,
-              wishlistId: item.wishlistId,
-              wishlistItemId: item.id,
-              vote: -1,
-            })
-          }
+          onClick={() => voteForItem(-1)}
           disabled={isVoteLoading}
         >
           <ThumbsDown
@@ -242,6 +226,27 @@ export default function WishlistItemCard({
   const [voteForItem, { isLoading: isVoteLoading }] =
     useVoteForWishlistItemMutation();
   const userId = useSelector((state: RootState) => state.auth.userId);
+  const handleVote = async (vote: number) => {
+    try {
+      await voteForItem({
+        tripId,
+        wishlistId: item.wishlistId,
+        wishlistItemId: item.id,
+        vote,
+      }).unwrap();
+      posthog?.capture("wishlist_item_vote_created", {
+        trip_id: tripId,
+        wishlist_id: item.wishlistId,
+        wishlist_item_id: item.id,
+      });
+    } catch (err) {
+      if (isApiError(err)) {
+        return toast.error(err.data.message);
+      } else {
+        toast.error("Could not vote.");
+      }
+    }
+  };
   const handleDelete = async () => {
     try {
       await deleteItem({
@@ -298,7 +303,6 @@ export default function WishlistItemCard({
   return (
     <>
       <WishlistItemView
-        tripId={tripId}
         item={item}
         editable={editable}
         onScheduleClick={() => {
@@ -306,7 +310,7 @@ export default function WishlistItemCard({
         }}
         onDeleteClick={() => setShowDeleteConfirm(true)}
         editItem={() => setIsEditingWishlistItem(true)}
-        voteForItem={voteForItem}
+        voteForItem={handleVote}
         isVoteLoading={isVoteLoading}
         userDidUpvote={userDidUpvote}
         userDidDownvote={userDidDownvote}
