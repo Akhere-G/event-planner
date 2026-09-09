@@ -22,6 +22,5 @@ bcrypt = Bcrypt()
 
 limiter = Limiter(
     get_remote_address,
-    default_limits=["200 per day", "60 per hour"],
     storage_uri=os.getenv("STORAGE_URI"),
 )
