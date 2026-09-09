@@ -12,6 +12,7 @@ from .config.testing_config import TestConfig
 from .exceptions import AppError
 from .extensions import bcrypt, db, limiter, migrate
 from .utils.format_response import api_response
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 pymysql.install_as_MySQLdb()
 load_dotenv()
@@ -23,6 +24,13 @@ def create_app(testing=False):
         static_folder="../static",
         static_url_path="/",
     )
+    app.wsgi_app = ProxyFix(
+        app.wsgi_app,
+        x_for=1,
+        x_proto=1,
+        x_host=1,
+    )
+
 
     configure_app(app, testing)
     initialise_extensions(app, testing)
