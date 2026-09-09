@@ -37,7 +37,7 @@ function Logo({
     </span>
   );
 }
-const url = process.env.NEXT_PUBLIC_BASE_URL || "https://triptrack.uk";
+const url = process.env.NEXT_PUBLIC_BASE_URL || "https://triptrack.uk/app";
 function HeroMockup() {
   return (
     <div className="bg-white rounded-2xl overflow-hidden shadow-2xl border border-slate-100 w-full">
