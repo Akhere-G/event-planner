@@ -25,6 +25,7 @@ import {
   DropdownMenuTrigger,
 } from "../../../components/ui/dropdown-menu";
 import { usePostHog } from "@posthog/react";
+import { isApiError } from "../../api/utils";
 
 export default function DayCard({
   day,
@@ -68,8 +69,13 @@ export default function DayCard({
         ...autoFillData,
       });
       setIsFillMenuOpen(false);
-    } catch {
-      toast.error("Could not get suggestions.");
+    } catch (err) {
+      if (isApiError(err)) {
+        toast.error(err.data.message);
+      } else {
+        posthog?.captureException(err);
+        toast.error("Could not get suggestions.");
+      }
     }
   };
 
@@ -79,8 +85,14 @@ export default function DayCard({
       posthog?.capture("ai_optimise_events_used", {
         trip_id: tripId,
       });
-    } catch {
-      toast.error("Could not get suggestions.");
+    } catch (err) {
+      if (isApiError(err)) {
+        toast.error(err.data.message);
+      } else {
+        posthog?.captureException(err);
+
+        toast.error("Could not optimise events.");
+      }
     }
   };
 

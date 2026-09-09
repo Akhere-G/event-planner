@@ -29,11 +29,14 @@ export default function JoinTrip() {
       } catch (err) {
         if (isApiError(err)) {
           toast.error(err.data.message);
+        } else {
+          posthog?.captureException(err);
+          toast.error("Sorry! Something went wrong...");
         }
       }
     }
     join();
-  }, [token, navigate, joinTrip]);
+  }, [token, navigate, joinTrip, posthog]);
 
   let title = "Joining trip...";
 

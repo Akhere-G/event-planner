@@ -71,6 +71,9 @@ export default function EventSearchResultCard() {
     } catch (err) {
       if (isFetchBaseQueryError(err)) {
         toast.error((err.data as { message: string }).message);
+      } else {
+        posthog?.captureException(err);
+        toast.error("Sorry! Something went wrong...");
       }
       throw err;
     }

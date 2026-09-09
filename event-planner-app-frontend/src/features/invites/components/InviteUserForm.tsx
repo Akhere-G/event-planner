@@ -8,6 +8,7 @@ import { useMatch } from "react-router";
 import { isValidationError } from "../../api/utils";
 import { useState } from "react";
 import { usePostHog } from "@posthog/react";
+import { toast } from "sonner";
 
 export default function InviteUserForm() {
   const [errorMessage, setErrorMessage] = useState("");
@@ -44,6 +45,9 @@ export default function InviteUserForm() {
             message: messages[0],
           });
         });
+      } else {
+        posthog?.captureException(err);
+        toast.error("Sorry! Something went wrong...");
       }
     }
   }
