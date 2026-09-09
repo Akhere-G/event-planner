@@ -9,8 +9,17 @@ import { APIProvider } from "@vis.gl/react-google-maps";
 import posthog from "posthog-js";
 import { PostHogProvider } from "@posthog/react";
 
-posthog.init(import.meta.env.VITE_POSTHOG_PROJECT_TOKEN, {
-  api_host: import.meta.env.VITE_POSTHOG_HOST,
+const PROJECT_TOKEN = import.meta.env.VITE_POSTHOG_PROJECT_TOKEN;
+const PROJECT_HOST = import.meta.env.VITE_POSTHOG_HOST;
+
+if (!PROJECT_HOST || !PROJECT_TOKEN) {
+  console.error("Missing project host and error. Analytics disabled");
+} else {
+  console.log("keys loaded");
+}
+
+posthog.init(PROJECT_TOKEN, {
+  api_host: PROJECT_HOST,
   defaults: "2026-05-30",
 });
 
