@@ -1,0 +1,574 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&display=swap');
+@import "tailwindcss";
+
+:root {
+  --bg-canvas: #f8fafc;
+  --bg-surface: #ffffff;
+  --bg-surface-muted: #f1f5f9;
+  --border-surface: #e2e8f0;
+  --txt-primary: #0f172a;
+  --txt-secondary: #64748b;
+  --txt-inverse: #ffffff;
+}
+
+@theme {
+  --color-brand-primary: #f97316;
+  --color-brand-secondary: #fb923c;
+  --color-brand-accent: #3ed5f9;
+
+  --color-canvas: var(--bg-canvas);
+  --color-surface: var(--bg-surface);
+  --color-surface-muted: var(--bg-surface-muted);
+  --color-surface-border: var(--border-surface);
+
+  --color-text-primary: var(--txt-primary);
+  --color-text-secondary: var(--txt-secondary);
+  --color-text-inverse: var(--txt-inverse);
+  --color-text-canvas: var(--color-brand-primary);
+  
+
+  --color-success: #10b981;
+  --color-error: #ef4444;
+  --color-warning: #f59e0b;
+  --color-info: #3b82f6;
+
+  --font-sans: 'Outfit', sans-serif;
+}
+
+@variant dark (&:where(.dark, .dark *));
+
+@layer base {
+/* --- Bali Jungle --- */
+  .theme-bali-jungle {
+    --color-canvas: #6ebfae; 
+    --color-surface: #145f48;  
+    --color-surface-muted: #084f38;
+    --color-brand-primary: #77c3a0; 
+    --color-surface-border: #053e26; 
+    --color-brand-secondary: #68d4c1; 
+    --color-text-primary: #f8f8f8;
+    --color-text-secondary: #f0f0f0;
+    --color-text-inverse: #111;
+    --color-error: #faa;
+    --color-text-canvas: var(--color-text-primary);
+
+
+  }
+
+  /* --- Icelandic Glacier --- */
+  .theme-icelandic-glacier {
+        /* A deep, midnight-plum canvas */
+    --color-canvas: #1a0b2e; 
+    --color-surface: #2d1b4d; 
+    --color-surface-muted: #3d2b5e;
+    --color-surface-border: #5a3e8c;
+
+    --color-brand-primary: #ffcc00;  /* Alchemist Gold */
+    --color-brand-secondary: #ec4899; /* Bohemian Pink */
+    
+    /* Text needs to pop against the dark plum */
+    --color-text-primary: #f5f3ff;
+    --color-text-secondary: #c4b5fd;
+    --color-text-inverse: #1a0b2e;
+  }
+
+  /* --- Sahara Dusk --- */
+  .theme-sahara-dusk {
+    --color-canvas: #f8f2dc; 
+    --color-surface: #ffffff; 
+    --color-surface-border: #e8e2cc; 
+    --color-surface-muted: #ffedd5;
+    --color-brand-primary: #9a3412; 
+    --color-brand-secondary: #76473a; 
+  }
+
+  .dark.theme-sahara-dusk {
+    --color-brand-primary: #da7452; 
+    --color-brand-secondary: #96675a; 
+
+  }
+
+  /* --- Amalfi Coast --- */
+  .theme-amalfi-coast {
+    --color-canvas: #f0f9ff; 
+    --color-surface: #ffffff; 
+    --color-surface-border: #e0e8ee; 
+    --color-surface-muted: #e0f2fe;
+    --color-brand-primary: #0369a1; 
+    --color-brand-secondary: #facc15; 
+  }
+
+  .dark.theme-amalfi-coast {
+    --color-brand-primary: #43a9e1; 
+
+  }
+
+  /* --- Tokyo Neon --- */
+  .theme-tokyo-neon {
+    --color-canvas: #09090b; 
+    --color-surface: #18181b; 
+    --color-surface-border: #404044; 
+    --color-surface-muted: #27272a;
+    --color-brand-primary: #d946ef; 
+    --color-brand-secondary: #22d3ee; 
+    --color-text-primary: #ffffff;
+    --color-text-secondary: #a1a1aa;
+    --color-text-inverse: #09090b;
+  }
+
+
+  /* --- Havana Retro --- */
+  .theme-havana-retro {
+    --color-canvas: #55bdec; 
+    --color-surface: #ffffff; 
+    --color-surface-muted: #f7f5f4;
+    --color-brand-primary: #0d9488; 
+    --color-brand-secondary: #ff698c; 
+    --color-brand-accent: #ff9a81;
+    --color-text-canvas: var(--color-text-primary);
+
+  }
+
+  .dark.theme-havana-retro {
+    --color-brand-primary: #4dd4c8; 
+  }
+
+  /* --- London Fog --- */
+  .theme-london-fog {
+    --color-canvas: #f1f5f9; 
+    --color-surface: #ffffff; 
+    --color-surface-muted: #e2e8f0;
+    --color-brand-primary: #C0090d; 
+    --color-brand-secondary: #D01A1E; 
+
+  }
+
+  .dark.theme-london-fog {
+    --color-brand-primary: #E0292d; 
+
+  }
+
+  /* --- NYC Taxi --- */
+  .theme-nyc-taxi {
+    --color-canvas: #f8fafc;
+    --color-surface: #ffffff;
+    --color-brand-primary: #f9bb04; 
+    --color-brand-secondary: #f9bb04; 
+    --color-text-inverse: #000000;
+  }
+
+  /* --- Australian Outback --- */
+  .theme-outback {
+    --color-canvas: #fff7ed;
+    --color-text-canvas: #222; 
+    --color-surface: #de7856;
+    --color-surface-border: #bc5634;
+    --color-surface-muted: #cd6745;
+    --color-brand-primary: #781200; 
+    --color-brand-secondary: #1d5100; 
+    --color-text-primary: #f8f8f8; 
+    --color-text-secondary: #f0f0f0; 
+    --color-error: #800;
+
+  }
+
+  .dark.theme-outback { 
+    --color-brand-primary: #b85240; 
+    --color-brand-secondary: #5d8140; 
+  }
+  /* --- Kenyan Savanna --- */
+  .theme-kenyan-savanna {
+    --color-canvas: #fbe8d1 ;
+    --color-surface: #fff;
+    --color-brand-primary: #a15f3e; 
+    --color-brand-secondary: #e99d56; 
+  }
+
+  /* --- Nigerian Royal --- */
+  .theme-nigerian-royal {
+    --color-canvas: #f0fdf4;
+    --color-surface: #ffffff;
+    --color-brand-primary: #166534; 
+    --color-brand-secondary: #388756; 
+    --color-surface-muted: #dcfce7;
+  }
+
+  .dark.theme-nigerian-royal {
+    --color-brand-primary: #569574; 
+
+  }
+
+  /* --- Cape Winelands --- */
+  .theme-cape-winelands {
+    --color-canvas: #bf6eae; 
+    --color-surface: #6f1858;  
+    --color-surface-muted: #5f0848;
+    --color-brand-primary: #d377b0; 
+    --color-surface-border: #4e0036; 
+    --color-brand-secondary: #e4a8d1; 
+    --color-text-primary: #f8f8f8;
+    --color-text-secondary: #f0f0f0;
+    --color-text-canvas: var(--color-text-primary);
+
+  }
+
+  /* --- Egyptian Dune --- */
+  .theme-egyptian-dune {
+    --color-canvas: #fdf6e3;
+    --color-text-canvas: #111;
+    --color-surface: #8c3512;
+    --color-surface-border: #6f1f00;
+    --color-surface-muted: #7c2502;
+    --color-brand-primary: #f6a577; 
+    --color-brand-secondary: #0eaef8; 
+    --color-text-primary: #f8fafc;
+    --color-text-secondary: #e8eaec;
+    --color-text-inverse: #111;
+    --color-error: #faa;
+
+  }
+
+  /* --- Seoul Night --- */
+  .theme-seoul-night {
+    --color-canvas: #020617;
+    --color-surface: #0f172a;
+    --color-surface-border: #2f374a;
+    --color-brand-primary: #3b82f6; 
+    --color-brand-secondary: #f472b6; 
+    --color-text-primary: #f8fafc;
+    --color-text-secondary: #94a3b8;
+    --color-surface-muted: #27272a;
+    --color-text-inverse: #111;
+
+  }
+
+  /* --- Spanish Fiesta --- */
+  .theme-spanish-fiesta {
+    --color-canvas: #F1BF00;
+    --color-surface: #fff;  
+    --color-surface-muted: #F1BF00;
+    --color-brand-primary: #AA151B; 
+    --color-brand-secondary: #AA151B; 
+  }
+
+  .dark.theme-spanish-fiesta {
+    --color-brand-primary: #eA555B; 
+  }
+
+  /* --- Amazonian Rainforest --- */
+  .theme-amazonian-rainforest {
+    --color-canvas: #243;
+    --color-surface: #486;
+    --color-surface-border: #286848;
+    --color-surface-muted: #307050;
+    --color-brand-primary: var(--color-teal-300); 
+    --color-brand-secondary: #fdd50c;
+    --color-text-primary: #f8f8f8;
+    --color-text-secondary: #f0f0f0; 
+    --color-text-inverse: #000;
+    --color-error: #faa;
+  }
+
+  /* --- Santorini Azure (Stark White & Deep Sea) --- */
+  .theme-santorini-azure {
+    --color-canvas: #ffffff; 
+    --color-surface: #f8fafc; 
+    --color-surface-muted: #e0f2fe;
+    --color-brand-primary: #0284c7; /* Aegean Blue */
+    --color-brand-secondary: #0ea5e9; /* Dome Blue */
+  }
+
+  /* --- Kyoto Moss (Traditional Zen Gardens) --- */
+  .theme-kyoto-moss {
+    --color-canvas: #f4f5f0; 
+    --color-surface: #ffffff; 
+    --color-brand-primary: #4d7c0f; /* Bamboo & Moss */
+    --color-brand-secondary: #be123c; /* Temple Red / Sakura */
+  }
+
+  /* --- Parisian Café (Elegant & Muted) --- */
+.theme-parisian-cafe {
+    --color-canvas: #f5f4ef;        /* Haussmann Limestone */
+    --color-surface: #ffffff; 
+    --color-surface-muted: #e5e2d9; 
+    --color-brand-primary: #3e49ab;  /* Parisian Navy */
+    --color-brand-secondary: #4e59bb; /* Zinc Rooftops */
+  }
+
+  .dark.theme-parisian-cafe {
+    --color-brand-primary: #7e89eb;
+  }
+
+  /* --- Tulum Cenote (Tropical & Earthy) --- */
+  .theme-tulum-cenote {
+    --color-canvas: #96e7d2; 
+    --color-surface: #FEF6F2; 
+    --color-surface-muted: #EEE6E2; 
+    --color-surface-border: #dfdfde; 
+    --color-brand-primary: #062a2e; /* Deep Cenote Water */
+    --color-brand-secondary: #158265; /* Woven Rattan */
+  }
+
+  .dark.theme-tulum-cenote {
+    --color-brand-primary: #86aaae;
+  }
+
+  /* --- Jaipur Palace (The Pink City) --- */
+  .theme-jaipur-palace {
+    --color-canvas: #F5aCa9; 
+    --color-text-canvas: #500C09; 
+    --color-surface: #d04C49; 
+    --color-surface-muted: #c02C29; 
+    --color-surface-border: #b02C29; 
+    --color-brand-primary: #ffaacd; /* Terracotta Pink */
+    --color-brand-secondary: #ffff5f; /* Marigold */
+    --color-text-primary: #f8f8f8;
+    --color-text-secondary: #f0f0f0; 
+    --color-text-inverse: #000;
+    --color-error: #fbb;
+  }
+
+ /* --- Dubai Lux (Desert Gold & Obsidian) --- */
+  .theme-dubai-lux {
+    --color-canvas: #0a0a0a;       /* Deep Obsidian */
+    --color-surface: #171717;      /* Matte Charcoal */
+    --color-surface-border: #373737;      /* Matte Charcoal */
+    --color-surface-muted: #262626; /* Refined dark grey */
+    --color-brand-primary: #d4af37;        /* Metallic Champagne Gold */
+    --color-brand-secondary: #e5bf48;        /* Metallic Champagne Gold */
+    --color-accent: #ebc23c;       /* Soft Highlight Gold */
+    --color-text-primary: #fff;  
+    --color-text-secondary: #ccc;  
+    --color-text-inverse: black
+  }
+
+  /* --- Alpine Frost (Crisp Swiss Mountains) --- */
+  .theme-alpine-frost {
+    --color-canvas: #6eaebf; 
+    --color-surface: #105068;  
+    --color-surface-muted: #004058;
+    --color-brand-primary: #77b0d3; 
+    --color-surface-border: #307088; 
+    --color-brand-secondary: #a8d1e4; 
+    --color-text-primary: #f8f8f8;
+    --color-text-secondary: #f0f0f0;
+    --color-text-canvas: var(--color-text-primary);
+
+  }
+
+  /* --- Bangkok Market (Vibrant & Energetic) --- */
+  .theme-bangkok-market {
+    --color-canvas: #fffbeb; 
+    --color-text-canvas: #222; 
+    --color-surface: #df6020; 
+    --color-surface-border: #bf4000;
+    --color-surface-muted: #ef7030; 
+    --color-brand-primary: #63e0a6; /* Papaya & Spice */
+    --color-brand-secondary: #a3f0a6; /* Pandan Leaf */
+
+    --color-text-primary: #f8fafc;
+    --color-text-secondary: #f8fafc;
+    --color-text-inverse: #111;
+    --color-error: #ffbfbf;
+
+  }
+
+  .dark.theme-bangkok-market {
+    --color-brand-primary: #c26064;
+  }
+
+  /* --- Bohemian Gothic (Prague & Budapest) --- */
+  .theme-bohemian-gothic {
+    --color-canvas: #f2e9d9; 
+    --color-surface: #ffffff; 
+    --color-surface-muted: #eaddca;
+    --color-surface-border: #d4c5b0;
+
+    --color-brand-primary: #8b1a1a;  /* Bohemian Garnet / Red Wine */
+    --color-brand-secondary: #5c1111; 
+    --color-brand-accent: #b48e4d;   /* Tarnished Brass / Gold Leaf */
+    
+    --color-text-primary: #1a1614;   /* Ironwork Charcoal */
+    --color-text-secondary: #5e5449;
+    --color-text-inverse: #ffffff;
+  }
+
+    .dark.theme-bohemian-gothic {
+    --color-brand-primary: #cb3a3a;  
+    --color-brand-secondary: #db5a5a; 
+  }
+  
+  .dark {
+      --color-canvas: #0a0f1c;
+      --color-surface: #161d2a;
+      --color-surface-muted: #334155;
+      --color-surface-border: #475569;
+
+    --color-text-primary: #f8fafc;
+    --color-text-secondary: #cbd5e1;
+    --color-text-inverse: #111;
+
+  
+    
+  }
+
+  
+
+  body {
+    @apply bg-canvas text-text-primary antialiased;
+  }
+
+  input, select, textarea {
+    @apply w-full px-4 py-2 rounded-xl border border-surface-border bg-surface transition-all outline-none text-text-primary focus:ring-1 focus:ring-brand-primary focus:border-transparent;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    @apply tracking-tight
+  }
+
+  p, span, a, label {
+    @apply bg-blend-exclusion tracking-wide
+  }
+  a {
+    @apply text-brand-primary hover:text-brand-secondary transition-colors no-underline font-medium;
+  }
+
+  button, .btn {
+    @apply px-5 py-2.5 rounded-lg font-semibold transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed hover:brightness-110;
+  }
+
+  li {
+    @apply list-none
+  }
+}
+
+@layer components {
+  
+  
+  .card {
+    @apply bg-surface border border-surface-border md:rounded-md shadow-sm transition-shadow p-4 ;
+  }
+
+  .btn-primary {
+    @apply bg-brand-primary text-text-inverse hover:brightness-110 shadow-sm;
+  }
+
+  .btn-error {
+    @apply bg-error text-text-inverse hover:brightness-110 shadow-sm;
+  }
+
+  .btn-secondary {
+    @apply bg-surface-muted text-text-primary hover:brightness-110;
+  }
+
+  .btn-menu {
+    @apply hover:bg-surface-muted disabled:hover:bg-inherit rounded-md
+  }
+
+  
+
+  .title {
+    @apply text-xl tracking-tight 
+  }
+
+  .form {
+    @apply flex gap-4 flex-col
+  }
+
+  .errorMessage {
+    @apply mt-4 text-error bg-error/10 p-1 pl-4 rounded-md border-l-error border-l-4
+  }
+
+  .container { 
+    @apply w-full max-w-7xl mx-auto py-6 md:px-6
+  }
+
+  .form-input {
+    @apply w-full p-3 rounded-xl border focus:outline-none focus:border-brand-primary bg-surface-muted text-text-primary transition-all placeholder:text-text-secondary/50 h-11
+  }
+
+  .backdrop {
+    @apply fixed w-full h-full top-0 left-0 inset-0 z-10 bg-black/40 backdrop-blur-sm transition-all flex justify-center items-center
+  }
+
+  .modal {
+    @apply w-full max-w-7xl m-4
+  }
+
+  .gm-style-iw {
+    @apply pl-2! pr-2! pb-2!
+  }
+
+  .gm-style-iw * {
+    @apply bg-surface! text-text-primary border-0! border-surface-border!
+  }
+
+
+  .gm-style-iw-c, .gm-title, .address, .address-line, .view-link, .view-link *, .gm-style-iw-d   {
+    @apply bg-surface! overflow-hidden!
+  }
+
+  .gm-style-iw-tc::after {
+    @apply bg-surface! text-text-primary!;
+  }
+
+  .gm-title {
+    @apply text-brand-primary 
+  }
+
+  .address-line {
+    @apply text-text-primary! fill-text-primary!
+  }
+
+  .gm-ui-hover-effect > span {
+    @apply bg-text-primary!
+  }
+  
+
+
+  
+}
+
+.rbc-show-more {
+  @apply  text-brand-accent! font-semibold! text-xs! bg-transparent! hover:underline! ;
+}
+
+.rbc-overlay {
+  @apply bg-surface! border! border-slate-200! shadow-xl! rounded-lg! p-2! z-50! min-w-fit! w-[30%]!;
+}
+
+.rbc-overlay-header {
+  @apply text-text-secondary! text-sm! font-bold! border-b! border-slate-100! dark:border-slate-800! mb-2! mt-0!  uppercase! tracking-tight!;
+}
+
+.rbc-overlay .rbc-event {
+  @apply mb-2! last:mb-0!;
+}
+
+/* 5. Month View specific tweaks */
+.rbc-month-view, .rbc-time-view {
+  @apply   rounded-md! overflow-hidden;
+}
+
+
+.rbc-header {
+  @apply py-2! text-text-secondary font-bold! text-xs! uppercase;
+}
+
+.rbc-time-slot {
+  @apply text-xs md:text-base flex justify-center min-h-6; 
+}
+
+.rbc-label {
+  @apply p-0.5! 
+}
+
+
+.rbc-events-container {
+  @apply mr-0!
+}
+
+.rbc-header {
+  @apply  flex justify-center items-center; 
+
+}
