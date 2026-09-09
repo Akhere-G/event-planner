@@ -19,4 +19,5 @@ export interface Trip {
   adminCode?: string;
   editorCode?: string;
   viewerCode?: string;
+  createdAt: string;
 }

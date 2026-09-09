@@ -61,6 +61,18 @@ export default function TripPage() {
     }
   }, [data, dispatch]);
 
+  useEffect(() => {
+    if (data?.data) {
+      const trip = data.data;
+      posthog?.group("trip", String(trip.id), {
+        name: trip.name,
+        destination: trip.destination,
+        member_count: trip.userMemberships.length,
+        created_at: trip.createdAt,
+      });
+    }
+  }, [posthog, data]);
+
   return (
     <StateGate
       containerClasses="container"
