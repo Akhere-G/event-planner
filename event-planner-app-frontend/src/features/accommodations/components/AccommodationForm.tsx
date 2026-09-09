@@ -101,6 +101,10 @@ export default function AccommodationForm({
       onSuccess();
     } catch (err) {
       if (isValidationError(err)) {
+        posthog?.captureException(err, {
+          feature: "accommodation_creation",
+          action: "accommodation_created",
+        });
         const serverErrors = err.data.error;
         setErrorMessage(serverErrors.general?.join(", ") ?? "");
         Object.entries(serverErrors).forEach(([k, messages]) => {

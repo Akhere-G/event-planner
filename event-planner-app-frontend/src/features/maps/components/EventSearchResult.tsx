@@ -70,6 +70,10 @@ export default function EventSearchResultCard() {
       updateSearchResults();
     } catch (err) {
       if (isFetchBaseQueryError(err)) {
+        posthog?.captureException(err, {
+          feature: "event_creation",
+          action: "event_created",
+        });
         toast.error((err.data as { message: string }).message);
       } else {
         posthog?.captureException(err);

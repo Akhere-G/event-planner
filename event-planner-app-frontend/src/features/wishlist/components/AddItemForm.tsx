@@ -104,6 +104,10 @@ export default function AddItemForm({
       onSuccess();
     } catch (err) {
       if (isFetchBaseQueryError(err)) {
+        posthog?.captureException(err, {
+          feature: "wishlist_item__creation",
+          action: "wishlist_item_created",
+        });
         toast.error(
           (err.data as { message: string }).message ||
             "Failed to add wishlist item",

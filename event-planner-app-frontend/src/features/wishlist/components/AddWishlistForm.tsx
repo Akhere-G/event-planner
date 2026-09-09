@@ -32,6 +32,10 @@ export default function AddWishlistForm({
       onSuccess();
     } catch (err) {
       if (isFetchBaseQueryError(err)) {
+        posthog?.captureException(err, {
+          feature: "wishlist_creation",
+          action: "wishlist_created",
+        });
         const error = err as APIError;
         toast.error(error.data.message);
       } else {
