@@ -9,7 +9,7 @@ import { APIProvider } from "@vis.gl/react-google-maps";
 import posthog from "posthog-js";
 import { PostHogProvider } from "@posthog/react";
 
-const PROJECT_TOKEN = "phc_zkZrWwVLTjZmtqJ9dbo3EFmBrmypH7ibJEK57Ykp4ZEN;";
+const PROJECT_TOKEN = "phc_zkZrWwVLTjZmtqJ9dbo3EFmBrmypH7ibJEK57Ykp4ZEN";
 const PROJECT_HOST = "https://eu.i.posthog.com";
 
 if (!PROJECT_HOST || !PROJECT_TOKEN) {
