@@ -36,9 +36,9 @@ const EventMarker = memo(
     const isRoutePin = isRouteStart || isRouteEnd;
     let pinIcon: string | undefined = undefined;
     if (isRouteStart) {
-      pinIcon = "/map_to_icon.svg";
+      pinIcon = "/app/map_to_icon.svg";
     } else if (isRouteEnd) {
-      pinIcon = "/flag.svg";
+      pinIcon = "/app/flag.svg";
     }
     return (
       <AdvancedMarker
