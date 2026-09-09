@@ -55,6 +55,10 @@ export default function AddEventForm({ date }: { date: string }) {
       setKey((prev) => prev + 1);
     } catch (err) {
       if (isValidationError(err)) {
+        posthog?.captureException(err, {
+          feature: "event_creation",
+          action: "event_created",
+        });
         const serverErrors = err.data.error;
 
         setErrorMessage(serverErrors.general?.join(", ") ?? "");

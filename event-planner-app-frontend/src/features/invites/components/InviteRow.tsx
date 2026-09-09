@@ -37,6 +37,10 @@ export default function InviteRow({ invite }: { invite: Invite }) {
       posthog?.capture("invite_created", { trip_id: tripId, role });
     } catch (err) {
       if (isFetchBaseQueryError(err)) {
+        posthog?.captureException(err, {
+          feature: "invite_creation",
+          action: "invite_created",
+        });
         toast.error((err.data as { message: string }).message);
       } else {
         posthog?.captureException(err);

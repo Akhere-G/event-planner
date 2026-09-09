@@ -30,7 +30,7 @@ export default class ErrorBoundary extends React.Component<Props, State> {
       React.captureOwnerStack(),
     );
     */
-    posthog.captureException(error);
+    posthog?.captureException(error);
     void info;
   }
 
