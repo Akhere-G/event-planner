@@ -68,6 +68,7 @@ export default function Register() {
           });
         });
       } else {
+        posthog?.captureException(err);
         toast.error("Sorry! Something went wrong...");
       }
     }

@@ -279,6 +279,9 @@ export default function WishlistItemCard({
           (err.data as { message: string }).message ||
             "Failed to schedule event.",
         );
+      } else {
+        posthog?.captureException(err);
+        toast.error("Sorry! Something went wrong...");
       }
     }
   };

@@ -12,6 +12,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { searchTags } from "../../maps/constants";
 import type { RootState } from "../../../store";
 import { toast } from "sonner";
+import { usePostHog } from "@posthog/react";
 
 export default function EventSearch({
   destination,
@@ -32,7 +33,7 @@ export default function EventSearch({
 
   const map = useMap();
   const placesLibrary = useMapsLibrary("places");
-
+  const posthog = usePostHog();
   const cityBounds = getCityBounds(destination);
 
   const handlePlaceSelect = (place: google.maps.places.PlaceResult) => {
@@ -60,8 +61,9 @@ export default function EventSearch({
           toast.error("Sorry! Something went wrong...");
         }
       });
-    } catch {
+    } catch (err) {
       toast.error("Sorry! Something went wrong...");
+      posthog?.captureException(err);
     }
   };
 

@@ -6,6 +6,7 @@ import {
 } from "../../events/service/eventApiSlice";
 import type { Event } from "../../events/types";
 import { useGetTripQuery } from "../services/tripsApiSlice";
+import { usePostHog } from "@posthog/react";
 
 export default function useUpdateEvent({
   tripId,
@@ -18,7 +19,7 @@ export default function useUpdateEvent({
 }) {
   const { data } = useGetTripQuery(Number(tripId));
   const trip = data?.data;
-
+  const posthog = usePostHog();
   const [deleteEvent] = useDeleteEventMutation();
   const [updateEvent] = useUpdateEventMutation();
 
@@ -46,6 +47,9 @@ export default function useUpdateEvent({
     } catch (err) {
       if (isFetchBaseQueryError(err)) {
         toast.error((err.data as { message: string }).message);
+      } else {
+        posthog?.captureException(err);
+        toast.error("Sorry! Something went wrong...");
       }
       throw err;
     }

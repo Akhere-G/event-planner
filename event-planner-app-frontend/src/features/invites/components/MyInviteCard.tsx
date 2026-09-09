@@ -31,6 +31,9 @@ export default function MyInviteCard({ invite }: { invite: Invite }) {
     } catch (err) {
       if (isFetchBaseQueryError(err)) {
         toast.error((err.data as { message: string }).message);
+      } else {
+        posthog?.captureException(err);
+        toast.error("Sorry! Something went wrong...");
       }
     }
   };
@@ -48,6 +51,9 @@ export default function MyInviteCard({ invite }: { invite: Invite }) {
     } catch (err) {
       if (isFetchBaseQueryError(err)) {
         toast.error((err.data as { message: string }).message);
+      } else {
+        posthog?.captureException(err);
+        toast.error("Sorry! Something went wrong...");
       }
     }
   };

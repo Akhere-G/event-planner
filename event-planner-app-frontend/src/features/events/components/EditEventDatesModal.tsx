@@ -9,6 +9,7 @@ import {
 import type { Event } from "../types";
 import { ConfirmModal, FormInput } from "../../../components";
 import { isApiError } from "../../api/utils";
+import { usePostHog } from "@posthog/react";
 
 interface EditEventDatesModalProps {
   event: Event;
@@ -37,7 +38,7 @@ export default function EditEventDatesModal({
 
   const [startAt, setStartAt] = useState(formatForInput(event.startAt));
   const [endAt, setEndAt] = useState(formatForInput(event.endAt));
-
+  const posthog = usePostHog();
   const handleSubmit = async () => {
     if (!startAt || !endAt) {
       toast.error("Please fill in both start and end times.");
@@ -63,6 +64,7 @@ export default function EditEventDatesModal({
         toast.error(err.data.message);
       } else {
         toast.error("Failed to update event times.");
+        posthog?.captureException(err);
       }
     }
   };

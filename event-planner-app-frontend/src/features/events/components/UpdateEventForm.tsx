@@ -10,6 +10,7 @@ import { useGetTripQuery } from "../../trips/services/tripsApiSlice";
 import { toast } from "sonner";
 import { getCityBounds } from "../../maps/utils";
 import type { Event } from "../types";
+import { usePostHog } from "@posthog/react";
 
 export default function UpdateEventFormView({
   initialEvent,
@@ -31,7 +32,7 @@ export default function UpdateEventFormView({
   const { register, formState, handleSubmit, setError, setValue } = useForm({
     resolver: yupResolver(updateEventSchema),
   });
-
+  const posthog = usePostHog();
   const addressInputProps = register("address");
   const [key, setKey] = useState(0);
 
@@ -76,6 +77,8 @@ export default function UpdateEventFormView({
           });
         });
       } else {
+        posthog?.captureException(err);
+
         toast.error("Sorry! Something went wrong...");
       }
     }

@@ -1,3 +1,4 @@
+import posthog from "posthog-js";
 import * as React from "react";
 
 interface Props {
@@ -29,7 +30,7 @@ export default class ErrorBoundary extends React.Component<Props, State> {
       React.captureOwnerStack(),
     );
     */
-    void error;
+    posthog.captureException(error);
     void info;
   }
 

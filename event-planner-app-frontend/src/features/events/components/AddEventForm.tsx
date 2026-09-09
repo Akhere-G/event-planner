@@ -58,7 +58,6 @@ export default function AddEventForm({ date }: { date: string }) {
         const serverErrors = err.data.error;
 
         setErrorMessage(serverErrors.general?.join(", ") ?? "");
-
         Object.entries(serverErrors).forEach(([k, messages]) => {
           setError(k as keyof EventSchema, {
             type: "server",
@@ -66,6 +65,7 @@ export default function AddEventForm({ date }: { date: string }) {
           });
         });
       } else {
+        posthog?.captureException(err);
         toast.error("Sorry! Something went wrong...");
       }
     }
