@@ -6,9 +6,7 @@ import {
   type FetchBaseQueryError,
 } from "@reduxjs/toolkit/query/react";
 import { toast } from "sonner";
-const baseUrl =
-  import.meta.env.VITE_API_URL ||
-  "/api";
+const baseUrl = import.meta.env.VITE_API_URL || "/api";
 
 const baseQuery = fetchBaseQuery({ baseUrl, credentials: "include" });
 
@@ -19,7 +17,10 @@ const baseQueryWithErrorHandling: BaseQueryFn<
 > = async (args, api, extraOptions) => {
   const result = await baseQuery(args, api, extraOptions);
 
-  if (result.error?.status === 429) {
+  if (
+    result.error?.status === 429 &&
+    !result.meta?.request.url.endsWith("/api/notifications")
+  ) {
     toast.error("Sorry, too many requests. Please try again soon.", {
       id: "rate-limit",
     });
