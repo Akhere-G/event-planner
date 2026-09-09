@@ -84,6 +84,7 @@ def initialise_extensions(app: Flask, testing: bool):
     db.init_app(app)
     migrate.init_app(app, db)
     bcrypt.init_app(app)
+
     if not testing:
         limiter.init_app(app)
 
@@ -105,7 +106,6 @@ def register_models():
         WishlistItem,
         WishlistItemVote,
     )
-
 
 
 def register_blueprints(app: Flask):
@@ -179,12 +179,22 @@ def register_blueprints(app: Flask):
     )
 
 
-
 def register_frontend(app: Flask):
-    @app.route("/")
-    def serve_frontend():
+    @app.route("/app")
+    @app.route("/app/")
+    @app.route("/app/<path:path>")
+    def serve_frontend(path=""):
+        if path:
+            file_path = os.path.join(app.static_folder, path)
+
+            if os.path.isfile(file_path):
+                return send_from_directory(
+                    app.static_folder,
+                    path,
+                )
+
         return send_from_directory(
-            app.static_folder or "/static",
+            app.static_folder,
             "index.html",
         )
 
@@ -192,9 +202,11 @@ def register_frontend(app: Flask):
 def register_error_handlers(app: Flask):
     @app.errorhandler(404)
     def not_found(error):
-        return send_from_directory(
-            app.static_folder or "/static",
-            "index.html",
+        return api_response(
+            success=False,
+            message="Resource not found.",
+            error="Not found",
+            status_code=404,
         )
 
     @app.errorhandler(429)
@@ -218,5 +230,8 @@ def register_error_handlers(app: Flask):
     @app.errorhandler(ValidationError)
     def handle_validation_error(error):
         return api_response(
-            success=False, error=error.messages, message="Bad request.", status_code=400
+            success=False,
+            error=error.messages,
+            message="Bad request.",
+            status_code=400,
         )
