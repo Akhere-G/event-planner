@@ -52,5 +52,13 @@ def check_auth():
     user_id = session.get("user_id")
     user = get_user(user_id)
     if user:
-        return api_response(success=True, data=user, message="User is authenticated.")
+        return api_response(
+            success=True,
+            data={
+                "id": user.id,
+                "email": user.email,
+                "username": user.username,
+            },
+            message="User is authenticated.",
+        )
     return api_response(success=False, message="Not authenticated.", status_code=401)
