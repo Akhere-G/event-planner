@@ -1,8 +1,5 @@
-"use client";
-
 import Link from "next/link";
 import Image from "next/image";
-import { useState, useEffect } from "react";
 import {
   Map,
   Calendar,
@@ -19,6 +16,7 @@ import {
   Vote,
   Palette,
 } from "lucide-react";
+import { TrackedLink } from "./components/TrackedLink";
 
 function Logo({
   light = false,
@@ -133,17 +131,10 @@ const featureCards = [
       "Personalise each trip with colourful, location-based themes for a distinctive feel.",
   },
 ];
+const scrolled = true;
+const menuOpen = false;
 
 function Navbar() {
-  const [scrolled, setScrolled] = useState(false);
-  const [menuOpen, setMenuOpen] = useState(false);
-
-  useEffect(() => {
-    const fn = () => setScrolled(window.scrollY > 60);
-    window.addEventListener("scroll", fn);
-    return () => window.removeEventListener("scroll", fn);
-  }, []);
-
   return (
     <>
       <nav
@@ -170,9 +161,10 @@ function Navbar() {
               </Link>
             ))}
           </div>
-          <div className="hidden md:flex gap-3 items-center ml-auto">
-            <Link
+          <div className="flex gap-3 items-center ml-auto">
+            <TrackedLink
               href={`${url}/login`}
+              event="signup_page_visited"
               className={`text-sm font-medium transition-colors ${
                 scrolled
                   ? "text-slate-900 hover:text-slate-700"
@@ -180,17 +172,18 @@ function Navbar() {
               }`}
             >
               Sign in
-            </Link>
-            <Link
+            </TrackedLink>
+
+            <TrackedLink
               href={`${url}/register`}
+              event="register_page_visited"
               className="bg-brand-primary text-white text-sm font-semibold px-6 py-2.5 rounded-full hover:bg-brand-primary/90 transition-colors"
             >
               Get Started
-            </Link>
+            </TrackedLink>
           </div>
           <button
-            onClick={() => setMenuOpen((o) => !o)}
-            className={`md:hidden ml-auto bg-none border-none cursor-pointer ${
+            className={`hidden ml-auto bg-none border-none cursor-pointer ${
               scrolled ? "text-slate-900" : "text-white"
             } text-2xl`}
           >
@@ -198,28 +191,6 @@ function Navbar() {
           </button>
         </div>
       </nav>
-      {menuOpen && (
-        <div className="fixed top-16 left-0 right-0 bg-white z-40 border-b border-slate-200 shadow-xl px-6 py-4">
-          {["Trips", "Add Trip", "Invites", "About"].map((l) => (
-            <div key={l} className="py-3 border-b border-slate-100">
-              <Link href="#" className="text-base font-medium text-slate-900">
-                {l}
-              </Link>
-            </div>
-          ))}
-          <div className="pt-4 flex flex-col gap-3">
-            <Link href="#" className="text-base font-medium text-slate-900">
-              Sign in
-            </Link>
-            <Link
-              href="/register"
-              className="bg-brand-primary text-white text-base font-semibold py-3 px-6 rounded-full text-center hover:bg-brand-primary/90 transition-colors"
-            >
-              Get Started
-            </Link>
-          </div>
-        </div>
-      )}
     </>
   );
 }
@@ -264,12 +235,13 @@ export default function HomePage() {
               smart features handle the boring bits.
             </p>
             <div className="flex gap-4 flex-wrap">
-              <Link
+              <TrackedLink
                 href={`${url}/register`}
+                event="register_page_visited"
                 className="bg-brand-primary text-white text-base font-bold px-8 py-3.5 rounded-full hover:bg-brand-primary/90 transition-colors shadow-lg shadow-brand-primary/20"
               >
                 Start planning
-              </Link>
+              </TrackedLink>
               <Link
                 href="#features"
                 className="bg-transparent text-white/85 text-base font-medium px-8 py-3.5 rounded-full border-2 border-white/25 hover:bg-white/10 transition-colors"
@@ -285,34 +257,6 @@ export default function HomePage() {
             </div>
           </div>
         </div>
-
-        <style jsx>{`
-          @keyframes float {
-            0%,
-            100% {
-              transform: translateY(0);
-            }
-            50% {
-              transform: translateY(-8px);
-            }
-          }
-          @keyframes fadeUp {
-            from {
-              opacity: 0;
-              transform: translateY(24px);
-            }
-            to {
-              opacity: 1;
-              transform: translateY(0);
-            }
-          }
-          .animate-float {
-            animation: float 6s ease-in-out infinite;
-          }
-          .animate-fadeUp {
-            animation: fadeUp 0.7s ease both;
-          }
-        `}</style>
       </section>
 
       <section className="bg-white border-b border-slate-200 py-6 px-3 md:px-5">
@@ -480,12 +424,13 @@ export default function HomePage() {
             trip in one place.
           </p>
           <div className="flex gap-4 justify-center flex-wrap">
-            <Link
-              href="/register"
+            <TrackedLink
+              href={`${url}/register`}
+              event="register_page_visited"
               className="bg-brand-primary text-white text-base font-bold px-9 py-3.5 rounded-full hover:bg-brand-primary/90 transition-colors shadow-lg shadow-brand-primary/20"
             >
               Start planning
-            </Link>
+            </TrackedLink>
             <Link
               href="#features"
               className="bg-transparent text-white/85 text-base font-medium px-9 py-3.5 rounded-full border-2 border-white/25 hover:bg-white/10 transition-colors"
@@ -530,25 +475,21 @@ export default function HomePage() {
               <span className="text-xs text-white/40">
                 © 2026 TripTrack. Built for travellers.
               </span>
-              <Link
+              <TrackedLink
                 href={`${url}/privacy`}
+                event="privacy_page_visited"
                 className="text-xs text-white/45 hover:text-white/70 transition-colors"
               >
                 Privacy
-              </Link>
-              <Link
+              </TrackedLink>
+              <TrackedLink
                 href={`${url}/terms`}
+                event="terms_page_visited"
                 className="text-xs text-white/45 hover:text-white/70 transition-colors"
               >
                 Terms
-              </Link>
+              </TrackedLink>
             </div>
-            <button
-              onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-              className="text-xs text-brand-primary bg-none border border-brand-primary/20 rounded-full px-4 py-2 cursor-pointer font-medium hover:bg-brand-primary/10 transition-colors"
-            >
-              Back to top ↑
-            </button>
           </div>
         </div>
       </footer>
