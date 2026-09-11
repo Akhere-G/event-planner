@@ -186,10 +186,18 @@ def register_blueprints(app: Flask):
     )
 
 
-def register_frontend(app: Flask):
+def register_frontend(app):
     @app.route("/")
     @app.route("/<path:path>")
     def serve_frontend(path=""):
+        if path.startswith("api/"):
+            return api_response(
+                success=False,
+                message="Resource not found.",
+                error="Not found",
+                status_code=404,
+            )
+
         if path:
             file_path = os.path.join(app.static_folder, path)
 
