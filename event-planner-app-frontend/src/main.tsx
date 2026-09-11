@@ -40,7 +40,7 @@ if (!mapsAPIKey) {
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <PostHogProvider client={posthog}>
-      <BrowserRouter basename="/app">
+      <BrowserRouter>
         <Provider store={store}>
           <APIProvider apiKey={mapsAPIKey} libraries={["places"]}>
             <App />

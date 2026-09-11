@@ -50,7 +50,7 @@ export default function WishlistMarker({
 
       <Pin
         background={color}
-        glyphSrc="/app/wishlist_star.svg"
+        glyphSrc="/wishlist_star.svg"
         glyphColor={"var(--color-text-inverse)"}
         borderColor={"var(--color-surface-border)"}
         scale={selected ? 1.4 : 0.9}
