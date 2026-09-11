@@ -5,7 +5,6 @@ import tailwindcss from "@tailwindcss/vite";
 import { VitePWA } from "vite-plugin-pwa";
 
 export default defineConfig({
-  base: "/app/",
   plugins: [
     react(),
     babel({ presets: [reactCompilerPreset()] }),
@@ -27,7 +26,6 @@ export default defineConfig({
         theme_color: "#d75104",
         background_color: "#ffffff",
         display: "standalone",
-        scope: "/app/",
         icons: [
           {
             src: "android-chrome-192x192.png",
