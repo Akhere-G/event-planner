@@ -31,7 +31,6 @@ def create_app(testing=False):
         x_host=1,
     )
 
-
     configure_app(app, testing)
     initialise_extensions(app, testing)
     register_models()
@@ -188,9 +187,8 @@ def register_blueprints(app: Flask):
 
 
 def register_frontend(app: Flask):
-    @app.route("/app")
-    @app.route("/app/")
-    @app.route("/app/<path:path>")
+    @app.route("/")
+    @app.route("/<path:path>")
     def serve_frontend(path=""):
         if path:
             file_path = os.path.join(app.static_folder, path)
