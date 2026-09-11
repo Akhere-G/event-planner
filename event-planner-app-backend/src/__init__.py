@@ -21,8 +21,7 @@ load_dotenv()
 def create_app(testing=False):
     app = Flask(
         __name__,
-        static_folder="../static",
-        static_url_path="/",
+        static_folder=None,
     )
     app.wsgi_app = ProxyFix(
         app.wsgi_app,
@@ -186,31 +185,23 @@ def register_blueprints(app: Flask):
     )
 
 
-def register_frontend(app):
-    @app.route("/")
+def register_frontend(app: Flask):
+    static_folder = os.path.abspath(
+        os.path.join(os.path.dirname(__file__), "../static")
+    )
+
+    @app.route("/", defaults={"path": ""})
     @app.route("/<path:path>")
-    def serve_frontend(path=""):
+    def serve_react(path):
         if path.startswith("api/"):
-            return api_response(
-                success=False,
-                message="Resource not found.",
-                error="Not found",
-                status_code=404,
-            )
+            return {"error": "Not found"}, 404
 
-        if path:
-            file_path = os.path.join(app.static_folder, path)
+        file_path = os.path.join(static_folder, path)
 
-            if os.path.isfile(file_path):
-                return send_from_directory(
-                    app.static_folder,
-                    path,
-                )
+        if os.path.isfile(file_path):
+            return send_from_directory(static_folder, path)
 
-        return send_from_directory(
-            app.static_folder,
-            "index.html",
-        )
+        return send_from_directory(static_folder, "index.html")
 
 
 def register_error_handlers(app: Flask):
