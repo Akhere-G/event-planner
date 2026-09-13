@@ -46,7 +46,7 @@ class ItinerarySchema(BaseSchema):
     )
     timezone = auto_field(dump_only=True)
     created_at = auto_field(dump_only=True)
-
+    anonymous_access_code = auto_field(dump_only=True)
     events = fields.Nested(EventSchema, many=True, dump_only=True)
     user_memberships = fields.Nested(UserWithRoleSchema, many=True, dump_only=True)
     invites = fields.Nested(InviteSchemaPrivate, many=True, dump_only=True)

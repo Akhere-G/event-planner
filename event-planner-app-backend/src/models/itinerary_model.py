@@ -1,12 +1,13 @@
-from ..extensions import Base
-from sqlalchemy.orm import Mapped, mapped_column, relationship
-from sqlalchemy import Integer, String, Date, Float
-from typing import Optional
+import secrets
 from datetime import date
-from typing import List
+from typing import List, Optional
+
+from sqlalchemy import Boolean, Date, Float, Integer, String
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+
+from ..extensions import Base
 from .audit_mixins import AuditMixin
 from .event_model import Event
-import secrets
 
 
 class Itinerary(Base, AuditMixin):
@@ -23,6 +24,10 @@ class Itinerary(Base, AuditMixin):
     end_date: Mapped[date] = mapped_column(Date)
     viewer_code: Mapped[str] = mapped_column(
         String(255), default=lambda: secrets.token_urlsafe(32)
+    )
+    is_anonymous: Mapped[Boolean] = mapped_column(Boolean, default=False)
+    anonymous_access_code: Mapped[str | None] = mapped_column(
+        String(255), nullable=True
     )
     editor_code: Mapped[str] = mapped_column(
         String(255), default=lambda: secrets.token_urlsafe(32)
