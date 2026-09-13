@@ -36,7 +36,7 @@ def create_event(itinerary_id: int, data: dict):
         raise
 
 
-def create_events(itinerary_id: int, data: list[dict], created_by_id: int):
+def create_events(itinerary_id: int, data: list[dict], created_by_id: int | None):
     try:
         ids = []
         for d in data:
@@ -96,7 +96,7 @@ def update_event(itinerary_id: int, event_id: int, data: dict):
         raise
 
 
-def update_events(itinerary_id: int, data: list[dict], updated_by_id: int):
+def update_events(itinerary_id: int, data: list[dict], updated_by_id: int | None):
     updated_events: list[Event] = []
     try:
         for d in data:

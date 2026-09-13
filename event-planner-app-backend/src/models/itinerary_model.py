@@ -25,7 +25,7 @@ class Itinerary(Base, AuditMixin):
     viewer_code: Mapped[str] = mapped_column(
         String(255), default=lambda: secrets.token_urlsafe(32)
     )
-    is_anonymous: Mapped[Boolean] = mapped_column(Boolean, default=False)
+    is_anonymous: Mapped[bool] = mapped_column(Boolean, default=False)
     anonymous_access_code: Mapped[str | None] = mapped_column(
         String(255), nullable=True
     )

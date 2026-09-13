@@ -1,6 +1,9 @@
 from flask import Blueprint, request
 
-from ..middleware.login_required import login_required
+from ..middleware.itinerary_access_required import (
+    ItineraryAccess,
+    itinerary_access_required,
+)
 from ..schemas.accommodation_schema import AccommodationSchema
 from ..schemas.itinerary_schema import UserRole
 from ..services.accommodation_service import (
@@ -10,19 +13,16 @@ from ..services.accommodation_service import (
     get_accommodations,
     update_accommodation,
 )
-from ..services.itineraries_service import (
-    is_authorised,
-    is_user_in_itinerary,
-)
 from ..utils.format_response import api_response
 
 accommodation_bp = Blueprint("accommodation", __name__)
 
 
 @accommodation_bp.route("", methods=["GET"])
-@login_required
-def get_accommodations_route(user_id: int, itinerary_id: int):
-    is_user_in_itinerary(user_id, itinerary_id)
+@itinerary_access_required(
+    allowed_roles=[UserRole.ADMIN, UserRole.EDITOR, UserRole.VIEWER]
+)
+def get_accommodations_route(itinerary_id: int, access: ItineraryAccess):
     results = get_accommodations(itinerary_id)
     schema = AccommodationSchema(many=True)
     return api_response(
@@ -34,17 +34,15 @@ def get_accommodations_route(user_id: int, itinerary_id: int):
 
 
 @accommodation_bp.route("", methods=["POST"])
-@login_required
-def create_accommodation_route(user_id: int, itinerary_id: int):
+@itinerary_access_required(
+    allowed_roles=[UserRole.ADMIN, UserRole.EDITOR],
+    message="You must be an admin or an editor to add accommodations.",
+)
+def create_accommodation_route(itinerary_id: int, access: ItineraryAccess):
     schema = AccommodationSchema()
-    is_authorised(
-        user_id=user_id,
-        itinerary_id=itinerary_id,
-        authorised_roles=[UserRole.ADMIN, UserRole.EDITOR],
-        message="You must be an admin or an editor to add accommodations.",
-    )
+
     validated_data = schema.load(request.json)
-    accommodation = create_accommodation(user_id, itinerary_id, validated_data)
+    accommodation = create_accommodation(access.user_id, itinerary_id, validated_data)
     return api_response(
         success=True,
         data=schema.dump(accommodation),
@@ -54,9 +52,12 @@ def create_accommodation_route(user_id: int, itinerary_id: int):
 
 
 @accommodation_bp.route("/<int:accommodation_id>", methods=["GET"])
-@login_required
-def get_accommodation_route(user_id: int, itinerary_id: int, accommodation_id: int):
-    is_user_in_itinerary(user_id, itinerary_id)
+@itinerary_access_required(
+    allowed_roles=[UserRole.ADMIN, UserRole.EDITOR, UserRole.VIEWER],
+)
+def get_accommodation_route(
+    itinerary_id: int, access: ItineraryAccess, accommodation_id: int
+):
     accommodation = get_accommodation(itinerary_id, accommodation_id)
     if not accommodation:
         return api_response(
@@ -75,18 +76,17 @@ def get_accommodation_route(user_id: int, itinerary_id: int, accommodation_id: i
 
 
 @accommodation_bp.route("/<int:accommodation_id>", methods=["PATCH"])
-@login_required
-def update_accommodation_route(user_id: int, itinerary_id: int, accommodation_id: int):
+@itinerary_access_required(
+    allowed_roles=[UserRole.ADMIN, UserRole.EDITOR],
+    message="You must be an admin or an editor to update accommodations.",
+)
+def update_accommodation_route(
+    itinerary_id: int, access: ItineraryAccess, accommodation_id: int
+):
     schema = AccommodationSchema()
-    is_authorised(
-        user_id=user_id,
-        itinerary_id=itinerary_id,
-        authorised_roles=[UserRole.ADMIN, UserRole.EDITOR],
-        message="You must be an admin or an editor to update accommodations.",
-    )
     validated_data = schema.load(request.json, partial=True)
     accommodation = update_accommodation(
-        itinerary_id, accommodation_id, user_id, validated_data
+        itinerary_id, accommodation_id, access.user_id, validated_data
     )
     return api_response(
         success=True,
@@ -97,14 +97,14 @@ def update_accommodation_route(user_id: int, itinerary_id: int, accommodation_id
 
 
 @accommodation_bp.route("/<int:accommodation_id>", methods=["DELETE"])
-@login_required
-def delete_accommodation_route(user_id: int, itinerary_id: int, accommodation_id: int):
-    is_authorised(
-        user_id=user_id,
-        itinerary_id=itinerary_id,
-        authorised_roles=[UserRole.ADMIN, UserRole.EDITOR],
-        message="You must be an admin or an editor to delete accommodations.",
-    )
+@itinerary_access_required(
+    allowed_roles=[UserRole.ADMIN, UserRole.EDITOR],
+    message="You must be an admin or an editor to delete accommodations.",
+)
+def delete_accommodation_route(
+    itinerary_id: int, access: ItineraryAccess, accommodation_id: int
+):
+
     deleted_id = delete_accommodation(itinerary_id, accommodation_id)
     return api_response(
         success=True,

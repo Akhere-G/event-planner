@@ -25,7 +25,7 @@ def get_accommodation(itinerary_id: int, accommodation_id: int):
 
 
 def create_accommodation(
-    user_id: int,
+    user_id: int | None,
     itinerary_id: int,
     accommodation_data: dict,
 ):
@@ -67,7 +67,7 @@ def create_accommodation(
 def update_accommodation(
     itinerary_id: int,
     accommodation_id: int,
-    user_id: int,
+    user_id: int | None,
     accommodation_data: dict,
 ):
     accommodation = get_accommodation(

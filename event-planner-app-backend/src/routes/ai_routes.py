@@ -3,12 +3,14 @@ from datetime import datetime
 from flask import Blueprint, request
 
 from ..extensions import limiter
-from ..middleware.login_required import login_required
+from ..middleware.itinerary_access_required import (
+    ItineraryAccess,
+    itinerary_access_required,
+)
 from ..models import UserRole
 from ..schemas.event_schema import EventSchema
 from ..services.ai_services import get_event_suggestions, get_insights, optimise_events
 from ..services.events_service import create_events, update_events
-from ..services.itineraries_service import is_authorised
 from ..utils.format_response import api_response
 from ..utils.rate_limit import get_user_or_ip
 
@@ -16,22 +18,23 @@ ai_bp = Blueprint("ai", __name__)
 
 
 @ai_bp.route("/insights/<int:itinerary_id>")
-@login_required
+@itinerary_access_required(
+    allowed_roles=[UserRole.ADMIN, UserRole.EDITOR, UserRole.VIEWER]
+)
 @limiter.limit("10 per minute", key_func=get_user_or_ip)
 @limiter.limit("10 per minute")
-def get_insights_route(user_id: int, itinerary_id: int):
-    is_authorised(
-        user_id, itinerary_id, [UserRole.ADMIN, UserRole.EDITOR, UserRole.VIEWER]
-    )
+def get_insights_route(itinerary_id: int, access: ItineraryAccess):
     insights = get_insights(itinerary_id)
     return api_response(success=True, data=insights, message="Fetched insights")
 
 
 @ai_bp.route("/suggest-events/<int:itinerary_id>", methods=["POST"])
-@login_required
+@itinerary_access_required(
+    allowed_roles=[UserRole.ADMIN, UserRole.EDITOR, UserRole.VIEWER]
+)
 @limiter.limit("10 per minute", key_func=get_user_or_ip)
 @limiter.limit("10 per minute")
-def get_event_suggestions_route(user_id: int, itinerary_id: int):
+def get_event_suggestions_route(itinerary_id: int, access: ItineraryAccess):
     schema = EventSchema(many=True)
 
     date = request.json.get("date")
@@ -44,9 +47,7 @@ def get_event_suggestions_route(user_id: int, itinerary_id: int):
         return api_response(success=False, error="Date is required.", status_code=400)
     try:
         event_date = datetime.strptime(date, "%Y-%m-%d")
-        is_authorised(
-            user_id, itinerary_id, [UserRole.ADMIN, UserRole.EDITOR, UserRole.VIEWER]
-        )
+
         suggestions = get_event_suggestions(
             itinerary_id,
             event_date,
@@ -56,7 +57,7 @@ def get_event_suggestions_route(user_id: int, itinerary_id: int):
             interests=interests,
         )
         validated_suggestions = schema.load(suggestions)
-        create_events(itinerary_id, validated_suggestions, user_id)
+        create_events(itinerary_id, validated_suggestions, access.user_id)
         return api_response(
             success=True,
             data=schema.dump(validated_suggestions),
@@ -72,10 +73,12 @@ def get_event_suggestions_route(user_id: int, itinerary_id: int):
 
 
 @ai_bp.route("/optimise-events/<int:itinerary_id>", methods=["POST"])
-@login_required
+@itinerary_access_required(
+    allowed_roles=[UserRole.ADMIN, UserRole.EDITOR, UserRole.VIEWER]
+)
 @limiter.limit("10 per minute", key_func=get_user_or_ip)
 @limiter.limit("10 per minute")
-def optimise_events_route(user_id: int, itinerary_id: int):
+def optimise_events_route(itinerary_id: int, access: ItineraryAccess):
     date = request.json.get("date")
     schema = EventSchema(many=True)
 
@@ -83,11 +86,9 @@ def optimise_events_route(user_id: int, itinerary_id: int):
         return api_response(success=False, error="Date is required.", status_code=400)
     try:
         event_date = datetime.strptime(date, "%Y-%m-%d")
-        is_authorised(
-            user_id, itinerary_id, [UserRole.ADMIN, UserRole.EDITOR, UserRole.VIEWER]
-        )
+
         optimised_events = optimise_events(itinerary_id, event_date)
-        updated_events = update_events(itinerary_id, optimised_events, user_id)
+        updated_events = update_events(itinerary_id, optimised_events, access.user_id)
         validated_events = schema.dump(updated_events)
         return api_response(
             success=True,

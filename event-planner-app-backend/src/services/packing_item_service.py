@@ -5,7 +5,7 @@ from ..extensions import db
 from ..models import PackingItem
 
 
-def get_packing_lists(user_id: int, itinerary_id: int):
+def get_packing_lists(user_id: int | None, itinerary_id: int):
     stmt = select(PackingItem).where(
         and_(
             PackingItem.itinerary_id == itinerary_id,
@@ -15,14 +15,14 @@ def get_packing_lists(user_id: int, itinerary_id: int):
     return db.session.execute(stmt).scalars().all()
 
 
-def create_packing_item(user_id: int, itinerary_id: int, packing_item: dict):
+def create_packing_item(user_id: int | None, itinerary_id: int, packing_item: dict):
     try:
         new_packing_item = PackingItem(
             itinerary_id=itinerary_id,
             owner_id=user_id if not packing_item["is_shared"] else None,
             name=packing_item["name"],
             category=packing_item["category"],
-            is_shared=packing_item["is_shared"],
+            is_shared=packing_item["is_shared"] if user_id else True,
             created_by_id=user_id,
             updated_by_id=user_id,
         )
@@ -37,7 +37,7 @@ def create_packing_item(user_id: int, itinerary_id: int, packing_item: dict):
         raise
 
 
-def get_packing_item(user_id: int, itinerary_id: int, packing_item_id: int):
+def get_packing_item(user_id: int | None, itinerary_id: int, packing_item_id: int):
     stmt = select(PackingItem).where(
         and_(
             PackingItem.id == packing_item_id,
@@ -53,7 +53,10 @@ def get_packing_item(user_id: int, itinerary_id: int, packing_item_id: int):
 
 
 def update_packing_item(
-    user_id: int, itinerary_id: int, packing_item_id: int, packing_item_data: dict
+    user_id: int | None,
+    itinerary_id: int,
+    packing_item_id: int,
+    packing_item_data: dict,
 ):
     try:
         item = get_packing_item(user_id, itinerary_id, packing_item_id)
@@ -79,7 +82,7 @@ def update_packing_item(
         raise
 
 
-def delete_packing_item(user_id: int, itinerary_id: int, packing_item_id: int):
+def delete_packing_item(user_id: int | None, itinerary_id: int, packing_item_id: int):
     try:
         item = get_packing_item(user_id, itinerary_id, packing_item_id)
 
@@ -92,7 +95,7 @@ def delete_packing_item(user_id: int, itinerary_id: int, packing_item_id: int):
         raise
 
 
-def generate_and_add_packing_items(user_id: int, itinerary_id: int):
+def generate_and_add_packing_items(user_id: int | None, itinerary_id: int):
     from .ai_services import generate_packing_list
 
     try:

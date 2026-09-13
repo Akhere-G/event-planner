@@ -1,6 +1,9 @@
 from flask import Blueprint, request
 
-from ..middleware.login_required import login_required
+from ..middleware.itinerary_access_required import (
+    ItineraryAccess,
+    itinerary_access_required,
+)
 from ..schemas.event_schema import EventSchema
 from ..schemas.itinerary_schema import UserRole
 from ..services.events_service import (
@@ -9,17 +12,17 @@ from ..services.events_service import (
     get_events,
     update_event,
 )
-from ..services.itineraries_service import is_authorised, is_user_in_itinerary
 from ..utils.format_response import api_response
 
 event_bp = Blueprint("events", __name__)
 
 
 @event_bp.route("")
-@login_required
-def get_events_route(user_id: int, itinerary_id: int):
+@itinerary_access_required(
+    allowed_roles=[UserRole.ADMIN, UserRole.EDITOR, UserRole.VIEWER]
+)
+def get_events_route(itinerary_id: int, access: ItineraryAccess):
     schema = EventSchema(many=True)
-    is_user_in_itinerary(user_id, itinerary_id)
 
     events = get_events(itinerary_id)
     return api_response(
@@ -31,19 +34,16 @@ def get_events_route(user_id: int, itinerary_id: int):
 
 
 @event_bp.route("", methods=["POST"])
-@login_required
-def create_events_route(user_id: int, itinerary_id: int):
+@itinerary_access_required(
+    allowed_roles=[UserRole.ADMIN, UserRole.EDITOR],
+    message="You must be an admin or an editor to add events.",
+)
+def create_events_route(itinerary_id: int, access: ItineraryAccess):
     schema = EventSchema()
 
-    is_authorised(
-        user_id=user_id,
-        itinerary_id=itinerary_id,
-        authorised_roles=[UserRole.ADMIN, UserRole.EDITOR],
-        message="You must be an admin or an editor to add events.",
-    )
     validated_event = schema.load(request.json)
-    validated_event["created_by_id"] = user_id
-    validated_event["updated_by_id"] = user_id
+    validated_event["created_by_id"] = access.user_id
+    validated_event["updated_by_id"] = access.user_id
     new_event = create_event(itinerary_id, validated_event)
     return api_response(
         message="Created new event.",
@@ -54,18 +54,14 @@ def create_events_route(user_id: int, itinerary_id: int):
 
 
 @event_bp.route("/<int:event_id>", methods=["PATCH"])
-@login_required
-def update_event_route(user_id: int, itinerary_id: int, event_id: int):
+@itinerary_access_required(
+    allowed_roles=[UserRole.ADMIN, UserRole.EDITOR],
+    message="You must be an admin or an editor to update events.",
+)
+def update_event_route(itinerary_id: int, access: ItineraryAccess, event_id: int):
     schema = EventSchema(partial=True)
-
-    is_authorised(
-        user_id=user_id,
-        itinerary_id=itinerary_id,
-        authorised_roles=[UserRole.ADMIN, UserRole.EDITOR],
-        message="You must be an admin or an editor to update events.",
-    )
     validated_event = schema.load(request.json)
-    validated_event["updated_by_id"] = user_id
+    validated_event["updated_by_id"] = access.user_id
     updated_event = update_event(itinerary_id, event_id, validated_event)
     return api_response(
         message="Updated event.",
@@ -76,14 +72,11 @@ def update_event_route(user_id: int, itinerary_id: int, event_id: int):
 
 
 @event_bp.route("/<int:event_id>", methods=["DELETE"])
-@login_required
-def delete_event_route(user_id: int, itinerary_id: int, event_id: int):
-    is_authorised(
-        user_id=user_id,
-        itinerary_id=itinerary_id,
-        authorised_roles=[UserRole.ADMIN, UserRole.EDITOR],
-        message="You must be an admin or an editor to delete events.",
-    )
+@itinerary_access_required(
+    allowed_roles=[UserRole.ADMIN, UserRole.EDITOR],
+    message="You must be an admin or an editor to delete events.",
+)
+def delete_event_route(itinerary_id: int, access: ItineraryAccess, event_id: int):
 
     delete_event(itinerary_id, event_id)
     return api_response(

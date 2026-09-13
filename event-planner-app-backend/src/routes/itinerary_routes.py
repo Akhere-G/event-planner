@@ -1,7 +1,13 @@
 import datetime
 
-from flask import Blueprint, request
+from flask import Blueprint, request, session
 
+from src.models import UserRole
+
+from ..middleware.itinerary_access_required import (
+    ItineraryAccess,
+    itinerary_access_required,
+)
 from ..middleware.login_required import login_required
 from ..schemas.itinerary_schema import ItinerarySchema, ItineraryWithRoleSchema
 from ..services.itineraries_service import (
@@ -10,7 +16,6 @@ from ..services.itineraries_service import (
     get_itineraries,
     get_itinerary_count,
     get_itinerary_membership,
-    is_authorised,
     update_itinerary,
 )
 from ..services.timezone_service import get_timezone_for_coordinates
@@ -20,14 +25,23 @@ itinerary_bp = Blueprint("itinerary", __name__)
 
 
 @itinerary_bp.route("", methods=["GET"])
-@login_required
-def get_itineraries_route(user_id):
+def get_itineraries_route():
+    user_id = session.get("user_id")
+    anonymous_access_code = request.headers.get("X-Itinerary-Access-Code")
     schema = ItineraryWithRoleSchema(many=True)
     limit = request.args.get("limit", type=int)
     offset = request.args.get("offset", default=0, type=int)
 
-    count = get_itinerary_count(user_id)
-    result = get_itineraries(user_id, limit, offset)
+    if user_id is None:
+        count = 1
+    else:
+        count = get_itinerary_count(user_id)
+    result = get_itineraries(
+        user_id,
+        limit=limit,
+        offset=offset,
+        anonymous_access_code=anonymous_access_code,
+    )
     itineraries = schema.dump(result)
 
     has_more = False
@@ -43,10 +57,15 @@ def get_itineraries_route(user_id):
 
 
 @itinerary_bp.route("<int:itinerary_id>", methods=["GET"])
-@login_required
-def get_itinerary_route(user_id, itinerary_id):
+@itinerary_access_required(
+    allowed_roles=[UserRole.ADMIN, UserRole.EDITOR, UserRole.VIEWER]
+)
+def get_itinerary_route(itinerary_id: int, access: ItineraryAccess):
+    print("Here 1")
     schema = ItineraryWithRoleSchema()
-    result = get_itinerary_membership(user_id, itinerary_id)
+    result = get_itinerary_membership(
+        access.user_id, itinerary_id, access.anonymous_access_code
+    )
 
     return api_response(
         data=schema.dump(result),
@@ -57,8 +76,8 @@ def get_itinerary_route(user_id, itinerary_id):
 
 
 @itinerary_bp.route("", methods=["POST"])
-@login_required
-def create_itinerary_route(user_id):
+def create_itinerary_route():
+    user_id = session.get("user_id")
     schema = ItinerarySchema()
     validated_data = schema.load(request.json)
     validated_data["created_by_id"] = user_id
@@ -92,16 +111,14 @@ def create_itinerary_route(user_id):
 
 
 @itinerary_bp.route("<int:itinerary_id>", methods=["PATCH"])
-@login_required
-def update_itinerary_route(user_id, itinerary_id):
-    is_authorised(
-        user_id=user_id,
-        itinerary_id=itinerary_id,
-        message="You must be an admin to update this itinerary.",
-    )
+@itinerary_access_required(
+    allowed_roles=[UserRole.ADMIN],
+    message="You must be an admin to update this itinerary.",
+)
+def update_itinerary_route(itinerary_id: int, access: ItineraryAccess):
     schema = ItinerarySchema(partial=True)
     validated_data = schema.load(request.json)
-    validated_data["updated_by_id"] = user_id
+    validated_data["updated_by_id"] = access.user_id
     updated_itinerary = update_itinerary(itinerary_id, validated_data)
 
     return api_response(
@@ -113,14 +130,12 @@ def update_itinerary_route(user_id, itinerary_id):
 
 
 @itinerary_bp.route("/<int:itinerary_id>", methods=["DELETE"])
-@login_required
-def delete_itinerary_route(user_id, itinerary_id):
-    is_authorised(
-        user_id=user_id,
-        itinerary_id=itinerary_id,
-        message="You must be an admin to delete this itinerary.",
-    )
-    delete_itinerary(itinerary_id)
+@itinerary_access_required(
+    allowed_roles=[UserRole.ADMIN],
+    message="You must be an admin to delete this itinerary.",
+)
+def delete_itinerary_route(itinerary_id: int, access: ItineraryAccess):
+    delete_itinerary(access.itinerary_id)
     return api_response(
         success=True,
         message="Successfully deleted Itinerary.",
