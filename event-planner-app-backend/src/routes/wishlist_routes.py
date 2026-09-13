@@ -8,11 +8,15 @@ from ..exceptions import (
     ItineraryDoesNotExistError,
     UserNotAuthorisedError,
 )
+from ..middleware.itinerary_access_required import (
+    ItineraryAccess,
+    itinerary_access_required,
+)
 from ..middleware.login_required import login_required
 from ..schemas.event_schema import EventSchema
 from ..schemas.itinerary_schema import UserRole
 from ..schemas.wishlist_schema import WishlistItemSchema, WishlistSchema
-from ..services.itineraries_service import is_authorised, is_user_in_itinerary
+from ..services.itineraries_service import is_authorised
 from ..services.wishlist_service import (
     create_wishlist,
     create_wishlist_item,
@@ -31,10 +35,11 @@ wishlist_bp = Blueprint("wishlist", __name__)
 
 
 @wishlist_bp.route("", methods=["GET"])
-@login_required
-def get_wishlists_route(user_id: int, itinerary_id: int):
+@itinerary_access_required(
+    allowed_roles=[UserRole.ADMIN, UserRole.EDITOR, UserRole.VIEWER],
+)
+def get_wishlists_route(itinerary_id: int, access: ItineraryAccess):
     try:
-        is_user_in_itinerary(user_id, itinerary_id)
         results = get_wishlists(itinerary_id)
         schema = WishlistSchema(many=True)
         return api_response(
@@ -53,22 +58,19 @@ def get_wishlists_route(user_id: int, itinerary_id: int):
 
 
 @wishlist_bp.route("", methods=["POST"])
-@login_required
-def create_wishlist_route(user_id: int, itinerary_id: int):
+@itinerary_access_required(
+    allowed_roles=[UserRole.ADMIN, UserRole.EDITOR],
+    message="You must be an admin or an editor to add wishlists.",
+)
+def create_wishlist_route(itinerary_id: int, access: ItineraryAccess):
     try:
-        is_authorised(
-            user_id=user_id,
-            itinerary_id=itinerary_id,
-            authorised_roles=[UserRole.ADMIN, UserRole.EDITOR],
-            message="You must be an admin or an editor to add wishlists.",
-        )
         name = request.json.get("name")
         if not name or not name.strip():
             return api_response(
                 success=False, error="Wishlist name is required.", status_code=400
             )
 
-        category = create_wishlist(user_id, itinerary_id, name.strip())
+        category = create_wishlist(access.user_id, itinerary_id, name.strip())
         schema = WishlistSchema()
         return api_response(
             success=True,
@@ -86,15 +88,12 @@ def create_wishlist_route(user_id: int, itinerary_id: int):
 
 
 @wishlist_bp.route("/<int:wishlist_id>", methods=["DELETE"])
-@login_required
-def delete_wishlist_route(user_id: int, itinerary_id: int, wishlist_id: int):
+@itinerary_access_required(
+    allowed_roles=[UserRole.ADMIN, UserRole.EDITOR],
+    message="You must be an admin or an editor to delete wishlists.",
+)
+def delete_wishlist_route(itinerary_id: int, access: ItineraryAccess, wishlist_id: int):
     try:
-        is_authorised(
-            user_id=user_id,
-            itinerary_id=itinerary_id,
-            authorised_roles=[UserRole.ADMIN, UserRole.EDITOR],
-            message="You must be an admin or an editor to delete wishlists.",
-        )
         delete_wishlist(itinerary_id, wishlist_id)
         return api_response(
             success=True,
@@ -112,17 +111,11 @@ def delete_wishlist_route(user_id: int, itinerary_id: int, wishlist_id: int):
 
 
 @wishlist_bp.route("/<int:wishlist_id>", methods=["PATCH"])
-@login_required
-def update_wishlist_route(user_id: int, itinerary_id: int, wishlist_id: int):
-    is_authorised(
-        user_id=user_id,
-        itinerary_id=itinerary_id,
-        authorised_roles=[
-            UserRole.ADMIN,
-            UserRole.EDITOR,
-        ],
-        message="You must be an admin or an editor to edit wishlists.",
-    )
+@itinerary_access_required(
+    allowed_roles=[UserRole.ADMIN, UserRole.EDITOR],
+    message="You must be an admin or an editor to edit wishlists.",
+)
+def update_wishlist_route(itinerary_id: int, access: ItineraryAccess, wishlist_id: int):
     try:
         schema = WishlistSchema()
         name = request.json.get("name", "").strip()
@@ -134,7 +127,9 @@ def update_wishlist_route(user_id: int, itinerary_id: int, wishlist_id: int):
                 status_code=400,
             )
 
-        updated_wishlist = update_wishlist(itinerary_id, wishlist_id, user_id, name)
+        updated_wishlist = update_wishlist(
+            itinerary_id, wishlist_id, access.user_id, name
+        )
 
         return api_response(
             success=True, data=schema.dump(updated_wishlist), message="Updated category"
@@ -150,19 +145,18 @@ def update_wishlist_route(user_id: int, itinerary_id: int, wishlist_id: int):
 
 
 @wishlist_bp.route("/<int:wishlist_id>/items", methods=["POST"])
-@login_required
-def create_item_route(user_id: int, itinerary_id: int, wishlist_id: int):
+@itinerary_access_required(
+    allowed_roles=[UserRole.ADMIN, UserRole.EDITOR],
+    message="You must be an admin or an editor to add items.",
+)
+def create_item_route(itinerary_id: int, access: ItineraryAccess, wishlist_id: int):
     schema = WishlistItemSchema()
     try:
-        is_authorised(
-            user_id=user_id,
-            itinerary_id=itinerary_id,
-            authorised_roles=[UserRole.ADMIN, UserRole.EDITOR],
-            message="You must be an admin or an editor to add items.",
-        )
         validated_data = schema.load(request.json)
 
-        item = create_wishlist_item(itinerary_id, wishlist_id, validated_data, user_id)
+        item = create_wishlist_item(
+            itinerary_id, wishlist_id, validated_data, access.user_id
+        )
         return api_response(
             success=True,
             data=schema.dump(item),
@@ -183,15 +177,14 @@ def create_item_route(user_id: int, itinerary_id: int, wishlist_id: int):
 
 
 @wishlist_bp.route("/<int:wishlist_id>/items/<int:item_id>", methods=["DELETE"])
-@login_required
-def delete_item_route(user_id: int, itinerary_id: int, wishlist_id: int, item_id: int):
+@itinerary_access_required(
+    allowed_roles=[UserRole.ADMIN, UserRole.EDITOR],
+    message="You must be an admin or an editor to remove items.",
+)
+def delete_item_route(
+    itinerary_id: int, access: ItineraryAccess, wishlist_id: int, item_id: int
+):
     try:
-        is_authorised(
-            user_id=user_id,
-            itinerary_id=itinerary_id,
-            authorised_roles=[UserRole.ADMIN, UserRole.EDITOR],
-            message="You must be an admin or an editor to remove items.",
-        )
         if not itinerary_contains_wishlist_item(itinerary_id, item_id):
             return api_response(
                 success=False,
@@ -216,16 +209,15 @@ def delete_item_route(user_id: int, itinerary_id: int, wishlist_id: int, item_id
 
 
 @wishlist_bp.route("/<int:wishlist_id>/items/<int:item_id>", methods=["PATCH"])
-@login_required
-def update_item_route(user_id: int, itinerary_id: int, wishlist_id: int, item_id: int):
+@itinerary_access_required(
+    allowed_roles=[UserRole.ADMIN, UserRole.EDITOR],
+    message="You must be an admin or an editor to update items.",
+)
+def update_item_route(
+    itinerary_id: int, access: ItineraryAccess, wishlist_id: int, item_id: int
+):
     schema = WishlistItemSchema()
     try:
-        is_authorised(
-            user_id=user_id,
-            itinerary_id=itinerary_id,
-            authorised_roles=[UserRole.ADMIN, UserRole.EDITOR],
-            message="You must be an admin or an editor to update items.",
-        )
         if not itinerary_contains_wishlist_item(itinerary_id, item_id):
             return api_response(
                 success=False,
@@ -235,7 +227,7 @@ def update_item_route(user_id: int, itinerary_id: int, wishlist_id: int, item_id
             )
         validated_data = schema.load(request.json, partial=True)
         item = update_wishlist_item(
-            itinerary_id, wishlist_id, item_id, validated_data, user_id
+            itinerary_id, wishlist_id, item_id, validated_data, access.user_id
         )
         return api_response(
             success=True,
@@ -257,14 +249,14 @@ def update_item_route(user_id: int, itinerary_id: int, wishlist_id: int, item_id
 
 
 @wishlist_bp.route("/<int:wishlist_id>/items/<int:item_id>/promote", methods=["POST"])
-@login_required
-def promote_item_route(user_id: int, itinerary_id: int, wishlist_id: int, item_id: int):
-    is_authorised(
-        user_id=user_id,
-        itinerary_id=itinerary_id,
-        authorised_roles=[UserRole.ADMIN, UserRole.EDITOR],
-        message="You must be an admin or an editor to schedule items.",
-    )
+@itinerary_access_required(
+    allowed_roles=[UserRole.ADMIN, UserRole.EDITOR],
+    message="You must be an admin or an editor to schedule items.",
+)
+def promote_item_route(
+    itinerary_id: int, access: ItineraryAccess, wishlist_id: int, item_id: int
+):
+
     if not itinerary_contains_wishlist_item(itinerary_id, item_id):
         return api_response(
             success=False,
@@ -293,7 +285,9 @@ def promote_item_route(user_id: int, itinerary_id: int, wishlist_id: int, item_i
             status_code=400,
         )
 
-    event = promote_wishlist_item(itinerary_id, item_id, start_at, end_at, user_id)
+    event = promote_wishlist_item(
+        itinerary_id, item_id, start_at, end_at, access.user_id
+    )
     event_schema = EventSchema()
     return api_response(
         success=True,

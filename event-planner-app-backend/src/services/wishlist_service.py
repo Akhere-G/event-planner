@@ -24,7 +24,7 @@ def get_wishlists(itinerary_id: int):
     return db.session.execute(stmt).scalars().all()
 
 
-def create_wishlist(user_id: int, itinerary_id: int, name: str):
+def create_wishlist(user_id: int | None, itinerary_id: int, name: str):
     try:
         stmt = select(Wishlist).where(
             Wishlist.itinerary_id == itinerary_id,
@@ -56,7 +56,7 @@ def create_wishlist(user_id: int, itinerary_id: int, name: str):
 def update_wishlist(
     itinerary_id: int,
     wishlist_id: int,
-    user_id: int,
+    user_id: int | None,
     name: str,
 ):
     try:
@@ -117,7 +117,7 @@ def create_wishlist_item(
     itinerary_id: int,
     wishlist_id: int,
     item_data: dict,
-    user_id: int,
+    user_id: int | None,
 ):
     try:
         stmt = select(Wishlist).where(
@@ -195,7 +195,7 @@ def update_wishlist_item(
     wishlist_id: int,
     item_id: int,
     item_data: dict,
-    user_id: int,
+    user_id: int | None,
 ):
     try:
         stmt = (
@@ -245,7 +245,7 @@ def promote_wishlist_item(
     item_id: int,
     start_at: datetime,
     end_at: datetime,
-    user_id: int,
+    user_id: int | None,
 ):
     try:
         stmt = (
