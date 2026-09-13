@@ -178,8 +178,6 @@ def create_itinerary(user_id: int | None, data: dict):
         db.session.flush()
 
         if user_id is not None:
-            print("is not  anon")
-
             new_membership = ItineraryUser(
                 itinerary_id=new_itinerary.id,
                 user_id=user_id,
@@ -190,7 +188,6 @@ def create_itinerary(user_id: int | None, data: dict):
 
             db.session.add(new_membership)
         else:
-            print("is anon")
             new_itinerary.is_anonymous = True
             new_itinerary.anonymous_access_code = secrets.token_urlsafe(32)
         db.session.commit()

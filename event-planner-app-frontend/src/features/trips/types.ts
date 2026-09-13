@@ -20,4 +20,5 @@ export interface Trip {
   editorCode?: string;
   viewerCode?: string;
   createdAt: string;
+  anonymousAccessCode: string | null;
 }
