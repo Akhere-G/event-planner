@@ -61,7 +61,6 @@ def get_itineraries_route():
     allowed_roles=[UserRole.ADMIN, UserRole.EDITOR, UserRole.VIEWER]
 )
 def get_itinerary_route(itinerary_id: int, access: ItineraryAccess):
-    print("Here 1")
     schema = ItineraryWithRoleSchema()
     result = get_itinerary_membership(
         access.user_id, itinerary_id, access.anonymous_access_code

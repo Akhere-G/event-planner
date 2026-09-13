@@ -6,6 +6,7 @@ import { usePostHog } from "@posthog/react";
 import { differenceInDays } from "date-fns";
 import { isValidationError } from "../features/api/utils";
 import { toast } from "sonner";
+import { anonymousAccessCodeStorageKey } from "../features/api/apiSlice";
 
 export default function Addtrip() {
   const [addTrip, { isLoading }] = useAddTripMutation();
@@ -26,7 +27,18 @@ export default function Addtrip() {
           new Date(trip.startDate),
         ),
       });
-      navigate("/");
+      const tripId = newTrip.data.id;
+      const anonymousAccessCode = newTrip.data.anonymousAccessCode;
+      if (anonymousAccessCode) {
+        localStorage.setItem(
+          anonymousAccessCodeStorageKey,
+          JSON.stringify({
+            anonymousAccessCode,
+            tripId,
+          }),
+        );
+      }
+      navigate(`/trips/${tripId}`);
     } catch (err) {
       if (isValidationError(err)) {
         posthog?.captureException(err, {

@@ -55,13 +55,13 @@ function App() {
 
   const isAuth = isAuthenticated || !!data?.data?.id;
 
-  const links = [{ title: "About", url: "/about" }];
+  const links = [
+    { title: "Trips", url: "/" },
+    { title: "Add Trip", url: "/addtrip" },
+    { title: "About", url: "/about" },
+  ];
   if (isAuth) {
-    links.unshift(
-      { title: "Trips", url: "/" },
-      { title: "Add Trip", url: "/addtrip" },
-      { title: "Invites", url: "/invites" },
-    );
+    links.unshift({ title: "Invites", url: "/invites" });
   } else {
     links.unshift(
       { title: "Login", url: "/login" },
@@ -112,7 +112,7 @@ function App() {
             <Route
               path="/"
               element={
-                <RequireAuth isAuth={isAuth} isLoading={isLoading}>
+                <RequireAuth isAuth={true} isLoading={isLoading}>
                   <Trips />
                 </RequireAuth>
               }
@@ -120,7 +120,7 @@ function App() {
             <Route
               path="/addtrip"
               element={
-                <RequireAuth isAuth={isAuth} isLoading={isLoading}>
+                <RequireAuth isAuth={true} isLoading={isLoading}>
                   <AddTrip />
                 </RequireAuth>
               }
@@ -128,7 +128,7 @@ function App() {
             <Route
               path="/trips/:tripId"
               element={
-                <RequireAuth isAuth={isAuth} isLoading={isLoading}>
+                <RequireAuth isAuth={true} isLoading={isLoading}>
                   <TripPage />
                 </RequireAuth>
               }

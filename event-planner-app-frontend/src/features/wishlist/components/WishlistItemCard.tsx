@@ -52,7 +52,7 @@ interface WishlistItemViewProps {
 }
 
 // TODO: Put schedule button on the bottom right corner
-
+// TODO should scheduled as an icon when a wishlist item is scheduled or delete the item
 function WishlistItemView({
   item,
   editable,

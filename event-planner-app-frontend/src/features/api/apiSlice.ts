@@ -8,7 +8,21 @@ import {
 import { toast } from "sonner";
 const baseUrl = import.meta.env.VITE_API_URL || "/api";
 console.log(import.meta.env.VITE_API_URL);
-const baseQuery = fetchBaseQuery({ baseUrl, credentials: "include" });
+const baseQuery = fetchBaseQuery({
+  baseUrl,
+  credentials: "include",
+  prepareHeaders: (headers) => {
+    const anonymousTrip = localStorage.getItem(anonymousAccessCodeStorageKey);
+
+    if (anonymousTrip) {
+      const { anonymousAccessCode } = JSON.parse(anonymousTrip);
+
+      headers.set("X-Itinerary-Access-Code", anonymousAccessCode);
+    }
+  },
+});
+
+export const anonymousAccessCodeStorageKey = "anonymousAccessCode";
 
 const baseQueryWithErrorHandling: BaseQueryFn<
   string | FetchArgs,
