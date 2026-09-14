@@ -460,10 +460,10 @@ export default function HomePage() {
           <p className="text-base text-slate-500 leading-[1.7]">
             Contact us at{" "}
             <a
-              href="mailto:akhereaihoeghinlan@gmail.com"
+              href="mailto:101akhere5@gmail.com"
               className="text-brand-primary font-semibold border-b-2 border-brand-primary hover:border-brand-primary/70 transition-colors"
             >
-              akhereaihoeghinlan@gmail.com
+              101akhere5@gmail.com
             </a>{" "}
             if you have any questions, queries or requests.
           </p>

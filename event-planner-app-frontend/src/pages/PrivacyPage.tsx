@@ -30,10 +30,10 @@ export default function PrivacyPage() {
         <p>
           <strong>Email:</strong>{" "}
           <a
-            href="mailto:akhereaihoeghinlan@gmail.com"
+            href="mailto:101akhere5@gmail.com"
             className="text-brand-primary underline"
           >
-            akhereaihoeghinlan@gmail.com
+            101akhere5@gmail.com
           </a>
         </p>
 
@@ -471,10 +471,10 @@ export default function PrivacyPage() {
 
         <p>
           <a
-            href="mailto:akhereaihoeghinlan@gmail.com"
+            href="mailto:101akhere5@gmail.com"
             className="text-brand-primary underline"
           >
-            akhereaihoeghinlan@gmail.com
+            101akhere5@gmail.com
           </a>
         </p>
 
@@ -532,10 +532,10 @@ export default function PrivacyPage() {
         <p>
           <strong>Email:</strong>{" "}
           <a
-            href="mailto:akhereaihoeghinlan@gmail.com"
+            href="mailto:101akhere5@gmail.com"
             className="text-brand-primary underline"
           >
-            akhereaihoeghinlan@gmail.com
+            101akhere5@gmail.com
           </a>
         </p>
 
