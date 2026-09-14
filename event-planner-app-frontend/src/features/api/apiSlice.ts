@@ -43,19 +43,20 @@ const baseQueryWithErrorHandling: BaseQueryFn<
   return result;
 };
 
+export const tagTypes = [
+  "Trips",
+  "Events",
+  "Invites",
+  "Users",
+  "Wishlists",
+  "Accommodations",
+  "PackingItem",
+  "Notifications",
+];
 export const apiSlice = createApi({
   reducerPath: "api",
   baseQuery: baseQueryWithErrorHandling,
-  tagTypes: [
-    "Trips",
-    "Events",
-    "Invites",
-    "Users",
-    "Wishlists",
-    "Accommodations",
-    "PackingItem",
-    "Notifications",
-  ],
+  tagTypes,
 
   endpoints: () => ({}),
 });

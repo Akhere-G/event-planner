@@ -1,5 +1,5 @@
 import type { LoginSchema, RegisterSchema } from "../schemas/authSchema";
-import { apiSlice } from "../../api/apiSlice";
+import { apiSlice, tagTypes } from "../../api/apiSlice";
 import type { User } from "../../users/types";
 
 export interface AuthResponse {
@@ -28,6 +28,7 @@ export const authApi = apiSlice.injectEndpoints({
         url: "/auth/logout",
         method: "POST",
       }),
+      invalidatesTags: tagTypes,
     }),
     checkUser: builder.query<AuthResponse, void>({
       query: () => ({ url: "/auth/check" }),
