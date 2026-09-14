@@ -74,24 +74,6 @@ export default function FitToDay() {
   const showWishlistButtons = wishlistButtons.length > 0 && showWishlist;
 
   if (daysWithEvents.length === 0 && wishlists.length === 0) return;
-  if (daysWithEvents.length === 1) {
-    return (
-      <div className="bg-surface rounded-xl hover:brightness-110 shadow-md p-4 w-44">
-        <button
-          className="btn bg-brand-secondary text-text-inverse border-surface-border border py-2 px-4 text-sm w-35"
-          onClick={() => fitToDay(daysWithEvents[0].date)}
-        >
-          Fit to day {daysWithEvents[0].day}
-        </button>
-        {showWishlistButtons && (
-          <div>
-            <h2 className="mt-4 mb-2">Wishlists</h2>
-            {wishlistButtons}
-          </div>
-        )}
-      </div>
-    );
-  }
 
   return (
     <div className="rounded-xl shadow-md max-h-[45vh] overflow-y-scroll">
