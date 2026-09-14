@@ -22,7 +22,7 @@ def test_get_events_unauthenticated_unauthorised(client, itinerary):
 
 def test_get_events_non_member_unauthorised(non_member_client, itinerary):
     response = non_member_client.get(f"/api/itineraries/{itinerary.id}/events")
-    assert response.status_code == 404
+    assert response.status_code == 401
 
 
 def test_create_event_admin_success(admin_client, itinerary):
@@ -145,7 +145,7 @@ def test_create_event_non_member_unauthorised(non_member_client, itinerary):
             "category": "food",
         },
     )
-    assert response.status_code == 404
+    assert response.status_code == 401
 
 
 def test_update_event_admin_success(admin_client, itinerary, event):
@@ -201,7 +201,7 @@ def test_update_event_non_member_unauthorised(non_member_client, itinerary, even
         f"/api/itineraries/{itinerary.id}/events/{event.id}",
         json={"name": "Updated Event"},
     )
-    assert response.status_code == 404
+    assert response.status_code == 401
 
 
 def test_delete_event_admin_success(admin_client, itinerary, event):
@@ -246,4 +246,4 @@ def test_delete_event_non_member_forbidden(non_member_client, itinerary, event):
     response = non_member_client.delete(
         f"/api/itineraries/{itinerary.id}/events/{event.id}"
     )
-    assert response.status_code == 404
+    assert response.status_code == 401

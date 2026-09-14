@@ -43,7 +43,9 @@ def test_get_itineraries_with_pagination(admin_client, admin_user, itinerary):
 
 def test_get_itineraries_unauthenticated_unauthorised(client):
     response = client.get("/api/itineraries")
-    assert response.status_code == 401
+    data = response.get_json()
+    assert response.status_code == 200
+    assert data["data"]["itineraries"] == []
 
 
 def test_get_itinerary_success(admin_client, itinerary):
@@ -68,7 +70,7 @@ def test_get_itinerary_unauthenticated_unauthorised(client, itinerary):
 
 def test_get_itinerary_not_member(non_member_client, itinerary):
     response = non_member_client.get(f"/api/itineraries/{itinerary.id}")
-    assert response.status_code == 404
+    assert response.status_code == 401
 
 
 def test_create_itinerary_success(auth_client, admin_user):
@@ -126,7 +128,11 @@ def test_create_itinerary_unauthenticated_unauthorised(client):
             "end_date": "2026-09-05",
         },
     )
-    assert response.status_code == 401
+    data = response.get_json()
+    itinerary = data["data"]
+    assert response.status_code == 201
+    assert itinerary.get("isAnonymous")
+    assert itinerary.get("anonymousAccessCode") is not None
 
 
 def test_update_itinerary_admin_success(admin_client, itinerary):
@@ -193,7 +199,7 @@ def test_update_itinerary_not_member(non_member_client, itinerary):
         f"/api/itineraries/{itinerary.id}",
         json={"name": "Updated Trip"},
     )
-    assert response.status_code == 404
+    assert response.status_code == 401
 
     db_itinerary = db.session.execute(
         select(Itinerary).where(Itinerary.id == itinerary.id)
@@ -245,7 +251,7 @@ def test_delete_itinerary_unauthenticated_unauthorised(client, itinerary):
 
 def test_delete_itinerary_not_member(non_member_client, itinerary):
     response = non_member_client.delete(f"/api/itineraries/{itinerary.id}")
-    assert response.status_code == 404
+    assert response.status_code == 401
 
     db_itinerary = db.session.execute(
         select(Itinerary).where(Itinerary.id == itinerary.id)

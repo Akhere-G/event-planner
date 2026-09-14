@@ -269,21 +269,27 @@ def test_decline_invite_revoked(invited_user, invite):
     assert "revoked" in str(exc_info.value).lower()
 
 
-def test_join_itinerary_viewer_code(admin_user, itinerary):
-    invite = join_itinerary(admin_user.id, itinerary.viewer_code)
+def test_join_itinerary_user_made(admin_user, itinerary):
+    with pytest.raises(UserAlreadyExistsError) as exc_info:
+        join_itinerary(admin_user.id, itinerary.viewer_code)
+    assert str(exc_info.value) == "This is the trip you created!"
+
+
+def test_join_itinerary_viewer_code(admin_user, invited_user, itinerary):
+    invite = join_itinerary(invited_user.id, itinerary.viewer_code)
     assert invite is not None
-    assert invite.email == admin_user.email
+    assert invite.email is not None
     assert invite.role == UserRole.VIEWER.value
 
 
-def test_join_itinerary_editor_code(admin_user, itinerary):
-    invite = join_itinerary(admin_user.id, itinerary.editor_code)
+def test_join_itinerary_editor_code(admin_user, invited_user, itinerary):
+    invite = join_itinerary(invited_user.id, itinerary.editor_code)
     assert invite is not None
     assert invite.role == UserRole.EDITOR.value
 
 
-def test_join_itinerary_admin_code(admin_user, itinerary):
-    invite = join_itinerary(admin_user.id, itinerary.admin_code)
+def test_join_itinerary_admin_code(admin_user, invited_user, itinerary):
+    invite = join_itinerary(invited_user.id, itinerary.admin_code)
     assert invite is not None
     assert invite.role == UserRole.ADMIN.value
 

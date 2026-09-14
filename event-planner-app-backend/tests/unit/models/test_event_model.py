@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 
 from sqlalchemy import select
 from src.extensions import db
@@ -12,8 +12,8 @@ def test_event_creation(event):
     assert event.latitude == 40.7128
     assert event.longitude == -74.0060
     assert event.description == "Sample event"
-    assert event.start_at == datetime(2026, 8, 20, 10, 0)
-    assert event.end_at == datetime(2026, 8, 20, 12, 0)
+    assert event.start_at == datetime(2026, 8, 20, 10, 0, tzinfo=timezone.utc)
+    assert event.end_at == datetime(2026, 8, 20, 12, 0, tzinfo=timezone.utc)
     assert event.category == "food"
 
 
