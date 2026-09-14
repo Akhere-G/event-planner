@@ -13,8 +13,8 @@ def schema():
 
 def test_camel_case_keys_are_converted_to_snake_case(schema):
     data = {
-        "firstName": "Akhere",
-        "lastName": "Ihoeghinlan",
+        "firstName": "Anthony",
+        "lastName": "Smith",
         "startDate": "2026-08-22",
         "createdAt": "2026-08-22T12:00:00",
     }
@@ -26,8 +26,8 @@ def test_camel_case_keys_are_converted_to_snake_case(schema):
     )
 
     assert result == {
-        "first_name": "Akhere",
-        "last_name": "Ihoeghinlan",
+        "first_name": "Anthony",
+        "last_name": "Smith",
         "start_date": "2026-08-22",
         "created_at": "2026-08-22T12:00:00",
     }
@@ -35,7 +35,7 @@ def test_camel_case_keys_are_converted_to_snake_case(schema):
 
 def test_snake_case_keys_are_unchanged(schema):
     data = {
-        "first_name": "Akhere",
+        "first_name": "Anthony",
         "start_date": "2026-08-22",
     }
 
@@ -50,8 +50,8 @@ def test_snake_case_keys_are_unchanged(schema):
 
 def test_mixed_case_keys_are_converted(schema):
     data = {
-        "firstName": "Akhere",
-        "last_name": "Ihoeghinlan",
+        "firstName": "Anthony",
+        "last_name": "Smith",
         "startDate": "2026-08-22",
     }
 
@@ -62,8 +62,8 @@ def test_mixed_case_keys_are_converted(schema):
     )
 
     assert result == {
-        "first_name": "Akhere",
-        "last_name": "Ihoeghinlan",
+        "first_name": "Anthony",
+        "last_name": "Smith",
         "start_date": "2026-08-22",
     }
 

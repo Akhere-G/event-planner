@@ -136,10 +136,8 @@ export default function AboutPage() {
       </h2>
       <p>
         Contact us at{" "}
-        <a href="mailto:akhereaihoeghinlan@gmail.com">
-          akhereaihoeghinlan@gmail.com
-        </a>{" "}
-        if you have any questions, queries or requests.
+        <a href="mailto:101akhere5@gmail.com">101akhere5@gmail.com</a> if you
+        have any questions, queries or requests.
       </p>
     </div>
   );
