@@ -15,6 +15,7 @@ export const authApi = apiSlice.injectEndpoints({
         method: "POST",
         body: userData,
       }),
+      invalidatesTags: tagTypes,
     }),
     loginUser: builder.mutation<AuthResponse, LoginSchema>({
       query: (credentials) => ({
@@ -22,6 +23,7 @@ export const authApi = apiSlice.injectEndpoints({
         method: "POST",
         body: credentials,
       }),
+      invalidatesTags: tagTypes,
     }),
     logoutUser: builder.mutation<void, void>({
       query: () => ({
