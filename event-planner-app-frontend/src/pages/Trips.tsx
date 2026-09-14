@@ -37,10 +37,24 @@ export default function Trips() {
         emptyStateProps={{
           isEmpty: !data || data?.data.itineraries.length === 0,
           message: "No trips.",
-          action: {
-            text: "Create new trip?",
-            onClick: () => navigate("/addtrip"),
-          },
+          height: 250,
+          actions: [
+            {
+              text: "Create new trip?",
+              onClick: () => navigate("/addtrip"),
+              className: "btn-primary text-text-inverse px-4 py-2",
+            },
+            {
+              text: "Login?",
+              onClick: () => navigate("/login"),
+              className: "btn-secondary px-4 py-2",
+            },
+            {
+              text: "Make a new account?",
+              onClick: () => navigate("/register"),
+              className: "btn-secondary px-4 py-2",
+            },
+          ],
         }}
       >
         <TripList

@@ -9,7 +9,15 @@ const Footer = ({ isAuthenticated }: { isAuthenticated: boolean }) => {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-12">
           <div className="col-span-2 md:col-span-1">
             <h2 className="text-2xl font-black text-brand tracking-tight">
-              Trip<span className="text-brand-primary">Track</span>
+              <Link
+                to="/"
+                onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+                className="font-bold"
+              >
+                <span className="text-text-primary">Trip</span>
+
+                <span className="text-brand-primary">Track</span>
+              </Link>
             </h2>
             <p className="text-text-secondary text-sm leading-relaxed">
               Plan your trips and collaborate with friends

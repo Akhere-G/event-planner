@@ -58,7 +58,7 @@ export default function AccommodationPage({
       emptyStateProps={{
         isEmpty: accommodations.length === 0 && !showForm,
         message: "No accommodations added yet",
-        action: { text: "Add accom?", onClick: () => setShowAddForm(true) },
+        actions: [{ text: "Add accom?", onClick: () => setShowAddForm(true) }],
       }}
     >
       <div className="space-y-4">
