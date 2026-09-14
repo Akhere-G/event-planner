@@ -104,6 +104,8 @@ def generate_and_add_packing_items(user_id: int | None, itinerary_id: int):
             name = item.get("name")
             category = item.get("category", "General")
             is_shared = bool(item.get("is_shared", False))
+            if not item.get("owner_id"):
+                is_shared = True
             if not name:
                 continue
             new_item = PackingItem(

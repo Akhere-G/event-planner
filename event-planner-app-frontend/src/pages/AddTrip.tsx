@@ -8,12 +8,24 @@ import { isValidationError } from "../features/api/utils";
 import { toast } from "sonner";
 import { anonymousAccessCodeStorageKey } from "../features/api/apiSlice";
 
+import useLoadAnonTrip from "../features/trips/hooks/useLoadAnonTrip";
+import { Alert, AlertDescription, AlertTitle } from "../components/ui/alert";
+import { InfoIcon } from "lucide-react";
+
 export default function Addtrip() {
   const [addTrip, { isLoading }] = useAddTripMutation();
   const navigate = useNavigate();
   const posthog = usePostHog();
 
+  const { anonTrip } = useLoadAnonTrip();
+
   async function onSubmit(trip: TripSchema) {
+    if (anonTrip) {
+      toast.warning(
+        "You already created one trip. Create an account to save your trip and create more trips.",
+      );
+      return;
+    }
     try {
       const newTrip = await addTrip(trip).unwrap();
       posthog?.capture("trip_created", {
@@ -58,10 +70,22 @@ export default function Addtrip() {
     <div className="container">
       <div className="card">
         <h2 className="title mb-4">Add Trip</h2>
+        {anonTrip && (
+          <Alert variant="destructive" className="mb-2">
+            <InfoIcon />
+            <AlertTitle className="inline">
+              Log in to create multiple trips
+            </AlertTitle>
+            <AlertDescription>
+              You already created one trip. Create an account to save your trip
+              and create more trips.
+            </AlertDescription>
+          </Alert>
+        )}
         <TripForm
           submitAction={onSubmit}
           submitBtnText="Add Trip"
-          isLoading={isLoading}
+          isLoading={isLoading || !!anonTrip}
         />
       </div>
     </div>

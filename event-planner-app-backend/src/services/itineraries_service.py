@@ -1,9 +1,10 @@
 import secrets
 
-from sqlalchemy import func, or_, select
-from sqlalchemy.orm import contains_eager, selectinload
+from sqlalchemy import func, select
+from sqlalchemy.orm import selectinload
 
 from ..exceptions import (
+    BadRequestError,
     ItineraryDoesNotExistError,
     UserDoesNotExistError,
     UserNotAuthorisedError,
@@ -143,6 +144,7 @@ def get_itineraries(
     ]
 
     result = []
+    seen = set()
 
     if user_id:
         stmt = (
@@ -157,6 +159,7 @@ def get_itineraries(
 
         for itinerary, role in db.session.execute(stmt).all():
             result.append({"itinerary": itinerary, "role": role})
+            seen.add(itinerary.id)
 
     if anonymous_access_code:
         stmt = (
@@ -166,7 +169,8 @@ def get_itineraries(
         )
 
         for itinerary in db.session.execute(stmt).scalars():
-            result.append({"itinerary": itinerary, "role": UserRole.ADMIN.value})
+            if itinerary.id not in seen:
+                result.append({"itinerary": itinerary, "role": UserRole.ADMIN.value})
 
     return result
 
@@ -247,6 +251,31 @@ def delete_itinerary(itinerary_id: int):
 
         db.session.delete(itinerary)
         db.session.commit()
+    except Exception:
+        db.session.rollback()
+        raise
+
+
+def save_anon_itinerary(itinerary_id: int, user_id: int):
+    try:
+        itinerary = get_itinerary(itinerary_id)
+        if not itinerary.is_anonymous:
+            raise BadRequestError("Already saved this trip!")
+        itinerary.is_anonymous = False
+        itinerary.anonymous_access_code = None
+        itinerary.created_by_id = user_id
+        itinerary.updated_by_id = user_id
+        new_membership = ItineraryUser(
+            itinerary_id=itinerary_id,
+            user_id=user_id,
+            role=UserRole.ADMIN.value,
+            created_by_id=user_id,
+            updated_by_id=user_id,
+        )
+
+        db.session.add(new_membership)
+        db.session.commit()
+        return itinerary
     except Exception:
         db.session.rollback()
         raise

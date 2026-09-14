@@ -4,6 +4,7 @@ from flask import Blueprint, request, session
 
 from src.models import UserRole
 
+from ..extensions import limiter
 from ..middleware.itinerary_access_required import (
     ItineraryAccess,
     itinerary_access_required,
@@ -16,10 +17,12 @@ from ..services.itineraries_service import (
     get_itineraries,
     get_itinerary_count,
     get_itinerary_membership,
+    save_anon_itinerary,
     update_itinerary,
 )
 from ..services.timezone_service import get_timezone_for_coordinates
 from ..utils.format_response import api_response
+from ..utils.rate_limit import get_user_or_ip
 
 itinerary_bp = Blueprint("itinerary", __name__)
 
@@ -75,6 +78,8 @@ def get_itinerary_route(itinerary_id: int, access: ItineraryAccess):
 
 
 @itinerary_bp.route("", methods=["POST"])
+@limiter.limit("20 per minute", key_func=get_user_or_ip)
+@limiter.limit("20 per minute")
 def create_itinerary_route():
     user_id = session.get("user_id")
     schema = ItinerarySchema()
@@ -140,4 +145,17 @@ def delete_itinerary_route(itinerary_id: int, access: ItineraryAccess):
         message="Successfully deleted Itinerary.",
         data={"deleted_id": itinerary_id},
         status_code=200,
+    )
+
+
+@itinerary_bp.route("/<int:itinerary_id>/save", methods=["POST"])
+@login_required
+def save_anon_itinerary_route(itinerary_id: int, user_id: int):
+    schema = ItinerarySchema()
+    itinerary = save_anon_itinerary(itinerary_id, user_id)
+    return api_response(
+        success=True,
+        message="Saved itinerary",
+        data=schema.dump(itinerary),
+        status_code=201,
     )

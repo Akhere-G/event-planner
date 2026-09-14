@@ -1,4 +1,4 @@
-import { Navigate, Route, Routes } from "react-router";
+import { Navigate, Route, Routes, useNavigate } from "react-router";
 import { lazy, Suspense, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import "react-tooltip/dist/react-tooltip.css";
@@ -31,13 +31,17 @@ const TermsPage = lazy(() => import("./pages/TermsPage"));
 
 import NotificationsPrompt from "./features/notifications/components/NotificationsPrompt";
 import { usePostHog } from "@posthog/react";
+import useLoadAnonTrip from "./features/trips/hooks/useLoadAnonTrip";
+import { useSaveTripMutation } from "./features/trips/services/tripsApiSlice";
 
 function App() {
   const isAuthenticated = useSelector(selectIsAuthenticated);
   const { isLoading, data } = useCheckUserQuery();
   const dispatch = useDispatch();
-
+  const { anonTrip, clearAnonTrip } = useLoadAnonTrip();
   const posthog = usePostHog();
+  const [saveTrip] = useSaveTripMutation();
+  const navigate = useNavigate();
 
   useEffect(() => {
     dispatch(syncDOM());
@@ -55,11 +59,33 @@ function App() {
 
   const isAuth = isAuthenticated || !!data?.data?.id;
 
+  useEffect(() => {
+    async function saveTripOnLogin() {
+      if (!anonTrip || !isAuth) {
+        return;
+      }
+      try {
+        await saveTrip(anonTrip.tripId).unwrap();
+        clearAnonTrip();
+        posthog?.capture("trip_saved", { trip_id: anonTrip.tripId });
+
+        navigate(`/trips/${anonTrip.tripId}`);
+      } catch (err) {
+        posthog?.captureException(err, {
+          feature: "trip_saved",
+          action: "trip_saved",
+        });
+      }
+    }
+    saveTripOnLogin();
+  }, [anonTrip, isAuth, saveTrip, navigate, posthog, clearAnonTrip]);
+
   const links = [
     { title: "Trips", url: "/" },
     { title: "Add Trip", url: "/addtrip" },
     { title: "About", url: "/about" },
   ];
+
   if (isAuth) {
     links.unshift({ title: "Invites", url: "/invites" });
   } else {

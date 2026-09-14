@@ -75,17 +75,19 @@ export default function Header({ links }: HeaderProps) {
                 <span>{darkMode ? "Light Mode" : "Dark Mode"}</span>
                 {darkMode ? <Sun size={16} /> : <Moon size={16} />}
               </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={async () => {
-                  await logout();
-                  posthog?.reset();
-                  dispatch(logOut());
-                  window.location.reload();
-                }}
-                className="text-error"
-              >
-                Logout
-              </DropdownMenuItem>
+              {isAuthenticated && (
+                <DropdownMenuItem
+                  onClick={async () => {
+                    await logout();
+                    posthog?.reset();
+                    dispatch(logOut());
+                    window.location.reload();
+                  }}
+                  className="text-error"
+                >
+                  Logout
+                </DropdownMenuItem>
+              )}
             </DropdownMenuContent>
           </DropdownMenu>
         </div>

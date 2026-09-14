@@ -38,6 +38,7 @@ import AddItemForm from "./AddItemForm";
 import { CITY_RADIUS } from "../../maps/constants";
 import { useGetTripQuery } from "../../trips/services/tripsApiSlice";
 import { usePostHog } from "@posthog/react";
+import useLoadAnonTrip from "../../trips/hooks/useLoadAnonTrip";
 
 interface WishlistItemViewProps {
   item: WishlistItem;
@@ -226,7 +227,13 @@ export default function WishlistItemCard({
   const [voteForItem, { isLoading: isVoteLoading }] =
     useVoteForWishlistItemMutation();
   const userId = useSelector((state: RootState) => state.auth.userId);
+  const { anonTrip } = useLoadAnonTrip();
+
   const handleVote = async (vote: number) => {
+    if (anonTrip) {
+      toast.warning("You must be registered to vote on wishlist items.");
+      return;
+    }
     try {
       await voteForItem({
         tripId,

@@ -29,8 +29,10 @@ import DeleteTripModal from "../../modal/components/DeleteTripModal";
 import EditTripModal from "../../modal/components/EditTripModal";
 import ViewUsersModal from "../../modal/components/ViewUsersModal";
 import { usePostHog } from "@posthog/react";
+import useLoadAnonTrip from "../hooks/useLoadAnonTrip";
+import RegisterModal from "../../modal/components/RegisterModal";
 
-type ModalType = "edit" | "delete" | "users" | null;
+type ModalType = "edit" | "delete" | "users" | "register" | null;
 
 interface TripSummaryProps {
   trip: Trip;
@@ -50,8 +52,9 @@ export default function TripSummary({
 
   const posthog = usePostHog();
 
+  const { anonTrip } = useLoadAnonTrip();
   function openUsersView() {
-    setModalType("users");
+    setModalType(anonTrip ? "register" : "users");
   }
 
   const handleEdit = () => {
@@ -122,14 +125,16 @@ export default function TripSummary({
                 </DropdownMenuItem>
               </>
             )}
-            <DropdownMenuItem
-              disabled={isRemoveLoading}
-              onClick={() => setIsModalOpen(true)}
-              className="flex gap-2 items-center text-error"
-            >
-              <SquareArrowRightExit size={16} />
-              Leave
-            </DropdownMenuItem>
+            {!anonTrip && (
+              <DropdownMenuItem
+                disabled={isRemoveLoading}
+                onClick={() => setIsModalOpen(true)}
+                className="flex gap-2 items-center text-error"
+              >
+                <SquareArrowRightExit size={16} />
+                Leave
+              </DropdownMenuItem>
+            )}
             {isAdmin(trip.role) && (
               <DropdownMenuItem
                 onClick={handleDelete}
@@ -184,6 +189,9 @@ export default function TripSummary({
       )}
       {modalType === "users" && (
         <ViewUsersModal open={true} onOpenChange={handleCloseModal} />
+      )}
+      {modalType === "register" && (
+        <RegisterModal open={true} onOpenChange={handleCloseModal} />
       )}
     </div>
   );
