@@ -8,6 +8,7 @@ from sqlalchemy import select
 from ..exceptions import (
     ItineraryDoesNotExistError,
     UserNotAuthorisedError,
+    InvalidCredentialsError,
 )
 from ..extensions import db
 from ..models import Itinerary, ItineraryUser, UserRole
@@ -86,7 +87,7 @@ def itinerary_access_required(
 
                 return f(*args, **kwargs)
 
-            raise ItineraryDoesNotExistError()
+            raise InvalidCredentialsError()
 
         return decorated_func
 

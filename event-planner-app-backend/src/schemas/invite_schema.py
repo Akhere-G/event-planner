@@ -22,6 +22,7 @@ class InviteSchema(BaseSchema):
             [r.value for r in UserRole],
             error="Invalid role. Must be one of: {choices}.",
         ),
+        load_default=UserRole.VIEWER.value,
         dump_default=UserRole.VIEWER.value,
         error_messages={"validator_failed": "Invalid role value."},
     )
@@ -64,6 +65,7 @@ class InviteSchemaPrivate(BaseSchema):
             [r.value for r in UserRole],
             error="Invalid role. Must be one of: {choices}.",
         ),
+        load_default=UserRole.VIEWER.value,
         dump_default=UserRole.VIEWER.value,
         error_messages={"validator_failed": "Invalid role value."},
     )

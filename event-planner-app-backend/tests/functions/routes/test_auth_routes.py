@@ -16,10 +16,12 @@ def test_register_success(client):
     assert response.status_code == 200
     data = response.get_json()
     assert data["success"] is True
-    assert "userId" in data["data"]
+    assert data["data"]["email"] == "test@example.com"
+    assert data["data"]["id"] == 1
+    assert data["data"]["username"] == "testuser"
 
     user = db.session.execute(
-        select(User).where(User.id == data["data"]["userId"])
+        select(User).where(User.id == data["data"]["id"])
     ).scalar_one_or_none()
 
     assert user is not None
@@ -73,10 +75,12 @@ def test_login_success(client, admin_user):
     assert response.status_code == 200
     data = response.get_json()
     assert data["success"] is True
-    assert "userId" in data["data"]
+    assert data["data"]["email"] is not None
+    assert data["data"]["id"] is not None
+    assert data["data"]["username"] is not None
 
     result = db.session.execute(
-        select(User).where(User.id == data["data"]["userId"])
+        select(User).where(User.id == data["data"]["id"])
     ).scalar_one_or_none()
 
     assert result is not None
@@ -113,7 +117,8 @@ def test_check_auth_authenticated(auth_client):
     assert response.status_code == 200
     data = response.get_json()
     assert data["success"] is True
-    assert "userId" in data["data"]
+    assert data["data"]["id"] is not None
+    assert data["data"]["username"] is not None
 
 
 def test_check_auth_not_authenticated(client):

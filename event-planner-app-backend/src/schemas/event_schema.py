@@ -8,14 +8,15 @@ from .base_schema import BaseSchema
 
 class AwareDateTimeField(fields.Field):
     def _deserialize(self, value, attr, data, **kwargs):
-        if not isinstance(value, str):
-            raise ValidationError("Not a valid datetime string.")
-
-        try:
-            dt = datetime.fromisoformat(value.replace("Z", "+00:00"))
-        except ValueError:
-            raise ValidationError(f"Not a valid ISO-8601 datetime string: {value!r}.")
-
+        if isinstance(value, str):
+            try:
+                dt = datetime.fromisoformat(value.replace("Z", "+00:00"))
+            except ValueError:
+                raise ValidationError(
+                    f"Not a valid ISO-8601 datetime string: {value!r}."
+                )
+        else:
+            dt = value
         if dt.tzinfo is None or dt.utcoffset() is None:
             raise ValidationError(
                 "Datetime must be timezone-aware (e.g. '2026-09-10T14:00:00Z'). "

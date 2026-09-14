@@ -12,8 +12,8 @@ VALID_EVENT_DATA = {
     "latitude": 40.7128,
     "longitude": -74.0060,
     "description": "Dinner reservation",
-    "start_at": datetime(2026, 8, 20, 10, 0),  # noqa: DTZ001
-    "end_at": datetime(2026, 8, 20, 12, 0),  # noqa: DTZ001
+    "start_at": datetime(2026, 8, 20, 10, 0, tzinfo=timezone.utc),
+    "end_at": datetime(2026, 8, 20, 12, 0, tzinfo=timezone.utc),
     "category": "food",
 }
 
@@ -22,8 +22,8 @@ def test_event_schema_loads_valid_data():
     result = EventSchema().load(VALID_EVENT_DATA)
 
     assert result["name"] == "Dinner"
-    assert result["start_at"] == datetime(2026, 8, 20, 10, 0)  # noqa: DTZ001
-    assert result["end_at"] == datetime(2026, 8, 20, 12, 0)  # noqa: DTZ001
+    assert result["start_at"] == datetime(2026, 8, 20, 10, 0, tzinfo=timezone.utc)
+    assert result["end_at"] == datetime(2026, 8, 20, 12, 0, tzinfo=timezone.utc)
 
 
 @pytest.mark.parametrize(
@@ -78,8 +78,8 @@ def test_event_schema_rejects_naive_datetime():
     """Test that naive datetimes are rejected"""
     data = {
         **VALID_EVENT_DATA,
-        "start_at": datetime(2026, 8, 20, 10, 0),
-        "end_at": datetime(2026, 8, 20, 12, 0, tzinfo=timezone.utc),
+        "start_at": datetime(2026, 8, 20, 10, 0),  # noqa: DTZ001
+        "end_at": datetime(2026, 8, 20, 12, 0),  # noqa: DTZ001
     }
 
     with pytest.raises(ValidationError) as exc_info:

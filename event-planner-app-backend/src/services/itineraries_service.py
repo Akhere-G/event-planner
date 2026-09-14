@@ -50,7 +50,9 @@ def is_user_in_itinerary(user_id: int, itinerary_id: int):
 
 
 def get_itinerary_membership(
-    user_id: int | None, itinerary_id: int | None, anonymous_access_code: str | None
+    user_id: int | None,
+    itinerary_id: int,
+    anonymous_access_code: str | None = None,
 ):
     if not user_id and not anonymous_access_code:
         raise ItineraryDoesNotExistError()
@@ -73,7 +75,7 @@ def get_itinerary_membership(
 
     membership = db.session.execute(stmt).scalar_one_or_none()
 
-    if not membership:
+    if not membership and anonymous_access_code is not None:
         stmt = select(Itinerary).where(
             Itinerary.anonymous_access_code == anonymous_access_code
         )
@@ -81,6 +83,9 @@ def get_itinerary_membership(
         if not itinerary:
             raise ItineraryDoesNotExistError()
         return {"role": UserRole.ADMIN.value, "itinerary": itinerary}
+
+    if not membership:
+        raise ItineraryDoesNotExistError()
 
     return membership
 

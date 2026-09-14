@@ -11,10 +11,10 @@ from tests.factories import UserFactory
 
 
 def test_register_user_success(app):
-    user_id = register_user("newuser", "newuser@example.com", "securepassword123")
-    assert user_id is not None
+    user = register_user("newuser", "newuser@example.com", "securepassword123")
+    assert user["id"] is not None
 
-    db_user = db.session.get(User, user_id)
+    db_user = db.session.get(User, user["id"])
     assert db_user is not None
     assert db_user.username == "newuser"
     assert db_user.email == "newuser@example.com"
@@ -22,8 +22,8 @@ def test_register_user_success(app):
 
 
 def test_register_user_email_normalization(app):
-    user_id = register_user("normalizer", "   TestUser@EXAMPLE.Com   ", "password123")
-    db_user = db.session.get(User, user_id)
+    user = register_user("normalizer", "   TestUser@EXAMPLE.Com   ", "password123")
+    db_user = db.session.get(User, user["id"])
 
     assert db_user is not None
     assert db_user.email == "testuser@example.com"
@@ -38,16 +38,16 @@ def test_login_user_success(app):
     password_hash = bcrypt.generate_password_hash("mysecretpassword").decode("utf-8")
     existing_user = UserFactory(email="loginuser@example.com", password=password_hash)
 
-    user_id = login_user("loginuser@example.com", "mysecretpassword")
-    assert user_id == existing_user.id
+    user = login_user("loginuser@example.com", "mysecretpassword")
+    assert user["id"] == existing_user.id
 
 
 def test_login_user_email_case_and_whitespace_insensitive(app):
     password_hash = bcrypt.generate_password_hash("mysecretpassword").decode("utf-8")
     existing_user = UserFactory(email="loginuser@example.com", password=password_hash)
     db.session.flush()
-    user_id = login_user("  LOGINUSER@EXAMPLE.COM  ", "mysecretpassword")
-    assert user_id == existing_user.id
+    user = login_user("  LOGINUSER@EXAMPLE.COM  ", "mysecretpassword")
+    assert user["id"] == existing_user.id
 
 
 def test_login_user_non_existent_email(app):
