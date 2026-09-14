@@ -16,6 +16,7 @@ import {
 import { toast } from "sonner";
 import { isApiError } from "../../api/utils";
 import { usePostHog } from "@posthog/react";
+import useLoadAnonTrip from "../../trips/hooks/useLoadAnonTrip";
 
 type PackingSubTab = "personal" | "shared";
 
@@ -26,7 +27,11 @@ export default function PackingPage({ trip }: { trip: Trip }) {
   const [generatePackingItems, { isLoading: isGenerating }] =
     useGeneratePackingItemsMutation();
   const posthog = usePostHog();
-  const [activeTab, setActiveTab] = useState<PackingSubTab>("personal");
+  const { anonTrip } = useLoadAnonTrip();
+
+  const [activeTab, setActiveTab] = useState<PackingSubTab>(
+    anonTrip ? "personal" : "shared",
+  );
 
   const packingItems = data?.data ?? [];
 
@@ -138,21 +143,23 @@ export default function PackingPage({ trip }: { trip: Trip }) {
         )}
 
         <div className="flex items-center gap-2 border-b border-surface-border pb-1">
-          <button
-            type="button"
-            onClick={() => setActiveTab("personal")}
-            className={`flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-t-xl transition-all cursor-pointer border-b-2 ${
-              activeTab === "personal"
-                ? "border-brand-primary text-brand-primary bg-brand-primary/5"
-                : "border-transparent text-text-secondary hover:text-text-primary hover:bg-surface-muted/50"
-            }`}
-          >
-            <UserCheck className="w-5 h-5" />
-            <span>My Items</span>
-            <span className="text-xs px-2 py-0.5 rounded-full bg-surface-muted text-text-secondary">
-              {userPackingItems.length}
-            </span>
-          </button>
+          {!anonTrip && (
+            <button
+              type="button"
+              onClick={() => setActiveTab("personal")}
+              className={`flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-t-xl transition-all cursor-pointer border-b-2 ${
+                activeTab === "personal"
+                  ? "border-brand-primary text-brand-primary bg-brand-primary/5"
+                  : "border-transparent text-text-secondary hover:text-text-primary hover:bg-surface-muted/50"
+              }`}
+            >
+              <UserCheck className="w-5 h-5" />
+              <span>My Items</span>
+              <span className="text-xs px-2 py-0.5 rounded-full bg-surface-muted text-text-secondary">
+                {userPackingItems.length}
+              </span>
+            </button>
+          )}
 
           <button
             type="button"

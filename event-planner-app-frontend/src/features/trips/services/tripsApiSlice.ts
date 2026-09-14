@@ -94,6 +94,12 @@ export const tripsApi = apiSlice.injectEndpoints({
         { type: "Trips", id: tripId },
       ],
     }),
+    saveTrip: builder.mutation<ApiResponse<Trip>, number>({
+      query: (id) => ({
+        url: `/itineraries/${id}/save`,
+        method: "POST",
+      }),
+    }),
   }),
 });
 
@@ -103,4 +109,5 @@ export const {
   useAddTripMutation,
   useEditTripMutation,
   useDeleteTripMutation,
+  useSaveTripMutation,
 } = tripsApi;

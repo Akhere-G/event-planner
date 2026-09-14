@@ -22,3 +22,8 @@ export interface Trip {
   createdAt: string;
   anonymousAccessCode: string | null;
 }
+
+export interface AnonTrip {
+  anonymousAccessCode: string;
+  tripId: number;
+}
