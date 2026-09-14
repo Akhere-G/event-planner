@@ -74,10 +74,12 @@ export default function PackingItems({
               ? "No group gear items added yet"
               : "No personal items in your checklist"
           }
-          action={{
-            text: `Add a ${isShared ? "group" : "personal"} item`,
-            onClick: () => setShowAddForm(true),
-          }}
+          actions={[
+            {
+              text: `Add a ${isShared ? "group" : "personal"} item`,
+              onClick: () => setShowAddForm(true),
+            },
+          ]}
         />
       ) : (
         <div className="grid grid-cols-1 2xl:grid-cols-2 gap-4">
