@@ -173,10 +173,21 @@ function Navbar() {
             >
               Sign in
             </TrackedLink>
-
             <TrackedLink
               href={`${url}/register`}
               event="register_page_visited"
+              className={`text-sm font-medium transition-colors ${
+                scrolled
+                  ? "text-slate-900 hover:text-slate-700"
+                  : "text-white/90 hover:text-white"
+              }`}
+            >
+              Register
+            </TrackedLink>
+
+            <TrackedLink
+              href={`${url}/addtrip`}
+              event="addtrip_page_visited"
               className="bg-brand-primary text-white text-sm font-semibold px-6 py-2.5 rounded-full hover:bg-brand-primary/90 transition-colors"
             >
               Get Started
@@ -236,8 +247,8 @@ export default function HomePage() {
             </p>
             <div className="flex gap-4 flex-wrap">
               <TrackedLink
-                href={`${url}/register`}
-                event="register_page_visited"
+                href={`${url}/addtrip`}
+                event="addtrip_page_visited"
                 className="bg-brand-primary text-white text-base font-bold px-8 py-3.5 rounded-full hover:bg-brand-primary/90 transition-colors shadow-lg shadow-brand-primary/20"
               >
                 Start planning
@@ -425,8 +436,8 @@ export default function HomePage() {
           </p>
           <div className="flex gap-4 justify-center flex-wrap">
             <TrackedLink
-              href={`${url}/register`}
-              event="register_page_visited"
+              href={`${url}/addtrip`}
+              event="addtrip_page_visited"
               className="bg-brand-primary text-white text-base font-bold px-9 py-3.5 rounded-full hover:bg-brand-primary/90 transition-colors shadow-lg shadow-brand-primary/20"
             >
               Start planning
