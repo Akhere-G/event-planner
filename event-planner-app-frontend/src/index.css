@@ -533,11 +533,14 @@
 }
 
 .rbc-overlay {
-  @apply bg-surface! border! border-slate-200! shadow-xl! rounded-lg! p-2! z-50! min-w-fit! w-[30%]!;
+  @apply bg-surface! border! border-slate-200! shadow-xl! rounded-lg! p-2! z-9! min-w-fit! w-[30%]!;
 }
 
 .rbc-overlay-header {
   @apply text-text-secondary! text-sm! font-bold! border-b! border-slate-100! dark:border-slate-800! mb-2! mt-0!  uppercase! tracking-tight!;
+}
+.rbc-row-content {
+  @apply z-0!
 }
 
 .rbc-overlay .rbc-event {

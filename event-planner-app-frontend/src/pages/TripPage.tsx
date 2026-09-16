@@ -79,12 +79,22 @@ export default function TripPage() {
       loadingStateProps={{ isLoading }}
       errorStateProps={{
         isError:
-          isError && !(isFetchBaseQueryError(error) && error.status === 404),
+          isError &&
+          !(
+            isFetchBaseQueryError(error) &&
+            typeof error.status === "number" &&
+            [404, 401].includes(error.status)
+          ),
         showReload: true,
       }}
       emptyStateProps={{
-        isEmpty: isFetchBaseQueryError(error) && error.status === 404,
-        message: "This trip could not be found.",
+        isEmpty:
+          isFetchBaseQueryError(error) &&
+          (error.status === 404 || error.status === 401),
+        message:
+          isFetchBaseQueryError(error) && error?.status === 404
+            ? "This trip could not be found."
+            : "You are not part of this trip.",
       }}
     >
       {data && isMobile && <MobileLayout trip={data.data} />}{" "}
