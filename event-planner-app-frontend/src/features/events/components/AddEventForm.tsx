@@ -23,6 +23,7 @@ export default function AddEventForm({ date }: { date: string }) {
   const { register, formState, handleSubmit, setError, setValue, getValues } =
     useForm({
       resolver: yupResolver(eventSchema),
+      defaultValues: { startAt: "12:00", endAt: "13:00" },
     });
 
   const addressInputProps = register("address");

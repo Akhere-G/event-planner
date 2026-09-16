@@ -6,7 +6,7 @@ export interface EmptyStateProps {
 
 export default function EmptyState({
   message = "No data found.",
-  height = 200,
+  height = 20,
   actions,
 }: EmptyStateProps) {
   return (
@@ -15,9 +15,9 @@ export default function EmptyState({
       className={`bg-surface border-dashed border-surface-border border-2 rounded-md flex flex-col gap-4 justify-center items-center`}
     >
       <h2 className="text-text-secondary title">{message}</h2>
-      <div className="flex gap-4 flex-wrap flex-col md:flex-row items-stretch justify-center">
-        {actions &&
-          actions.map((action) => (
+      {actions && (
+        <div className="flex gap-4 flex-wrap flex-col md:flex-row items-stretch justify-center">
+          {actions.map((action) => (
             <button
               className={`text-brand-primary cursor-pointer p-0 m-0 ${action.className}`}
               onClick={action.onClick}
@@ -25,7 +25,8 @@ export default function EmptyState({
               {action.text}
             </button>
           ))}
-      </div>
+        </div>
+      )}
     </div>
   );
 }
