@@ -1,5 +1,7 @@
 import {
+  addDays,
   addMilliseconds,
+  addMonths,
   differenceInMilliseconds,
   format,
   isValid,
@@ -33,11 +35,13 @@ export default function TripForm({
     });
 
   useEffect(() => {
+    const defaultStart = addMonths(new Date(), 4);
+    const defaultEnd = addDays(defaultStart, 7);
     const defaultValues: TripSchema = {
       name: "",
       destination: "",
-      startDate: "",
-      endDate: "",
+      startDate: format(defaultStart, "yyyy-MM-dd"),
+      endDate: format(defaultEnd, "yyyy-MM-dd"),
       description: "",
       latitude: 0,
       longitude: 0,
@@ -45,7 +49,6 @@ export default function TripForm({
     };
 
     for (const key of Object.keys(defaultValues)) {
-      // ensure that if start_at or end_at aer set, they are converted from UTC to trip timezone
       setValue(key as keyof TripSchema, defaultValues[key as keyof TripSchema]);
     }
   }, [initialData, setValue]);
@@ -99,6 +102,10 @@ export default function TripForm({
       const duration = differenceInMilliseconds(currentEnd, currentStart);
 
       const nextEnd = addMilliseconds(nextStart, duration);
+
+      setValue("endDate", format(nextEnd, "yyyy-MM-dd"));
+    } else if (isValid(nextStart)) {
+      const nextEnd = addDays(nextStart, 7);
 
       setValue("endDate", format(nextEnd, "yyyy-MM-dd"));
     }
