@@ -1,0 +1,99 @@
+{
+  "itinerary": {
+    "name": "Sample Trip to Lisbon",
+    "destination": "Lisbon, Portugal",
+    "latitude": 38.7223,
+    "longitude": -9.1393,
+    "description": "A sample itinerary you can freely explore, edit, and delete things in — nothing here is real.",
+    "timezone": "Europe/Lisbon",
+    "trip_length_days": 6
+  },
+  "accommodation": {
+    "name": "Lisbon Riverside Hotel",
+    "address": "Avenida Infante Dom Henrique, Lisbon",
+    "latitude": 38.7089,
+    "longitude": -9.1366,
+    "description": "A comfortable 4-star hotel by the river."
+  },
+  "events": [
+    { "day_offset": 0, "start_hour": 9, "end_hour": 11, "category": "travel", "name": "Arrive & check in", "address": "Belem, Lisbon", "latitude": 38.6970, "longitude": -9.2162 },
+    { "day_offset": 0, "start_hour": 14, "end_hour": 17, "category": "sightseeing", "name": "Explore Alfama district", "address": "Alfama, Lisbon", "latitude": 38.7122, "longitude": -9.1309 },
+    { "day_offset": 0, "start_hour": 19, "end_hour": 21, "category": "food", "name": "Dinner at Time Out Market", "address": "Avenida 24 de Julho 50, Lisbon", "latitude": 38.7061, "longitude": -9.1461 },
+
+    { "day_offset": 1, "start_hour": 9, "end_hour": 11, "category": "sightseeing", "name": "Belem Tower", "address": "Av. Brasilia, Lisbon", "latitude": 38.6916, "longitude": -9.2160 },
+    { "day_offset": 1, "start_hour": 11, "end_hour": 13, "category": "sightseeing", "name": "Jeronimos Monastery", "address": "Praca do Imperio, Lisbon", "latitude": 38.6979, "longitude": -9.2063 },
+    { "day_offset": 1, "start_hour": 13, "end_hour": 14, "category": "food", "name": "Pasteis de Belem tasting", "address": "R. de Belem 84-92, Lisbon", "latitude": 38.6973, "longitude": -9.2033 },
+    { "day_offset": 1, "start_hour": 18, "end_hour": 20, "category": "sightseeing", "name": "Sunset at Miradouro das Portas do Sol", "address": "Largo das Portas do Sol, Lisbon", "latitude": 38.7128, "longitude": -9.1303 },
+
+    { "day_offset": 2, "start_hour": 8, "end_hour": 10, "category": "sightseeing", "name": "Pena Palace", "address": "Estrada da Pena, Sintra", "latitude": 38.7879, "longitude": -9.3905 },
+    { "day_offset": 2, "start_hour": 10, "end_hour": 12, "category": "sightseeing", "name": "Quinta da Regaleira", "address": "R. Barbosa du Bocage, Sintra", "latitude": 38.7956, "longitude": -9.3984 },
+    { "day_offset": 2, "start_hour": 12, "end_hour": 14, "category": "sightseeing", "name": "Moorish Castle", "address": "Castelo dos Mouros, Sintra", "latitude": 38.7943, "longitude": -9.3903 },
+    { "day_offset": 2, "start_hour": 14, "end_hour": 15, "category": "food", "name": "Lunch in Sintra village", "address": "Sintra Historic Centre, Sintra", "latitude": 38.7979, "longitude": -9.3903 },
+    { "day_offset": 2, "start_hour": 16, "end_hour": 18, "category": "travel", "name": "Return to Lisbon", "address": "Sintra Train Station, Sintra", "latitude": 38.7984, "longitude": -9.3878 },
+
+    { "day_offset": 3, "start_hour": 10, "end_hour": 12, "category": "sightseeing", "name": "Castelo de Sao Jorge", "address": "R. de Santa Cruz do Castelo, Lisbon", "latitude": 38.7139, "longitude": -9.1335 },
+    { "day_offset": 3, "start_hour": 12, "end_hour": 14, "category": "sightseeing", "name": "Tram 28 ride", "address": "Martim Moniz, Lisbon", "latitude": 38.7161, "longitude": -9.1360 },
+    { "day_offset": 3, "start_hour": 15, "end_hour": 17, "category": "sightseeing", "name": "Alfama walking tour", "address": "Alfama, Lisbon", "latitude": 38.7122, "longitude": -9.1309 },
+    { "day_offset": 3, "start_hour": 20, "end_hour": 22, "category": "food", "name": "Fado dinner show", "address": "Bairro Alto, Lisbon", "latitude": 38.7139, "longitude": -9.1459 },
+
+    { "day_offset": 4, "start_hour": 9, "end_hour": 10, "category": "travel", "name": "Train to Cascais", "address": "Cais do Sodre Station, Lisbon", "latitude": 38.7061, "longitude": -9.1456 },
+    { "day_offset": 4, "start_hour": 10, "end_hour": 13, "category": "sightseeing", "name": "Beach time at Praia da Rainha", "address": "Praia da Rainha, Cascais", "latitude": 38.6972, "longitude": -9.4215 },
+    { "day_offset": 4, "start_hour": 13, "end_hour": 15, "category": "food", "name": "Seafood lunch in Cascais", "address": "Cascais Marina, Cascais", "latitude": 38.6960, "longitude": -9.4206 },
+    { "day_offset": 4, "start_hour": 15, "end_hour": 17, "category": "sightseeing", "name": "Coastal walk to Boca do Inferno", "address": "Boca do Inferno, Cascais", "latitude": 38.6896, "longitude": -9.4295 },
+
+    { "day_offset": 5, "start_hour": 9, "end_hour": 10, "category": "food", "name": "Brunch at LX Factory", "address": "R. Rodrigues de Faria 103, Lisbon", "latitude": 38.7033, "longitude": -9.1778 },
+    { "day_offset": 5, "start_hour": 10, "end_hour": 12, "category": "sightseeing", "name": "Last-minute souvenir shopping", "address": "Baixa, Lisbon", "latitude": 38.7103, "longitude": -9.1366 },
+    { "day_offset": 5, "start_hour": 13, "end_hour": 14, "category": "travel", "name": "Airport transfer", "address": "Lisbon Airport, Lisbon", "latitude": 38.7813, "longitude": -9.1363 }
+  ],
+  "wishlists": [
+    {
+      "name": "Restaurants to try",
+      "items": [
+        { "name": "Time Out Market", "address": "Avenida 24 de Julho 50, Lisbon", "description": "Food hall with stalls from the city's best chefs.", "voted": true },
+        { "name": "Cervejaria Ramiro", "address": "Av. Almirante Reis 1, Lisbon", "description": "Famous seafood and shrimp spot." },
+        { "name": "Taberna da Rua das Flores", "address": "R. das Flores 103, Lisbon", "description": "Tiny, much-loved tasca with daily specials." },
+        { "name": "Pasteis de Belem", "address": "R. de Belem 84-92, Lisbon", "description": "The original custard tart bakery." },
+        { "name": "A Cevicheria", "address": "R. Dom Pedro V 129, Lisbon", "description": "Peruvian-Portuguese ceviche bar." }
+      ]
+    },
+    {
+      "name": "Nightlife & bars",
+      "items": [
+        { "name": "Pink Street", "address": "Rua Nova do Carvalho, Lisbon", "description": "Lively nightlife strip.", "voted": true },
+        { "name": "Park Bar", "address": "Calcada do Combro 58, Lisbon", "description": "Rooftop bar on top of a car park with great sunset views." },
+        { "name": "Lux Fragil", "address": "Av. Infante Dom Henrique, Lisbon", "description": "Iconic riverside nightclub." },
+        { "name": "Povo", "address": "Rua Cego da Maia 5, Lisbon", "description": "Tasca with live fado and a fun crowd." },
+        { "name": "Music Box", "address": "R. Nova do Carvalho 24, Lisbon", "description": "Small venue with live music most nights." }
+      ]
+    },
+    {
+      "name": "Sightseeing & culture",
+      "items": [
+        { "name": "Belem Tower", "address": "Av. Brasilia, Lisbon", "description": "16th-century fortress at the river mouth." },
+        { "name": "LX Factory", "address": "R. Rodrigues de Faria 103, Lisbon", "description": "Converted industrial complex with shops, art, and cafes." },
+        { "name": "Oceanario de Lisboa", "address": "Esplanada Dom Carlos I, Lisbon", "description": "One of the largest aquariums in Europe." },
+        { "name": "MAAT Museum", "address": "Av. Brasilia, Lisbon", "description": "Museum of Art, Architecture and Technology on the riverfront." },
+        { "name": "Carmo Convent ruins", "address": "Largo do Carmo, Lisbon", "description": "Gothic church ruins left from the 1755 earthquake." }
+      ]
+    }
+  ],
+  "packing_items": {
+    "personal": [
+      { "name": "Passport", "category": "documents", "checked": true },
+      { "name": "Phone charger", "category": "electronics", "checked": true },
+      { "name": "Sunscreen", "category": "toiletries", "checked": false },
+      { "name": "Walking shoes", "category": "clothing", "checked": false },
+      { "name": "Swimsuit", "category": "clothing", "checked": false },
+      { "name": "Travel adapter", "category": "electronics", "checked": true },
+      { "name": "Sunglasses", "category": "accessories", "checked": true },
+      { "name": "Light jacket", "category": "clothing", "checked": false }
+    ],
+    "group_gear": [
+      { "name": "Portable power bank", "category": "electronics", "checked": false },
+      { "name": "First aid kit", "category": "health", "checked": true },
+      { "name": "Travel umbrella", "category": "accessories", "checked": false },
+      { "name": "Beach towel", "category": "accessories", "checked": false },
+      { "name": "Picnic blanket", "category": "misc", "checked": false }
+    ]
+  }
+}

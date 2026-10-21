@@ -69,6 +69,7 @@ export default function PackingItems({
 
       {packingItems.length === 0 ? (
         <EmptyState
+          height={100}
           message={
             isShared
               ? "No group gear items added yet"

@@ -32,6 +32,13 @@ export const authApi = apiSlice.injectEndpoints({
       }),
       invalidatesTags: tagTypes,
     }),
+    demoLogin: builder.mutation<AuthResponse, void>({
+      query: () => ({
+        url: "/auth/demo-login",
+        method: "POST",
+      }),
+      invalidatesTags: tagTypes,
+    }),
     checkUser: builder.query<AuthResponse, void>({
       query: () => ({ url: "/auth/check" }),
     }),
@@ -43,4 +50,5 @@ export const {
   useLoginUserMutation,
   useCheckUserQuery,
   useLogoutUserMutation,
+  useDemoLoginMutation,
 } = authApi;
