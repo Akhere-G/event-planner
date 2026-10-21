@@ -49,7 +49,7 @@ function App() {
 
   useEffect(() => {
     if (data?.data?.id) {
-      dispatch(setCredentials(data.data.id));
+      dispatch(setCredentials({ id: data.data.id, isDemo: data.data.isDemo }));
       posthog?.identify(String(data.data.id), {
         email: data.data.email,
         username: data.data.username,

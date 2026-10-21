@@ -13,6 +13,7 @@ import { setCredentials } from "../features/auth/services/authSlice";
 import { useState } from "react";
 import { toast } from "sonner";
 import { usePostHog } from "@posthog/react";
+import DemoButton from "../components/DemoButton";
 
 export default function Register() {
   const [errorMessage, setErrorMessage] = useState("");
@@ -46,7 +47,7 @@ export default function Register() {
         email: formData.email.toLowerCase(),
       };
       const result = await registerUser(formattedFormData).unwrap();
-      dispatch(setCredentials(result.data.id));
+      dispatch(setCredentials({ id: result.data.id }));
       posthog?.capture("user_registered", {
         user_id: result.data.id,
         email: result.data.email,
@@ -133,6 +134,7 @@ export default function Register() {
           <button className="btn-primary mt-2" disabled={result.isLoading}>
             Register
           </button>
+          <DemoButton />
           <Link to="/login">Have an account? Login.</Link>
         </form>
       </div>

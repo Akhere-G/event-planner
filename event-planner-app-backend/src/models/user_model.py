@@ -1,6 +1,6 @@
 from ..extensions import Base
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from sqlalchemy import Integer, String, DateTime
+from sqlalchemy import Boolean, Integer, String, DateTime
 from typing import List
 from datetime import datetime, timezone
 
@@ -12,6 +12,7 @@ class User(Base):
     username: Mapped[str] = mapped_column(String(100))
     email: Mapped[str] = mapped_column(String(100), unique=True, index=True)
     password: Mapped[str] = mapped_column(String(256))
+    is_demo: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
 
     itinerary_memberships: Mapped[List["ItineraryUser"]] = relationship(  # type: ignore  # noqa: F821
         back_populates="user",

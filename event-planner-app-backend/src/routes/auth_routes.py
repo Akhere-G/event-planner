@@ -2,7 +2,7 @@ from flask import Blueprint, request, session
 
 from ..extensions import limiter
 from ..schemas.user_schema import LoginSchema, RegisterSchema
-from ..services.auth_service import get_user, login_user, register_user
+from ..services.auth_service import get_demo_user, get_user, login_user, register_user
 from ..utils.format_response import api_response
 
 auth_bp = Blueprint("auth", __name__)
@@ -39,6 +39,24 @@ def login_user_route():
     )
 
 
+@auth_bp.route("/demo-login", methods=["POST"])
+@limiter.limit("20 per minute")
+def demo_login_route():
+    user = get_demo_user()
+    session["user_id"] = user.id
+    return api_response(
+        data={
+            "id": user.id,
+            "email": user.email,
+            "username": user.username,
+            "is_demo": True,
+        },
+        message="Logged in to the demo account.",
+        success=True,
+        status_code=200,
+    )
+
+
 @auth_bp.route("/logout", methods=["POST"])
 def logout_user_route():
     session.clear()
@@ -58,6 +76,7 @@ def check_auth():
                 "id": user.id,
                 "email": user.email,
                 "username": user.username,
+                "is_demo": user.is_demo,
             },
             message="User is authenticated.",
         )

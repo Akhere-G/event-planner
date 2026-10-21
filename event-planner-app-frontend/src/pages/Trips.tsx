@@ -3,6 +3,7 @@ import { StateGate } from "../components";
 import { TripCardSkeleton, TripList } from "../features/trips/components";
 import { useGetTripsQuery } from "../features/trips/services/tripsApiSlice";
 import { useState } from "react";
+import useDemoButton from "../hooks/useDemoButton";
 
 const LIMIT = 12;
 
@@ -12,6 +13,7 @@ export default function Trips() {
     limit: LIMIT,
     offset,
   });
+  const { demoResult, onTryDemo } = useDemoButton();
   const navigate = useNavigate();
 
   const getMore = () => setOffset((prev) => prev + LIMIT);
@@ -37,7 +39,7 @@ export default function Trips() {
         emptyStateProps={{
           isEmpty: !data || data?.data.itineraries.length === 0,
           message: "No trips.",
-          height: 250,
+          height: 300,
           actions: [
             {
               text: "Create new trip?",
@@ -53,6 +55,12 @@ export default function Trips() {
               text: "Make a new account?",
               onClick: () => navigate("/register"),
               className: "btn-secondary px-4 py-2",
+            },
+            {
+              text: "Try the demo?",
+              onClick: onTryDemo,
+              className: "btn-secondary px-4 py-2",
+              disabled: demoResult.isLoading,
             },
           ],
         }}

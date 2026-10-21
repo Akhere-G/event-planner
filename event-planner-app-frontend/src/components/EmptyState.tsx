@@ -1,7 +1,11 @@
+interface ActionProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  text: string;
+}
+
 export interface EmptyStateProps {
   message?: string;
   height?: number;
-  actions?: { text: string; onClick: () => void; className?: string }[];
+  actions?: ActionProps[];
 }
 
 export default function EmptyState({

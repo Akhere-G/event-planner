@@ -22,6 +22,11 @@ class InvalidCredentialsError(AppError):
     default_message = "Invalid credentials."
 
 
+class DemoUnavailableError(AppError):
+    status_code = 404
+    default_message = "Demo is temporarily unavailable. Please try again shortly."
+
+
 class ItineraryDoesNotExistError(AppError):
     status_code = 404
     default_message = (

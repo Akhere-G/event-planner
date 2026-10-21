@@ -13,6 +13,7 @@ import { Link, useLocation, useNavigate } from "react-router";
 import { setCredentials } from "../features/auth/services/authSlice";
 import { toast } from "sonner";
 import { usePostHog } from "@posthog/react";
+import DemoButton from "../components/DemoButton";
 
 export default function Login() {
   const [errorMessage, setErrorMessage] = useState("");
@@ -35,7 +36,7 @@ export default function Login() {
         email: formData.email.toLowerCase(),
       };
       const result = await loginUser(formattedFormData).unwrap();
-      dispatch(setCredentials(result.data.id));
+      dispatch(setCredentials({ id: result.data.id }));
       posthog?.capture("user_logged_in", {
         user_id: result.data.id,
         email: result.data.email,
@@ -63,6 +64,7 @@ export default function Login() {
       }
     }
   };
+
   return (
     <div className="container">
       <div className="card">
@@ -83,6 +85,7 @@ export default function Login() {
           <button className="btn-primary mt-2" disabled={result.isLoading}>
             Login
           </button>
+          <DemoButton />
           <Link to="/register" state={{ from }}>
             New here? Create an Account.
           </Link>

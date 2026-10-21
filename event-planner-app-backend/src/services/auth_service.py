@@ -1,6 +1,7 @@
 from sqlalchemy import select
 
 from ..exceptions import (
+    DemoUnavailableError,
     InvalidCredentialsError,
     UserAlreadyExistsError,
 )
@@ -15,6 +16,14 @@ def get_user(user_id: str | None):
     return db.session.execute(stmt).scalar_one_or_none()
 
 
+def get_demo_user() -> User:
+    stmt = select(User).where(User.is_demo.is_(True))
+    user = db.session.execute(stmt).scalar_one_or_none()
+    if not user:
+        raise DemoUnavailableError()
+    return user
+
+
 def register_user(username: str, email: str, password: str):
     email = email.strip().lower()
 
@@ -27,7 +36,12 @@ def register_user(username: str, email: str, password: str):
     new_user = User(username=username, email=email, password=password_hash)
     db.session.add(new_user)
     db.session.commit()
-    return {"id": new_user.id, "email": new_user.email, "username": new_user.username}
+    return {
+        "id": new_user.id,
+        "email": new_user.email,
+        "username": new_user.username,
+        "is_demo": new_user.is_demo,
+    }
 
 
 def login_user(email: str, password: str):
@@ -44,6 +58,7 @@ def login_user(email: str, password: str):
             "id": user.id,
             "email": user.email,
             "username": user.username,
+            "is_demo": user.is_demo,
         }
     else:
         raise InvalidCredentialsError()
