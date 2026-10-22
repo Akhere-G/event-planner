@@ -26,7 +26,7 @@ def get_timezone_for_coordinates(
         timestamp = int(time.time())
 
     try:
-        gmaps = googlemaps.Client(key=os.getenv("GOOGLE_MAPS_API_KEY"))
+        gmaps = googlemaps.Client(key=os.getenv("GOOGLE_MAPS_API_KEY"), timeout=10)
 
         timezone_result = gmaps.timezone(
             location=(latitude, longitude),
