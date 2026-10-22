@@ -24,7 +24,6 @@ ai_bp = Blueprint("ai", __name__)
     allowed_roles=[UserRole.ADMIN, UserRole.EDITOR, UserRole.VIEWER]
 )
 @limiter.limit("10 per minute", key_func=get_user_or_ip)
-@limiter.limit("10 per minute")
 def get_insights_route(itinerary_id: int, access: ItineraryAccess):
     insights = get_insights(itinerary_id)
     return api_response(success=True, data=insights, message="Fetched insights")
@@ -35,7 +34,6 @@ def get_insights_route(itinerary_id: int, access: ItineraryAccess):
     allowed_roles=[UserRole.ADMIN, UserRole.EDITOR, UserRole.VIEWER]
 )
 @limiter.limit("10 per minute", key_func=get_user_or_ip)
-@limiter.limit("10 per minute")
 def get_event_suggestions_route(itinerary_id: int, access: ItineraryAccess):
     schema = EventSchema(many=True)
 
@@ -84,7 +82,6 @@ def get_event_suggestions_route(itinerary_id: int, access: ItineraryAccess):
     allowed_roles=[UserRole.ADMIN, UserRole.EDITOR, UserRole.VIEWER]
 )
 @limiter.limit("10 per minute", key_func=get_user_or_ip)
-@limiter.limit("10 per minute")
 def optimise_events_route(itinerary_id: int, access: ItineraryAccess):
     body = request.get_json(silent=True) or {}
     date = body.get("date")
