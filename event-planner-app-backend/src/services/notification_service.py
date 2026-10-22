@@ -48,7 +48,11 @@ def subscribe_user(
         )
         db.session.add(subscription)
 
-    db.session.commit()
+    try:
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
+        raise
     return subscription
 
 
@@ -63,7 +67,11 @@ def unsubscribe_user(user_id: int, endpoint: Optional[str] = None) -> bool:
     for sub in subscriptions:
         db.session.delete(sub)
 
-    db.session.commit()
+    try:
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
+        raise
     return True
 
 
@@ -99,7 +107,11 @@ def mark_notification_read(user_id: int, notification_id: int) -> Notification:
         raise NotFoundError("Notification not found.")
 
     notification.is_read = True
-    db.session.commit()
+    try:
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
+        raise
     return notification
 
 
@@ -114,7 +126,11 @@ def mark_all_notifications_read(user_id: int) -> int:
         notif.is_read = True
         count += 1
 
-    db.session.commit()
+    try:
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
+        raise
     return count
 
 
@@ -132,7 +148,11 @@ def send_push_notification(
         is_read=False,
     )
     db.session.add(notification)
-    db.session.commit()
+    try:
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
+        raise
 
     private_key = DEFAULT_VAPID_PRIVATE_KEY
     if not private_key:
@@ -170,43 +190,130 @@ def send_push_notification(
         except WebPushException as ex:
             logger.error(f"WebPush error for subscription {sub.id}: {ex}")
             if ex.response is not None and ex.response.status_code in [404, 410]:
-                db.session.delete(sub)
-                db.session.commit()
+                try:
+                    db.session.delete(sub)
+                    db.session.commit()
+                except Exception:
+                    db.session.rollback()
+                    raise
         except Exception as ex:
             logger.exception(f"Unexpected error sending push: {ex}")
 
     return notification
 
 
+def send_push_notifications_bulk(
+    user_ids: List[int],
+    title: str,
+    message: str,
+    link_url: Optional[str] = None,
+) -> List[Notification]:
+    if not user_ids:
+        return []
+
+    notifications = [
+        Notification(
+            user_id=user_id,
+            title=title,
+            message=message,
+            link_url=link_url,
+            is_read=False,
+        )
+        for user_id in user_ids
+    ]
+    db.session.add_all(notifications)
+    db.session.commit()
+
+    private_key = DEFAULT_VAPID_PRIVATE_KEY
+    if not private_key:
+        logger.warning("VAPID_PRIVATE_KEY not set. Push dispatch skipped.")
+        return notifications
+
+    stmt = select(NotificationSubscription).where(
+        NotificationSubscription.user_id.in_(user_ids)
+    )
+    subscriptions = db.session.execute(stmt).scalars().all()
+    payload = json.dumps(
+        {
+            "title": title,
+            "message": message,
+            "url": link_url or "/",
+        }
+    )
+
+    claims: Dict[str, str | int] = {"sub": DEFAULT_VAPID_CLAIMS_SUB}
+
+    for sub in subscriptions:
+        try:
+            webpush(
+                subscription_info={
+                    "endpoint": sub.endpoint,
+                    "keys": {
+                        "p256dh": sub.p256dh,
+                        "auth": sub.auth,
+                    },
+                },
+                data=payload,
+                vapid_private_key=private_key,
+                vapid_claims=claims,
+            )
+        except WebPushException as ex:
+            logger.error(f"WebPush error for subscription {sub.id}: {ex}")
+            if ex.response is not None and ex.response.status_code in [404, 410]:
+                db.session.delete(sub)
+                db.session.commit()
+        except Exception as ex:
+            logger.exception(f"Unexpected error sending push: {ex}")
+
+    return notifications
+
+
 def check_upcoming_event_reminders(minutes_ahead: int = 30) -> int:
     now = datetime.now(timezone.utc).replace(tzinfo=None)
     future_window = now + timedelta(minutes=minutes_ahead)
 
-    stmt = select(Event).where(Event.start_at >= now, Event.start_at <= future_window)
+    stmt = select(Event).where(
+        Event.start_at >= now,
+        Event.start_at <= future_window,
+        Event.reminder_sent_at.is_(None),
+    )
     upcoming_events = db.session.execute(stmt).scalars().all()
 
     total_sent = 0
+    memberships_by_itinerary: Dict[int, List[ItineraryUser]] = {}
+
     for event in upcoming_events:
         time_diff = event.start_at - now
         mins_remaining = max(1, int(time_diff.total_seconds() / 60))
         suffix = "s" if mins_remaining > 1 else ""
 
-        members_stmt = select(ItineraryUser).where(
-            ItineraryUser.itinerary_id == event.itinerary_id
-        )
-        memberships = db.session.execute(members_stmt).scalars().all()
+        if event.itinerary_id not in memberships_by_itinerary:
+            members_stmt = select(ItineraryUser).where(
+                ItineraryUser.itinerary_id == event.itinerary_id
+            )
+            memberships_by_itinerary[event.itinerary_id] = (
+                db.session.execute(members_stmt).scalars().all()
+            )
+
+        memberships = memberships_by_itinerary[event.itinerary_id]
 
         title = f"Upcoming Event: {event.name}"
         message = f"Starting in {mins_remaining} minute{suffix}! Location: {event.address or 'N/A'}"
         url = f"/trips/{event.itinerary_id}"
 
-        for member in memberships:
-            send_push_notification(
-                user_id=member.user_id,
-                title=title,
-                message=message,
-                link_url=url,
-            )
-            total_sent += 1
+        sent = send_push_notifications_bulk(
+            user_ids=[member.user_id for member in memberships],
+            title=title,
+            message=message,
+            link_url=url,
+        )
+        total_sent += len(sent)
+
+        event.reminder_sent_at = datetime.now(timezone.utc)
+        try:
+            db.session.commit()
+        except Exception:
+            db.session.rollback()
+            raise
 
     return total_sent

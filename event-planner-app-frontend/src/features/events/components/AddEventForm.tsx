@@ -46,6 +46,7 @@ export default function AddEventForm({ date }: { date: string }) {
         trip_id: trip.id,
         category: formState.category,
       });
+      toast.success("Event added!");
 
       setValue("address", "");
       setValue("name", "");

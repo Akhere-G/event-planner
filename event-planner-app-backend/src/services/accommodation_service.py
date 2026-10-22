@@ -58,8 +58,12 @@ def create_accommodation(
         updated_by_id=user_id,
     )
 
-    db.session.add(accommodation)
-    db.session.commit()
+    try:
+        db.session.add(accommodation)
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
+        raise
 
     return accommodation
 
@@ -121,7 +125,11 @@ def update_accommodation(
 
     accommodation.updated_by_id = user_id
 
-    db.session.commit()
+    try:
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
+        raise
 
     return accommodation
 
@@ -138,7 +146,11 @@ def delete_accommodation(
     if not accommodation:
         raise NotFoundError("Accommodation not found.")
 
-    db.session.delete(accommodation)
-    db.session.commit()
+    try:
+        db.session.delete(accommodation)
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
+        raise
 
     return accommodation_id

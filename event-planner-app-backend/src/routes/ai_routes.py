@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from flask import Blueprint, request
+from marshmallow import ValidationError
 
 from ..extensions import limiter
 from ..middleware.itinerary_access_required import (
@@ -8,6 +9,7 @@ from ..middleware.itinerary_access_required import (
     itinerary_access_required,
 )
 from ..models import UserRole
+from ..schemas.ai_schema import EventSuggestionRequestSchema
 from ..schemas.event_schema import EventSchema
 from ..services.ai_services import get_event_suggestions, get_insights, optimise_events
 from ..services.events_service import create_events, update_events
@@ -35,14 +37,19 @@ def get_insights_route(itinerary_id: int, access: ItineraryAccess):
 def get_event_suggestions_route(itinerary_id: int, access: ItineraryAccess):
     schema = EventSchema(many=True)
 
-    date = request.json.get("date")
-    pace = request.json.get("pace", "balanced")
-    companions = request.json.get("companions", "couple")
-    transport = request.json.get("transport", "public_transport")
-    interests = request.json.get("interests")
+    try:
+        validated = EventSuggestionRequestSchema().load(
+            request.get_json(silent=True) or {}
+        )
+    except ValidationError as err:
+        return api_response(success=False, error=err.messages, status_code=400)
 
-    if not date:
-        return api_response(success=False, error="Date is required.", status_code=400)
+    date = validated["date"]
+    pace = validated["pace"]
+    companions = validated["companions"]
+    transport = validated["transport"]
+    interests = validated["interests"]
+
     try:
         event_date = datetime.strptime(date, "%Y-%m-%d")
 
@@ -76,7 +83,8 @@ def get_event_suggestions_route(itinerary_id: int, access: ItineraryAccess):
 )
 @limiter.limit("10 per minute", key_func=get_user_or_ip)
 def optimise_events_route(itinerary_id: int, access: ItineraryAccess):
-    date = request.json.get("date")
+    body = request.get_json(silent=True) or {}
+    date = body.get("date")
     schema = EventSchema(many=True)
 
     if not date:

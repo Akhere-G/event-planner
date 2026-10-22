@@ -235,7 +235,16 @@ def update_itinerary(itinerary_id: int, data: dict):
             raise ItineraryDoesNotExistError()
 
         for k, v in data.items():
-            if hasattr(itinerary, k):
+            if k in [
+                "name",
+                "destination",
+                "latitude",
+                "longitude",
+                "description",
+                "start_date",
+                "end_date",
+                "updated_by_id",
+            ]:
                 setattr(itinerary, k, v)
 
         db.session.commit()

@@ -3,6 +3,13 @@ import { lazy, Suspense, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import "react-tooltip/dist/react-tooltip.css";
 import { Toaster } from "sonner";
+import { APIProvider } from "@vis.gl/react-google-maps";
+
+const mapsAPIKey = "AIzaSyAzLmSK-RsggriUFdkHmir3A3kzJp4iyGU";
+
+if (!mapsAPIKey) {
+  console.error("No maps api key present!");
+}
 
 import { useCheckUserQuery } from "./features/auth/services/authApiSlice";
 import {
@@ -147,7 +154,9 @@ function App() {
               path="/addtrip"
               element={
                 <RequireAuth isAuth={true} isLoading={isLoading}>
-                  <AddTrip />
+                  <APIProvider apiKey={mapsAPIKey} libraries={["places"]}>
+                    <AddTrip />
+                  </APIProvider>
                 </RequireAuth>
               }
             />
@@ -155,7 +164,9 @@ function App() {
               path="/trips/:tripId"
               element={
                 <RequireAuth isAuth={true} isLoading={isLoading}>
-                  <TripPage />
+                  <APIProvider apiKey={mapsAPIKey} libraries={["places"]}>
+                    <TripPage />
+                  </APIProvider>
                 </RequireAuth>
               }
             />
