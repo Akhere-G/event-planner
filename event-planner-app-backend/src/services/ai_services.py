@@ -7,6 +7,7 @@ from typing import Any, List
 
 import googlemaps
 from google import genai
+from google.genai import types as genai_types
 from groq import Groq
 
 from ..utils import ai_output_validators
@@ -69,7 +70,10 @@ def get_ai_response(prompt: str) -> str:
 
     if gemini_api_key:
         try:
-            client_gemini = genai.Client(api_key=gemini_api_key)
+            client_gemini = genai.Client(
+                api_key=gemini_api_key,
+                http_options=genai_types.HttpOptions(timeout=10000),
+            )
 
             response = client_gemini.models.generate_content(
                 model="gemini-3.5-flash",

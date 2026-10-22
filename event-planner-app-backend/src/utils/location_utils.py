@@ -9,7 +9,7 @@ def get_place_details(
     address: Optional[str] = None,
     place_type: str = "establishment",
 ) -> dict[str, str | float]:
-    gmaps = googlemaps.Client(key=os.getenv("GOOGLE_MAPS_API_KEY"))
+    gmaps = googlemaps.Client(key=os.getenv("GOOGLE_MAPS_API_KEY"), timeout=10)
 
     query = f"{name}, {address or ''}"
 
