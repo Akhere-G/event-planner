@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import type { Trip } from "../../trips/types";
 import withDragAndDrop, {
   type DragFromOutsideItemArgs,
@@ -11,6 +10,9 @@ import {
   Views,
   type View,
   type Event as CalendarEvent,
+  type DateFormatFunction,
+  type DateRangeFormatFunction,
+  type SlotInfo,
 } from "react-big-calendar";
 import {
   format,
@@ -46,9 +48,24 @@ const localizer = dateFnsLocalizer({
   locales,
 });
 
-const DnDCalendar = (withDragAndDrop as any).default
-  ? (withDragAndDrop as any).default(Calendar)
+// The addon's CJS/ESM interop shape differs by bundler, so the module itself
+// isn't reliably typed here; the calendar item shape it's instantiated with
+// below is.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const withDragAndDropModule = withDragAndDrop as any;
+const DnDCalendar = withDragAndDropModule.default
+  ? withDragAndDropModule.default(Calendar)
   : withDragAndDrop(Calendar);
+
+type CalendarItem = {
+  id: number | string;
+  title: string;
+  start: Date;
+  end: Date;
+  allDay: boolean;
+  isSummary?: boolean;
+  resource: Event | number;
+};
 
 export default function TripCalendar({ trip }: { trip: Trip }) {
   const [tripEvents, setTripEvents] = useState(trip.events);
@@ -126,10 +143,10 @@ export default function TripCalendar({ trip }: { trip: Trip }) {
     return `transition-all duration-150 cursor-pointer relative ${bgClass} hover:bg-brand-primary/20`;
   };
 
-  const handleEventClick = (calendarEvent: any) => {
+  const handleEventClick = (calendarEvent: CalendarItem) => {
     if (calendarEvent.isSummary) return;
 
-    setSelectedEvent(calendarEvent.resource);
+    setSelectedEvent(calendarEvent.resource as Event);
   };
 
   function onDropFromOutside(day: DragFromOutsideItemArgs) {
@@ -285,27 +302,19 @@ export default function TripCalendar({ trip }: { trip: Trip }) {
         <DnDCalendar
           localizer={localizer}
           formats={{
-            dayFormat: (date: Date, culture?: string, localizer?: any) =>
+            dayFormat: ((date, culture, localizer) =>
               isMobile
-                ? localizer.format(date, "dd", culture)
-                : localizer.format(date, "EEE dd/MM", culture),
-            timeGutterFormat: (
-              date: Date,
-              culture?: string,
-              localizer?: any,
-            ) =>
+                ? localizer!.format(date, "dd", culture)
+                : localizer!.format(date, "EEE dd/MM", culture)) as DateFormatFunction,
+            timeGutterFormat: ((date, culture, localizer) =>
               isMobile
-                ? localizer.format(date, "HH", culture)
-                : localizer.format(date, "p", culture),
+                ? localizer!.format(date, "HH", culture)
+                : localizer!.format(date, "p", culture)) as DateFormatFunction,
 
-            eventTimeRangeFormat: (
-              { start, end }: any,
-              culture?: string,
-              localizer?: any,
-            ) =>
+            eventTimeRangeFormat: (({ start, end }, culture, localizer) =>
               isMobile
-                ? `${localizer.format(start, "H", culture)} - ${localizer.format(end, "H", culture)}`
-                : `${localizer.format(start, "p", culture)} - ${localizer.format(end, "p", culture)}`,
+                ? `${localizer!.format(start, "H", culture)} - ${localizer!.format(end, "H", culture)}`
+                : `${localizer!.format(start, "p", culture)} - ${localizer!.format(end, "p", culture)}`) as DateRangeFormatFunction,
           }}
           events={events}
           date={currentDate}
@@ -318,20 +327,20 @@ export default function TripCalendar({ trip }: { trip: Trip }) {
           onSelectEvent={handleEventClick}
           onNavigate={setCurrentDate}
           onDropFromOutside={onDropFromOutside}
-          handleDragStart={(event: any) => {
-            setDraggedEvent(event.resource);
+          handleDragStart={(event: CalendarItem) => {
+            setDraggedEvent(event.resource as Event);
           }}
           onDrillDown={(date: Date) => {
             setCurrentDate(date);
             if (!isMobile) setView(Views.DAY);
           }}
-          onSelectSlot={({ start, action }: any) => {
+          onSelectSlot={({ start, action }: SlotInfo) => {
             if (action === "click") setCurrentDate(new Date(start));
           }}
           dayPropGetter={(date: Date) => ({
             className: getDayClasses(date),
           })}
-          eventPropGetter={(event: any) => ({
+          eventPropGetter={(event: CalendarItem) => ({
             className: event.isSummary
               ? "!bg-transparent !border-none !shadow-none p-0 m-0 hover:!bg-transparent !pointer-events-none" // Hide container for dots
               : "!border-none !shadow-sm !rounded-md !px-1 !py-1 !text-xs !font-medium transition-all !bg-brand-primary !text-text-inverse",
@@ -345,11 +354,17 @@ export default function TripCalendar({ trip }: { trip: Trip }) {
                 setView={setView}
               />
             ),
-            event: ({ title, event }: any) => {
+            event: ({
+              title,
+              event,
+            }: {
+              title: string;
+              event: CalendarItem;
+            }) => {
               if (event.isSummary) {
                 return (
                   <div className="flex flex-wrap justify-center items-center gap-0.5 w-full mt-1 pointer-events-none">
-                    {new Array(event.resource).fill(1).map((_, i) => (
+                    {new Array(event.resource as number).fill(1).map((_, i) => (
                       <span
                         key={i}
                         className="h-2 w-2 rounded-full bg-brand-primary shadow-sm"
