@@ -1,3 +1,5 @@
+from typing import Optional
+
 from sqlalchemy import (
     Boolean,
     Float,
@@ -11,8 +13,6 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from ..extensions import Base
 from . import User
 from .audit_mixins import AuditMixin
-
-# TODO: add creator and last editor relationships
 
 
 class Wishlist(Base, AuditMixin):
@@ -54,11 +54,11 @@ class WishlistItem(Base, AuditMixin):
     )
 
     name: Mapped[str] = mapped_column(String(255))
-    address: Mapped[str] = mapped_column(String(255), nullable=True)
-    latitude: Mapped[float] = mapped_column(Float, nullable=True)
-    longitude: Mapped[float] = mapped_column(Float, nullable=True)
-    description: Mapped[str] = mapped_column(String(1000), nullable=True)
-    place_id: Mapped[str] = mapped_column(String(255), nullable=True)
+    address: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
+    latitude: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    longitude: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    description: Mapped[Optional[str]] = mapped_column(String(1000), nullable=True)
+    place_id: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
     is_promoted: Mapped[bool] = mapped_column(Boolean, default=False)
 
     wishlist: Mapped["Wishlist"] = relationship(back_populates="items")
