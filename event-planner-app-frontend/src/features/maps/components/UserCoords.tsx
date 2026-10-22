@@ -50,9 +50,9 @@ export default function UserCoords() {
     <AdvancedMarker
       position={{ lat: userCoords.latitude, lng: userCoords.longitude }}
     >
-      <div className="w-6 h-6 rounded-full bg-blue-400/70 flex items-center justify-center">
+      <div className="w-6 h-6 rounded-full bg-info/70 flex items-center justify-center">
         <div className="w-4 h-4 rounded-full bg-white flex items-center justify-center">
-          <div className="w-3 h-3 rounded-full bg-blue-600"></div>
+          <div className="w-3 h-3 rounded-full bg-info"></div>
         </div>
       </div>
     </AdvancedMarker>
