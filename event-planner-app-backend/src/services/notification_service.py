@@ -48,7 +48,11 @@ def subscribe_user(
         )
         db.session.add(subscription)
 
-    db.session.commit()
+    try:
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
+        raise
     return subscription
 
 
@@ -63,7 +67,11 @@ def unsubscribe_user(user_id: int, endpoint: Optional[str] = None) -> bool:
     for sub in subscriptions:
         db.session.delete(sub)
 
-    db.session.commit()
+    try:
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
+        raise
     return True
 
 
@@ -99,7 +107,11 @@ def mark_notification_read(user_id: int, notification_id: int) -> Notification:
         raise NotFoundError("Notification not found.")
 
     notification.is_read = True
-    db.session.commit()
+    try:
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
+        raise
     return notification
 
 
@@ -114,7 +126,11 @@ def mark_all_notifications_read(user_id: int) -> int:
         notif.is_read = True
         count += 1
 
-    db.session.commit()
+    try:
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
+        raise
     return count
 
 
@@ -132,7 +148,11 @@ def send_push_notification(
         is_read=False,
     )
     db.session.add(notification)
-    db.session.commit()
+    try:
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
+        raise
 
     private_key = DEFAULT_VAPID_PRIVATE_KEY
     if not private_key:
@@ -171,8 +191,12 @@ def send_push_notification(
         except WebPushException as ex:
             logger.error(f"WebPush error for subscription {sub.id}: {ex}")
             if ex.response is not None and ex.response.status_code in [404, 410]:
-                db.session.delete(sub)
-                db.session.commit()
+                try:
+                    db.session.delete(sub)
+                    db.session.commit()
+                except Exception:
+                    db.session.rollback()
+                    raise
         except Exception as ex:
             logger.exception(f"Unexpected error sending push: {ex}")
 
@@ -183,7 +207,11 @@ def check_upcoming_event_reminders(minutes_ahead: int = 30) -> int:
     now = datetime.now(timezone.utc).replace(tzinfo=None)
     future_window = now + timedelta(minutes=minutes_ahead)
 
-    stmt = select(Event).where(Event.start_at >= now, Event.start_at <= future_window)
+    stmt = select(Event).where(
+        Event.start_at >= now,
+        Event.start_at <= future_window,
+        Event.reminder_sent_at.is_(None),
+    )
     upcoming_events = db.session.execute(stmt).scalars().all()
     print(now, future_window)
     print(f"upcoming events {len(upcoming_events)}")
@@ -212,5 +240,12 @@ def check_upcoming_event_reminders(minutes_ahead: int = 30) -> int:
                 link_url=url,
             )
             total_sent += 1
+
+        event.reminder_sent_at = datetime.now(timezone.utc)
+        try:
+            db.session.commit()
+        except Exception:
+            db.session.rollback()
+            raise
 
     return total_sent
