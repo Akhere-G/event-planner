@@ -32,7 +32,3 @@ export function isApiError(error: unknown): error is ApiError {
     typeof error.data.message === "string"
   );
 }
-
-export interface APIError {
-  data: { message: string };
-}
