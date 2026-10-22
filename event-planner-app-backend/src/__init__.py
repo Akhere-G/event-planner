@@ -92,7 +92,7 @@ def configure_app(app: Flask, testing: bool):
         app,
         supports_credentials=True,
         origins=[
-            os.getenv("FRONTEND_URL", "localhost:5173"),
+            os.getenv("FRONTEND_URL", "http://localhost:5173"),
         ],
     )
 
