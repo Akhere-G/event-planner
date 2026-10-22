@@ -64,7 +64,8 @@ def get_wishlists_route(itinerary_id: int, access: ItineraryAccess):
 )
 def create_wishlist_route(itinerary_id: int, access: ItineraryAccess):
     try:
-        name = request.json.get("name")
+        body = request.get_json(silent=True) or {}
+        name = body.get("name")
         if not name or not name.strip():
             return api_response(
                 success=False, error="Wishlist name is required.", status_code=400
@@ -118,7 +119,8 @@ def delete_wishlist_route(itinerary_id: int, access: ItineraryAccess, wishlist_i
 def update_wishlist_route(itinerary_id: int, access: ItineraryAccess, wishlist_id: int):
     try:
         schema = WishlistSchema()
-        name = request.json.get("name", "").strip()
+        body = request.get_json(silent=True) or {}
+        name = body.get("name", "").strip()
         if not name:
             return api_response(
                 success=False,
@@ -265,8 +267,9 @@ def promote_item_route(
             status_code=404,
         )
 
-    start_at_str = request.json.get("startAt")
-    end_at_str = request.json.get("endAt")
+    body = request.get_json(silent=True) or {}
+    start_at_str = body.get("startAt")
+    end_at_str = body.get("endAt")
 
     if not start_at_str or not end_at_str:
         return api_response(
@@ -302,7 +305,8 @@ def promote_item_route(
 def vote_for_wishlist_item_route(
     user_id: int, itinerary_id: int, wishlist_id: int, item_id: int
 ):
-    vote = request.json.get("vote")
+    body = request.get_json(silent=True) or {}
+    vote = body.get("vote")
     if vote is None:
         raise BadRequestError("Vote is required.")
     is_authorised(
