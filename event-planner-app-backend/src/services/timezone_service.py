@@ -52,7 +52,11 @@ def get_timezone_for_coordinates(
 
     except googlemaps.exceptions.ApiError as e:
         logger.error(f"Google Maps API error: {e}")
-        raise ValidationError({"timezone": [f"Google Maps API error: {str(e)}"]})
+        raise ValidationError(
+            {"timezone": ["Unable to determine timezone for this location."]}
+        )
     except Exception as e:
         logger.exception(f"Unexpected error determining timezone: {e}")
-        raise ValidationError({"timezone": [f"Failed to determine timezone: {str(e)}"]})
+        raise ValidationError(
+            {"timezone": ["Unable to determine timezone for this location."]}
+        )
