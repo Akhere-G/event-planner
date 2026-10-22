@@ -1,13 +1,8 @@
 from datetime import datetime
 
 from flask import Blueprint, request
-from marshmallow import ValidationError
 
-from ..exceptions import (
-    BadRequestError,
-    ItineraryDoesNotExistError,
-    UserNotAuthorisedError,
-)
+from ..exceptions import BadRequestError
 from ..middleware.itinerary_access_required import (
     ItineraryAccess,
     itinerary_access_required,
@@ -39,22 +34,14 @@ wishlist_bp = Blueprint("wishlist", __name__)
     allowed_roles=[UserRole.ADMIN, UserRole.EDITOR, UserRole.VIEWER],
 )
 def get_wishlists_route(itinerary_id: int, access: ItineraryAccess):
-    try:
-        results = get_wishlists(itinerary_id)
-        schema = WishlistSchema(many=True)
-        return api_response(
-            success=True,
-            data=schema.dump(results),
-            message="Fetched wishlist details.",
-            status_code=200,
-        )
-    except (ItineraryDoesNotExistError, UserNotAuthorisedError) as err:
-        return api_response(
-            success=False,
-            message=err.message,
-            error=err.message,
-            status_code=err.status_code,
-        )
+    results = get_wishlists(itinerary_id)
+    schema = WishlistSchema(many=True)
+    return api_response(
+        success=True,
+        data=schema.dump(results),
+        message="Fetched wishlist details.",
+        status_code=200,
+    )
 
 
 @wishlist_bp.route("", methods=["POST"])
@@ -63,28 +50,20 @@ def get_wishlists_route(itinerary_id: int, access: ItineraryAccess):
     message="You must be an admin or an editor to add wishlists.",
 )
 def create_wishlist_route(itinerary_id: int, access: ItineraryAccess):
-    try:
-        name = request.json.get("name")
-        if not name or not name.strip():
-            return api_response(
-                success=False, error="Wishlist name is required.", status_code=400
-            )
+    name = request.json.get("name")
+    if not name or not name.strip():
+        return api_response(
+            success=False, error="Wishlist name is required.", status_code=400
+        )
 
-        category = create_wishlist(access.user_id, itinerary_id, name.strip())
-        schema = WishlistSchema()
-        return api_response(
-            success=True,
-            data=schema.dump(category),
-            message="Created wishlist category.",
-            status_code=201,
-        )
-    except (UserNotAuthorisedError, ItineraryDoesNotExistError, BadRequestError) as err:
-        return api_response(
-            success=False,
-            message=err.message,
-            error=err.message,
-            status_code=err.status_code,
-        )
+    category = create_wishlist(access.user_id, itinerary_id, name.strip())
+    schema = WishlistSchema()
+    return api_response(
+        success=True,
+        data=schema.dump(category),
+        message="Created wishlist category.",
+        status_code=201,
+    )
 
 
 @wishlist_bp.route("/<int:wishlist_id>", methods=["DELETE"])
@@ -93,21 +72,13 @@ def create_wishlist_route(itinerary_id: int, access: ItineraryAccess):
     message="You must be an admin or an editor to delete wishlists.",
 )
 def delete_wishlist_route(itinerary_id: int, access: ItineraryAccess, wishlist_id: int):
-    try:
-        delete_wishlist(itinerary_id, wishlist_id)
-        return api_response(
-            success=True,
-            data={"deletedId": wishlist_id},
-            message="Deleted wishlist.",
-            status_code=200,
-        )
-    except (UserNotAuthorisedError, ItineraryDoesNotExistError, BadRequestError) as err:
-        return api_response(
-            success=False,
-            message=err.message,
-            error=err.message,
-            status_code=err.status_code,
-        )
+    delete_wishlist(itinerary_id, wishlist_id)
+    return api_response(
+        success=True,
+        data={"deletedId": wishlist_id},
+        message="Deleted wishlist.",
+        status_code=200,
+    )
 
 
 @wishlist_bp.route("/<int:wishlist_id>", methods=["PATCH"])
@@ -116,32 +87,21 @@ def delete_wishlist_route(itinerary_id: int, access: ItineraryAccess, wishlist_i
     message="You must be an admin or an editor to edit wishlists.",
 )
 def update_wishlist_route(itinerary_id: int, access: ItineraryAccess, wishlist_id: int):
-    try:
-        schema = WishlistSchema()
-        name = request.json.get("name", "").strip()
-        if not name:
-            return api_response(
-                success=False,
-                error="Name is required",
-                message="Name is required",
-                status_code=400,
-            )
-
-        updated_wishlist = update_wishlist(
-            itinerary_id, wishlist_id, access.user_id, name
-        )
-
-        return api_response(
-            success=True, data=schema.dump(updated_wishlist), message="Updated category"
-        )
-
-    except (ItineraryDoesNotExistError, UserNotAuthorisedError, BadRequestError) as err:
+    schema = WishlistSchema()
+    name = request.json.get("name", "").strip()
+    if not name:
         return api_response(
             success=False,
-            error=err.message,
-            message=err.message,
-            status_code=err.status_code,
+            error="Name is required",
+            message="Name is required",
+            status_code=400,
         )
+
+    updated_wishlist = update_wishlist(itinerary_id, wishlist_id, access.user_id, name)
+
+    return api_response(
+        success=True, data=schema.dump(updated_wishlist), message="Updated category"
+    )
 
 
 @wishlist_bp.route("/<int:wishlist_id>/items", methods=["POST"])
@@ -151,29 +111,17 @@ def update_wishlist_route(itinerary_id: int, access: ItineraryAccess, wishlist_i
 )
 def create_item_route(itinerary_id: int, access: ItineraryAccess, wishlist_id: int):
     schema = WishlistItemSchema()
-    try:
-        validated_data = schema.load(request.json)
+    validated_data = schema.load(request.json)
 
-        item = create_wishlist_item(
-            itinerary_id, wishlist_id, validated_data, access.user_id
-        )
-        return api_response(
-            success=True,
-            data=schema.dump(item),
-            message="Created wishlist item.",
-            status_code=201,
-        )
-    except ValidationError as err:
-        return api_response(
-            success=False, error=err.messages, message="Bad request.", status_code=400
-        )
-    except (UserNotAuthorisedError, ItineraryDoesNotExistError, BadRequestError) as err:
-        return api_response(
-            success=False,
-            message=err.message,
-            error=err.message,
-            status_code=err.status_code,
-        )
+    item = create_wishlist_item(
+        itinerary_id, wishlist_id, validated_data, access.user_id
+    )
+    return api_response(
+        success=True,
+        data=schema.dump(item),
+        message="Created wishlist item.",
+        status_code=201,
+    )
 
 
 @wishlist_bp.route("/<int:wishlist_id>/items/<int:item_id>", methods=["DELETE"])
@@ -184,28 +132,20 @@ def create_item_route(itinerary_id: int, access: ItineraryAccess, wishlist_id: i
 def delete_item_route(
     itinerary_id: int, access: ItineraryAccess, wishlist_id: int, item_id: int
 ):
-    try:
-        if not itinerary_contains_wishlist_item(itinerary_id, item_id):
-            return api_response(
-                success=False,
-                error="Wishlist item does not exists",
-                message="Wishlist item does not exist",
-                status_code=404,
-            )
-        deleted_id = delete_wishlist_item(item_id)
-        return api_response(
-            success=True,
-            data={"deletedId": deleted_id},
-            message="Removed wishlist item.",
-            status_code=200,
-        )
-    except (UserNotAuthorisedError, ItineraryDoesNotExistError, BadRequestError) as err:
+    if not itinerary_contains_wishlist_item(itinerary_id, item_id):
         return api_response(
             success=False,
-            message=err.message,
-            error=err.message,
-            status_code=err.status_code,
+            error="Wishlist item does not exists",
+            message="Wishlist item does not exist",
+            status_code=404,
         )
+    deleted_id = delete_wishlist_item(item_id)
+    return api_response(
+        success=True,
+        data={"deletedId": deleted_id},
+        message="Removed wishlist item.",
+        status_code=200,
+    )
 
 
 @wishlist_bp.route("/<int:wishlist_id>/items/<int:item_id>", methods=["PATCH"])
@@ -217,35 +157,23 @@ def update_item_route(
     itinerary_id: int, access: ItineraryAccess, wishlist_id: int, item_id: int
 ):
     schema = WishlistItemSchema()
-    try:
-        if not itinerary_contains_wishlist_item(itinerary_id, item_id):
-            return api_response(
-                success=False,
-                error="Wishlist item does not exist",
-                message="Wishlist item does not exist",
-                status_code=404,
-            )
-        validated_data = schema.load(request.json, partial=True)
-        item = update_wishlist_item(
-            itinerary_id, wishlist_id, item_id, validated_data, access.user_id
-        )
-        return api_response(
-            success=True,
-            data=schema.dump(item),
-            message="Updated wishlist item.",
-            status_code=200,
-        )
-    except ValidationError as err:
-        return api_response(
-            success=False, error=err.messages, message="Bad request.", status_code=400
-        )
-    except (UserNotAuthorisedError, ItineraryDoesNotExistError, BadRequestError) as err:
+    if not itinerary_contains_wishlist_item(itinerary_id, item_id):
         return api_response(
             success=False,
-            message=err.message,
-            error=err.message,
-            status_code=err.status_code,
+            error="Wishlist item does not exist",
+            message="Wishlist item does not exist",
+            status_code=404,
         )
+    validated_data = schema.load(request.json, partial=True)
+    item = update_wishlist_item(
+        itinerary_id, wishlist_id, item_id, validated_data, access.user_id
+    )
+    return api_response(
+        success=True,
+        data=schema.dump(item),
+        message="Updated wishlist item.",
+        status_code=200,
+    )
 
 
 @wishlist_bp.route("/<int:wishlist_id>/items/<int:item_id>/promote", methods=["POST"])
