@@ -34,8 +34,12 @@ def register_user(username: str, email: str, password: str):
     if user:
         raise UserAlreadyExistsError()
     new_user = User(username=username, email=email, password=password_hash)
-    db.session.add(new_user)
-    db.session.commit()
+    try:
+        db.session.add(new_user)
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
+        raise
     return {
         "id": new_user.id,
         "email": new_user.email,
