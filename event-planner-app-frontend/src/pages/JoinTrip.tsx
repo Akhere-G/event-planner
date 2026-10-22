@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import { isApiError } from "../features/api/utils";
 import { toast } from "sonner";
 import { usePostHog } from "@posthog/react";
+import StateGate from "../components/StateGate";
 
 export default function JoinTrip() {
   const [joinTrip, { isLoading, error }] = useJoinTripMutation();
@@ -38,22 +39,23 @@ export default function JoinTrip() {
     join();
   }, [token, navigate, joinTrip, posthog]);
 
-  let title = "Joining trip...";
-
-  if (error) {
-    title = "Could not join trip.";
-  }
+  const title = error ? "Could not join trip." : "Joining trip...";
 
   return (
     <div className="container">
       <div className="card">
         <h2 className="title mb-4">{title}</h2>
-        {isLoading && <p> Loading...</p>}
-        {isApiError(error) && (
-          <>
-            <p> {error.data.message || "Could not join trip."}</p>
-          </>
-        )}
+        <StateGate
+          loadingStateProps={{ isLoading, message: "Joining trip..." }}
+          errorStateProps={{
+            isError: !!error,
+            message: isApiError(error)
+              ? error.data.message
+              : "Could not join trip.",
+          }}
+        >
+          <></>
+        </StateGate>
       </div>
     </div>
   );
