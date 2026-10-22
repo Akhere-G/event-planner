@@ -207,7 +207,11 @@ def check_upcoming_event_reminders(minutes_ahead: int = 30) -> int:
     now = datetime.now(timezone.utc).replace(tzinfo=None)
     future_window = now + timedelta(minutes=minutes_ahead)
 
-    stmt = select(Event).where(Event.start_at >= now, Event.start_at <= future_window)
+    stmt = select(Event).where(
+        Event.start_at >= now,
+        Event.start_at <= future_window,
+        Event.reminder_sent_at.is_(None),
+    )
     upcoming_events = db.session.execute(stmt).scalars().all()
     print(now, future_window)
     print(f"upcoming events {len(upcoming_events)}")
@@ -236,5 +240,12 @@ def check_upcoming_event_reminders(minutes_ahead: int = 30) -> int:
                 link_url=url,
             )
             total_sent += 1
+
+        event.reminder_sent_at = datetime.now(timezone.utc)
+        try:
+            db.session.commit()
+        except Exception:
+            db.session.rollback()
+            raise
 
     return total_sent
