@@ -38,6 +38,7 @@ export default function PackingItemCard({
         itemId: packingItem.id,
         updates: { isChecked: !packingItem.isChecked },
       }).unwrap();
+      toast.success(packingItem.isChecked ? "Item unpacked" : "Item packed");
     } catch (err) {
       if (isApiError(err)) {
         toast.error(err.data.message);

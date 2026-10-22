@@ -21,7 +21,7 @@ class Invite(Base, AuditMixin):
     __tablename__ = "itinerary_invitations"
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     itinerary_id: Mapped[int] = mapped_column(
-        ForeignKey("itineraries.id", ondelete="CASCADE")
+        ForeignKey("itineraries.id", ondelete="CASCADE"), index=True
     )
     email: Mapped[str] = mapped_column(String(255), index=True)
     inviter_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="SET NULL"))

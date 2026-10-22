@@ -18,7 +18,6 @@ import { toast } from "sonner";
 import type { RootState } from "../../../store";
 import { ConfirmModal } from "../../../components";
 import { useState } from "react";
-import { exportToCalendar, exportToDoc } from "../utils";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -95,7 +94,8 @@ export default function TripSummary({
           <DropdownMenuContent align="end">
             <DropdownMenuItem
               disabled={isRemoveLoading}
-              onClick={() => {
+              onClick={async () => {
+                const { exportToCalendar } = await import("../utils");
                 exportToCalendar(trip.name, trip.events, trip.userMemberships);
                 posthog?.capture("export_to_calendar", { trip_id: trip.id });
               }}
@@ -105,7 +105,8 @@ export default function TripSummary({
               Export to calendar
             </DropdownMenuItem>
             <DropdownMenuItem
-              onClick={() => {
+              onClick={async () => {
+                const { exportToDoc } = await import("../utils");
                 exportToDoc(trip);
                 posthog?.capture("export_to_doc", { trip_id: trip.id });
               }}

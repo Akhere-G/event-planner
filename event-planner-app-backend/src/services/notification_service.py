@@ -203,6 +203,72 @@ def send_push_notification(
     return notification
 
 
+def send_push_notifications_bulk(
+    user_ids: List[int],
+    title: str,
+    message: str,
+    link_url: Optional[str] = None,
+) -> List[Notification]:
+    if not user_ids:
+        return []
+
+    notifications = [
+        Notification(
+            user_id=user_id,
+            title=title,
+            message=message,
+            link_url=link_url,
+            is_read=False,
+        )
+        for user_id in user_ids
+    ]
+    db.session.add_all(notifications)
+    db.session.commit()
+
+    private_key = DEFAULT_VAPID_PRIVATE_KEY
+    if not private_key:
+        logger.warning("VAPID_PRIVATE_KEY not set. Push dispatch skipped.")
+        return notifications
+
+    stmt = select(NotificationSubscription).where(
+        NotificationSubscription.user_id.in_(user_ids)
+    )
+    subscriptions = db.session.execute(stmt).scalars().all()
+    payload = json.dumps(
+        {
+            "title": title,
+            "message": message,
+            "url": link_url or "/",
+        }
+    )
+
+    claims: Dict[str, str | int] = {"sub": DEFAULT_VAPID_CLAIMS_SUB}
+
+    for sub in subscriptions:
+        try:
+            webpush(
+                subscription_info={
+                    "endpoint": sub.endpoint,
+                    "keys": {
+                        "p256dh": sub.p256dh,
+                        "auth": sub.auth,
+                    },
+                },
+                data=payload,
+                vapid_private_key=private_key,
+                vapid_claims=claims,
+            )
+        except WebPushException as ex:
+            logger.error(f"WebPush error for subscription {sub.id}: {ex}")
+            if ex.response is not None and ex.response.status_code in [404, 410]:
+                db.session.delete(sub)
+                db.session.commit()
+        except Exception as ex:
+            logger.exception(f"Unexpected error sending push: {ex}")
+
+    return notifications
+
+
 def check_upcoming_event_reminders(minutes_ahead: int = 30) -> int:
     now = datetime.now(timezone.utc).replace(tzinfo=None)
     future_window = now + timedelta(minutes=minutes_ahead)
@@ -213,33 +279,36 @@ def check_upcoming_event_reminders(minutes_ahead: int = 30) -> int:
         Event.reminder_sent_at.is_(None),
     )
     upcoming_events = db.session.execute(stmt).scalars().all()
-    print(now, future_window)
-    print(f"upcoming events {len(upcoming_events)}")
 
     total_sent = 0
+    memberships_by_itinerary: Dict[int, List[ItineraryUser]] = {}
+
     for event in upcoming_events:
         time_diff = event.start_at - now
         mins_remaining = max(1, int(time_diff.total_seconds() / 60))
         suffix = "s" if mins_remaining > 1 else ""
 
-        members_stmt = select(ItineraryUser).where(
-            ItineraryUser.itinerary_id == event.itinerary_id
-        )
-        memberships = db.session.execute(members_stmt).scalars().all()
-        print(f"No. memberships {len(memberships)}")
+        if event.itinerary_id not in memberships_by_itinerary:
+            members_stmt = select(ItineraryUser).where(
+                ItineraryUser.itinerary_id == event.itinerary_id
+            )
+            memberships_by_itinerary[event.itinerary_id] = (
+                db.session.execute(members_stmt).scalars().all()
+            )
+
+        memberships = memberships_by_itinerary[event.itinerary_id]
 
         title = f"Upcoming Event: {event.name}"
         message = f"Starting in {mins_remaining} minute{suffix}! Location: {event.address or 'N/A'}"
         url = f"/trips/{event.itinerary_id}"
 
-        for member in memberships:
-            send_push_notification(
-                user_id=member.user_id,
-                title=title,
-                message=message,
-                link_url=url,
-            )
-            total_sent += 1
+        sent = send_push_notifications_bulk(
+            user_ids=[member.user_id for member in memberships],
+            title=title,
+            message=message,
+            link_url=url,
+        )
+        total_sent += len(sent)
 
         event.reminder_sent_at = datetime.now(timezone.utc)
         try:

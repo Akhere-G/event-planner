@@ -26,6 +26,7 @@ export default function useUpdateEvent({
   async function handleDelete(eventId: number) {
     try {
       await deleteEvent({ tripId, eventId }).unwrap();
+      toast.success("Event deleted!");
       onDelete();
     } catch (err) {
       if (isFetchBaseQueryError(err)) {
@@ -43,6 +44,7 @@ export default function useUpdateEvent({
         updatedEvent,
         timezone: trip.timezone,
       }).unwrap();
+      toast.success("Event updated!");
       onEdit();
     } catch (err) {
       if (isFetchBaseQueryError(err)) {
