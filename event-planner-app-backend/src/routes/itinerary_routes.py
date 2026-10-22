@@ -79,7 +79,6 @@ def get_itinerary_route(itinerary_id: int, access: ItineraryAccess):
 
 @itinerary_bp.route("", methods=["POST"])
 @limiter.limit("20 per minute", key_func=get_user_or_ip)
-@limiter.limit("20 per minute")
 def create_itinerary_route():
     user_id = session.get("user_id")
     schema = ItinerarySchema()

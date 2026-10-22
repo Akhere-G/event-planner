@@ -63,7 +63,6 @@ def create_packing_item(itinerary_id: int, access: ItineraryAccess):
     allowed_roles=[UserRole.ADMIN, UserRole.EDITOR],
 )
 @limiter.limit("10 per minute", key_func=get_user_or_ip)
-@limiter.limit("10 per minute")
 def generate_packing_items_route(itinerary_id: int, access: ItineraryAccess):
     schema = PackingItemSchema(many=True)
     items = packing_item_service.generate_and_add_packing_items(
