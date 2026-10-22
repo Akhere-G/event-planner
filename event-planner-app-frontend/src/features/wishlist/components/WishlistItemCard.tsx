@@ -246,6 +246,7 @@ export default function WishlistItemCard({
         wishlist_id: item.wishlistId,
         wishlist_item_id: item.id,
       });
+      toast.success("Vote recorded!");
     } catch (err) {
       if (isApiError(err)) {
         return toast.error(err.data.message);

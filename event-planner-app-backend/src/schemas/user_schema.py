@@ -94,23 +94,3 @@ class RegisterSchema(BaseSchema):
     def validate_passwords(self, data, **kwargs):
         if data.get("password") != data.get("repeat_password"):
             raise ValidationError("Passwords must match.", field_name="repeat_password")
-
-
-class AddOrUpdateUserRoleSchema(Schema):
-    email = fields.Email(
-        required=True, error_messages={"required": "Email is required."}
-    )
-    role = fields.String(
-        required=True,
-        validate=validate.OneOf(
-            [e.value for e in UserRole],
-            error="Invalid role. Must be one of: {choices}.",
-        ),
-        error_messages={
-            "required": "Role is required.",
-            "validator_failed": "Invalid role value.",
-        },
-        metadata={
-            "description": f"Must be one of: {', '.join([e.value for e in UserRole])}"
-        },
-    )
