@@ -143,7 +143,6 @@ def send_push_notification(
         NotificationSubscription.user_id == user_id
     )
     subscriptions = db.session.execute(stmt).scalars().all()
-    print(f"no. subscriptions {len(subscriptions)}")
     payload = json.dumps(
         {
             "title": title,
@@ -185,8 +184,6 @@ def check_upcoming_event_reminders(minutes_ahead: int = 30) -> int:
 
     stmt = select(Event).where(Event.start_at >= now, Event.start_at <= future_window)
     upcoming_events = db.session.execute(stmt).scalars().all()
-    print(now, future_window)
-    print(f"upcoming events {len(upcoming_events)}")
 
     total_sent = 0
     for event in upcoming_events:
@@ -198,7 +195,6 @@ def check_upcoming_event_reminders(minutes_ahead: int = 30) -> int:
             ItineraryUser.itinerary_id == event.itinerary_id
         )
         memberships = db.session.execute(members_stmt).scalars().all()
-        print(f"No. memberships {len(memberships)}")
 
         title = f"Upcoming Event: {event.name}"
         message = f"Starting in {mins_remaining} minute{suffix}! Location: {event.address or 'N/A'}"
