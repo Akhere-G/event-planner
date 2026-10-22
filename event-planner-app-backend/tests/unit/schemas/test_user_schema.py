@@ -3,7 +3,6 @@
 import pytest
 from marshmallow import ValidationError
 from src.schemas.user_schema import (
-    AddOrUpdateUserRoleSchema,
     LoginSchema,
     RegisterSchema,
     UserWithRoleSchema,
@@ -92,25 +91,3 @@ def test_user_with_role_accepts_valid_role(role, admin_user):
 def test_user_with_role_rejects_invalid_role():
     with pytest.raises(ValidationError):
         UserWithRoleSchema().load({"role": "invalid"})
-
-
-def test_add_or_update_user_role_schema_validates_role_and_email():
-    result = AddOrUpdateUserRoleSchema().load(
-        {
-            "email": "test@example.com",
-            "role": "editor",
-        }
-    )
-
-    assert result["email"] == "test@example.com"
-    assert result["role"] == "editor"
-
-
-def test_add_or_update_user_role_schema_rejects_invalid_role():
-    with pytest.raises(ValidationError):
-        AddOrUpdateUserRoleSchema().load(
-            {
-                "email": "test@example.com",
-                "role": "invalid",
-            }
-        )

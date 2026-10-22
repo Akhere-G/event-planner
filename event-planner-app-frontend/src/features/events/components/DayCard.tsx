@@ -68,6 +68,7 @@ export default function DayCard({
         trip_id: tripId,
         ...autoFillData,
       });
+      toast.success("Suggestions added!");
       setIsFillMenuOpen(false);
     } catch (err) {
       if (isApiError(err)) {
@@ -85,6 +86,7 @@ export default function DayCard({
       posthog?.capture("ai_optimise_events_used", {
         trip_id: tripId,
       });
+      toast.success("Events optimised!");
     } catch (err) {
       if (isApiError(err)) {
         toast.error(err.data.message);

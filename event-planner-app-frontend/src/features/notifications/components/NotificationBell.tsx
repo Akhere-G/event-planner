@@ -46,6 +46,7 @@ export default function NotificationBell() {
         await markAsRead(item.id).unwrap();
       } catch (err) {
         console.error("Failed to mark notification as read:", err);
+        toast.error("Failed to update notification.");
       }
     }
     setIsOpen(false);

@@ -28,11 +28,12 @@ export default function InviteUserForm() {
       email: invite.email.toLowerCase(),
     };
     try {
-      createInvite({ tripId, invite: formattedInvite }).unwrap();
+      await createInvite({ tripId, invite: formattedInvite }).unwrap();
       posthog?.capture("invite_sent", {
         role: invite.role,
         trip_id: tripId,
       });
+      toast.success("Invite sent!");
     } catch (err) {
       if (isValidationError(err)) {
         const serverErrors = err.data.error;
