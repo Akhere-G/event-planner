@@ -1,4 +1,5 @@
 from datetime import date
+from typing import Optional
 
 from sqlalchemy import (
     Date,
@@ -25,7 +26,7 @@ class Accommodation(Base, AuditMixin):
     address: Mapped[str] = mapped_column(String(255))
     latitude: Mapped[float] = mapped_column(Float)
     longitude: Mapped[float] = mapped_column(Float)
-    description: Mapped[str] = mapped_column(String(1000), nullable=True)
+    description: Mapped[Optional[str]] = mapped_column(String(1000), nullable=True)
     start_date: Mapped[date] = mapped_column(Date, index=True)
     end_date: Mapped[date] = mapped_column(Date)
 
