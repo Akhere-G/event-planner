@@ -58,7 +58,6 @@ marshmallow==4.2.3
 marshmallow-sqlalchemy==1.5.0
 matplotlib-inline==0.2.1
 multidict==6.7.1
-openai==0.27.10
 ordered-set==4.1.0
 packaging==26.1
 parso==0.8.7
