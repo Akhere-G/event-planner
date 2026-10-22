@@ -16,7 +16,7 @@ import {
   useDeleteWishlistMutation,
   useUpdateWishlistMutation,
 } from "../services/wishlistApiSlice";
-import { isFetchBaseQueryError, type APIError } from "../../api/utils";
+import { isApiError } from "../../api/utils";
 import { toast } from "sonner";
 import {
   DropdownMenu,
@@ -61,12 +61,9 @@ export default function WishlistCard({
 
       await updateWishlist({ name, tripId, wishlistId: wishlist.id }).unwrap();
     } catch (err) {
-      if (isFetchBaseQueryError(err)) {
-        const error = err as APIError;
-        toast.error(error.data.message);
-      } else {
-        toast.error("Could not update wishlist name.");
-      }
+      toast.error(
+        isApiError(err) ? err.data.message : "Could not update wishlist name.",
+      );
 
       setName(oldName);
     }
@@ -76,13 +73,7 @@ export default function WishlistCard({
     try {
       await deleteWishlist({ tripId, wishlistId: wishlist.id }).unwrap();
     } catch (err) {
-      if (isFetchBaseQueryError(err)) {
-        const error = err as APIError;
-
-        toast.error(error.data.message);
-      } else {
-        toast.error("Could not delete wishlist");
-      }
+      toast.error(isApiError(err) ? err.data.message : "Could not delete wishlist");
     }
   };
 
