@@ -7,9 +7,6 @@ from .user_model import User
 from typing import Optional
 
 
-# TODO: add creator and last editor relationships
-
-
 class PackingItem(Base, AuditMixin):
     __tablename__ = "packing_items"
 
