@@ -42,6 +42,7 @@ export default function UserRow({ user }: { user: User }) {
         isCurrentUser ? "user_left_trip" : "user_removed_from_trip",
         { trip_id: tripId },
       );
+      toast.success(isCurrentUser ? "Left the trip!" : `Removed ${username}!`);
 
       setIsConfirmOpen(false);
     } catch (err) {
@@ -60,6 +61,7 @@ export default function UserRow({ user }: { user: User }) {
         userId: user.id,
         newUserData: { role },
       }).unwrap();
+      toast.success("Role updated!");
     } catch (err) {
       setUserRole(oldRole);
       if (isFetchBaseQueryError(err)) {

@@ -7,6 +7,7 @@ import type { PackingitemSchema } from "../schema";
 import { useAddPackingItemMutation } from "../services/packingApiSlice";
 import { Plus, Tag } from "lucide-react";
 import { usePostHog } from "@posthog/react";
+import { toast } from "sonner";
 
 export default function PackingItems({
   packingItems,
@@ -28,6 +29,7 @@ export default function PackingItems({
     posthog?.capture("packing_item_created", {
       trip_id: tripId,
     });
+    toast.success("Item added!");
     setShowAddForm(false);
   }
 
