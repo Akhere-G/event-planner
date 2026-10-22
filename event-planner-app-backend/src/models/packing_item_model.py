@@ -34,6 +34,7 @@ class PackingItem(Base, AuditMixin):
         ForeignKey("users.id", ondelete="SET NULL"),
         default=None,
         nullable=True,
+        index=True,
     )
     checked_by: Mapped[Optional["User"]] = relationship(
         "User", foreign_keys=[checked_by_id]
