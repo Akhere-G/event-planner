@@ -21,6 +21,8 @@ if (!PROJECT_HOST || !PROJECT_TOKEN) {
 posthog.init(PROJECT_TOKEN, {
   api_host: PROJECT_HOST,
   defaults: "2026-05-30",
+  persistence: "memory",
+  person_profiles: "identified_only",
 });
 
 posthog?.register({
