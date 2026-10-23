@@ -133,7 +133,7 @@ export default function TripCalendar({ trip }: { trip: Trip }) {
       isSameDay(date, trip.endDate) ||
       (isAfter(date, trip.startDate) && isBefore(date, trip.endDate));
     if (isToday) {
-      bgClass = "!font-bold bg-blue-200! dark:bg-blue-600/50!";
+      bgClass = "!font-bold bg-info/20! dark:bg-info/40!";
     } else if (isSelected) {
       bgClass = "bg-brand-primary/20! dark:!bg-brand-primary/50";
     } else if (!tripDay) {
