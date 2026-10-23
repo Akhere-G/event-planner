@@ -1,3 +1,4 @@
+import logging
 from datetime import datetime, timedelta, timezone
 
 from sqlalchemy import or_, select
@@ -13,6 +14,8 @@ from ..extensions import db
 from ..models import InvitationStatus, Invite, Itinerary, User, UserRole
 from .itineraries_service import get_membership_by_email
 from .users_service import add_user_to_itinerary
+
+logger = logging.getLogger(__name__)
 
 
 def get_invite(
@@ -100,8 +103,8 @@ def create_invite_notification(invite, email):
                 message=f"You have been invited to join {trip_name}!",
                 link_url="/invites",
             )
-    except Exception as e:
-        print(f"Failed to send invite push notification: {e}")
+    except Exception:
+        logger.exception("Failed to send invite push notification")
 
 
 def revoke_invite(user_id: int, itinerary_id: int, invite_id: int):

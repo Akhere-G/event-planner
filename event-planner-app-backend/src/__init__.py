@@ -92,7 +92,7 @@ def configure_app(app: Flask, testing: bool):
         app,
         supports_credentials=True,
         origins=[
-            os.getenv("FRONTEND_URL", "localhost:5173"),
+            os.getenv("FRONTEND_URL", "http://localhost:5173"),
         ],
     )
 
@@ -205,7 +205,12 @@ def register_frontend(app: Flask):
     @app.route("/<path:path>")
     def serve_react(path):
         if path.startswith("api/"):
-            return {"error": "Not found"}, 404
+            return api_response(
+                success=False,
+                message="Resource not found.",
+                error="Not found",
+                status_code=404,
+            )
 
         file_path = os.path.join(static_folder, path)
 
