@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { toast } from "sonner";
-import { isFetchBaseQueryError, type APIError } from "../../api/utils";
+import { isApiError, isFetchBaseQueryError } from "../../api/utils";
 import { useCreateWishlistMutation } from "../services/wishlistApiSlice";
 import { usePostHog } from "@posthog/react";
 
@@ -36,11 +36,8 @@ export default function AddWishlistForm({
           feature: "wishlist_creation",
           action: "wishlist_created",
         });
-        const error = err as APIError;
-        toast.error(error.data.message);
-      } else {
-        toast.error("Failed to create wishlist");
       }
+      toast.error(isApiError(err) ? err.data.message : "Failed to create wishlist");
     }
   };
 
