@@ -1,4 +1,5 @@
 from datetime import date
+from unittest.mock import patch
 
 from sqlalchemy import func, select
 from src.extensions import db
@@ -73,7 +74,11 @@ def test_get_itinerary_not_member(non_member_client, itinerary):
     assert response.status_code == 401
 
 
-def test_create_itinerary_success(auth_client, admin_user):
+@patch(
+    "src.routes.itinerary_routes.get_timezone_for_coordinates",
+    return_value="Asia/Tokyo",
+)
+def test_create_itinerary_success(mock_get_timezone, auth_client, admin_user):
     initial_count = db.session.execute(
         select(func.count()).where(ItineraryUser.user_id == admin_user.id)
     ).scalar()
@@ -116,7 +121,11 @@ def test_create_itinerary_success(auth_client, admin_user):
     assert membership.role == UserRole.ADMIN.value
 
 
-def test_create_itinerary_unauthenticated_unauthorised(client):
+@patch(
+    "src.routes.itinerary_routes.get_timezone_for_coordinates",
+    return_value="Asia/Tokyo",
+)
+def test_create_itinerary_unauthenticated_unauthorised(mock_get_timezone, client):
     response = client.post(
         "/api/itineraries",
         json={
