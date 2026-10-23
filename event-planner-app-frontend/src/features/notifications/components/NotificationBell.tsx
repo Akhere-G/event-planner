@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { Bell, CheckCheck, ExternalLink, Inbox } from "lucide-react";
+import { Bell, CheckCheck, ExternalLink } from "lucide-react";
 import { useNavigate } from "react-router";
 import { formatDistanceToNow, parseISO } from "date-fns";
 import { toast } from "sonner";
@@ -10,6 +10,7 @@ import {
   useMarkNotificationAsReadMutation,
 } from "../services/notificationApiSlice";
 import type { NotificationItem } from "../types";
+import StateGate from "../../../components/StateGate";
 
 export default function NotificationBell() {
   const [isOpen, setIsOpen] = useState(false);
@@ -103,17 +104,22 @@ export default function NotificationBell() {
           </div>
 
           <div className="max-h-80 overflow-y-auto divide-y divide-brand-primary/5">
-            {isLoading ? (
-              <div className="p-6 text-center text-xs text-text-muted">
-                Loading notifications...
-              </div>
-            ) : notifications.length === 0 ? (
-              <div className="p-8 text-center flex flex-col items-center justify-center text-text-muted gap-2">
-                <Inbox className="w-8 h-8 opacity-40" />
-                <p className="text-xs">No notifications yet</p>
-              </div>
-            ) : (
-              notifications.map((item) => (
+            <StateGate
+              loadingStateProps={{
+                isLoading,
+                customSkeleton: (
+                  <div className="p-6 text-center text-xs text-text-muted">
+                    Loading notifications...
+                  </div>
+                ),
+              }}
+              emptyStateProps={{
+                isEmpty: notifications.length === 0,
+                message: "No notifications yet",
+                height: 100,
+              }}
+            >
+              {notifications.map((item) => (
                 <div
                   key={item.id}
                   onClick={() => handleNotificationClick(item)}
@@ -148,8 +154,8 @@ export default function NotificationBell() {
                     )}
                   </div>
                 </div>
-              ))
-            )}
+              ))}
+            </StateGate>
           </div>
         </div>
       )}
