@@ -243,6 +243,7 @@ def update_itinerary(itinerary_id: int, data: dict):
                 "description",
                 "start_date",
                 "end_date",
+                "budget_amount_gbp",
                 "updated_by_id",
             ]:
                 setattr(itinerary, k, v)

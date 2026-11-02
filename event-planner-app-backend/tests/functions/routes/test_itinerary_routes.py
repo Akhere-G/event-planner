@@ -266,3 +266,23 @@ def test_delete_itinerary_not_member(non_member_client, itinerary):
         select(Itinerary).where(Itinerary.id == itinerary.id)
     ).scalar_one_or_none()
     assert db_itinerary is not None
+
+
+def test_update_itinerary_budget_admin_success(admin_client, itinerary):
+    response = admin_client.patch(
+        f"/api/itineraries/{itinerary.id}",
+        json={"budgetAmountGbp": 1250.5},
+    )
+    assert response.status_code == 200
+    assert response.get_json()["data"]["budgetAmountGbp"] == 1250.5
+
+    db.session.refresh(itinerary)
+    assert float(itinerary.budget_amount_gbp) == 1250.5
+
+
+def test_update_itinerary_negative_budget_rejected(admin_client, itinerary):
+    response = admin_client.patch(
+        f"/api/itineraries/{itinerary.id}",
+        json={"budgetAmountGbp": -10},
+    )
+    assert response.status_code == 400

@@ -1,6 +1,7 @@
 from .accommodation_routes import accommodation_bp
 from .ai_routes import ai_bp
 from .auth_routes import auth_bp
+from .change_set_routes import change_set_bp
 from .event_routes import event_bp
 from .invite_routes import itinerary_invites_bp
 from .itinerary_routes import itinerary_bp
@@ -14,6 +15,7 @@ __all__ = [
     "accommodation_bp",
     "ai_bp",
     "auth_bp",
+    "change_set_bp",
     "event_bp",
     "itinerary_bp",
     "itinerary_invites_bp",
