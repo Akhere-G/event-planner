@@ -10,9 +10,11 @@ from ..middleware.itinerary_access_required import (
 )
 from ..models import UserRole
 from ..schemas.ai_schema import EventSuggestionRequestSchema
-from ..schemas.event_schema import EventSchema
 from ..services.ai_services import get_event_suggestions, get_insights, optimise_events
-from ..services.events_service import create_events, update_events
+from ..services.change_set_service import (
+    build_event_create_ops,
+    build_event_update_ops,
+)
 from ..utils.format_response import api_response
 from ..utils.rate_limit import get_user_or_ip
 
@@ -29,15 +31,14 @@ def get_insights_route(itinerary_id: int, access: ItineraryAccess):
     return api_response(success=True, data=insights, message="Fetched insights")
 
 
-@ai_bp.route("/suggest-events/<int:itinerary_id>", methods=["POST"])
+@ai_bp.route("/suggest-events/<int:itinerary_id>/preview", methods=["POST"])
 @itinerary_access_required(
     allowed_roles=[UserRole.ADMIN, UserRole.EDITOR],
     message="You must be an admin or an editor to change events.",
 )
 @limiter.limit("10 per minute", key_func=get_user_or_ip)
-def get_event_suggestions_route(itinerary_id: int, access: ItineraryAccess):
-    schema = EventSchema(many=True)
-
+def preview_event_suggestions_route(itinerary_id: int, access: ItineraryAccess):
+    """Suggest events for a day. Nothing is saved until the change set is applied."""
     try:
         validated = EventSuggestionRequestSchema().load(
             request.get_json(silent=True) or {}
@@ -45,30 +46,8 @@ def get_event_suggestions_route(itinerary_id: int, access: ItineraryAccess):
     except ValidationError as err:
         return api_response(success=False, error=err.messages, status_code=400)
 
-    date = validated["date"]
-    pace = validated["pace"]
-    companions = validated["companions"]
-    transport = validated["transport"]
-    interests = validated["interests"]
-
     try:
-        event_date = datetime.strptime(date, "%Y-%m-%d")
-
-        suggestions = get_event_suggestions(
-            itinerary_id,
-            event_date,
-            pace=pace,
-            companions=companions,
-            transport=transport,
-            interests=interests,
-        )
-        validated_suggestions = schema.load(suggestions)
-        create_events(itinerary_id, validated_suggestions, access.user_id)
-        return api_response(
-            success=True,
-            data=schema.dump(validated_suggestions),
-            message="Fetched suggestions.",
-        )
+        event_date = datetime.strptime(validated["date"], "%Y-%m-%d")
     except ValueError:
         return api_response(
             success=False,
@@ -77,32 +56,37 @@ def get_event_suggestions_route(itinerary_id: int, access: ItineraryAccess):
             status_code=400,
         )
 
+    suggestions = get_event_suggestions(
+        itinerary_id,
+        event_date,
+        pace=validated["pace"],
+        companions=validated["companions"],
+        transport=validated["transport"],
+        interests=validated["interests"],
+    )
+    return api_response(
+        success=True,
+        data={"ops": build_event_create_ops(suggestions)},
+        message="Generated suggestions.",
+    )
 
-@ai_bp.route("/optimise-events/<int:itinerary_id>", methods=["POST"])
+
+@ai_bp.route("/optimise-events/<int:itinerary_id>/preview", methods=["POST"])
 @itinerary_access_required(
     allowed_roles=[UserRole.ADMIN, UserRole.EDITOR],
     message="You must be an admin or an editor to change events.",
 )
 @limiter.limit("10 per minute", key_func=get_user_or_ip)
-def optimise_events_route(itinerary_id: int, access: ItineraryAccess):
+def preview_optimised_events_route(itinerary_id: int, access: ItineraryAccess):
+    """Propose new times for a day's events. Nothing is saved until applied."""
     body = request.get_json(silent=True) or {}
     date = body.get("date")
-    schema = EventSchema(many=True)
 
     if not date:
         return api_response(success=False, error="Date is required.", status_code=400)
+
     try:
         event_date = datetime.strptime(date, "%Y-%m-%d")
-
-        optimised_events = optimise_events(itinerary_id, event_date)
-        updated_events = update_events(itinerary_id, optimised_events, access.user_id)
-        validated_events = schema.dump(updated_events)
-        return api_response(
-            success=True,
-            data=validated_events,
-            message="Optimised events.",
-        )
-
     except ValueError:
         return api_response(
             success=False,
@@ -110,3 +94,10 @@ def optimise_events_route(itinerary_id: int, access: ItineraryAccess):
             message="Invalid format for date.",
             status_code=400,
         )
+
+    optimised_events = optimise_events(itinerary_id, event_date)
+    return api_response(
+        success=True,
+        data={"ops": build_event_update_ops(optimised_events)},
+        message="Generated optimised times.",
+    )

@@ -1,7 +1,12 @@
 import { apiSlice } from "../../api/apiSlice";
 import type { ApiResponse } from "../../api/types";
 import type { AutofillConfig } from "../../events/types";
-import type { TripInsight } from "../types";
+import type {
+  ApplyChangeSetResult,
+  ChangeOp,
+  ChangePreview,
+  TripInsight,
+} from "../types";
 
 export const aiApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
@@ -11,32 +16,41 @@ export const aiApiSlice = apiSlice.injectEndpoints({
     >({
       query: ({ tripId }) => `/ai/insights/${tripId}`,
     }),
-    suggestEvents: builder.mutation<
-      ApiResponse<Event[]>,
-      { tripId: number; body: AutofillConfig }
+    previewEventSuggestions: builder.mutation<
+      ApiResponse<ChangePreview>,
+      { tripId: number; body: AutofillConfig & { date: string } }
     >({
       query: ({ tripId, body }) => ({
-        url: `/ai/suggest-events/${tripId}`,
+        url: `/ai/suggest-events/${tripId}/preview`,
         method: "POST",
         body,
       }),
-      invalidatesTags: (_, __, args) => [
-        { type: "Trips", id: "LIST" },
-        { type: "Trips", id: args.tripId },
-      ],
     }),
-    optimiseEvents: builder.mutation<
-      ApiResponse<Event[]>,
+    previewOptimisedEvents: builder.mutation<
+      ApiResponse<ChangePreview>,
       { tripId: number; date: string }
     >({
       query: ({ tripId, date }) => ({
-        url: `/ai/optimise-events/${tripId}`,
+        url: `/ai/optimise-events/${tripId}/preview`,
         method: "POST",
         body: { date },
+      }),
+    }),
+    applyChangeSet: builder.mutation<
+      ApiResponse<ApplyChangeSetResult>,
+      { tripId: number; ops: ChangeOp[] }
+    >({
+      query: ({ tripId, ops }) => ({
+        url: `/itineraries/${tripId}/changes/apply`,
+        method: "POST",
+        body: { ops },
       }),
       invalidatesTags: (_, __, args) => [
         { type: "Trips", id: "LIST" },
         { type: "Trips", id: args.tripId },
+        "Accommodations",
+        "Wishlists",
+        { type: "PackingItem", id: "LIST" },
       ],
     }),
   }),
@@ -44,6 +58,7 @@ export const aiApiSlice = apiSlice.injectEndpoints({
 export const {
   useGetTripInsightsQuery,
   useLazyGetTripInsightsQuery,
-  useSuggestEventsMutation,
-  useOptimiseEventsMutation,
+  usePreviewEventSuggestionsMutation,
+  usePreviewOptimisedEventsMutation,
+  useApplyChangeSetMutation,
 } = aiApiSlice;

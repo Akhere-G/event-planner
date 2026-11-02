@@ -5,9 +5,11 @@ import EventList from "./EventList";
 import AddEventForm from "./AddEventForm";
 import { LoaderCircle, Map, MoreVertical, Sparkles, Wand2 } from "lucide-react";
 import {
-  useOptimiseEventsMutation,
-  useSuggestEventsMutation,
+  usePreviewEventSuggestionsMutation,
+  usePreviewOptimisedEventsMutation,
 } from "../../ai/services/aiApiSlice";
+import { ChangePreviewModal } from "../../ai/components";
+import type { ChangeOp } from "../../ai/types";
 import { useParams } from "react-router";
 import { toast } from "sonner";
 import { useGetTripQuery } from "../../trips/services/tripsApiSlice";
@@ -35,19 +37,23 @@ export default function DayCard({
   day: Day;
 }) {
   const tripId = Number(useParams()?.tripId);
-  const { isFetching } = useGetTripQuery(tripId);
+  const { data: tripData, isFetching } = useGetTripQuery(tripId);
   const { data } = useGetAccommodationsQuery(tripId);
   const accommodations = data?.data ?? [];
 
   const dispatch = useDispatch();
   const posthog = usePostHog();
 
-  const [suggestEvents, { isLoading: isSuggestLoading }] =
-    useSuggestEventsMutation();
-  const [optimiseEvents, { isLoading: isOptimiseLoading }] =
-    useOptimiseEventsMutation();
+  const [previewSuggestions, { isLoading: isSuggestLoading }] =
+    usePreviewEventSuggestionsMutation();
+  const [previewOptimised, { isLoading: isOptimiseLoading }] =
+    usePreviewOptimisedEventsMutation();
 
   const [isFillMenuOpen, setIsFillMenuOpen] = useState(false);
+  const [preview, setPreview] = useState<{
+    kind: "fill" | "optimise";
+    ops: ChangeOp[];
+  } | null>(null);
 
   const isOpen = day.isOpen;
 
@@ -60,16 +66,16 @@ export default function DayCard({
   }
   const getSuggestions = async (autoFillData: Autofill) => {
     try {
-      await suggestEvents({
+      const { data } = await previewSuggestions({
         tripId,
         body: autoFillData,
       }).unwrap();
-      posthog?.capture("ai_fill_days_generated", {
-        trip_id: tripId,
-        ...autoFillData,
-      });
-      toast.success("Suggestions added!");
       setIsFillMenuOpen(false);
+      if (!data.ops.length) {
+        toast.info("No suggestions found for this day. Try different options.");
+        return;
+      }
+      setPreview({ kind: "fill", ops: data.ops });
     } catch (err) {
       if (isApiError(err)) {
         toast.error(err.data.message);
@@ -82,20 +88,32 @@ export default function DayCard({
 
   const getOptimisedEvents = async () => {
     try {
-      await optimiseEvents({ tripId, date: day.date }).unwrap();
-      posthog?.capture("ai_optimise_events_used", {
-        trip_id: tripId,
-      });
-      toast.success("Events optimised!");
+      const { data } = await previewOptimised({
+        tripId,
+        date: day.date,
+      }).unwrap();
+      if (!data.ops.length) {
+        toast.info("There is nothing to optimise for this day.");
+        return;
+      }
+      setPreview({ kind: "optimise", ops: data.ops });
     } catch (err) {
       if (isApiError(err)) {
         toast.error(err.data.message);
       } else {
         posthog?.captureException(err);
-
         toast.error("Could not optimise events.");
       }
     }
+  };
+
+  const handlePreviewApplied = () => {
+    posthog?.capture(
+      preview?.kind === "fill"
+        ? "ai_fill_days_generated"
+        : "ai_optimise_events_used",
+      { trip_id: tripId },
+    );
   };
 
   const viewAllRoutes = () => {
@@ -211,6 +229,23 @@ export default function DayCard({
         )}
         onOpenChange={handleToggleOpen}
       />
+
+      {preview && tripData?.data && (
+        <ChangePreviewModal
+          open
+          onOpenChange={(open) => !open && setPreview(null)}
+          tripId={tripId}
+          timezone={tripData.data.timezone}
+          ops={preview.ops}
+          events={tripData.data.events ?? []}
+          title={
+            preview.kind === "fill"
+              ? `Fill Day ${day.day}: review suggestions`
+              : `Optimise Day ${day.day}: review changes`
+          }
+          onApplied={handlePreviewApplied}
+        />
+      )}
 
       {isFillMenuOpen && (
         <ConfirmModal
