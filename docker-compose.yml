@@ -1,0 +1,19 @@
+services:
+  triptrack:
+    build:
+      context: .
+      dockerfile: Dockerfile
+
+    ports:
+      - "8080:8080"
+
+    environment:
+      STORAGE_URI: redis://redis:6379/0
+
+    depends_on:
+      - redis
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"

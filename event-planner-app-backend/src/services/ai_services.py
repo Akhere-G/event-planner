@@ -2,8 +2,9 @@ import json
 import logging
 import os
 import re
-from datetime import datetime
+from datetime import datetime, timezone as dt_timezone
 from typing import Any, List
+from zoneinfo import ZoneInfo
 
 import googlemaps
 from google import genai
@@ -59,6 +60,28 @@ def format_json(raw_json: str) -> Any:
         return json.loads(clean_json)
     except json.JSONDecodeError as exc:
         raise ValueError("AI response contained invalid JSON.") from exc
+
+
+def _trip_zone(timezone_name: str | None) -> ZoneInfo:
+    return ZoneInfo(timezone_name or "UTC")
+
+
+def to_trip_local(value: datetime, timezone_name: str | None) -> datetime:
+    """Convert a stored (UTC) datetime to naive wall-clock time in the trip's zone."""
+    if value.tzinfo is None:
+        value = value.replace(tzinfo=dt_timezone.utc)
+    return value.astimezone(_trip_zone(timezone_name)).replace(tzinfo=None)
+
+
+def trip_local_to_utc(value: str | datetime, timezone_name: str | None) -> datetime:
+    """Treat an AI-provided time as wall-clock time in the trip's zone and return UTC.
+
+    Any offset the model adds anyway is ignored, because the prompt asks for local time.
+    """
+    if isinstance(value, str):
+        value = datetime.fromisoformat(value.replace("Z", "+00:00"))
+    local = value.replace(tzinfo=_trip_zone(timezone_name))
+    return local.astimezone(dt_timezone.utc)
 
 
 def get_ai_response(prompt: str) -> str:
@@ -175,7 +198,11 @@ def get_event_suggestions(
 
     booked_events = "\n".join(
         [
-            (f"- {event.name}: {event.start_at} - {event.end_at}")
+            (
+                f"- {event.name}: "
+                f"{to_trip_local(event.start_at, itinerary.timezone):%Y-%m-%dT%H:%M} - "
+                f"{to_trip_local(event.end_at, itinerary.timezone):%Y-%m-%dT%H:%M}"
+            )
             for event in itinerary.events
         ]
     )
@@ -224,7 +251,7 @@ REQUIREMENTS:
 7. Do not overlap events.
 8. Return ONLY a JSON array.
 9. Do not use markdown code blocks.
-10. The start_at and end_at MUST be formatted as UTC ISO 8601 strings, but represent the intended time in the {timezone} timezone.
+10. start_at and end_at MUST be local wall-clock times in the {timezone} timezone, formatted as YYYY-MM-DDTHH:MM:SS with no offset or "Z".
 
 JSON FORMAT:
 
@@ -233,8 +260,8 @@ JSON FORMAT:
     "name": "Exact Official Venue Name",
     "description": "Short description. Maximum 100 characters.",
     "address": "Full street address, City, Country",
-    "start_at": "YYYY-MM-DDTHH:MM:SSZ",
-    "end_at": "YYYY-MM-DDTHH:MM:SSZ",
+    "start_at": "YYYY-MM-DDTHH:MM:SS",
+    "end_at": "YYYY-MM-DDTHH:MM:SS",
     "category": "String that represents the type of activity (MAX 10 CHARACTERS, spaces between words)"
   }}
 ]
@@ -270,6 +297,10 @@ JSON FORMAT:
 
                 event_with_location = {
                     **event,
+                    "start_at": trip_local_to_utc(
+                        event["start_at"], timezone
+                    ).isoformat(),
+                    "end_at": trip_local_to_utc(event["end_at"], timezone).isoformat(),
                     "latitude": details["latitude"],
                     "longitude": details["longitude"],
                     "address": details.get("formatted_address") or event.get("address"),
@@ -302,7 +333,7 @@ def optimise_events(
     events = [
         event
         for event in itinerary.events
-        if event.start_at.date() == event_date.date()
+        if to_trip_local(event.start_at, timezone).date() == event_date.date()
     ]
 
     if not events:
@@ -313,8 +344,8 @@ def optimise_events(
             (
                 f"- id: {event.id}, "
                 f"name: {event.name}, "
-                f"start_at: {event.start_at}, "
-                f"end_at: {event.end_at}, "
+                f"start_at: {to_trip_local(event.start_at, timezone).isoformat()}, "
+                f"end_at: {to_trip_local(event.end_at, timezone).isoformat()}, "
                 f"address: {event.address}, "
                 f"category: {event.category}"
             )
@@ -354,7 +385,8 @@ Constraints:
    If an event cannot be sensibly optimised, keep its original times.
 
 8. TIMEZONE:
-   The start_at and end_at MUST be formatted as UTC ISO 8601 strings, but represent the intended time in the {timezone} timezone.
+   start_at and end_at MUST be local wall-clock times in the {timezone} timezone,
+   formatted as YYYY-MM-DDTHH:MM:SS with no offset or "Z".
 
 Return ONLY a JSON array.
 
@@ -363,8 +395,8 @@ Format:
 [
   {{
     "id": 123,
-    "start_at": "ISO 8601 string",
-    "end_at": "ISO 8601 string"
+    "start_at": "YYYY-MM-DDTHH:MM:SS",
+    "end_at": "YYYY-MM-DDTHH:MM:SS"
   }}
 ]
 
@@ -377,11 +409,20 @@ Events:
         raw_response = get_ai_response(prompt)
         optimised_events = format_json(raw_response)
 
-        return ai_output_validators.validate_optimised_events(
+        validated = ai_output_validators.validate_optimised_events(
             optimised_events,
             events,
             event_date,
         )
+
+        return [
+            {
+                **event,
+                "start_at": trip_local_to_utc(event["start_at"], timezone),
+                "end_at": trip_local_to_utc(event["end_at"], timezone),
+            }
+            for event in validated
+        ]
 
     except (ValueError, RuntimeError) as exc:
         logger.warning(
