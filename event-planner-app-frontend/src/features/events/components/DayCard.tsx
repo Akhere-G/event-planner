@@ -168,33 +168,37 @@ export default function DayCard({
                   <Map className="text-brand-primary" size={18} />
                   View all routes
                 </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={(e) => {
-                    setIsFillMenuOpen(true);
-                    e.stopPropagation();
-                  }}
-                  disabled={isSuggestBtnDisabled}
-                  className="flex gap-2 items-center"
-                >
-                  {isSuggestBtnDisabled ? (
-                    <LoaderCircle className="animate-spin" size={18} />
-                  ) : (
-                    <Sparkles className="text-brand-primary" size={18} />
-                  )}
-                  Fill in day
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={getOptimisedEvents}
-                  disabled={isOptimiseBtnDisabled}
-                  className="flex gap-2 items-center"
-                >
-                  {isOptimiseBtnDisabled ? (
-                    <LoaderCircle className="animate-spin" size={18} />
-                  ) : (
-                    <Wand2 className="text-brand-primary" size={18} />
-                  )}
-                  Optimise day
-                </DropdownMenuItem>
+                {canEdit && (
+                  <>
+                    <DropdownMenuItem
+                      onClick={(e) => {
+                        setIsFillMenuOpen(true);
+                        e.stopPropagation();
+                      }}
+                      disabled={isSuggestBtnDisabled}
+                      className="flex gap-2 items-center"
+                    >
+                      {isSuggestBtnDisabled ? (
+                        <LoaderCircle className="animate-spin" size={18} />
+                      ) : (
+                        <Sparkles className="text-brand-primary" size={18} />
+                      )}
+                      Fill in day
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={getOptimisedEvents}
+                      disabled={isOptimiseBtnDisabled}
+                      className="flex gap-2 items-center"
+                    >
+                      {isOptimiseBtnDisabled ? (
+                        <LoaderCircle className="animate-spin" size={18} />
+                      ) : (
+                        <Wand2 className="text-brand-primary" size={18} />
+                      )}
+                      Optimise day
+                    </DropdownMenuItem>
+                  </>
+                )}
               </DropdownMenuContent>
             </DropdownMenu>
           </div>

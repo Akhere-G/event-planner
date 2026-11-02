@@ -31,7 +31,8 @@ def get_insights_route(itinerary_id: int, access: ItineraryAccess):
 
 @ai_bp.route("/suggest-events/<int:itinerary_id>", methods=["POST"])
 @itinerary_access_required(
-    allowed_roles=[UserRole.ADMIN, UserRole.EDITOR, UserRole.VIEWER]
+    allowed_roles=[UserRole.ADMIN, UserRole.EDITOR],
+    message="You must be an admin or an editor to change events.",
 )
 @limiter.limit("10 per minute", key_func=get_user_or_ip)
 def get_event_suggestions_route(itinerary_id: int, access: ItineraryAccess):
@@ -79,7 +80,8 @@ def get_event_suggestions_route(itinerary_id: int, access: ItineraryAccess):
 
 @ai_bp.route("/optimise-events/<int:itinerary_id>", methods=["POST"])
 @itinerary_access_required(
-    allowed_roles=[UserRole.ADMIN, UserRole.EDITOR, UserRole.VIEWER]
+    allowed_roles=[UserRole.ADMIN, UserRole.EDITOR],
+    message="You must be an admin or an editor to change events.",
 )
 @limiter.limit("10 per minute", key_func=get_user_or_ip)
 def optimise_events_route(itinerary_id: int, access: ItineraryAccess):

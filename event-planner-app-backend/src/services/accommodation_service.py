@@ -24,7 +24,7 @@ def get_accommodation(itinerary_id: int, accommodation_id: int):
     return db.session.execute(stmt).scalar_one_or_none()
 
 
-def create_accommodation(
+def stage_create_accommodation(
     user_id: int | None,
     itinerary_id: int,
     accommodation_data: dict,
@@ -58,8 +58,20 @@ def create_accommodation(
         updated_by_id=user_id,
     )
 
+    db.session.add(accommodation)
+    db.session.flush()
+    return accommodation
+
+
+def create_accommodation(
+    user_id: int | None,
+    itinerary_id: int,
+    accommodation_data: dict,
+):
     try:
-        db.session.add(accommodation)
+        accommodation = stage_create_accommodation(
+            user_id, itinerary_id, accommodation_data
+        )
         db.session.commit()
     except Exception:
         db.session.rollback()
@@ -68,7 +80,7 @@ def create_accommodation(
     return accommodation
 
 
-def update_accommodation(
+def stage_update_accommodation(
     itinerary_id: int,
     accommodation_id: int,
     user_id: int | None,
@@ -124,8 +136,20 @@ def update_accommodation(
             setattr(accommodation, field, accommodation_data[field])
 
     accommodation.updated_by_id = user_id
+    db.session.flush()
+    return accommodation
 
+
+def update_accommodation(
+    itinerary_id: int,
+    accommodation_id: int,
+    user_id: int | None,
+    accommodation_data: dict,
+):
     try:
+        accommodation = stage_update_accommodation(
+            itinerary_id, accommodation_id, user_id, accommodation_data
+        )
         db.session.commit()
     except Exception:
         db.session.rollback()
@@ -134,7 +158,7 @@ def update_accommodation(
     return accommodation
 
 
-def delete_accommodation(
+def stage_delete_accommodation(
     itinerary_id: int,
     accommodation_id: int,
 ):
@@ -146,8 +170,17 @@ def delete_accommodation(
     if not accommodation:
         raise NotFoundError("Accommodation not found.")
 
+    db.session.delete(accommodation)
+    db.session.flush()
+    return accommodation_id
+
+
+def delete_accommodation(
+    itinerary_id: int,
+    accommodation_id: int,
+):
     try:
-        db.session.delete(accommodation)
+        stage_delete_accommodation(itinerary_id, accommodation_id)
         db.session.commit()
     except Exception:
         db.session.rollback()

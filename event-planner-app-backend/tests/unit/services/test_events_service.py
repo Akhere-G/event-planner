@@ -216,3 +216,27 @@ def test_delete_event_success(event):
 def test_delete_event_not_found(itinerary):
     with pytest.raises(EventNotFoundError):
         delete_event(itinerary.id, 99999)
+
+
+def test_stage_create_event_flushes_without_committing(itinerary):
+    from unittest.mock import patch
+
+    from src.extensions import db
+    from src.services.events_service import stage_create_event
+
+    with patch.object(db.session, "commit") as commit:
+        event = stage_create_event(
+            itinerary.id,
+            {
+                "name": "Staged",
+                "address": "1 Rue de Rivoli, Paris",
+                "latitude": 48.86,
+                "longitude": 2.35,
+                "start_at": datetime(2026, 8, 20, 10, 0, tzinfo=timezone.utc),
+                "end_at": datetime(2026, 8, 20, 11, 0, tzinfo=timezone.utc),
+                "category": "Sightseeing",
+            },
+        )
+
+    assert event.id is not None
+    commit.assert_not_called()
