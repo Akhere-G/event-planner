@@ -64,3 +64,8 @@ export const convertUtcToTripTimezone = (
 
   return formatInTimeZone(utcDateString, timeZone, "yyyy-MM-dd HH:mm");
 };
+
+export const formatTimeInTripTimezone = (
+  utcDateString: string,
+  timeZone: string,
+): string => formatInTimeZone(utcDateString, timeZone, "HH:mm");
