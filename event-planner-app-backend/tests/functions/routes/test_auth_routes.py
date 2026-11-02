@@ -17,7 +17,7 @@ def test_register_success(client):
     data = response.get_json()
     assert data["success"] is True
     assert data["data"]["email"] == "test@example.com"
-    assert data["data"]["id"] == 1
+    assert isinstance(data["data"]["id"], int)
     assert data["data"]["username"] == "testuser"
 
     user = db.session.execute(

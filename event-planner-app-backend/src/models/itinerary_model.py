@@ -1,8 +1,9 @@
 import secrets
 from datetime import date
+from decimal import Decimal
 from typing import List, Optional
 
-from sqlalchemy import Boolean, Date, Float, Integer, String
+from sqlalchemy import Boolean, Date, Float, Integer, Numeric, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from ..extensions import Base
@@ -22,6 +23,9 @@ class Itinerary(Base, AuditMixin):
     timezone: Mapped[Optional[str]] = mapped_column(String(64), nullable=True)
     start_date: Mapped[date] = mapped_column(Date, index=True)
     end_date: Mapped[date] = mapped_column(Date)
+    budget_amount_gbp: Mapped[Optional[Decimal]] = mapped_column(
+        Numeric(12, 2), nullable=True
+    )
     viewer_code: Mapped[str] = mapped_column(
         String(255), default=lambda: secrets.token_urlsafe(32)
     )

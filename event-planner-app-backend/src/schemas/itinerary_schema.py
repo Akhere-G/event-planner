@@ -45,6 +45,10 @@ class ItinerarySchema(BaseSchema):
         }
     )
     timezone = auto_field(dump_only=True)
+    budget_amount_gbp = fields.Float(
+        allow_none=True,
+        validate=validate.Range(min=0, error="Budget cannot be negative."),
+    )
     created_at = auto_field(dump_only=True)
     anonymous_access_code = auto_field(dump_only=True)
     events = fields.Nested(EventSchema, many=True, dump_only=True)

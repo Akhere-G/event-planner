@@ -24,28 +24,34 @@ def get_wishlists(itinerary_id: int):
     return db.session.execute(stmt).scalars().all()
 
 
+def get_wishlist_by_name(itinerary_id: int, name: str):
+    stmt = select(Wishlist).where(
+        Wishlist.itinerary_id == itinerary_id,
+        Wishlist.name == name,
+    )
+    return db.session.execute(stmt).scalar_one_or_none()
+
+
+def stage_create_wishlist(user_id: int | None, itinerary_id: int, name: str):
+    if get_wishlist_by_name(itinerary_id, name):
+        raise BadRequestError(f"Wishlist '{name}' already exists.")
+
+    wishlist = Wishlist(
+        itinerary_id=itinerary_id,
+        name=name,
+        created_by_id=user_id,
+        updated_by_id=user_id,
+    )
+
+    db.session.add(wishlist)
+    db.session.flush()
+    return wishlist
+
+
 def create_wishlist(user_id: int | None, itinerary_id: int, name: str):
     try:
-        stmt = select(Wishlist).where(
-            Wishlist.itinerary_id == itinerary_id,
-            Wishlist.name == name,
-        )
-
-        existing = db.session.execute(stmt).scalar_one_or_none()
-
-        if existing:
-            raise BadRequestError(f"Wishlist '{name}' already exists.")
-
-        wishlist = Wishlist(
-            itinerary_id=itinerary_id,
-            name=name,
-            created_by_id=user_id,
-            updated_by_id=user_id,
-        )
-
-        db.session.add(wishlist)
+        wishlist = stage_create_wishlist(user_id, itinerary_id, name)
         db.session.commit()
-
         return wishlist
 
     except Exception:
@@ -113,6 +119,39 @@ def delete_wishlist(itinerary_id: int, wishlist_id: int):
         raise
 
 
+def stage_create_wishlist_item(
+    itinerary_id: int,
+    wishlist_id: int,
+    item_data: dict,
+    user_id: int | None,
+):
+    stmt = select(Wishlist).where(
+        Wishlist.id == wishlist_id,
+        Wishlist.itinerary_id == itinerary_id,
+    )
+
+    wishlist = db.session.execute(stmt).scalar_one_or_none()
+
+    if not wishlist:
+        raise BadRequestError("Wishlist does not exist.")
+
+    item = WishlistItem(
+        wishlist_id=wishlist_id,
+        name=item_data.get("name"),
+        address=item_data.get("address"),
+        latitude=item_data.get("latitude"),
+        longitude=item_data.get("longitude"),
+        description=item_data.get("description"),
+        place_id=item_data.get("place_id"),
+        created_by_id=user_id,
+        updated_by_id=user_id,
+    )
+
+    db.session.add(item)
+    db.session.flush()
+    return item
+
+
 def create_wishlist_item(
     itinerary_id: int,
     wishlist_id: int,
@@ -120,31 +159,8 @@ def create_wishlist_item(
     user_id: int | None,
 ):
     try:
-        stmt = select(Wishlist).where(
-            Wishlist.id == wishlist_id,
-            Wishlist.itinerary_id == itinerary_id,
-        )
-
-        wishlist = db.session.execute(stmt).scalar_one_or_none()
-
-        if not wishlist:
-            raise BadRequestError("Wishlist does not exist.")
-
-        item = WishlistItem(
-            wishlist_id=wishlist_id,
-            name=item_data.get("name"),
-            address=item_data.get("address"),
-            latitude=item_data.get("latitude"),
-            longitude=item_data.get("longitude"),
-            description=item_data.get("description"),
-            place_id=item_data.get("place_id"),
-            created_by_id=user_id,
-            updated_by_id=user_id,
-        )
-
-        db.session.add(item)
+        item = stage_create_wishlist_item(itinerary_id, wishlist_id, item_data, user_id)
         db.session.commit()
-
         return item
 
     except Exception:
@@ -171,6 +187,26 @@ def itinerary_contains_wishlist_item(
     return bool(db.session.execute(stmt).scalar_one_or_none())
 
 
+def get_itinerary_wishlist_item(itinerary_id: int, item_id: int):
+    stmt = (
+        select(WishlistItem)
+        .join(Wishlist, Wishlist.id == WishlistItem.wishlist_id)
+        .where(Wishlist.itinerary_id == itinerary_id, WishlistItem.id == item_id)
+    )
+    return db.session.execute(stmt).scalar_one_or_none()
+
+
+def stage_delete_wishlist_item(itinerary_id: int, item_id: int):
+    item = get_itinerary_wishlist_item(itinerary_id, item_id)
+
+    if not item:
+        raise BadRequestError("Wishlist item not found.")
+
+    db.session.delete(item)
+    db.session.flush()
+    return item_id
+
+
 def delete_wishlist_item(item_id: int):
     try:
         stmt = select(WishlistItem).where(WishlistItem.id == item_id)
@@ -188,6 +224,36 @@ def delete_wishlist_item(item_id: int):
     except Exception:
         db.session.rollback()
         raise
+
+
+UPDATABLE_WISHLIST_ITEM_FIELDS = {
+    "name",
+    "address",
+    "description",
+    "latitude",
+    "longitude",
+    "place_id",
+}
+
+
+def stage_update_wishlist_item(
+    itinerary_id: int,
+    item_id: int,
+    item_data: dict,
+    user_id: int | None,
+):
+    item = get_itinerary_wishlist_item(itinerary_id, item_id)
+
+    if not item:
+        raise BadRequestError("Wishlist item not found.")
+
+    for field in UPDATABLE_WISHLIST_ITEM_FIELDS:
+        if field in item_data:
+            setattr(item, field, item_data[field])
+
+    item.updated_by_id = user_id
+    db.session.flush()
+    return item
 
 
 def update_wishlist_item(
@@ -216,20 +282,7 @@ def update_wishlist_item(
         if not item:
             raise BadRequestError("Wishlist item not found.")
 
-        updatable_fields = {
-            "name",
-            "address",
-            "description",
-            "latitude",
-            "longitude",
-            "place_id",
-        }
-
-        for field in updatable_fields:
-            if field in item_data:
-                setattr(item, field, item_data[field])
-
-        item.updated_by_id = user_id
+        item = stage_update_wishlist_item(itinerary_id, item_id, item_data, user_id)
 
         db.session.commit()
 
