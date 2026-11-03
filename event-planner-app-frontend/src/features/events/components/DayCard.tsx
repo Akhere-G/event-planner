@@ -17,6 +17,8 @@ import { useDispatch } from "react-redux";
 import { setRoutes, toggleDayOpen } from "../../maps/service/mapSlice";
 import type { Route } from "../../maps/types";
 import AutofillDayForm from "./AutoFillDayForm";
+import { useGetPreferencesQuery } from "../../trips/services/preferencesApiSlice";
+import { autofillDefaultsFromPreferences } from "../../trips/preferenceUtils";
 import { useGetAccommodationsQuery } from "../../accommodations/accomodationApiSlice";
 
 import { useState } from "react";
@@ -54,6 +56,10 @@ export default function DayCard({
     kind: "fill" | "optimise";
     ops: ChangeOp[];
   } | null>(null);
+
+  const { data: preferencesData } = useGetPreferencesQuery(tripId, {
+    skip: !canEdit,
+  });
 
   const isOpen = day.isOpen;
 
@@ -263,6 +269,7 @@ export default function DayCard({
         >
           <div className="p-4">
             <AutofillDayForm
+              defaults={autofillDefaultsFromPreferences(preferencesData?.data)}
               onSubmit={(autoFillData) =>
                 getSuggestions({ ...autoFillData, date: day.date })
               }
