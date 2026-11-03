@@ -32,6 +32,7 @@ import { usePostHog } from "@posthog/react";
 import useLoadAnonTrip from "../hooks/useLoadAnonTrip";
 import { useLazyGetFlightsQuery } from "../../flights/flightApiSlice";
 import RegisterModal from "../../modal/components/RegisterModal";
+import { PresenceAvatars } from "../../realtime";
 
 type ModalType = "edit" | "delete" | "users" | "register" | null;
 
@@ -168,7 +169,8 @@ export default function TripSummary({
         <div className="flex gap-2 items-center">
           <Calendar size={20} /> {formatDateRange(startDate, endDate)}
         </div>
-        <div className="flex gap-1">
+        <div className="flex items-center gap-3">
+          <PresenceAvatars />
           <UserAvatarList users={userMemberships} />
           {showActions && (
             <button
