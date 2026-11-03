@@ -17,6 +17,12 @@ export const tripSchema = yup.object({
         return new Date(value) > new Date(this.parent.startDate);
       },
     ),
+  budgetAmountGbp: yup
+    .number()
+    .transform((value, original) => (original === "" ? null : value))
+    .typeError("Enter a number.")
+    .min(0, "Budget cannot be negative.")
+    .nullable(),
 });
 
 export type TripSchema = yup.InferType<typeof tripSchema>;
