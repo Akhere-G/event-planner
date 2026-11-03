@@ -1,5 +1,3 @@
-import datetime
-
 from flask import Blueprint, request, session
 
 from src.models import UserRole
@@ -11,16 +9,18 @@ from ..middleware.itinerary_access_required import (
 )
 from ..middleware.login_required import login_required
 from ..schemas.itinerary_schema import ItinerarySchema, ItineraryWithRoleSchema
+from ..schemas.trip_draft_schema import TripDraftSchema
 from ..services.itineraries_service import (
     create_itinerary,
     delete_itinerary,
     get_itineraries,
     get_itinerary_count,
     get_itinerary_membership,
+    prepare_itinerary_data,
     save_anon_itinerary,
     update_itinerary,
 )
-from ..services.timezone_service import get_timezone_for_coordinates
+from ..services.trip_draft_service import create_trip_from_draft
 from ..utils.format_response import api_response
 from ..utils.rate_limit import get_user_or_ip
 
@@ -82,32 +82,28 @@ def get_itinerary_route(itinerary_id: int, access: ItineraryAccess):
 def create_itinerary_route():
     user_id = session.get("user_id")
     schema = ItinerarySchema()
-    validated_data = schema.load(request.json)
-    validated_data["created_by_id"] = user_id
-    validated_data["updated_by_id"] = user_id
-
-    # Get timezone
-    start_date = validated_data.get("start_date")
-    timestamp = None
-    if start_date:
-        if isinstance(start_date, datetime.date) and not isinstance(
-            start_date, datetime.datetime
-        ):
-            start_date = datetime.datetime.combine(start_date, datetime.time.min)
-        timestamp = int(start_date.timestamp())
-
-    timezone = get_timezone_for_coordinates(
-        latitude=validated_data.get("latitude"),
-        longitude=validated_data.get("longitude"),
-        timestamp=timestamp,
-    )
-    validated_data["timezone"] = timezone
+    validated_data = prepare_itinerary_data(schema.load(request.json), user_id)
 
     new_itinerary = create_itinerary(user_id, validated_data)
 
     return api_response(
         success=True,
         data=schema.dump(new_itinerary),
+        message="Succesfully created new itinerary.",
+        status_code=201,
+    )
+
+
+@itinerary_bp.route("/from-draft", methods=["POST"])
+@limiter.limit("20 per minute", key_func=get_user_or_ip)
+def create_itinerary_from_draft_route():
+    """Create a trip, its preferences and its planned items together."""
+    draft = TripDraftSchema().load(request.get_json(silent=True) or {})
+    new_itinerary = create_trip_from_draft(session.get("user_id"), draft)
+
+    return api_response(
+        success=True,
+        data=ItinerarySchema().dump(new_itinerary),
         message="Succesfully created new itinerary.",
         status_code=201,
     )

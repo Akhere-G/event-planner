@@ -41,3 +41,16 @@ def get_place_details(
         "longitude": location["lng"],
         "formatted_address": formatted_address,
     }
+
+
+def get_destination_coordinates(destination: str) -> dict[str, float]:
+    """Look up a city or region by name, which place search is not suited to."""
+    gmaps = googlemaps.Client(key=os.getenv("GOOGLE_MAPS_API_KEY"), timeout=10)
+
+    results = gmaps.geocode(destination)
+
+    if not results:
+        raise ValidationError({"destination": ["Cannot find destination."]})
+
+    location = results[0]["geometry"]["location"]
+    return {"latitude": location["lat"], "longitude": location["lng"]}
