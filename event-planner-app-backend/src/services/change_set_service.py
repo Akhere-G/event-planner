@@ -19,6 +19,8 @@ EVENT_FIELDS = (
     "start_at",
     "end_at",
     "category",
+    "estimated_cost_gbp",
+    "price_tier",
 )
 
 _COUNT_KEYS = {"create": "created", "update": "updated", "delete": "deleted"}

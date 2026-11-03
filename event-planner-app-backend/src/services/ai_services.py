@@ -17,6 +17,13 @@ from .itineraries_service import get_itinerary
 
 logger = logging.getLogger(__name__)
 
+COST_ESTIMATE_PROMPT_RULES = """\
+COST ESTIMATES:
+- "estimated_cost_gbp": realistic cost PER PERSON in GBP as a plain number
+  (no currency symbol), e.g. 24.5. Use 0 for free activities.
+- "price_tier": integer from 1 (cheap) to 4 (luxury).
+- For accommodation, estimate the cost per person for the whole stay."""
+
 
 def format_json(raw_json: str) -> Any:
     """
@@ -253,6 +260,8 @@ REQUIREMENTS:
 9. Do not use markdown code blocks.
 10. start_at and end_at MUST be local wall-clock times in the {timezone} timezone, formatted as YYYY-MM-DDTHH:MM:SS with no offset or "Z".
 
+{COST_ESTIMATE_PROMPT_RULES}
+
 JSON FORMAT:
 
 [
@@ -263,6 +272,8 @@ JSON FORMAT:
     "start_at": "YYYY-MM-DDTHH:MM:SS",
     "end_at": "YYYY-MM-DDTHH:MM:SS",
     "category": "String that represents the type of activity (MAX 10 CHARACTERS, spaces between words)",
+    "estimated_cost_gbp": 24.5,
+    "price_tier": 2,
     "reason": "One short sentence (max 120 characters) on why this suits the traveller and the day"
   }}
 ]
@@ -297,7 +308,12 @@ JSON FORMAT:
                 )
 
                 event_with_location = {
-                    **event,
+                    **{
+                        k: v
+                        for k, v in event.items()
+                        if k not in ai_output_validators.COST_ESTIMATE_KEYS
+                    },
+                    **ai_output_validators.extract_cost_estimate(event),
                     "start_at": trip_local_to_utc(
                         event["start_at"], timezone
                     ).isoformat(),
