@@ -6,6 +6,12 @@ export interface ChangeOpSummary {
   title: string;
   detail: string;
   before?: string;
+  estimate?: CostEstimate;
+}
+
+export interface CostEstimate {
+  cost?: string;
+  tier?: string;
 }
 
 const ENTITY_LABELS: Record<ChangeEntity, string> = {
@@ -40,7 +46,46 @@ const utcTimeRange = (
   return `${formatTimeInTripTimezone(startAt, timezone)}–${formatTimeInTripTimezone(endAt, timezone)}`;
 };
 
+const ESTIMATE_KEYS = ["estimatedCostGbp", "priceTier"];
+
+const formatCost = (cost: number) =>
+  `~£${Number.isInteger(cost) ? cost : cost.toFixed(2)} pp`;
+
+export const costEstimateFromData = (
+  data: Record<string, unknown>,
+): CostEstimate | undefined => {
+  const cost = data.estimatedCostGbp;
+  const tier = data.priceTier;
+  const result: CostEstimate = {};
+  if (typeof cost === "number" && cost >= 0) result.cost = formatCost(cost);
+  if (typeof tier === "number" && tier >= 1 && tier <= 4) {
+    result.tier = "£".repeat(tier);
+  }
+  return result.cost || result.tier ? result : undefined;
+};
+
 export const describeChangeOp = (
+  op: ChangeOp,
+  events: Event[],
+  timezone: string,
+): ChangeOpSummary => {
+  const summary = describeChangeOpBase(op, events, timezone);
+  if (op.op === "delete") return summary;
+
+  const estimate = costEstimateFromData(op.data);
+  if (!estimate) return summary;
+
+  const onlyEstimate =
+    op.op === "update" &&
+    Object.keys(op.data).every((key) => ESTIMATE_KEYS.includes(key));
+  return {
+    ...summary,
+    ...(onlyEstimate && { detail: "Cost estimate", before: undefined }),
+    estimate,
+  };
+};
+
+const describeChangeOpBase = (
   op: ChangeOp,
   events: Event[],
   timezone: string,
