@@ -17,6 +17,8 @@ from .itineraries_service import get_itinerary
 
 logger = logging.getLogger(__name__)
 
+MAX_HISTORY_MESSAGES = 10
+
 
 def format_json(raw_json: str) -> Any:
     """
@@ -145,6 +147,16 @@ def get_ai_response(prompt: str) -> str:
             logger.exception("Groq request failed.")
 
     raise RuntimeError("All AI providers failed.")
+
+
+def format_chat_history(history: list[dict]) -> str:
+    """Render the most recent chat turns as prompt text."""
+    lines = [
+        f"{'Assistant' if m['role'] == 'assistant' else 'User'}: {m['content'].strip()}"
+        for m in history[-MAX_HISTORY_MESSAGES:]
+        if m["content"].strip()
+    ]
+    return "\n".join(lines) or "No earlier messages."
 
 
 def get_insights(itinerary_id: int):

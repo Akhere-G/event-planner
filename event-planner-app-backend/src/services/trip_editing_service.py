@@ -3,13 +3,18 @@ from abc import ABC, abstractmethod
 from datetime import datetime
 from typing import Any, ClassVar
 
-from .ai_services import format_json, get_ai_response, to_trip_local, trip_local_to_utc
+from .ai_services import (
+    format_chat_history,
+    format_json,
+    get_ai_response,
+    to_trip_local,
+    trip_local_to_utc,
+)
 from .itineraries_service import get_itinerary
 
 logger = logging.getLogger(__name__)
 
 MAX_EDIT_OPS = 20
-MAX_HISTORY_MESSAGES = 10
 
 
 class EntityEditHandler(ABC):
@@ -121,15 +126,6 @@ HANDLER_CLASSES: tuple[type[EntityEditHandler], ...] = (
 EDIT_OPS = ("create", "update", "delete")
 
 
-def _format_history(history: list[dict]) -> str:
-    lines = [
-        f"{'Assistant' if m['role'] == 'assistant' else 'User'}: {m['content'].strip()}"
-        for m in history[-MAX_HISTORY_MESSAGES:]
-        if m["content"].strip()
-    ]
-    return "\n".join(lines) or "No earlier messages."
-
-
 def _build_prompt(itinerary, handlers: dict[str, EntityEditHandler], message, history):
     timezone_name = itinerary.timezone
     sections = "\n\n".join(
@@ -148,7 +144,7 @@ CURRENT TRIP (use these ids exactly; event times are local to {timezone_name}):
 {sections}
 
 CONVERSATION SO FAR:
-{_format_history(history)}
+{format_chat_history(history)}
 
 USER REQUEST:
 {message}
