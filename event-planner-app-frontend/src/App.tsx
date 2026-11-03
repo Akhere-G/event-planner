@@ -35,6 +35,8 @@ const Settings = lazy(() => import("./pages/Settings"));
 const About = lazy(() => import("./pages/About"));
 const PrivacyPage = lazy(() => import("./pages/PrivacyPage"));
 const TermsPage = lazy(() => import("./pages/TermsPage"));
+const Templates = lazy(() => import("./pages/Templates"));
+const TemplateDetail = lazy(() => import("./pages/TemplateDetail"));
 
 import NotificationsPrompt from "./features/notifications/components/NotificationsPrompt";
 import { usePostHog } from "@posthog/react";
@@ -90,6 +92,7 @@ function App() {
   const links = [
     { title: "Trips", url: "/" },
     { title: "Add Trip", url: "/addtrip" },
+    { title: "Templates", url: "/templates" },
     { title: "About", url: "/about" },
   ];
 
@@ -124,6 +127,8 @@ function App() {
         >
           <Routes>
             <Route path="/about" element={<About />} />
+            <Route path="/templates" element={<Templates />} />
+            <Route path="/templates/:slug" element={<TemplateDetail />} />
 
             <Route
               path="/login"

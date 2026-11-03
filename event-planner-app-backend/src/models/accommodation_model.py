@@ -1,4 +1,5 @@
 from datetime import date
+from decimal import Decimal
 from typing import Optional
 
 from sqlalchemy import (
@@ -6,6 +7,8 @@ from sqlalchemy import (
     Float,
     ForeignKey,
     Integer,
+    Numeric,
+    SmallInteger,
     String,
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -29,6 +32,10 @@ class Accommodation(Base, AuditMixin):
     description: Mapped[Optional[str]] = mapped_column(String(1000), nullable=True)
     start_date: Mapped[date] = mapped_column(Date, index=True)
     end_date: Mapped[date] = mapped_column(Date)
+    estimated_cost_gbp: Mapped[Optional[Decimal]] = mapped_column(
+        Numeric(12, 2), nullable=True
+    )
+    price_tier: Mapped[Optional[int]] = mapped_column(SmallInteger, nullable=True)
 
     itinerary: Mapped["Itinerary"] = relationship(back_populates="accommodations")
     creator: Mapped["User"] = relationship(  # type: ignore  # noqa: F821

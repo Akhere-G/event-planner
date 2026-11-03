@@ -158,3 +158,74 @@ def validate_packing_items(
         )
 
     return validated
+
+
+COST_ESTIMATE_KEYS = ("estimated_cost_gbp", "price_tier")
+MAX_ESTIMATED_COST_GBP = 100_000
+ESTIMATE_ENTITIES = ("event", "accommodation", "wishlist_item")
+
+
+def extract_cost_estimate(item: Any) -> dict[str, Any]:
+    """
+    Pull a usable cost estimate (per person, GBP) and price tier out of an AI
+    item. Anything missing or out of range is dropped rather than rejected, so
+    a bad estimate never discards an otherwise good suggestion.
+    """
+    if not isinstance(item, dict):
+        return {}
+
+    estimate: dict[str, Any] = {}
+
+    cost = item.get("estimated_cost_gbp")
+    if (
+        isinstance(cost, (int, float))
+        and not isinstance(cost, bool)
+        and 0 <= cost <= MAX_ESTIMATED_COST_GBP
+    ):
+        estimate["estimated_cost_gbp"] = round(float(cost), 2)
+
+    tier = item.get("price_tier")
+    if isinstance(tier, int) and not isinstance(tier, bool) and 1 <= tier <= 4:
+        estimate["price_tier"] = tier
+
+    return estimate
+
+
+def validate_cost_estimates(
+    estimates: Any,
+    requested: set[tuple[str, int]],
+) -> list[dict[str, Any]]:
+    """
+    Validate AI cost estimates for existing items. Only items that were asked
+    about are kept, each at most once, and each needs at least one usable value.
+    """
+    if not isinstance(estimates, list):
+        raise ValueError("AI response must be a list.")
+
+    validated = []
+    seen: set[tuple[str, int]] = set()
+
+    for item in estimates:
+        if not isinstance(item, dict):
+            continue
+
+        entity = item.get("entity")
+        item_id = item.get("id")
+
+        if entity not in ESTIMATE_ENTITIES or not isinstance(item_id, int):
+            continue
+
+        key = (entity, item_id)
+        if key not in requested or key in seen:
+            continue
+
+        estimate = extract_cost_estimate(item)
+        if not estimate:
+            continue
+
+        seen.add(key)
+        validated.append(
+            {"entity": entity, "id": item_id, **estimate, "reason": item.get("reason")}
+        )
+
+    return validated

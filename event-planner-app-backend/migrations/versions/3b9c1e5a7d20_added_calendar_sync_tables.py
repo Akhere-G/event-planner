@@ -1,7 +1,7 @@
 """added_calendar_sync_tables
 
 Revision ID: 3b9c1e5a7d20
-Revises: f1e2d3c4b5a6
+Revises: 864964945511
 Create Date: 2026-11-03 09:00:00.000000
 
 """
@@ -11,7 +11,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision = "3b9c1e5a7d20"
-down_revision = "f1e2d3c4b5a6"
+down_revision = "864964945511"
 branch_labels = None
 depends_on = None
 

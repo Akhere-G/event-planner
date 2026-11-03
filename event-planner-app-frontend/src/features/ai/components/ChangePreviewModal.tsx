@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { usePostHog } from "@posthog/react";
 import { ConfirmModal } from "../../../components";
 import type { Event } from "../../events/types";
+import { CostEstimateChip } from "../../estimates/components";
 import { isApiError } from "../../api/utils";
 import { useApplyChangeSetMutation } from "../services/aiApiSlice";
 import type { ChangeOp } from "../types";
@@ -107,6 +108,7 @@ export default function ChangePreviewModal({
                     <span className="font-semibold text-text-primary">
                       {summary.title}
                     </span>
+                    <CostEstimateChip estimate={summary.estimate} />
                   </div>
                   {(summary.before || summary.detail) && (
                     <p className="text-sm text-text-secondary">
