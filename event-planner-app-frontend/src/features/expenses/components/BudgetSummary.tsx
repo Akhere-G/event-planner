@@ -9,13 +9,9 @@ import { useEditTripMutation } from "../../trips/services/tripsApiSlice";
 import type { Trip } from "../../trips/types";
 import { isAdmin } from "../../users/utils";
 import { budgetSchema, type BudgetFormValues } from "../schema";
+import useMoney from "../../currency/useMoney";
 import type { Expense } from "../types";
-import {
-  budgetProgress,
-  formatGbp,
-  spentByCategory,
-  totalSpent,
-} from "../utils";
+import { budgetProgress, spentByCategory, totalSpent } from "../utils";
 
 export default function BudgetSummary({
   trip,
@@ -24,6 +20,7 @@ export default function BudgetSummary({
   trip: Trip;
   expenses: Expense[];
 }) {
+  const money = useMoney();
   const [isEditing, setIsEditing] = useState(false);
   const [editTrip, { isLoading }] = useEditTripMutation();
   const { register, handleSubmit, formState } = useForm<BudgetFormValues>({
@@ -57,8 +54,8 @@ export default function BudgetSummary({
         <div>
           <h3 className="text-lg font-semibold text-text-primary">Budget</h3>
           <p className="text-sm text-text-secondary">
-            {formatGbp(spent)} spent
-            {budget ? ` of ${formatGbp(budget)}` : ""}
+            {money.format(spent)} spent
+            {budget ? ` of ${money.format(budget)}` : ""}
           </p>
         </div>
         {isAdmin(trip.role) && !isEditing && (
@@ -124,8 +121,8 @@ export default function BudgetSummary({
             className={`text-xs ${progress.isOver ? "text-error" : "text-text-secondary"}`}
           >
             {progress.isOver
-              ? `${formatGbp(Math.abs(progress.remaining ?? 0))} over budget`
-              : `${formatGbp(progress.remaining ?? 0)} left`}
+              ? `${money.format(Math.abs(progress.remaining ?? 0))} over budget`
+              : `${money.format(progress.remaining ?? 0)} left`}
           </p>
         </div>
       ) : (
@@ -140,7 +137,9 @@ export default function BudgetSummary({
             <li key={category} className="flex flex-col gap-1">
               <div className="flex justify-between text-sm">
                 <span className="capitalize text-text-primary">{category}</span>
-                <span className="text-text-secondary">{formatGbp(amount)}</span>
+                <span className="text-text-secondary">
+                  {money.format(amount)}
+                </span>
               </div>
               <div className="w-full bg-surface-muted rounded-full h-1.5 overflow-hidden">
                 <div
