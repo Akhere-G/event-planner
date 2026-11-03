@@ -65,6 +65,7 @@ export interface Balances {
 
 export interface ExpensePrefill {
   description?: string;
+  amount?: number;
   eventId?: number;
   accommodationId?: number;
   category?: ExpenseCategory;
