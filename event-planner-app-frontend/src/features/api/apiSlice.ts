@@ -52,6 +52,7 @@ export const tagTypes = [
   "Accommodations",
   "PackingItem",
   "Notifications",
+  "Preferences",
 ];
 export const apiSlice = createApi({
   reducerPath: "api",
