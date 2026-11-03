@@ -2,7 +2,9 @@ from flask import jsonify
 from datetime import date, datetime
 
 
-def to_camel_case(key: str):
+def to_camel_case(key):
+    if not isinstance(key, str):
+        return key
     parts = key.split("_")
     return parts[0] + "".join([p.capitalize() for p in parts[1:]])
 

@@ -8,6 +8,14 @@ import {
   DialogHeader,
   DialogTitle,
 } from "../../../components/ui/dialog";
+import {
+  useGetPreferencesQuery,
+  useSavePreferencesMutation,
+} from "../../trips/services/preferencesApiSlice";
+import { preferencesFromApi } from "../../trips/preferenceUtils";
+import type { PreferencesInput } from "../../trips/schemas/preferencesSchema";
+import { StateGate } from "../../../components";
+import { toast } from "sonner";
 import { usePostHog } from "@posthog/react";
 
 interface EditTripModalProps {
@@ -22,10 +30,18 @@ export default function EditTripModal({
   onOpenChange,
 }: EditTripModalProps) {
   const [editTrip, { isLoading }] = useEditTripMutation();
+  const [savePreferences, { isLoading: isSavingPreferences }] =
+    useSavePreferencesMutation();
+  const preferencesQuery = useGetPreferencesQuery(trip.id, { skip: !open });
   const posthog = usePostHog();
 
-  async function onSubmit(updatedTrip: TripSchema) {
+  async function onSubmit(
+    updatedTrip: TripSchema,
+    preferences: PreferencesInput,
+  ) {
     await editTrip({ tripId: trip.id, updatedTrip }).unwrap();
+    await savePreferences({ tripId: trip.id, preferences }).unwrap();
+    toast.success("Trip updated.");
     posthog?.capture("trip_edited", {
       trip_id: trip.id,
     });
@@ -39,12 +55,25 @@ export default function EditTripModal({
         <DialogHeader className="bg-brand-primary text-text-inverse p-4 -mx-4 -mt-4 rounded-t-xl">
           <DialogTitle>Edit Trip</DialogTitle>
         </DialogHeader>
-        <TripForm
-          submitBtnText="Edit Form"
-          submitAction={onSubmit}
-          isLoading={isLoading}
-          initialData={trip}
-        />
+        <StateGate
+          loadingStateProps={{
+            isLoading: preferencesQuery.isLoading,
+            message: "Loading preferences...",
+          }}
+          errorStateProps={{
+            isError: preferencesQuery.isError,
+            message: "Could not load trip preferences.",
+          }}
+        >
+          <TripForm
+            variant="single"
+            submitBtnText="Save changes"
+            submitAction={onSubmit}
+            isLoading={isLoading || isSavingPreferences}
+            initialData={trip}
+            initialPreferences={preferencesFromApi(preferencesQuery.data?.data)}
+          />
+        </StateGate>
       </DialogContent>
     </Dialog>
   );

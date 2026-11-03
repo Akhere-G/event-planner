@@ -262,7 +262,8 @@ JSON FORMAT:
     "address": "Full street address, City, Country",
     "start_at": "YYYY-MM-DDTHH:MM:SS",
     "end_at": "YYYY-MM-DDTHH:MM:SS",
-    "category": "String that represents the type of activity (MAX 10 CHARACTERS, spaces between words)"
+    "category": "String that represents the type of activity (MAX 10 CHARACTERS, spaces between words)",
+    "reason": "One short sentence (max 120 characters) on why this suits the traveller and the day"
   }}
 ]
 """
@@ -396,7 +397,8 @@ Format:
   {{
     "id": 123,
     "start_at": "YYYY-MM-DDTHH:MM:SS",
-    "end_at": "YYYY-MM-DDTHH:MM:SS"
+    "end_at": "YYYY-MM-DDTHH:MM:SS",
+    "reason": "One short sentence (max 120 characters) on why this timing helps"
   }}
 ]
 
@@ -501,3 +503,14 @@ Schema:
             exc,
         )
         return []
+
+
+
+def __getattr__(name: str):
+    # Whole-trip generation lives in trip_generation_service, which builds on
+    # this module; resolve it lazily to avoid a circular import.
+    if name == "generate_trip_plan":
+        from .trip_generation_service import generate_trip_plan
+
+        return generate_trip_plan
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
