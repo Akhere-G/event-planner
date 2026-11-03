@@ -3,7 +3,9 @@ from typing import Any
 from marshmallow import ValidationError
 
 from ..extensions import db
+from ..schemas.accommodation_schema import AccommodationSchema
 from ..schemas.event_schema import EventSchema
+from ..schemas.wishlist_schema import WishlistItemSchema
 from .change_set_appliers import (
     ChangeSetApplier,
     ChangeSetApplierFactory,
@@ -22,6 +24,13 @@ EVENT_FIELDS = (
     "estimated_cost_gbp",
     "price_tier",
 )
+
+_ESTIMATE_FIELDS = ("estimated_cost_gbp", "price_tier")
+_ESTIMATE_SCHEMAS = {
+    "event": EventSchema,
+    "accommodation": AccommodationSchema,
+    "wishlist_item": WishlistItemSchema,
+}
 
 _COUNT_KEYS = {"create": "created", "update": "updated", "delete": "deleted"}
 
@@ -97,3 +106,21 @@ def build_event_update_ops(updates: list[dict]) -> list[dict]:
         }
         for update in updates
     ]
+
+
+def build_cost_estimate_ops(estimates: list[dict]) -> list[dict]:
+    """Turn AI cost estimates for existing items into preview-only update ops."""
+    ops = []
+    for estimate in estimates:
+        schema = _ESTIMATE_SCHEMAS[estimate["entity"]](only=_ESTIMATE_FIELDS)
+        fields = {k: estimate[k] for k in _ESTIMATE_FIELDS if k in estimate}
+        ops.append(
+            {
+                "op": "update",
+                "entity": estimate["entity"],
+                "id": estimate["id"],
+                "data": schema.dump(schema.load(fields)),
+                "reason": _clean_reason(estimate.get("reason")),
+            }
+        )
+    return ops

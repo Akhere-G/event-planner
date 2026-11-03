@@ -10,8 +10,14 @@ from ..middleware.itinerary_access_required import (
 )
 from ..models import UserRole
 from ..schemas.ai_schema import EventSuggestionRequestSchema
-from ..services.ai_services import get_event_suggestions, get_insights, optimise_events
+from ..services.ai_services import (
+    estimate_costs,
+    get_event_suggestions,
+    get_insights,
+    optimise_events,
+)
 from ..services.change_set_service import (
+    build_cost_estimate_ops,
     build_event_create_ops,
     build_event_update_ops,
 )
@@ -100,4 +106,20 @@ def preview_optimised_events_route(itinerary_id: int, access: ItineraryAccess):
         success=True,
         data={"ops": build_event_update_ops(optimised_events)},
         message="Generated optimised times.",
+    )
+
+
+@ai_bp.route("/estimate-costs/<int:itinerary_id>/preview", methods=["POST"])
+@itinerary_access_required(
+    allowed_roles=[UserRole.ADMIN, UserRole.EDITOR],
+    message="You must be an admin or an editor to change cost estimates.",
+)
+@limiter.limit("10 per minute", key_func=get_user_or_ip)
+def preview_cost_estimates_route(itinerary_id: int, access: ItineraryAccess):
+    """Estimate costs for items without one. Nothing is saved until applied."""
+    estimates = estimate_costs(itinerary_id)
+    return api_response(
+        success=True,
+        data={"ops": build_cost_estimate_ops(estimates)},
+        message="Generated cost estimates.",
     )
