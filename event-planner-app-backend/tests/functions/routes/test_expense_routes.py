@@ -67,9 +67,64 @@ def test_self_split(admin_client, base, members, admin_user):
     assert shares == [{"userId": admin_user.id, "amountGbp": 30}]
 
 
-def test_non_gbp_rejected(admin_client, base, members):
-    res = admin_client.post(base, json=payload(currency="EUR"))
+def test_unsupported_currency_rejected(admin_client, base, members):
+    res = admin_client.post(base, json=payload(currency="XXX"))
     assert res.status_code in (400, 422)
+
+
+def test_foreign_currency_converted_at_spent_on_rate(
+    admin_client, base, members, monkeypatch
+):
+    from decimal import Decimal
+
+    from src.services import fx_service
+
+    seen = []
+
+    def fake_rate(base_cur, quote, on):
+        seen.append((base_cur, quote, on.isoformat()))
+        return Decimal("0.85")
+
+    monkeypatch.setattr(fx_service, "get_rate", fake_rate)
+    res = admin_client.post(base, json=payload(amount=30, currency="EUR"))
+    assert res.status_code == 201
+    data = res.get_json()["data"]
+    assert (data["amount"], data["currency"]) == (30, "EUR")
+    assert data["amountGbp"] == 25.5
+    assert data["fxRate"] == 0.85
+    assert sum(s["amountGbp"] for s in data["shares"]) == 25.5
+    assert seen == [("EUR", "GBP", "2026-08-01")]
+
+
+def test_rate_outage_returns_503_and_creates_nothing(
+    admin_client, base, members, monkeypatch
+):
+    import requests
+
+    from src.services import fx_service
+
+    def boom(*a, **kw):
+        raise requests.ConnectionError("down")
+
+    monkeypatch.setattr(fx_service.requests, "get", boom)
+    before = db.session.query(Expense).count()
+    res = admin_client.post(base, json=payload(currency="USD", spentOn="2019-03-04"))
+    assert res.status_code == 503
+    assert db.session.query(Expense).count() == before
+
+
+def test_update_currency_recomputes_gbp(admin_client, base, members, monkeypatch):
+    from decimal import Decimal
+
+    from src.services import fx_service
+
+    monkeypatch.setattr(fx_service, "get_rate", lambda b, q, on: Decimal("0.5"))
+    created = admin_client.post(base, json=payload(amount=20, currency="USD"))
+    expense_id = created.get_json()["data"]["id"]
+    assert created.get_json()["data"]["amountGbp"] == 10
+    res = admin_client.patch(f"{base}/{expense_id}", json={"amount": 40})
+    assert res.get_json()["data"]["amountGbp"] == 20
+    assert res.get_json()["data"]["currency"] == "USD"
 
 
 def test_negative_amount_rejected(admin_client, base, members):
