@@ -1,4 +1,5 @@
 import secrets
+from datetime import datetime, time
 
 from sqlalchemy import func, select
 from sqlalchemy.orm import selectinload
@@ -11,6 +12,7 @@ from ..exceptions import (
 )
 from ..extensions import db
 from ..models import Itinerary, ItineraryUser, User, UserRole
+from .timezone_service import get_timezone_for_coordinates
 
 
 # TODO: simplify
@@ -180,25 +182,50 @@ def get_itineraries(
     return result
 
 
+def prepare_itinerary_data(validated_data: dict, user_id: int | None) -> dict:
+    """Add the audit fields and the destination's timezone to validated trip data."""
+    start_date = validated_data.get("start_date")
+    timestamp = (
+        int(datetime.combine(start_date, time.min).timestamp()) if start_date else None
+    )
+    timezone = get_timezone_for_coordinates(
+        latitude=validated_data.get("latitude"),
+        longitude=validated_data.get("longitude"),
+        timestamp=timestamp,
+    )
+    return {
+        **validated_data,
+        "created_by_id": user_id,
+        "updated_by_id": user_id,
+        "timezone": timezone,
+    }
+
+
+def stage_itinerary(user_id: int | None, data: dict) -> Itinerary:
+    """Add an itinerary and its owner access (membership or anonymous code) without committing."""
+    new_itinerary = Itinerary(**data)
+    db.session.add(new_itinerary)
+    db.session.flush()
+
+    if user_id is not None:
+        new_membership = ItineraryUser(
+            itinerary_id=new_itinerary.id,
+            user_id=user_id,
+            role=UserRole.ADMIN.value,
+            created_by_id=user_id,
+            updated_by_id=user_id,
+        )
+
+        db.session.add(new_membership)
+    else:
+        new_itinerary.is_anonymous = True
+        new_itinerary.anonymous_access_code = secrets.token_urlsafe(32)
+    return new_itinerary
+
+
 def create_itinerary(user_id: int | None, data: dict):
     try:
-        new_itinerary = Itinerary(**data)
-        db.session.add(new_itinerary)
-        db.session.flush()
-
-        if user_id is not None:
-            new_membership = ItineraryUser(
-                itinerary_id=new_itinerary.id,
-                user_id=user_id,
-                role=UserRole.ADMIN.value,
-                created_by_id=user_id,
-                updated_by_id=user_id,
-            )
-
-            db.session.add(new_membership)
-        else:
-            new_itinerary.is_anonymous = True
-            new_itinerary.anonymous_access_code = secrets.token_urlsafe(32)
+        new_itinerary = stage_itinerary(user_id, data)
         db.session.commit()
 
         return new_itinerary

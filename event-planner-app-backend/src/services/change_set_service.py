@@ -40,17 +40,25 @@ def validate_ops(
     return prepared
 
 
-def apply_change_set(
+def stage_change_set(
     itinerary_id: int, ops: list[dict], user_id: int | None
 ) -> dict[str, int]:
-    """Validate every op, then apply them all in one transaction (all or nothing)."""
+    """Validate every op, then stage them all without committing."""
     prepared = validate_ops(itinerary_id, ops, user_id)
     counts = {key: 0 for key in _COUNT_KEYS.values()}
 
+    for applier, op in prepared:
+        applier.apply(op)
+        counts[_COUNT_KEYS[op.kind]] += 1
+    return counts
+
+
+def apply_change_set(
+    itinerary_id: int, ops: list[dict], user_id: int | None
+) -> dict[str, int]:
+    """Apply a whole change set in one transaction (all or nothing)."""
     try:
-        for applier, op in prepared:
-            applier.apply(op)
-            counts[_COUNT_KEYS[op.kind]] += 1
+        counts = stage_change_set(itinerary_id, ops, user_id)
         db.session.commit()
     except Exception:
         db.session.rollback()
