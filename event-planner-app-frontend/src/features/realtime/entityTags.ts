@@ -7,7 +7,7 @@ export type ApiTag = TagDescription<(typeof tagTypes)[number]>;
  * Maps the entity names the backend sends in `trip:changed` to the RTK Query
  * tags to invalidate.
  *
- * Extension point: PR5 (expenses) and PR8 (flights) add per-trip tags to
+ * Extension point: PR5 (expenses) adds per-trip tags to
  * `tagTypes` and register them here, e.g.
  *   expense: (tripId) => [{ type: "Expenses", id: tripId }],
  * and the backend registers the model with `register_tracked_model`.
@@ -16,6 +16,7 @@ const ENTITY_TAGS: Record<string, (tripId: number) => ApiTag[]> = {
   itinerary: (tripId) => [{ type: "Trips", id: tripId }],
   event: (tripId) => [{ type: "Trips", id: tripId }],
   accommodation: () => ["Accommodations"],
+  flight: (tripId) => [{ type: "Flights", id: tripId }],
   packing: () => ["PackingItem"],
   wishlist: () => ["Wishlists"],
 };
