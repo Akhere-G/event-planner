@@ -33,6 +33,7 @@ import useLoadAnonTrip from "../hooks/useLoadAnonTrip";
 import { useLazyGetFlightsQuery } from "../../flights/flightApiSlice";
 import RegisterModal from "../../modal/components/RegisterModal";
 import { PresenceAvatars } from "../../realtime";
+import { TripSyncMenuItem } from "../../googleCalendar";
 
 type ModalType = "edit" | "delete" | "users" | "register" | null;
 
@@ -132,6 +133,7 @@ export default function TripSummary({
               <FileText size={16} />
               Export to Word
             </DropdownMenuItem>
+            {!anonTrip && <TripSyncMenuItem tripId={trip.id} />}
             {isAdmin(trip.role) && (
               <>
                 <DropdownMenuItem
