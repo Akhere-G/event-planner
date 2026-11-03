@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { usePostHog } from "@posthog/react";
 import { ConfirmModal } from "../../../components";
 import type { Event } from "../../events/types";
+import { CostEstimateChip } from "../../estimates/components";
 import { isApiError } from "../../api/utils";
 import { useApplyChangeSetMutation } from "../services/aiApiSlice";
 import type { ChangeOp } from "../types";
@@ -107,19 +108,7 @@ export default function ChangePreviewModal({
                     <span className="font-semibold text-text-primary">
                       {summary.title}
                     </span>
-                    {summary.estimate?.cost && (
-                      <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-brand-primary/10 text-brand-primary">
-                        {summary.estimate.cost}
-                      </span>
-                    )}
-                    {summary.estimate?.tier && (
-                      <span
-                        className="text-xs text-text-secondary"
-                        aria-label={`Price tier ${summary.estimate.tier.length} of 4`}
-                      >
-                        {summary.estimate.tier}
-                      </span>
-                    )}
+                    <CostEstimateChip estimate={summary.estimate} />
                   </div>
                   {(summary.before || summary.detail) && (
                     <p className="text-sm text-text-secondary">

@@ -1,5 +1,6 @@
 import { formatTimeInTripTimezone } from "../../utils/dateFormattors";
 import type { Event } from "../events/types";
+import { costEstimateLabels, type CostEstimate } from "../estimates/utils";
 import type { ChangeEntity, ChangeOp } from "./types";
 
 export interface ChangeOpSummary {
@@ -7,11 +8,6 @@ export interface ChangeOpSummary {
   detail: string;
   before?: string;
   estimate?: CostEstimate;
-}
-
-export interface CostEstimate {
-  cost?: string;
-  tier?: string;
 }
 
 const ENTITY_LABELS: Record<ChangeEntity, string> = {
@@ -48,21 +44,10 @@ const utcTimeRange = (
 
 const ESTIMATE_KEYS = ["estimatedCostGbp", "priceTier"];
 
-const formatCost = (cost: number) =>
-  `~£${Number.isInteger(cost) ? cost : cost.toFixed(2)} pp`;
-
 export const costEstimateFromData = (
   data: Record<string, unknown>,
-): CostEstimate | undefined => {
-  const cost = data.estimatedCostGbp;
-  const tier = data.priceTier;
-  const result: CostEstimate = {};
-  if (typeof cost === "number" && cost >= 0) result.cost = formatCost(cost);
-  if (typeof tier === "number" && tier >= 1 && tier <= 4) {
-    result.tier = "£".repeat(tier);
-  }
-  return result.cost || result.tier ? result : undefined;
-};
+): CostEstimate | undefined =>
+  costEstimateLabels(data.estimatedCostGbp, data.priceTier);
 
 export const describeChangeOp = (
   op: ChangeOp,
