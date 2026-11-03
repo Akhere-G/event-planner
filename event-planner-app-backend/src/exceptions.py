@@ -64,3 +64,10 @@ class NotFoundError(AppError):
 class TemplateNotFoundError(AppError):
     status_code = 404
     default_message = "Template not found."
+
+
+class FxUnavailableError(AppError):
+    status_code = 503
+    default_message = (
+        "Exchange rates are unavailable right now. Please try again shortly."
+    )

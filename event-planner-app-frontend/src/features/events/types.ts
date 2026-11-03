@@ -8,6 +8,8 @@ export interface Event {
   startAt: string;
   endAt: string;
   category: string;
+  estimatedCostGbp?: number | null;
+  priceTier?: number | null;
 }
 
 export type Day = {

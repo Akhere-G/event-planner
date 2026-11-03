@@ -119,3 +119,15 @@ def remove_user(user_id: int, itinerary_id: int, other_user_id: int):
     db.session.delete(membership)
     db.session.commit()
     return other_user_id
+
+
+def update_me(user_id: int, data: dict) -> User:
+    try:
+        user = get_user(id=user_id)
+        if "home_currency" in data:
+            user.home_currency = data["home_currency"]
+        db.session.commit()
+        return user
+    except Exception:
+        db.session.rollback()
+        raise

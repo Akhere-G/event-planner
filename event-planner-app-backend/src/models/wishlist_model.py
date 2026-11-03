@@ -1,3 +1,4 @@
+from decimal import Decimal
 from typing import Optional
 
 from sqlalchemy import (
@@ -5,6 +6,8 @@ from sqlalchemy import (
     Float,
     ForeignKey,
     Integer,
+    Numeric,
+    SmallInteger,
     String,
     UniqueConstraint,
 )
@@ -59,6 +62,10 @@ class WishlistItem(Base, AuditMixin):
     longitude: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
     description: Mapped[Optional[str]] = mapped_column(String(1000), nullable=True)
     place_id: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
+    estimated_cost_gbp: Mapped[Optional[Decimal]] = mapped_column(
+        Numeric(12, 2), nullable=True
+    )
+    price_tier: Mapped[Optional[int]] = mapped_column(SmallInteger, nullable=True)
     is_promoted: Mapped[bool] = mapped_column(Boolean, default=False)
 
     wishlist: Mapped["Wishlist"] = relationship(back_populates="items")
