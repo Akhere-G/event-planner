@@ -12,6 +12,7 @@ from .client import (
     GoogleAuthRevokedError,
     GoogleEventGoneError,
 )
+from .failures import handle_user_failure
 from .settings import get_settings
 
 # Channels last a week; renew any that would lapse before the next daily run.
@@ -65,6 +66,11 @@ def renew_expiring_channels(client_for: ClientFactory) -> int:
     """Renews channels close to expiry, and creates any that are missing."""
     trip_calendars = trip_calendars_needing_channel()
     for trip_calendar in trip_calendars:
-        start_watch(trip_calendar, client_for(trip_calendar.user_id))
-        db.session.commit()
+        user_id = trip_calendar.user_id
+        try:
+            start_watch(trip_calendar, client_for(user_id))
+            db.session.commit()
+        except Exception as exc:
+            db.session.rollback()
+            handle_user_failure(user_id, exc)
     return len(trip_calendars)
