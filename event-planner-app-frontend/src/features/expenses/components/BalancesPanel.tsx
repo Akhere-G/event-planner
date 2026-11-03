@@ -5,10 +5,11 @@ import type { Trip } from "../../trips/types";
 import { canUserEdit } from "../../users/utils";
 import { useGetBalancesQuery } from "../services/expenseApiSlice";
 import type { Transfer } from "../types";
-import { formatGbp } from "../utils";
+import useMoney from "../../currency/useMoney";
 import SettlementModal from "./SettlementModal";
 
 export default function BalancesPanel({ trip }: { trip: Trip }) {
+  const money = useMoney();
   const { data, isLoading, isError } = useGetBalancesQuery(trip.id);
   const [settling, setSettling] = useState<{ suggestion?: Transfer } | null>(
     null,
@@ -59,7 +60,7 @@ export default function BalancesPanel({ trip }: { trip: Trip }) {
                   : b.netGbp < 0
                     ? "owes "
                     : "settled "}
-                {b.netGbp !== 0 && formatGbp(Math.abs(b.netGbp))}
+                {b.netGbp !== 0 && money.format(Math.abs(b.netGbp))}
               </span>
             </li>
           ))}
@@ -84,7 +85,7 @@ export default function BalancesPanel({ trip }: { trip: Trip }) {
                 </span>
                 <span className="flex items-center gap-3">
                   <span className="font-semibold">
-                    {formatGbp(t.amountGbp)}
+                    {money.format(t.amountGbp)}
                   </span>
                   {canUserEdit(trip.role) && (
                     <button

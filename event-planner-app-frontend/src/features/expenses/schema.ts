@@ -1,4 +1,5 @@
 import * as yup from "yup";
+import { currencyCodes } from "../currency/constants";
 import { expenseCategories, splitTypes } from "./types";
 
 export const expenseSchema = yup.object({
@@ -8,6 +9,10 @@ export const expenseSchema = yup.object({
     .typeError("Enter an amount.")
     .moreThan(0, "Amount must be greater than zero.")
     .required("Amount is required."),
+  currency: yup
+    .string()
+    .oneOf(currencyCodes, "Choose a supported currency.")
+    .required("Choose a currency."),
   category: yup.string().oneOf(expenseCategories).required(),
   spentOn: yup.string().required("Date is required."),
   paidById: yup.number().required("Choose who paid."),

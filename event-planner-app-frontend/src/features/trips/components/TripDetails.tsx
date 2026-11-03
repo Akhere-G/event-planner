@@ -1,13 +1,14 @@
-import { isAdmin } from "../../users/utils";
+import { canUserEdit, isAdmin } from "../../users/utils";
 import type { Trip } from "../types";
 import TripSummary from "./TripSummary";
-import { TripInsights } from "../../ai/components";
+import { EditTripDrawer, TripInsights } from "../../ai/components";
 import TripActivities from "./TripActivities";
 import AccommodationPage from "../../accommodations/components/AccommodationPage";
 import { getCityBounds } from "../../maps/utils";
 import { useSearchParams } from "react-router";
 import { PackingPage } from "../../packing/components";
 import { BudgetPage } from "../../expenses/components";
+import { useTripRealtime } from "../../realtime";
 
 // TODO Add Resizable sections from shadcn
 
@@ -25,6 +26,8 @@ export default function TripDetails(trip: Trip) {
   const [searchParams, setSearchParams] = useSearchParams();
   const activeTab = searchParams.get("activeTab") ?? "activities";
 
+  useTripRealtime(trip.id);
+
   function setActiveTab(tab: TabOption) {
     setSearchParams((current) => {
       const next = new URLSearchParams(current);
@@ -39,6 +42,7 @@ export default function TripDetails(trip: Trip) {
       <div className="card">
         <TripSummary trip={trip} showActions={isAdmin(trip.role)} />
       </div>
+      {canUserEdit(trip.role) && <EditTripDrawer trip={trip} />}
       <div>
         <div className="ml-auto w-full mb-4 flex items-center overflow-x-scroll">
           {tabs.map((tab, i) => {

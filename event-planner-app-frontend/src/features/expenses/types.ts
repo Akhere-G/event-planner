@@ -24,6 +24,7 @@ export interface Expense {
   amount: number;
   currency: string;
   amountGbp: number;
+  fxRate?: number;
   spentOn: string;
   paidById: number;
   paidBy?: { id: number; username: string };

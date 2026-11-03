@@ -10,7 +10,7 @@ import type { Trip } from "../../trips/types";
 import { canUserEdit, isAdmin } from "../../users/utils";
 import { useDeleteExpenseMutation } from "../services/expenseApiSlice";
 import type { Expense } from "../types";
-import { formatGbp } from "../utils";
+import useMoney from "../../currency/useMoney";
 import ExpenseModal from "./ExpenseModal";
 
 export default function ExpenseList({
@@ -20,6 +20,7 @@ export default function ExpenseList({
   trip: Trip;
   expenses: Expense[];
 }) {
+  const money = useMoney();
   const userId = useSelector((state: RootState) => state.auth.userId);
   const [deleteExpense] = useDeleteExpenseMutation();
   const [editing, setEditing] = useState<Expense | null>(null);
@@ -65,9 +66,18 @@ export default function ExpenseList({
               </p>
             </div>
             <div className="flex items-center gap-2 shrink-0">
-              <span className="font-semibold text-text-primary">
-                {formatGbp(expense.amountGbp)}
-              </span>
+              <div className="text-right">
+                <span className="font-semibold text-text-primary">
+                  {expense.currency === "GBP"
+                    ? money.format(expense.amountGbp)
+                    : money.formatOriginal(expense.amount, expense.currency)}
+                </span>
+                {expense.currency !== "GBP" && (
+                  <p className="text-xs text-text-secondary">
+                    {money.format(expense.amountGbp)}
+                  </p>
+                )}
+              </div>
               {canChange(expense) && (
                 <>
                   <button

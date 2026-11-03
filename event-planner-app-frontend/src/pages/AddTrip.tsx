@@ -1,10 +1,17 @@
 import { useNavigate } from "react-router";
 import TripForm from "../features/trips/components/TripForm";
 import type { TripSchema } from "../features/trips/schemas/tripSchema";
+import type { PreferencesInput } from "../features/trips/schemas/preferencesSchema";
+import type { TripSubmitOptions } from "../features/trips/components/TripForm";
+import { useSavePreferencesMutation } from "../features/trips/services/preferencesApiSlice";
+import { usePreviewGeneratedTripMutation } from "../features/ai/services/aiApiSlice";
+import { ChangePreviewModal } from "../features/ai/components";
+import type { ChangeOp } from "../features/ai/types";
+import { useState } from "react";
 import { useAddTripMutation } from "../features/trips/services/tripsApiSlice";
 import { usePostHog } from "@posthog/react";
 import { differenceInDays } from "date-fns";
-import { isValidationError } from "../features/api/utils";
+import { isApiError, isValidationError } from "../features/api/utils";
 import { toast } from "sonner";
 import { anonymousAccessCodeStorageKey } from "../features/api/apiSlice";
 
@@ -17,9 +24,43 @@ export default function Addtrip() {
   const navigate = useNavigate();
   const posthog = usePostHog();
 
+  const [savePreferences, { isLoading: isSavingPreferences }] =
+    useSavePreferencesMutation();
+  const [previewGeneratedTrip, { isLoading: isGenerating }] =
+    usePreviewGeneratedTripMutation();
+  const [generated, setGenerated] = useState<{
+    tripId: number;
+    timezone: string;
+    ops: ChangeOp[];
+  } | null>(null);
+
   const { anonTrip } = useLoadAnonTrip();
 
-  async function onSubmit(trip: TripSchema) {
+  async function generatePlan(tripId: number, timezone: string) {
+    try {
+      const { data } = await previewGeneratedTrip({ tripId }).unwrap();
+      if (!data.ops.length) {
+        toast.info(
+          "The AI had no suggestions this time. You can add things yourself.",
+        );
+        navigate(`/trips/${tripId}`);
+        return;
+      }
+      setGenerated({ tripId, timezone, ops: data.ops });
+    } catch (err) {
+      posthog?.captureException(err);
+      toast.error(
+        isApiError(err) ? err.data.message : "Could not generate a plan.",
+      );
+      navigate(`/trips/${tripId}`);
+    }
+  }
+
+  async function onSubmit(
+    trip: TripSchema,
+    preferences: PreferencesInput,
+    { generateWithAi }: TripSubmitOptions,
+  ) {
     if (anonTrip) {
       toast.warning(
         "You already created one trip. Create an account to save your trip and create more trips.",
@@ -49,6 +90,23 @@ export default function Addtrip() {
             tripId,
           }),
         );
+      }
+      toast.success("Trip created.");
+
+      try {
+        await savePreferences({ tripId, preferences }).unwrap();
+      } catch (prefsErr) {
+        posthog?.captureException(prefsErr);
+        toast.warning(
+          "Your trip was created, but we couldn't save your preferences.",
+        );
+        navigate(`/trips/${tripId}`);
+        return;
+      }
+
+      if (generateWithAi) {
+        await generatePlan(tripId, newTrip.data.timezone);
+        return;
       }
       navigate(`/trips/${tripId}`);
     } catch (err) {
@@ -84,9 +142,29 @@ export default function Addtrip() {
         )}
         <TripForm
           submitAction={onSubmit}
-          submitBtnText="Add Trip"
-          isLoading={isLoading || !!anonTrip}
+          submitBtnText="Create"
+          isLoading={
+            isLoading || isSavingPreferences || isGenerating || !!anonTrip
+          }
         />
+        {generated && (
+          <ChangePreviewModal
+            open
+            onOpenChange={(open) => {
+              if (!open) navigate(`/trips/${generated.tripId}`);
+            }}
+            tripId={generated.tripId}
+            timezone={generated.timezone}
+            ops={generated.ops}
+            events={[]}
+            title="Review your AI trip plan"
+            onApplied={() =>
+              posthog?.capture("ai_trip_generated", {
+                trip_id: generated.tripId,
+              })
+            }
+          />
+        )}
       </div>
     </div>
   );

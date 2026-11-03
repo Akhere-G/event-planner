@@ -5,6 +5,7 @@ from flask_bcrypt import Bcrypt
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from flask_migrate import Migrate
+from flask_socketio import SocketIO
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import DeclarativeBase
 
@@ -24,3 +25,6 @@ limiter = Limiter(
     get_remote_address,
     storage_uri=os.getenv("STORAGE_URI"),
 )
+
+# Initialised in create_app (see src/__init__.py). Handlers live in src/realtime.
+socketio = SocketIO()

@@ -6,6 +6,7 @@ from sqlalchemy import select
 
 from ..exceptions import BadRequestError, NotFoundError, UserNotAuthorisedError
 from ..extensions import db
+from . import fx_service
 from ..models import (
     Accommodation,
     Event,
@@ -178,14 +179,16 @@ def create_expense(user_id: int | None, itinerary_id: int, data: dict) -> Expens
         _require_members(itinerary_id, [payer_id])
         _validate_links(itinerary_id, data)
         amount = to_money(data["amount"])
+        currency = data.get("currency", "GBP")
+        rate = fx_service.get_rate(currency, "GBP", data["spent_on"])
         expense = Expense(
             itinerary_id=itinerary_id,
             description=data["description"],
             category=data.get("category", "other"),
             amount=amount,
-            currency="GBP",
-            amount_gbp=amount,
-            fx_rate=Decimal("1"),
+            currency=currency,
+            amount_gbp=to_money(amount * rate),
+            fx_rate=rate,
             spent_on=data["spent_on"],
             paid_by_id=payer_id,
             event_id=data.get("event_id"),
@@ -235,11 +238,17 @@ def update_expense(
         expense.event_id = event_id
         expense.accommodation_id = accommodation_id
 
-        for field in ("description", "category", "spent_on"):
+        for field in ("description", "category"):
             if field in data:
                 setattr(expense, field, data[field])
-        if "amount" in data:
-            expense.amount = expense.amount_gbp = to_money(data["amount"])
+        if {"amount", "currency", "spent_on"} & data.keys():
+            amount = to_money(data.get("amount", expense.amount))
+            currency = data.get("currency", expense.currency)
+            spent_on = data.get("spent_on", expense.spent_on)
+            rate = fx_service.get_rate(currency, "GBP", spent_on)
+            expense.amount, expense.currency, expense.spent_on = amount, currency, spent_on
+            expense.fx_rate = rate
+            expense.amount_gbp = to_money(amount * rate)
         if "paid_by_id" in data:
             _require_members(itinerary_id, [data["paid_by_id"]])
             expense.paid_by_id = data["paid_by_id"]

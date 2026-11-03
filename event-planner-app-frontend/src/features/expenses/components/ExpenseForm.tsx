@@ -7,6 +7,9 @@ import { FormInput, FormSelect } from "../../../components";
 import type { RootState } from "../../../store";
 import { isApiError } from "../../api/utils";
 import { useGetAccommodationsQuery } from "../../accommodations/accomodationApiSlice";
+import { currencyOptions } from "../../currency/constants";
+import { formatMoney } from "../../currency/utils";
+import useMoney from "../../currency/useMoney";
 import type { Trip } from "../../trips/types";
 import { expenseSchema, type ExpenseFormValues } from "../schema";
 import {
@@ -42,6 +45,7 @@ export default function ExpenseForm({
   onSuccess: () => void;
   onCancel: () => void;
 }) {
+  const money = useMoney();
   const userId = useSelector((state: RootState) => state.auth.userId);
   const { data: accommodationData } = useGetAccommodationsQuery(trip.id);
   const [addExpense, { isLoading: isAdding }] = useAddExpenseMutation();
@@ -57,6 +61,10 @@ export default function ExpenseForm({
       defaultValues: {
         description: expense?.description ?? prefill?.description ?? "",
         amount: expense?.amount ?? prefill?.amount,
+        // Planned amounts from estimates are in GBP, so keep them in GBP.
+        currency:
+          expense?.currency ??
+          (prefill?.amount === undefined ? money.homeCurrency : "GBP"),
         category: expense?.category ?? prefill?.category ?? "other",
         spentOn:
           expense?.spentOn ??
@@ -72,6 +80,12 @@ export default function ExpenseForm({
     });
 
   const link = watch("link");
+  const currency = watch("currency");
+  const amount = Number(watch("amount"));
+  const estimateGbp =
+    currency !== "GBP" && amount > 0
+      ? money.estimateGbp(amount, currency)
+      : null;
   const splitType = watch("splitType");
   const participantIds = watch("participantIds") ?? [];
   const isLoading = isAdding || isUpdating;
@@ -128,8 +142,15 @@ export default function ExpenseForm({
         errorMessage={formState.errors.description?.message}
       />
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <FormSelect
+          label="Currency"
+          {...register("currency")}
+          value={currency}
+          options={currencyOptions}
+          errorMessage={formState.errors.currency?.message}
+        />
         <FormInput
-          label="Amount (£)"
+          label={`Amount (${currency})`}
           type="number"
           step="0.01"
           min="0"
@@ -143,6 +164,16 @@ export default function ExpenseForm({
           {...register("spentOn")}
           errorMessage={formState.errors.spentOn?.message}
         />
+        {currency !== "GBP" && (
+          <p
+            className="sm:col-span-2 text-sm text-text-secondary"
+            role="status"
+          >
+            {estimateGbp !== null
+              ? `≈ ${formatMoney(estimateGbp, "GBP")} at today's rate. The final amount uses the rate on the expense date.`
+              : "Enter an amount to see it in pounds. Splits are calculated in GBP."}
+          </p>
+        )}
         <FormSelect
           label="Category"
           {...register("category")}
