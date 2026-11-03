@@ -120,6 +120,7 @@ def register_models():
         NotificationSubscription,
         PackingItem,
         Settlement,
+        TripPreferences,
         User,
         UserRole,
         Wishlist,
@@ -133,12 +134,14 @@ def register_blueprints(app: Flask):
         accommodation_bp,
         ai_bp,
         auth_bp,
+        change_set_bp,
         event_bp,
         expense_bp,
         itinerary_bp,
         itinerary_invites_bp,
         notification_bp,
         packing_item_bp,
+        preferences_bp,
         user_bp,
         user_invites_bp,
         wishlist_bp,
@@ -152,6 +155,11 @@ def register_blueprints(app: Flask):
     app.register_blueprint(
         itinerary_bp,
         url_prefix="/api/itineraries",
+    )
+
+    app.register_blueprint(
+        change_set_bp,
+        url_prefix="/api/itineraries/<int:itinerary_id>/changes",
     )
 
     app.register_blueprint(
@@ -197,6 +205,11 @@ def register_blueprints(app: Flask):
     app.register_blueprint(
         expense_bp,
         url_prefix="/api/itineraries/<int:itinerary_id>/expenses",
+    )
+
+    app.register_blueprint(
+        preferences_bp,
+        url_prefix="/api/itineraries/<int:itinerary_id>/preferences",
     )
 
     app.register_blueprint(
