@@ -1,5 +1,6 @@
 import logging
 from collections import defaultdict
+from dataclasses import dataclass
 from typing import Callable
 
 from flask import has_request_context, session as flask_session
@@ -12,6 +13,28 @@ from .rooms import TRIP_CHANGED_EVENT, trip_room
 logger = logging.getLogger(__name__)
 
 SESSION_INFO_KEY = "realtime_changes"
+RECORDS_INFO_KEY = "realtime_change_records"
+
+
+@dataclass(frozen=True)
+class EntityChange:
+    """One tracked row that was inserted, updated or deleted in a commit."""
+
+    itinerary_id: int
+    entity: str
+    entity_id: int
+    deleted: bool
+
+
+ChangeListener = Callable[[list[EntityChange]], None]
+
+# Called after each successful commit with the rows that changed.
+_LISTENERS: list[ChangeListener] = []
+
+
+def register_change_listener(listener: ChangeListener) -> None:
+    if listener not in _LISTENERS:
+        _LISTENERS.append(listener)
 
 # Maps a model class to (entity name, resolver returning the owning itinerary id).
 # Later features (expenses, flights) add themselves here with register_tracked_model.
@@ -49,6 +72,7 @@ def register_default_models():
     from ..models import (
         Accommodation,
         Event,
+        Flight,
         Itinerary,
         PackingItem,
         Wishlist,
@@ -57,6 +81,7 @@ def register_default_models():
     )
 
     register_tracked_model(Event, "event")
+    register_tracked_model(Flight, "flight")
     register_tracked_model(Accommodation, "accommodation")
     register_tracked_model(PackingItem, "packing")
     register_tracked_model(Wishlist, "wishlist")
@@ -67,10 +92,13 @@ def register_default_models():
 
 def collect_changes(session: Session, flush_context):
     changes = session.info.setdefault(SESSION_INFO_KEY, defaultdict(set))
+    records = session.info.setdefault(RECORDS_INFO_KEY, {})
 
     # A backref append marks the parent dirty without changing its row, so only
     # count dirty objects whose own columns changed.
     dirty = [o for o in session.dirty if session.is_modified(o, include_collections=False)]
+
+    deleted = set(session.deleted)
 
     for obj in [*session.new, *dirty, *session.deleted]:
         tracked = _TRACKED.get(type(obj))
@@ -84,10 +112,25 @@ def collect_changes(session: Session, flush_context):
             continue
         if itinerary_id is not None:
             changes[itinerary_id].add(entity)
+            entity_id = getattr(obj, "id", None)
+            if entity_id is not None:
+                key = (itinerary_id, entity, entity_id)
+                records[key] = EntityChange(
+                    itinerary_id, entity, entity_id, deleted=obj in deleted
+                )
+
+
+def notify_listeners(records: list[EntityChange]):
+    for listener in _LISTENERS:
+        try:
+            listener(records)
+        except Exception:
+            logger.exception("Change listener %s failed", listener)
 
 
 def emit_changes(session: Session):
     changes = session.info.pop(SESSION_INFO_KEY, None)
+    records = session.info.pop(RECORDS_INFO_KEY, None)
     if not changes:
         return
 
@@ -108,9 +151,13 @@ def emit_changes(session: Session):
             # A broken queue must never fail a request whose commit already succeeded.
             logger.exception("Failed to broadcast change for trip %s", itinerary_id)
 
+    if records:
+        notify_listeners(list(records.values()))
+
 
 def discard_changes(session: Session):
     session.info.pop(SESSION_INFO_KEY, None)
+    session.info.pop(RECORDS_INFO_KEY, None)
 
 
 _registered = False
