@@ -1,7 +1,12 @@
 import pytest
 from src.extensions import db
 from src.models import Accommodation, Event, PackingItem, Wishlist, WishlistItem
-from src.realtime.change_tracker import SESSION_INFO_KEY
+from src.realtime.change_tracker import (
+    _LISTENERS,
+    SESSION_INFO_KEY,
+    EntityChange,
+    register_change_listener,
+)
 from tests.factories import (
     EventFactory,
     WishlistFactory,
@@ -121,3 +126,24 @@ def test_by_user_id_comes_from_request_session(emitted, app, itinerary, admin_us
         db.session.commit()
 
     assert emitted[-1][1]["by_user_id"] == admin_user.id
+
+
+@pytest.fixture
+def received():
+    batches = []
+    register_change_listener(batches.append)
+    yield batches
+    _LISTENERS.remove(batches.append)
+
+
+def test_listeners_receive_entity_ids_and_deletions(
+    emitted, received, itinerary, admin_user
+):
+    event = EventFactory(itinerary=itinerary, creator=admin_user)
+    db.session.commit()
+    assert received[-1] == [EntityChange(itinerary.id, "event", event.id, False)]
+
+    event_id = event.id
+    db.session.delete(event)
+    db.session.commit()
+    assert received[-1] == [EntityChange(itinerary.id, "event", event_id, True)]
