@@ -56,7 +56,7 @@ export default function ExpenseForm({
       resolver: yupResolver(expenseSchema),
       defaultValues: {
         description: expense?.description ?? prefill?.description ?? "",
-        amount: expense?.amount,
+        amount: expense?.amount ?? prefill?.amount,
         category: expense?.category ?? prefill?.category ?? "other",
         spentOn:
           expense?.spentOn ??
