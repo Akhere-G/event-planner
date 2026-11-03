@@ -9,22 +9,23 @@ import { useSearchParams } from "react-router";
 import { PackingPage } from "../../packing/components";
 import FlightsPanel from "../../flights/components/FlightsPanel";
 import { useTripRealtime } from "../../realtime";
-
-// TODO Add Resizable sections from shadcn
+import { BudgetPage } from "../../expenses/components";
 
 type TabOption =
   | "activities"
   | "tips"
   | "accommodation"
+  | "flights"
   | "packing"
-  | "flights";
+  | "budget";
 
 const tabs: { name: string; tab: TabOption }[] = [
   { name: "Activities", tab: "activities" },
   { name: "Tips", tab: "tips" },
   { name: "Accommodation", tab: "accommodation" },
-  { name: "Packing", tab: "packing" },
   { name: "Flights", tab: "flights" },
+  { name: "Budget", tab: "budget" },
+  { name: "Packing", tab: "packing" },
 ];
 
 export default function TripDetails(trip: Trip) {
@@ -86,6 +87,7 @@ export default function TripDetails(trip: Trip) {
           )}
           {activeTab === "packing" && <PackingPage trip={trip} />}
           {activeTab === "flights" && <FlightsPanel trip={trip} />}
+          {activeTab === "budget" && <BudgetPage trip={trip} />}
         </div>
       </div>
     </div>
