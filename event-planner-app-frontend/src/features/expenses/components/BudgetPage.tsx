@@ -8,6 +8,7 @@ import BalancesPanel from "./BalancesPanel";
 import BudgetSummary from "./BudgetSummary";
 import ExpenseList from "./ExpenseList";
 import ExpenseModal from "./ExpenseModal";
+import PlannedBudgetPanel from "./PlannedBudgetPanel";
 
 export default function BudgetPage({ trip }: { trip: Trip }) {
   const { data, isLoading, isError } = useGetExpensesQuery(trip.id);
@@ -18,6 +19,7 @@ export default function BudgetPage({ trip }: { trip: Trip }) {
     <StateGate loadingStateProps={{ isLoading }} errorStateProps={{ isError }}>
       <div className="flex flex-col gap-6">
         <BudgetSummary trip={trip} expenses={expenses} />
+        <PlannedBudgetPanel trip={trip} expenses={expenses} />
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="card lg:col-span-2 flex flex-col gap-2">
             <div className="flex items-center justify-between gap-2">
