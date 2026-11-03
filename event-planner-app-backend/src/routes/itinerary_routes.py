@@ -9,6 +9,7 @@ from ..middleware.itinerary_access_required import (
 )
 from ..middleware.login_required import login_required
 from ..schemas.itinerary_schema import ItinerarySchema, ItineraryWithRoleSchema
+from ..schemas.trip_draft_schema import TripDraftSchema
 from ..services.itineraries_service import (
     create_itinerary,
     delete_itinerary,
@@ -19,6 +20,7 @@ from ..services.itineraries_service import (
     save_anon_itinerary,
     update_itinerary,
 )
+from ..services.trip_draft_service import create_trip_from_draft
 from ..utils.format_response import api_response
 from ..utils.rate_limit import get_user_or_ip
 
@@ -87,6 +89,21 @@ def create_itinerary_route():
     return api_response(
         success=True,
         data=schema.dump(new_itinerary),
+        message="Succesfully created new itinerary.",
+        status_code=201,
+    )
+
+
+@itinerary_bp.route("/from-draft", methods=["POST"])
+@limiter.limit("20 per minute", key_func=get_user_or_ip)
+def create_itinerary_from_draft_route():
+    """Create a trip, its preferences and its planned items together."""
+    draft = TripDraftSchema().load(request.get_json(silent=True) or {})
+    new_itinerary = create_trip_from_draft(session.get("user_id"), draft)
+
+    return api_response(
+        success=True,
+        data=ItinerarySchema().dump(new_itinerary),
         message="Succesfully created new itinerary.",
         status_code=201,
     )

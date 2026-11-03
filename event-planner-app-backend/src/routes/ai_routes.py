@@ -9,7 +9,11 @@ from ..middleware.itinerary_access_required import (
     itinerary_access_required,
 )
 from ..models import UserRole
-from ..schemas.ai_schema import EditTripRequestSchema, EventSuggestionRequestSchema
+from ..schemas.ai_schema import (
+    EditTripRequestSchema,
+    EventSuggestionRequestSchema,
+    TripBuilderChatRequestSchema,
+)
 from ..services.ai_services import (
     get_event_suggestions,
     get_insights,
@@ -20,12 +24,27 @@ from ..services.change_set_service import (
     build_event_create_ops,
     build_event_update_ops,
 )
+from ..services.trip_builder_service import build_trip_from_chat
 from ..services.trip_editing_service import edit_trip_with_ai
 from ..services.trip_generation_service import generate_trip_plan
 from ..utils.format_response import api_response
-from ..utils.rate_limit import ai_generation_limit, get_user_or_ip
+from ..utils.rate_limit import (
+    ai_generation_limit,
+    get_user_or_ip,
+    trip_builder_daily_limit,
+    trip_builder_hourly_limit,
+)
 
 ai_bp = Blueprint("ai", __name__)
+
+
+def ai_unavailable_response():
+    return api_response(
+        success=False,
+        error="The AI could not process that request.",
+        message="The AI could not process that request. Please try again.",
+        status_code=502,
+    )
 
 
 @ai_bp.route("/insights/<int:itinerary_id>")
@@ -143,15 +162,29 @@ def preview_trip_edit_route(itinerary_id: int, access: ItineraryAccess):
             itinerary_id, validated["message"], validated["history"]
         )
     except (ValueError, RuntimeError):
-        return api_response(
-            success=False,
-            error="The AI could not process that request.",
-            message="The AI could not process that request. Please try again.",
-            status_code=502,
-        )
+        return ai_unavailable_response()
 
     return api_response(
         success=True,
         data={"reply": result["reply"], "ops": build_edit_ops(result["ops"])},
         message="Generated proposed changes.",
+    )
+
+
+@ai_bp.route("/trip-builder/chat", methods=["POST"])
+@limiter.limit(trip_builder_hourly_limit, key_func=get_user_or_ip)
+@limiter.limit(trip_builder_daily_limit, key_func=get_user_or_ip)
+def trip_builder_chat_route():
+    """One turn of the trip builder chat: a question, or a draft trip. Saves nothing."""
+    validated = TripBuilderChatRequestSchema().load(request.get_json(silent=True) or {})
+
+    try:
+        result = build_trip_from_chat(validated["message"], validated["history"])
+    except (ValueError, RuntimeError):
+        return ai_unavailable_response()
+
+    return api_response(
+        success=True,
+        data=result,
+        message="Continued the trip builder chat.",
     )
