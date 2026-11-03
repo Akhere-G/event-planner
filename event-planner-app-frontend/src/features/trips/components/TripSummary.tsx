@@ -1,6 +1,7 @@
 import {
   Calendar,
   FileText,
+  Globe,
   MoreVertical,
   Pencil,
   SquareArrowRightExit,
@@ -30,8 +31,15 @@ import ViewUsersModal from "../../modal/components/ViewUsersModal";
 import { usePostHog } from "@posthog/react";
 import useLoadAnonTrip from "../hooks/useLoadAnonTrip";
 import RegisterModal from "../../modal/components/RegisterModal";
+import PublishTemplateModal from "../../templates/components/PublishTemplateModal";
 
-type ModalType = "edit" | "delete" | "users" | "register" | null;
+type ModalType =
+  | "edit"
+  | "delete"
+  | "users"
+  | "register"
+  | "publish"
+  | null;
 
 interface TripSummaryProps {
   trip: Trip;
@@ -124,6 +132,15 @@ export default function TripSummary({
                   <Pencil size={16} />
                   Edit
                 </DropdownMenuItem>
+                {!anonTrip && (
+                  <DropdownMenuItem
+                    onClick={() => setModalType("publish")}
+                    className="flex gap-2 items-center"
+                  >
+                    <Globe size={16} />
+                    Publish as template
+                  </DropdownMenuItem>
+                )}
               </>
             )}
             {!anonTrip && (
@@ -176,6 +193,13 @@ export default function TripSummary({
       )}
       {modalType === "edit" && (
         <EditTripModal
+          trip={trip}
+          open={true}
+          onOpenChange={handleCloseModal}
+        />
+      )}
+      {modalType === "publish" && (
+        <PublishTemplateModal
           trip={trip}
           open={true}
           onOpenChange={handleCloseModal}
