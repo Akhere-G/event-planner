@@ -57,6 +57,15 @@ export const aiApiSlice = apiSlice.injectEndpoints({
         body: { message, history },
       }),
     }),
+    previewCostEstimates: builder.mutation<
+      ApiResponse<ChangePreview>,
+      { tripId: number }
+    >({
+      query: ({ tripId }) => ({
+        url: `/ai/estimate-costs/${tripId}/preview`,
+        method: "POST",
+      }),
+    }),
     applyChangeSet: builder.mutation<
       ApiResponse<ApplyChangeSetResult>,
       { tripId: number; ops: ChangeOp[] }
@@ -83,5 +92,6 @@ export const {
   usePreviewOptimisedEventsMutation,
   usePreviewGeneratedTripMutation,
   usePreviewTripEditMutation,
+  usePreviewCostEstimatesMutation,
   useApplyChangeSetMutation,
 } = aiApiSlice;

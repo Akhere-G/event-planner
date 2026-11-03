@@ -9,6 +9,7 @@ from marshmallow import (
 from marshmallow_sqlalchemy import SQLAlchemyAutoSchema, auto_field
 
 from ..models import User, UserRole
+from ..services.fx_service import SUPPORTED_CURRENCIES
 from .base_schema import BaseSchema
 
 
@@ -94,3 +95,14 @@ class RegisterSchema(BaseSchema):
     def validate_passwords(self, data, **kwargs):
         if data.get("password") != data.get("repeat_password"):
             raise ValidationError("Passwords must match.", field_name="repeat_password")
+
+
+class UpdateMeSchema(Schema):
+    home_currency = fields.String(
+        data_key="homeCurrency",
+        validate=validate.OneOf(
+            sorted(SUPPORTED_CURRENCIES), error="That currency is not supported."
+        ),
+        error_messages={"required": "Home currency is required."},
+        required=True,
+    )
