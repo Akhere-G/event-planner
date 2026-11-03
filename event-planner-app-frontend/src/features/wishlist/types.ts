@@ -16,6 +16,8 @@ export interface WishlistItem {
   description?: string;
   placeId?: string;
   isPromoted: boolean;
+  estimatedCostGbp?: number | null;
+  priceTier?: number | null;
   createdBy?: number;
   createdAt?: string;
   votes: WishlistItemVote[];

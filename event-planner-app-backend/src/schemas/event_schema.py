@@ -4,6 +4,7 @@ from marshmallow_sqlalchemy import auto_field
 
 from ..models import Event
 from .base_schema import BaseSchema
+from .cost_estimate_fields import estimated_cost_field, price_tier_field
 
 
 class AwareDateTimeField(fields.Field):
@@ -84,6 +85,9 @@ class EventSchema(BaseSchema):
             "required": "Category is required.",
         }
     )
+
+    estimated_cost_gbp = estimated_cost_field()
+    price_tier = price_tier_field()
 
     @validates_schema
     def validate_times(self, data, **kwargs):

@@ -135,6 +135,9 @@ def register_models():
     from .models import (
         Accommodation,
         Event,
+        ExchangeRate,
+        Expense,
+        ExpenseShare,
         Flight,
         InvitationStatus,
         Invite,
@@ -143,6 +146,9 @@ def register_models():
         Notification,
         NotificationSubscription,
         PackingItem,
+        TripTemplate,
+        Settlement,
+        TripPreferences,
         User,
         UserRole,
         Wishlist,
@@ -159,11 +165,17 @@ def register_blueprints(app: Flask):
         calendar_bp,
         change_set_bp,
         event_bp,
+        expense_bp,
+        fx_bp,
         flight_bp,
         itinerary_bp,
         itinerary_invites_bp,
         notification_bp,
         packing_item_bp,
+        template_bp,
+        template_publish_bp,
+        me_bp,
+        preferences_bp,
         user_bp,
         user_invites_bp,
         wishlist_bp,
@@ -232,6 +244,36 @@ def register_blueprints(app: Flask):
     app.register_blueprint(
         packing_item_bp,
         url_prefix="/api/itineraries/<int:itinerary_id>/packing_items",
+    )
+
+    app.register_blueprint(
+        template_bp,
+        url_prefix="/api/templates",
+    )
+
+    app.register_blueprint(
+        template_publish_bp,
+        url_prefix="/api/itineraries/<int:itinerary_id>/publish",
+    )
+
+    app.register_blueprint(
+        expense_bp,
+        url_prefix="/api/itineraries/<int:itinerary_id>/expenses",
+    )
+
+    app.register_blueprint(
+        fx_bp,
+        url_prefix="/api/fx",
+    )
+
+    app.register_blueprint(
+        me_bp,
+        url_prefix="/api/users/me",
+    )
+
+    app.register_blueprint(
+        preferences_bp,
+        url_prefix="/api/itineraries/<int:itinerary_id>/preferences",
     )
 
     app.register_blueprint(

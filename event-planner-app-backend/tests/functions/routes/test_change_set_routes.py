@@ -212,3 +212,94 @@ def test_apply_rejects_empty_and_oversized_sets(editor_client, itinerary):
         for i in range(61)
     ]
     assert apply(editor_client, itinerary.id, too_many).status_code == 400
+
+
+def test_apply_estimates_via_create_and_update_ops(editor_client, itinerary, event):
+    ops = [
+        {
+            "op": "create",
+            "entity": "event",
+            "data": {**event_data(), "estimatedCostGbp": 30, "priceTier": 2},
+        },
+        {
+            "op": "update",
+            "entity": "event",
+            "id": event.id,
+            "data": {"estimatedCostGbp": 12.5, "priceTier": 1},
+        },
+    ]
+
+    response = apply(editor_client, itinerary.id, ops)
+
+    assert response.status_code == 200
+    db.session.refresh(event)
+    assert float(event.estimated_cost_gbp) == 12.5
+    assert event.price_tier == 1
+    created = next(e for e in trip_events(itinerary.id) if e.name == "Dinner")
+    assert float(created.estimated_cost_gbp) == 30
+    assert created.price_tier == 2
+
+
+def test_apply_estimate_ops_for_accommodation_and_wishlist_item(
+    editor_client, itinerary
+):
+    ops = [
+        {
+            "op": "create",
+            "entity": "accommodation",
+            "data": {
+                "name": "Hotel",
+                "address": "2 Rue",
+                "latitude": 48.8,
+                "longitude": 2.3,
+                "startDate": "2026-08-20",
+                "endDate": "2026-08-22",
+                "estimatedCostGbp": 150,
+                "priceTier": 3,
+            },
+        },
+        {
+            "op": "create",
+            "entity": "wishlist_item",
+            "data": {"name": "Museum", "estimatedCostGbp": 15, "priceTier": 2},
+        },
+    ]
+
+    response = apply(editor_client, itinerary.id, ops)
+
+    assert response.status_code == 200
+    hotel = (
+        db.session.execute(
+            select(Accommodation).where(Accommodation.itinerary_id == itinerary.id)
+        )
+        .scalars()
+        .one()
+    )
+    assert float(hotel.estimated_cost_gbp) == 150
+    assert hotel.price_tier == 3
+    item = (
+        db.session.execute(
+            select(WishlistItem)
+            .join(Wishlist)
+            .where(Wishlist.itinerary_id == itinerary.id)
+        )
+        .scalars()
+        .one()
+    )
+    assert float(item.estimated_cost_gbp) == 15
+    assert item.price_tier == 2
+
+
+@pytest.mark.parametrize(
+    "bad", [{"estimatedCostGbp": -5}, {"priceTier": 0}, {"priceTier": 5}]
+)
+def test_apply_rejects_invalid_estimates_and_saves_nothing(
+    editor_client, itinerary, event, bad
+):
+    ops = [{"op": "update", "entity": "event", "id": event.id, "data": bad}]
+
+    response = apply(editor_client, itinerary.id, ops)
+
+    assert response.status_code == 400
+    db.session.refresh(event)
+    assert event.estimated_cost_gbp is None

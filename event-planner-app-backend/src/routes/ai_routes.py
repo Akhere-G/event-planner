@@ -9,16 +9,44 @@ from ..middleware.itinerary_access_required import (
     itinerary_access_required,
 )
 from ..models import UserRole
-from ..schemas.ai_schema import EventSuggestionRequestSchema
-from ..services.ai_services import get_event_suggestions, get_insights, optimise_events
+from ..schemas.ai_schema import (
+    EditTripRequestSchema,
+    EventSuggestionRequestSchema,
+    TripBuilderChatRequestSchema,
+)
+from ..services.ai_services import (
+    estimate_costs,
+    get_event_suggestions,
+    get_insights,
+    optimise_events,
+)
 from ..services.change_set_service import (
+    build_cost_estimate_ops,
+    build_edit_ops,
     build_event_create_ops,
     build_event_update_ops,
 )
+from ..services.trip_builder_service import build_trip_from_chat
+from ..services.trip_editing_service import edit_trip_with_ai
+from ..services.trip_generation_service import generate_trip_plan
 from ..utils.format_response import api_response
-from ..utils.rate_limit import get_user_or_ip
+from ..utils.rate_limit import (
+    ai_generation_limit,
+    get_user_or_ip,
+    trip_builder_daily_limit,
+    trip_builder_hourly_limit,
+)
 
 ai_bp = Blueprint("ai", __name__)
+
+
+def ai_unavailable_response():
+    return api_response(
+        success=False,
+        error="The AI could not process that request.",
+        message="The AI could not process that request. Please try again.",
+        status_code=502,
+    )
 
 
 @ai_bp.route("/insights/<int:itinerary_id>")
@@ -100,4 +128,81 @@ def preview_optimised_events_route(itinerary_id: int, access: ItineraryAccess):
         success=True,
         data={"ops": build_event_update_ops(optimised_events)},
         message="Generated optimised times.",
+    )
+
+
+@ai_bp.route("/estimate-costs/<int:itinerary_id>/preview", methods=["POST"])
+@itinerary_access_required(
+    allowed_roles=[UserRole.ADMIN, UserRole.EDITOR],
+    message="You must be an admin or an editor to change cost estimates.",
+)
+@limiter.limit("10 per minute", key_func=get_user_or_ip)
+def preview_cost_estimates_route(itinerary_id: int, access: ItineraryAccess):
+    """Estimate costs for items without one. Nothing is saved until applied."""
+    estimates = estimate_costs(itinerary_id)
+    return api_response(
+        success=True,
+        data={"ops": build_cost_estimate_ops(estimates)},
+        message="Generated cost estimates.",
+    )
+
+
+@ai_bp.route("/generate-trip/<int:itinerary_id>/preview", methods=["POST"])
+@itinerary_access_required(
+    allowed_roles=[UserRole.ADMIN, UserRole.EDITOR],
+    message="You must be an admin or an editor to generate a trip plan.",
+)
+@limiter.limit(ai_generation_limit, key_func=get_user_or_ip)
+def preview_generated_trip_route(itinerary_id: int, access: ItineraryAccess):
+    """Plan a whole trip from the saved preferences. Nothing is saved until applied."""
+    return api_response(
+        success=True,
+        data={"ops": generate_trip_plan(itinerary_id)},
+        message="Generated trip plan.",
+    )
+
+
+@ai_bp.route("/edit-trip/<int:itinerary_id>/preview", methods=["POST"])
+@itinerary_access_required(
+    allowed_roles=[UserRole.ADMIN, UserRole.EDITOR],
+    message="You must be an admin or an editor to change this trip.",
+)
+@limiter.limit("10 per minute", key_func=get_user_or_ip)
+def preview_trip_edit_route(itinerary_id: int, access: ItineraryAccess):
+    """Turn a natural-language request into proposed changes. Nothing is saved."""
+    try:
+        validated = EditTripRequestSchema().load(request.get_json(silent=True) or {})
+    except ValidationError as err:
+        return api_response(success=False, error=err.messages, status_code=400)
+
+    try:
+        result = edit_trip_with_ai(
+            itinerary_id, validated["message"], validated["history"]
+        )
+    except (ValueError, RuntimeError):
+        return ai_unavailable_response()
+
+    return api_response(
+        success=True,
+        data={"reply": result["reply"], "ops": build_edit_ops(result["ops"])},
+        message="Generated proposed changes.",
+    )
+
+
+@ai_bp.route("/trip-builder/chat", methods=["POST"])
+@limiter.limit(trip_builder_hourly_limit, key_func=get_user_or_ip)
+@limiter.limit(trip_builder_daily_limit, key_func=get_user_or_ip)
+def trip_builder_chat_route():
+    """One turn of the trip builder chat: a question, or a draft trip. Saves nothing."""
+    validated = TripBuilderChatRequestSchema().load(request.get_json(silent=True) or {})
+
+    try:
+        result = build_trip_from_chat(validated["message"], validated["history"])
+    except (ValueError, RuntimeError):
+        return ai_unavailable_response()
+
+    return api_response(
+        success=True,
+        data=result,
+        message="Continued the trip builder chat.",
     )
