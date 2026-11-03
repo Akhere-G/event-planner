@@ -126,6 +126,10 @@ def initialise_realtime(app: Flask, testing: bool):
     register_change_tracking()
     register_socket_handlers()
 
+    from .calendar_sync.dispatch import register_calendar_sync
+
+    register_calendar_sync(testing)
+
 
 def register_models():
     from .models import (
@@ -152,6 +156,7 @@ def register_blueprints(app: Flask):
         accommodation_bp,
         ai_bp,
         auth_bp,
+        calendar_bp,
         change_set_bp,
         event_bp,
         flight_bp,
@@ -207,6 +212,11 @@ def register_blueprints(app: Flask):
     app.register_blueprint(
         accommodation_bp,
         url_prefix="/api/itineraries/<int:itinerary_id>/accommodations",
+    )
+
+    app.register_blueprint(
+        calendar_bp,
+        url_prefix="/api/calendar",
     )
 
     app.register_blueprint(
