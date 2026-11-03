@@ -56,3 +56,17 @@ def test_update_is_partial_but_still_validated():
     assert applier.prepare({"op": "update", "id": 1, "data": {"name": "New"}}).data
     with pytest.raises(ValidationError):
         applier.prepare({"op": "update", "id": 1, "data": {"latitude": "north"}})
+
+
+def test_wishlist_preview_includes_the_target_wishlist_name():
+    applier = ChangeSetApplierFactory.create("wishlist_item", 1, 2)
+    prepared = applier.prepare(
+        {"op": "create", "data": {"name": "Louvre", "wishlistName": "Museums"}}
+    )
+    assert applier.preview(prepared)["wishlistName"] == "Museums"
+
+
+def test_preview_of_other_entities_has_no_extra_fields():
+    applier = ChangeSetApplierFactory.create("packing_item", 1, 2)
+    prepared = applier.prepare({"op": "create", "data": {"name": "Passport"}})
+    assert "wishlistName" not in applier.preview(prepared)

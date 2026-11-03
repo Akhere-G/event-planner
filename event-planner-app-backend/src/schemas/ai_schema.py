@@ -19,3 +19,21 @@ class EventSuggestionRequestSchema(Schema):
         fields.String(validate=validate.Length(max=50)),
         load_default=None,
     )
+
+
+class EditTripHistoryMessageSchema(Schema):
+    role = fields.String(required=True, validate=validate.OneOf(["user", "assistant"]))
+    content = fields.String(required=True, validate=validate.Length(max=2000))
+
+
+class EditTripRequestSchema(Schema):
+    message = fields.String(
+        required=True,
+        validate=validate.Length(min=1, max=1000),
+        error_messages={"required": "Message is required."},
+    )
+    history = fields.List(
+        fields.Nested(EditTripHistoryMessageSchema),
+        load_default=list,
+        validate=validate.Length(max=20),
+    )

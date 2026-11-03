@@ -25,3 +25,12 @@ export interface ApplyChangeSetResult {
   updated: number;
   deleted: number;
 }
+
+export interface ChatHistoryMessage {
+  role: "user" | "assistant";
+  content: string;
+}
+
+export interface EditTripPreview extends ChangePreview {
+  reply: string;
+}
