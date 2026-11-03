@@ -4,6 +4,7 @@ import { budgetSchema, expenseSchema, settlementSchema } from "../schema";
 const valid = {
   description: "Dinner",
   amount: 30,
+  currency: "GBP",
   category: "food",
   spentOn: "2026-08-01",
   paidById: 1,
