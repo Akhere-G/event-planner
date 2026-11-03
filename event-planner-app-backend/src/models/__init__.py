@@ -8,6 +8,7 @@ from src.models.expense_model import (
     Settlement,
     SplitType,
 )
+from src.models.flight_model import Flight
 from src.models.invite_model import InvitationStatus, Invite
 from src.models.itinerary_model import Itinerary
 from src.models.itinerary_user_model import ItineraryUser, UserRole
@@ -24,6 +25,7 @@ __all__ = [
     "Expense",
     "ExpenseCategory",
     "ExpenseShare",
+    "Flight",
     "InvitationStatus",
     "Invite",
     "Itinerary",
