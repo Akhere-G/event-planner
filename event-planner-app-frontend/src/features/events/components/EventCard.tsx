@@ -30,6 +30,8 @@ import { useDispatch } from "react-redux";
 import { setIsMapView, setSelectedEvent } from "../../maps/service/mapSlice";
 import EditEventModal from "./EditEventModal";
 import { AddExpenseButton } from "../../expenses/components";
+import { CostEstimateChip } from "../../estimates/components";
+import { costEstimateLabels } from "../../estimates/utils";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -175,6 +177,15 @@ export default function EventCard({
             options={eventCategories}
             selectClassName="flex flex-col items-stretch text-center!"
           />
+
+          <div className="flex items-center gap-2 flex-wrap">
+            <CostEstimateChip
+              estimate={costEstimateLabels(
+                event.estimatedCostGbp,
+                event.priceTier,
+              )}
+            />
+          </div>
 
           <div className="flex items-center gap-2 text-text-secondary text-sm my-2">
             <MapPin size={14} className="shrink-0" />
