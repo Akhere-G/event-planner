@@ -8,10 +8,16 @@ import { getCityBounds } from "../../maps/utils";
 import { useSearchParams } from "react-router";
 import { PackingPage } from "../../packing/components";
 import FlightsPanel from "../../flights/components/FlightsPanel";
+import { useTripRealtime } from "../../realtime";
 
 // TODO Add Resizable sections from shadcn
 
-type TabOption = "activities" | "tips" | "accommodation" | "packing" | "flights";
+type TabOption =
+  | "activities"
+  | "tips"
+  | "accommodation"
+  | "packing"
+  | "flights";
 
 const tabs: { name: string; tab: TabOption }[] = [
   { name: "Activities", tab: "activities" },
@@ -24,6 +30,8 @@ const tabs: { name: string; tab: TabOption }[] = [
 export default function TripDetails(trip: Trip) {
   const [searchParams, setSearchParams] = useSearchParams();
   const activeTab = searchParams.get("activeTab") ?? "activities";
+
+  useTripRealtime(trip.id);
 
   function setActiveTab(tab: TabOption) {
     setSearchParams((current) => {
