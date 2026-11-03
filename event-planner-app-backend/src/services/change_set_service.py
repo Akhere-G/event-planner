@@ -41,9 +41,13 @@ def validate_ops(
 
 
 def apply_change_set(
-    itinerary_id: int, ops: list[dict], user_id: int | None
+    itinerary_id: int, ops: list[dict], user_id: int | None, commit: bool = True
 ) -> dict[str, int]:
-    """Validate every op, then apply them all in one transaction (all or nothing)."""
+    """Validate every op, then apply them all in one transaction (all or nothing).
+
+    Pass ``commit=False`` to flush only, so the caller can join the ops to a larger
+    transaction (the caller then owns the commit and rollback).
+    """
     prepared = validate_ops(itinerary_id, ops, user_id)
     counts = {key: 0 for key in _COUNT_KEYS.values()}
 
@@ -51,9 +55,11 @@ def apply_change_set(
         for applier, op in prepared:
             applier.apply(op)
             counts[_COUNT_KEYS[op.kind]] += 1
-        db.session.commit()
+        if commit:
+            db.session.commit()
     except Exception:
-        db.session.rollback()
+        if commit:
+            db.session.rollback()
         raise
 
     return counts

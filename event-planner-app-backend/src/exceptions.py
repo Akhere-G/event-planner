@@ -59,3 +59,8 @@ class BadRequestError(AppError):
 class NotFoundError(AppError):
     status_code = 404
     default_message = "Item not found."
+
+
+class TemplateNotFoundError(AppError):
+    status_code = 404
+    default_message = "Template not found."
