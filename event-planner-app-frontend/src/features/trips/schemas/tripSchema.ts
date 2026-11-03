@@ -6,7 +6,6 @@ export const tripSchema = yup.object({
   longitude: yup.number().required("Required."),
   latitude: yup.number().required("Required."),
   description: yup.string().trim().nullable(),
-  budgetAmountGbp: yup.number().nullable().min(0, "Budget cannot be negative."),
   startDate: yup.string().required("Start date is required."),
   endDate: yup
     .string()
@@ -18,6 +17,12 @@ export const tripSchema = yup.object({
         return new Date(value) > new Date(this.parent.startDate);
       },
     ),
+  budgetAmountGbp: yup
+    .number()
+    .transform((value, original) => (original === "" ? null : value))
+    .typeError("Enter a number.")
+    .min(0, "Budget cannot be negative.")
+    .nullable(),
 });
 
 export type TripSchema = yup.InferType<typeof tripSchema>;
