@@ -1,7 +1,7 @@
-import { isAdmin } from "../../users/utils";
+import { canUserEdit, isAdmin } from "../../users/utils";
 import type { Trip } from "../types";
 import TripSummary from "./TripSummary";
-import { TripInsights } from "../../ai/components";
+import { EditTripDrawer, TripInsights } from "../../ai/components";
 import TripActivities from "./TripActivities";
 import AccommodationPage from "../../accommodations/components/AccommodationPage";
 import { getCityBounds } from "../../maps/utils";
@@ -37,6 +37,7 @@ export default function TripDetails(trip: Trip) {
       <div className="card">
         <TripSummary trip={trip} showActions={isAdmin(trip.role)} />
       </div>
+      {canUserEdit(trip.role) && <EditTripDrawer trip={trip} />}
       <div>
         <div className="ml-auto w-full mb-4 flex items-center overflow-x-scroll">
           {tabs.map((tab, i) => {

@@ -95,3 +95,25 @@ def build_event_update_ops(updates: list[dict]) -> list[dict]:
         }
         for update in updates
     ]
+
+
+def build_edit_ops(proposed: list[dict]) -> list[dict]:
+    """Turn sanitised AI edit ops into preview-only ops with API-shaped data.
+
+    Ops whose data fails the entity's schema are dropped rather than failing the preview.
+    """
+    ops = []
+    for op in proposed:
+        applier = ChangeSetApplierFactory.create(op["entity"], 0, None)
+        dumped: dict[str, Any] = {}
+        if op["op"] != "delete":
+            try:
+                prepared = applier.prepare(op)
+            except ValidationError:
+                continue
+            schema = applier.schema_class(partial=(op["op"] == "update"))
+            dumped = schema.dump(prepared.data)
+            if op["op"] == "create" and "wishlist_name" in prepared.context:
+                dumped["wishlistName"] = prepared.context["wishlist_name"]
+        ops.append({**op, "data": dumped})
+    return ops

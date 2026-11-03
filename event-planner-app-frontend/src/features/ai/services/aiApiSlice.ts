@@ -5,6 +5,8 @@ import type {
   ApplyChangeSetResult,
   ChangeOp,
   ChangePreview,
+  ChatHistoryMessage,
+  EditTripPreview,
   TripInsight,
 } from "../types";
 
@@ -45,6 +47,16 @@ export const aiApiSlice = apiSlice.injectEndpoints({
         method: "POST",
       }),
     }),
+    previewTripEdit: builder.mutation<
+      ApiResponse<EditTripPreview>,
+      { tripId: number; message: string; history: ChatHistoryMessage[] }
+    >({
+      query: ({ tripId, message, history }) => ({
+        url: `/ai/edit-trip/${tripId}/preview`,
+        method: "POST",
+        body: { message, history },
+      }),
+    }),
     applyChangeSet: builder.mutation<
       ApiResponse<ApplyChangeSetResult>,
       { tripId: number; ops: ChangeOp[] }
@@ -70,5 +82,6 @@ export const {
   usePreviewEventSuggestionsMutation,
   usePreviewOptimisedEventsMutation,
   usePreviewGeneratedTripMutation,
+  usePreviewTripEditMutation,
   useApplyChangeSetMutation,
 } = aiApiSlice;
