@@ -1,7 +1,7 @@
 """added_expenses_and_settlements
 
 Revision ID: d1e2f3a4b5c6
-Revises: c7d8e9f0a1b2
+Revises: f1e2d3c4b5a6
 Create Date: 2026-11-02 00:00:00.000000
 
 """
@@ -11,7 +11,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision = "d1e2f3a4b5c6"
-down_revision = "c7d8e9f0a1b2"
+down_revision = "f1e2d3c4b5a6"
 branch_labels = None
 depends_on = None
 
