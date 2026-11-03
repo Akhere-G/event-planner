@@ -1,7 +1,11 @@
 import { describe, expect, it } from "vitest";
 import type { Event } from "../../events/types";
 import type { ChangeOp } from "../types";
-import { describeChangeOp, summariseApplied } from "../utils";
+import {
+  costEstimateFromData,
+  describeChangeOp,
+  summariseApplied,
+} from "../utils";
 
 const timezone = "Europe/Paris";
 
@@ -98,5 +102,52 @@ describe("summariseApplied", () => {
     expect(summariseApplied({ created: 0, updated: 0, deleted: 0 })).toBe(
       "No changes.",
     );
+  });
+});
+
+describe("cost estimates", () => {
+  it("formats cost and tier, ignoring invalid values", () => {
+    expect(
+      costEstimateFromData({ estimatedCostGbp: 12, priceTier: 3 }),
+    ).toEqual({
+      cost: "~£12 pp",
+      tier: "£££",
+    });
+    expect(costEstimateFromData({ estimatedCostGbp: 0 })).toEqual({
+      cost: "~£0 pp",
+    });
+    expect(
+      costEstimateFromData({ estimatedCostGbp: -1, priceTier: 9 }),
+    ).toBeUndefined();
+    expect(costEstimateFromData({})).toBeUndefined();
+  });
+
+  it("adds the estimate to a created op summary", () => {
+    const op: ChangeOp = {
+      op: "create",
+      entity: "wishlist_item",
+      data: { name: "Museum", estimatedCostGbp: 15.5, priceTier: 2 },
+    };
+
+    expect(describeChangeOp(op, [], timezone)).toEqual({
+      title: "Museum",
+      detail: "AI ideas",
+      estimate: { cost: "~£15.50 pp", tier: "££" },
+    });
+  });
+
+  it("labels estimate-only updates", () => {
+    const op: ChangeOp = {
+      op: "update",
+      entity: "accommodation",
+      id: 4,
+      data: { estimatedCostGbp: 90 },
+    };
+
+    expect(describeChangeOp(op, [], timezone)).toEqual({
+      title: "Accommodation #4",
+      detail: "Cost estimate",
+      estimate: { cost: "~£90 pp" },
+    });
   });
 });
