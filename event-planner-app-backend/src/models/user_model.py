@@ -12,6 +12,9 @@ class User(Base):
     username: Mapped[str] = mapped_column(String(100))
     email: Mapped[str] = mapped_column(String(100), unique=True, index=True)
     password: Mapped[str] = mapped_column(String(256))
+    home_currency: Mapped[str] = mapped_column(
+        String(3), nullable=False, default="GBP", server_default="GBP"
+    )
     is_demo: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
 
     itinerary_memberships: Mapped[List["ItineraryUser"]] = relationship(  # type: ignore  # noqa: F821

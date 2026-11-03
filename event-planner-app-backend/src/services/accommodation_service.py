@@ -54,6 +54,8 @@ def stage_create_accommodation(
         description=accommodation_data.get("description"),
         start_date=start_date,
         end_date=end_date,
+        estimated_cost_gbp=accommodation_data.get("estimated_cost_gbp"),
+        price_tier=accommodation_data.get("price_tier"),
         created_by_id=user_id,
         updated_by_id=user_id,
     )
@@ -129,6 +131,8 @@ def stage_update_accommodation(
         "description",
         "start_date",
         "end_date",
+        "estimated_cost_gbp",
+        "price_tier",
     ]
 
     for field in updatable_fields:

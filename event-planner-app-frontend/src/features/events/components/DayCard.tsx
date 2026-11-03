@@ -3,7 +3,14 @@ import { Accordion, ConfirmModal } from "../../../components";
 import { formatDateRelative } from "../../../utils/dateFormattors";
 import EventList from "./EventList";
 import AddEventForm from "./AddEventForm";
-import { LoaderCircle, Map, MoreVertical, Sparkles, Wand2 } from "lucide-react";
+import {
+  LoaderCircle,
+  Map,
+  MoreVertical,
+  Plane,
+  Sparkles,
+  Wand2,
+} from "lucide-react";
 import {
   usePreviewEventSuggestionsMutation,
   usePreviewOptimisedEventsMutation,
@@ -17,7 +24,16 @@ import { useDispatch } from "react-redux";
 import { setRoutes, toggleDayOpen } from "../../maps/service/mapSlice";
 import type { Route } from "../../maps/types";
 import AutofillDayForm from "./AutoFillDayForm";
+import { useGetPreferencesQuery } from "../../trips/services/preferencesApiSlice";
+import { autofillDefaultsFromPreferences } from "../../trips/preferenceUtils";
 import { useGetAccommodationsQuery } from "../../accommodations/accomodationApiSlice";
+import { useGetFlightsQuery } from "../../flights/flightApiSlice";
+import {
+  flightDepartureDate,
+  flightTitle,
+  formatFlightTime,
+  getFlightsForDay,
+} from "../../flights/utils";
 
 import { useState } from "react";
 import {
@@ -28,6 +44,7 @@ import {
 } from "../../../components/ui/dropdown-menu";
 import { usePostHog } from "@posthog/react";
 import { isApiError } from "../../api/utils";
+import { DayViewers, setViewingDay } from "../../realtime";
 
 export default function DayCard({
   day,
@@ -40,6 +57,8 @@ export default function DayCard({
   const { data: tripData, isFetching } = useGetTripQuery(tripId);
   const { data } = useGetAccommodationsQuery(tripId);
   const accommodations = data?.data ?? [];
+  const { data: flightsData } = useGetFlightsQuery(tripId);
+  const dayFlights = getFlightsForDay(flightsData?.data ?? [], day.date);
 
   const dispatch = useDispatch();
   const posthog = usePostHog();
@@ -55,10 +74,15 @@ export default function DayCard({
     ops: ChangeOp[];
   } | null>(null);
 
+  const { data: preferencesData } = useGetPreferencesQuery(tripId, {
+    skip: !canEdit,
+  });
+
   const isOpen = day.isOpen;
 
   const handleToggleOpen = () => {
     dispatch(toggleDayOpen(day.date));
+    setViewingDay(isOpen ? null : day.date);
   };
 
   interface Autofill extends AutofillConfig {
@@ -168,6 +192,7 @@ export default function DayCard({
               <h3 className="text-xl font-semibold tracking-tight text-text-primary">
                 {formatDateRelative(day.date)}
               </h3>
+              <DayViewers date={day.date} />
             </div>
 
             <DropdownMenu>
@@ -223,6 +248,32 @@ export default function DayCard({
         )}
         ContentComponent={() => (
           <div className="px-4 ">
+            {dayFlights.length > 0 && (
+              <ul className="flex flex-col gap-2 pb-3" aria-label="Flights">
+                {dayFlights.map((flight) => {
+                  const departs = flightDepartureDate(flight) === day.date;
+                  return (
+                    <li
+                      key={flight.id}
+                      className="flex items-center gap-2 rounded-md bg-surface-muted px-3 py-2 text-sm text-text-main"
+                    >
+                      <Plane
+                        size={14}
+                        className="text-brand-primary shrink-0"
+                      />
+                      <span className="font-semibold">
+                        {flightTitle(flight)}
+                      </span>
+                      <span className="text-text-secondary">
+                        {departs
+                          ? `departs ${formatFlightTime(flight.departAt, flight.departureTimezone)}`
+                          : `arrives ${formatFlightTime(flight.arriveAt, flight.arrivalTimezone)}`}
+                      </span>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
             <EventList events={day.events} />
             {canEdit && <AddEventForm date={day.date} />}
           </div>
@@ -263,6 +314,7 @@ export default function DayCard({
         >
           <div className="p-4">
             <AutofillDayForm
+              defaults={autofillDefaultsFromPreferences(preferencesData?.data)}
               onSubmit={(autoFillData) =>
                 getSuggestions({ ...autoFillData, date: day.date })
               }

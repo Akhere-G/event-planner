@@ -70,13 +70,22 @@ const INTEREST_OPTIONS: ToggleOption[] = [
 
 export default function AutofillDayForm({
   onSubmit,
+  defaults = {},
 }: {
   onSubmit: (data: AutofillConfig) => void;
+  /** Initial answers, e.g. from the trip's saved preferences. */
+  defaults?: Partial<AutofillConfig>;
 }) {
-  const [pace, setPace] = useState<string>("balanced");
-  const [companions, setCompanions] = useState<string>("couple");
-  const [transport, setTransport] = useState<string>("public_transport");
-  const [interests, setInterests] = useState<string[]>([]);
+  const [pace, setPace] = useState<string>(defaults.pace ?? "balanced");
+  const [companions, setCompanions] = useState<string>(
+    defaults.companions ?? "couple",
+  );
+  const [transport, setTransport] = useState<string>(
+    defaults.transport ?? "public_transport",
+  );
+  const [interests, setInterests] = useState<string[]>(
+    defaults.interests ?? [],
+  );
 
   const handleToggleInterest = (value: string) => {
     setInterests((prev) =>
