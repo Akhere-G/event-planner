@@ -17,6 +17,14 @@ from .itineraries_service import get_itinerary
 
 logger = logging.getLogger(__name__)
 
+MAX_HISTORY_MESSAGES = 10
+COST_ESTIMATE_PROMPT_RULES = """\
+COST ESTIMATES:
+- "estimated_cost_gbp": realistic cost PER PERSON in GBP as a plain number
+  (no currency symbol), e.g. 24.5. Use 0 for free activities.
+- "price_tier": integer from 1 (cheap) to 4 (luxury).
+- For accommodation, estimate the cost per person for the whole stay."""
+
 
 def format_json(raw_json: str) -> Any:
     """
@@ -147,6 +155,16 @@ def get_ai_response(prompt: str) -> str:
     raise RuntimeError("All AI providers failed.")
 
 
+def format_chat_history(history: list[dict]) -> str:
+    """Render the most recent chat turns as prompt text."""
+    lines = [
+        f"{'Assistant' if m['role'] == 'assistant' else 'User'}: {m['content'].strip()}"
+        for m in history[-MAX_HISTORY_MESSAGES:]
+        if m["content"].strip()
+    ]
+    return "\n".join(lines) or "No earlier messages."
+
+
 def get_insights(itinerary_id: int):
     itinerary = get_itinerary(itinerary_id)
 
@@ -253,6 +271,8 @@ REQUIREMENTS:
 9. Do not use markdown code blocks.
 10. start_at and end_at MUST be local wall-clock times in the {timezone} timezone, formatted as YYYY-MM-DDTHH:MM:SS with no offset or "Z".
 
+{COST_ESTIMATE_PROMPT_RULES}
+
 JSON FORMAT:
 
 [
@@ -263,6 +283,8 @@ JSON FORMAT:
     "start_at": "YYYY-MM-DDTHH:MM:SS",
     "end_at": "YYYY-MM-DDTHH:MM:SS",
     "category": "String that represents the type of activity (MAX 10 CHARACTERS, spaces between words)",
+    "estimated_cost_gbp": 24.5,
+    "price_tier": 2,
     "reason": "One short sentence (max 120 characters) on why this suits the traveller and the day"
   }}
 ]
@@ -297,7 +319,12 @@ JSON FORMAT:
                 )
 
                 event_with_location = {
-                    **event,
+                    **{
+                        k: v
+                        for k, v in event.items()
+                        if k not in ai_output_validators.COST_ESTIMATE_KEYS
+                    },
+                    **ai_output_validators.extract_cost_estimate(event),
                     "start_at": trip_local_to_utc(
                         event["start_at"], timezone
                     ).isoformat(),
@@ -503,3 +530,90 @@ Schema:
             exc,
         )
         return []
+
+
+MAX_ESTIMATE_ITEMS = 40
+
+
+def _items_missing_estimates(itinerary) -> list[tuple[str, Any]]:
+    items: list[tuple[str, Any]] = [("event", e) for e in itinerary.events]
+    items += [("accommodation", a) for a in itinerary.accommodations]
+    items += [
+        ("wishlist_item", item)
+        for wishlist in itinerary.wishlists
+        for item in wishlist.items
+    ]
+    return [
+        (entity, item) for entity, item in items if item.estimated_cost_gbp is None
+    ][:MAX_ESTIMATE_ITEMS]
+
+
+def estimate_costs(itinerary_id: int):
+    """Estimate per-person costs for existing items that don't have one yet."""
+    itinerary = get_itinerary(itinerary_id)
+    missing = _items_missing_estimates(itinerary)
+
+    if not missing:
+        return []
+
+    item_lines = []
+    for entity, item in missing:
+        detail = f"- entity: {entity}, id: {item.id}, name: {item.name}, address: {item.address}"
+        if entity == "accommodation":
+            nights = (item.end_date - item.start_date).days
+            detail += f", nights: {nights}"
+        elif entity == "event":
+            detail += f", category: {item.category}"
+        item_lines.append(detail)
+    item_details = "\n".join(item_lines)
+
+    prompt = f"""
+You are a travel budgeting assistant.
+
+Estimate the typical cost per person for each item below, for a trip to
+{itinerary.destination}. Use current typical prices in GBP.
+
+{COST_ESTIMATE_PROMPT_RULES}
+
+Return ONLY a JSON array with one object per item, using the same entity and id.
+Do not use markdown code blocks.
+
+Format:
+
+[
+  {{
+    "entity": "event",
+    "id": 123,
+    "estimated_cost_gbp": 24.5,
+    "price_tier": 2,
+    "reason": "One short sentence (max 120 characters) on how you estimated this"
+  }}
+]
+
+Items:
+
+{item_details}
+"""
+
+    try:
+        raw_response = get_ai_response(prompt)
+        estimates = format_json(raw_response)
+
+        return ai_output_validators.validate_cost_estimates(
+            estimates, {(entity, item.id) for entity, item in missing}
+        )
+
+    except (ValueError, RuntimeError) as exc:
+        logger.warning("Failed to estimate costs: %s", exc)
+        return []
+
+
+
+def __getattr__(name: str):
+    # Whole-trip generation lives in trip_generation_service, which builds on
+    # this module; resolve it lazily to avoid a circular import.
+    if name == "generate_trip_plan":
+        from .trip_generation_service import generate_trip_plan
+
+        return generate_trip_plan
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")

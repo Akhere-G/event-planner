@@ -1,7 +1,7 @@
 """added_flights
 
 Revision ID: f1e2d3c4b5a6
-Revises: c7d8e9f0a1b2
+Revises: d8e9f0a1b2c3
 Create Date: 2026-11-02 12:00:00.000000
 
 """
@@ -11,7 +11,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision = "f1e2d3c4b5a6"
-down_revision = "c7d8e9f0a1b2"
+down_revision = "d8e9f0a1b2c3"
 branch_labels = None
 depends_on = None
 

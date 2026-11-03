@@ -8,6 +8,8 @@ export interface Accommodation {
   description?: string;
   startDate: string;
   endDate: string;
+  estimatedCostGbp?: number | null;
+  priceTier?: number | null;
 }
 
 export interface CreateAccommodationPayload {
