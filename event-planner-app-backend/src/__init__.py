@@ -110,6 +110,7 @@ def register_models():
     from .models import (
         Accommodation,
         Event,
+        Flight,
         InvitationStatus,
         Invite,
         Itinerary,
@@ -132,6 +133,7 @@ def register_blueprints(app: Flask):
         auth_bp,
         change_set_bp,
         event_bp,
+        flight_bp,
         itinerary_bp,
         itinerary_invites_bp,
         notification_bp,
@@ -184,6 +186,11 @@ def register_blueprints(app: Flask):
     app.register_blueprint(
         accommodation_bp,
         url_prefix="/api/itineraries/<int:itinerary_id>/accommodations",
+    )
+
+    app.register_blueprint(
+        flight_bp,
+        url_prefix="/api/itineraries/<int:itinerary_id>/flights",
     )
 
     app.register_blueprint(
