@@ -19,6 +19,7 @@ vi.mock("../../accommodations/components/AccommodationPage", () => ({
   default: () => null,
 }));
 vi.mock("../../packing/components", () => ({ PackingPage: () => null }));
+vi.mock("../../realtime", () => ({ useTripRealtime: () => undefined }));
 
 const trip: Trip = {
   id: 5,

@@ -3,6 +3,7 @@ from marshmallow_sqlalchemy import auto_field
 
 from ..models import Wishlist, WishlistItem, WishlistItemVote
 from .base_schema import BaseSchema
+from .cost_estimate_fields import estimated_cost_field, price_tier_field
 from .user_schema import UserSchema
 
 
@@ -40,6 +41,8 @@ class WishlistItemSchema(BaseSchema):
     )
     description = auto_field(allow_none=True)
     place_id = auto_field(allow_none=True)
+    estimated_cost_gbp = estimated_cost_field()
+    price_tier = price_tier_field()
     is_promoted = auto_field(dump_only=True)
     created_by_id = auto_field(dump_only=True)
     created_at = auto_field(dump_only=True)
