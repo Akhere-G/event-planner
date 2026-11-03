@@ -182,22 +182,26 @@ def get_itineraries(
     return result
 
 
-def prepare_itinerary_data(validated_data: dict, user_id: int | None) -> dict:
-    """Add the audit fields and the destination's timezone to validated trip data."""
-    start_date = validated_data.get("start_date")
+def resolve_trip_timezone(trip_data: dict) -> str:
+    """The timezone of a trip's destination on its start date."""
+    start_date = trip_data.get("start_date")
     timestamp = (
         int(datetime.combine(start_date, time.min).timestamp()) if start_date else None
     )
-    timezone = get_timezone_for_coordinates(
-        latitude=validated_data.get("latitude"),
-        longitude=validated_data.get("longitude"),
+    return get_timezone_for_coordinates(
+        latitude=trip_data.get("latitude"),
+        longitude=trip_data.get("longitude"),
         timestamp=timestamp,
     )
+
+
+def prepare_itinerary_data(validated_data: dict, user_id: int | None) -> dict:
+    """Add the audit fields and the destination's timezone to validated trip data."""
     return {
         **validated_data,
         "created_by_id": user_id,
         "updated_by_id": user_id,
-        "timezone": timezone,
+        "timezone": resolve_trip_timezone(validated_data),
     }
 
 
