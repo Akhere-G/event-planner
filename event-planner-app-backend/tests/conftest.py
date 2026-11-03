@@ -4,6 +4,7 @@ from src import create_app
 from src.extensions import db
 from src.models import (
     Event,
+    Flight,
     Invite,
     Itinerary,
     ItineraryUser,
@@ -16,6 +17,7 @@ from src.models import (
 
 from .factories import (
     EventFactory,
+    FlightFactory,
     InviteFactory,
     ItineraryFactory,
     ItineraryUserFactory,
@@ -203,3 +205,8 @@ def non_member_client(client, non_member_user) -> FlaskClient:
     with client.session_transaction() as session:
         session["user_id"] = non_member_user.id
     return client
+
+
+@pytest.fixture
+def flight(app, admin_user, itinerary, admin_itinerary_user) -> Flight:
+    return FlightFactory(itinerary=itinerary, creator=admin_user)
