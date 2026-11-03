@@ -1,6 +1,7 @@
 import { ConfirmModal } from "../../../components";
 import type { Event } from "../types";
 import UpdateEventForm from "./UpdateEventForm";
+import { useRemoteChangeWarning } from "../../realtime";
 
 export default function EditEventModal({
   event,
@@ -13,6 +14,8 @@ export default function EditEventModal({
   onOpenChange: (open: boolean) => void;
   onSave: (event: Event) => Promise<void>;
 }) {
+  useRemoteChangeWarning("event", open);
+
   return (
     <ConfirmModal
       open={open}
