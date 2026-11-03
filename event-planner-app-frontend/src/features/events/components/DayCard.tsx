@@ -3,11 +3,20 @@ import { Accordion, ConfirmModal } from "../../../components";
 import { formatDateRelative } from "../../../utils/dateFormattors";
 import EventList from "./EventList";
 import AddEventForm from "./AddEventForm";
-import { LoaderCircle, Map, MoreVertical, Sparkles, Wand2 } from "lucide-react";
 import {
-  useOptimiseEventsMutation,
-  useSuggestEventsMutation,
+  LoaderCircle,
+  Map,
+  MoreVertical,
+  Plane,
+  Sparkles,
+  Wand2,
+} from "lucide-react";
+import {
+  usePreviewEventSuggestionsMutation,
+  usePreviewOptimisedEventsMutation,
 } from "../../ai/services/aiApiSlice";
+import { ChangePreviewModal } from "../../ai/components";
+import type { ChangeOp } from "../../ai/types";
 import { useParams } from "react-router";
 import { toast } from "sonner";
 import { useGetTripQuery } from "../../trips/services/tripsApiSlice";
@@ -15,7 +24,16 @@ import { useDispatch } from "react-redux";
 import { setRoutes, toggleDayOpen } from "../../maps/service/mapSlice";
 import type { Route } from "../../maps/types";
 import AutofillDayForm from "./AutoFillDayForm";
+import { useGetPreferencesQuery } from "../../trips/services/preferencesApiSlice";
+import { autofillDefaultsFromPreferences } from "../../trips/preferenceUtils";
 import { useGetAccommodationsQuery } from "../../accommodations/accomodationApiSlice";
+import { useGetFlightsQuery } from "../../flights/flightApiSlice";
+import {
+  flightDepartureDate,
+  flightTitle,
+  formatFlightTime,
+  getFlightsForDay,
+} from "../../flights/utils";
 
 import { useState } from "react";
 import {
@@ -26,6 +44,7 @@ import {
 } from "../../../components/ui/dropdown-menu";
 import { usePostHog } from "@posthog/react";
 import { isApiError } from "../../api/utils";
+import { DayViewers, setViewingDay } from "../../realtime";
 
 export default function DayCard({
   day,
@@ -35,24 +54,35 @@ export default function DayCard({
   day: Day;
 }) {
   const tripId = Number(useParams()?.tripId);
-  const { isFetching } = useGetTripQuery(tripId);
+  const { data: tripData, isFetching } = useGetTripQuery(tripId);
   const { data } = useGetAccommodationsQuery(tripId);
   const accommodations = data?.data ?? [];
+  const { data: flightsData } = useGetFlightsQuery(tripId);
+  const dayFlights = getFlightsForDay(flightsData?.data ?? [], day.date);
 
   const dispatch = useDispatch();
   const posthog = usePostHog();
 
-  const [suggestEvents, { isLoading: isSuggestLoading }] =
-    useSuggestEventsMutation();
-  const [optimiseEvents, { isLoading: isOptimiseLoading }] =
-    useOptimiseEventsMutation();
+  const [previewSuggestions, { isLoading: isSuggestLoading }] =
+    usePreviewEventSuggestionsMutation();
+  const [previewOptimised, { isLoading: isOptimiseLoading }] =
+    usePreviewOptimisedEventsMutation();
 
   const [isFillMenuOpen, setIsFillMenuOpen] = useState(false);
+  const [preview, setPreview] = useState<{
+    kind: "fill" | "optimise";
+    ops: ChangeOp[];
+  } | null>(null);
+
+  const { data: preferencesData } = useGetPreferencesQuery(tripId, {
+    skip: !canEdit,
+  });
 
   const isOpen = day.isOpen;
 
   const handleToggleOpen = () => {
     dispatch(toggleDayOpen(day.date));
+    setViewingDay(isOpen ? null : day.date);
   };
 
   interface Autofill extends AutofillConfig {
@@ -60,16 +90,16 @@ export default function DayCard({
   }
   const getSuggestions = async (autoFillData: Autofill) => {
     try {
-      await suggestEvents({
+      const { data } = await previewSuggestions({
         tripId,
         body: autoFillData,
       }).unwrap();
-      posthog?.capture("ai_fill_days_generated", {
-        trip_id: tripId,
-        ...autoFillData,
-      });
-      toast.success("Suggestions added!");
       setIsFillMenuOpen(false);
+      if (!data.ops.length) {
+        toast.info("No suggestions found for this day. Try different options.");
+        return;
+      }
+      setPreview({ kind: "fill", ops: data.ops });
     } catch (err) {
       if (isApiError(err)) {
         toast.error(err.data.message);
@@ -82,20 +112,32 @@ export default function DayCard({
 
   const getOptimisedEvents = async () => {
     try {
-      await optimiseEvents({ tripId, date: day.date }).unwrap();
-      posthog?.capture("ai_optimise_events_used", {
-        trip_id: tripId,
-      });
-      toast.success("Events optimised!");
+      const { data } = await previewOptimised({
+        tripId,
+        date: day.date,
+      }).unwrap();
+      if (!data.ops.length) {
+        toast.info("There is nothing to optimise for this day.");
+        return;
+      }
+      setPreview({ kind: "optimise", ops: data.ops });
     } catch (err) {
       if (isApiError(err)) {
         toast.error(err.data.message);
       } else {
         posthog?.captureException(err);
-
         toast.error("Could not optimise events.");
       }
     }
+  };
+
+  const handlePreviewApplied = () => {
+    posthog?.capture(
+      preview?.kind === "fill"
+        ? "ai_fill_days_generated"
+        : "ai_optimise_events_used",
+      { trip_id: tripId },
+    );
   };
 
   const viewAllRoutes = () => {
@@ -150,6 +192,7 @@ export default function DayCard({
               <h3 className="text-xl font-semibold tracking-tight text-text-primary">
                 {formatDateRelative(day.date)}
               </h3>
+              <DayViewers date={day.date} />
             </div>
 
             <DropdownMenu>
@@ -205,12 +248,55 @@ export default function DayCard({
         )}
         ContentComponent={() => (
           <div className="px-4 ">
+            {dayFlights.length > 0 && (
+              <ul className="flex flex-col gap-2 pb-3" aria-label="Flights">
+                {dayFlights.map((flight) => {
+                  const departs = flightDepartureDate(flight) === day.date;
+                  return (
+                    <li
+                      key={flight.id}
+                      className="flex items-center gap-2 rounded-md bg-surface-muted px-3 py-2 text-sm text-text-main"
+                    >
+                      <Plane
+                        size={14}
+                        className="text-brand-primary shrink-0"
+                      />
+                      <span className="font-semibold">
+                        {flightTitle(flight)}
+                      </span>
+                      <span className="text-text-secondary">
+                        {departs
+                          ? `departs ${formatFlightTime(flight.departAt, flight.departureTimezone)}`
+                          : `arrives ${formatFlightTime(flight.arriveAt, flight.arrivalTimezone)}`}
+                      </span>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
             <EventList events={day.events} />
             {canEdit && <AddEventForm date={day.date} />}
           </div>
         )}
         onOpenChange={handleToggleOpen}
       />
+
+      {preview && tripData?.data && (
+        <ChangePreviewModal
+          open
+          onOpenChange={(open) => !open && setPreview(null)}
+          tripId={tripId}
+          timezone={tripData.data.timezone}
+          ops={preview.ops}
+          events={tripData.data.events ?? []}
+          title={
+            preview.kind === "fill"
+              ? `Fill Day ${day.day}: review suggestions`
+              : `Optimise Day ${day.day}: review changes`
+          }
+          onApplied={handlePreviewApplied}
+        />
+      )}
 
       {isFillMenuOpen && (
         <ConfirmModal
@@ -228,6 +314,7 @@ export default function DayCard({
         >
           <div className="p-4">
             <AutofillDayForm
+              defaults={autofillDefaultsFromPreferences(preferencesData?.data)}
               onSubmit={(autoFillData) =>
                 getSuggestions({ ...autoFillData, date: day.date })
               }

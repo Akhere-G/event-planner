@@ -28,3 +28,13 @@ export interface AnonTrip {
   anonymousAccessCode: string;
   tripId: number;
 }
+
+export interface TripPreferences {
+  tripType: "solo" | "couple" | "friends" | "family" | null;
+  groupSize: number | null;
+  vibes: string[];
+  budgetTier: "budget" | "mid" | "luxury" | null;
+  pace: "relaxed" | "balanced" | "packed" | null;
+  interests: string[];
+  transport: "walking" | "public_transport" | "driving" | "cycling" | null;
+}

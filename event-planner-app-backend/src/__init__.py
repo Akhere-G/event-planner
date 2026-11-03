@@ -10,7 +10,7 @@ from .config.dev_config import DevConfig
 from .config.production_config import ProductionConfig
 from .config.testing_config import TestConfig
 from .exceptions import AppError
-from .extensions import bcrypt, db, limiter, migrate
+from .extensions import bcrypt, db, limiter, migrate, socketio
 from .utils.format_response import api_response
 from werkzeug.middleware.proxy_fix import ProxyFix
 
@@ -105,6 +105,27 @@ def initialise_extensions(app: Flask, testing: bool):
     if not testing:
         limiter.init_app(app)
 
+    initialise_realtime(app, testing)
+
+
+def initialise_realtime(app: Flask, testing: bool):
+    from .realtime import register_change_tracking, register_socket_handlers
+
+    # Threading mode (not gevent: gRPC in the Gemini SDK conflicts with it) and
+    # websocket-only transport, so no sticky sessions are needed behind a load balancer.
+    options = {
+        "async_mode": "threading",
+        "transports": ["websocket"],
+        "cors_allowed_origins": os.getenv("FRONTEND_URL", "http://localhost:5173"),
+    }
+    queue_url = os.getenv("STORAGE_URI")
+    if not testing and queue_url and queue_url.startswith(("redis://", "rediss://")):
+        options["message_queue"] = queue_url
+
+    socketio.init_app(app, **options)
+    register_change_tracking()
+    register_socket_handlers()
+
 
 def register_models():
     from .models import (
@@ -113,6 +134,7 @@ def register_models():
         ExchangeRate,
         Expense,
         ExpenseShare,
+        Flight,
         InvitationStatus,
         Invite,
         Itinerary,
@@ -121,6 +143,7 @@ def register_models():
         NotificationSubscription,
         PackingItem,
         Settlement,
+        TripPreferences,
         User,
         UserRole,
         Wishlist,
@@ -134,14 +157,17 @@ def register_blueprints(app: Flask):
         accommodation_bp,
         ai_bp,
         auth_bp,
+        change_set_bp,
         event_bp,
         expense_bp,
         fx_bp,
+        flight_bp,
         itinerary_bp,
         itinerary_invites_bp,
         notification_bp,
         packing_item_bp,
         me_bp,
+        preferences_bp,
         user_bp,
         user_invites_bp,
         wishlist_bp,
@@ -155,6 +181,11 @@ def register_blueprints(app: Flask):
     app.register_blueprint(
         itinerary_bp,
         url_prefix="/api/itineraries",
+    )
+
+    app.register_blueprint(
+        change_set_bp,
+        url_prefix="/api/itineraries/<int:itinerary_id>/changes",
     )
 
     app.register_blueprint(
@@ -188,6 +219,11 @@ def register_blueprints(app: Flask):
     )
 
     app.register_blueprint(
+        flight_bp,
+        url_prefix="/api/itineraries/<int:itinerary_id>/flights",
+    )
+
+    app.register_blueprint(
         ai_bp,
         url_prefix="/api/ai",
     )
@@ -210,6 +246,11 @@ def register_blueprints(app: Flask):
     app.register_blueprint(
         me_bp,
         url_prefix="/api/users/me",
+    )
+
+    app.register_blueprint(
+        preferences_bp,
+        url_prefix="/api/itineraries/<int:itinerary_id>/preferences",
     )
 
     app.register_blueprint(
