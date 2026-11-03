@@ -26,6 +26,7 @@ import {
 } from "../../../components/ui/dropdown-menu";
 import { usePostHog } from "@posthog/react";
 import { isApiError } from "../../api/utils";
+import { DayViewers, setViewingDay } from "../../realtime";
 
 export default function DayCard({
   day,
@@ -53,6 +54,7 @@ export default function DayCard({
 
   const handleToggleOpen = () => {
     dispatch(toggleDayOpen(day.date));
+    setViewingDay(isOpen ? null : day.date);
   };
 
   interface Autofill extends AutofillConfig {
@@ -150,6 +152,7 @@ export default function DayCard({
               <h3 className="text-xl font-semibold tracking-tight text-text-primary">
                 {formatDateRelative(day.date)}
               </h3>
+              <DayViewers date={day.date} />
             </div>
 
             <DropdownMenu>
