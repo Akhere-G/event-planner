@@ -6,6 +6,7 @@ export const tripSchema = yup.object({
   longitude: yup.number().required("Required."),
   latitude: yup.number().required("Required."),
   description: yup.string().trim().nullable(),
+  budgetAmountGbp: yup.number().nullable().min(0, "Budget cannot be negative."),
   startDate: yup.string().required("Start date is required."),
   endDate: yup
     .string()
