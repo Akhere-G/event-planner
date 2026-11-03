@@ -7,6 +7,7 @@ from .invite_routes import itinerary_invites_bp
 from .itinerary_routes import itinerary_bp
 from .notification_routes import notification_bp
 from .packing_item_routes import packing_item_bp
+from .template_routes import template_bp, template_publish_bp
 from .user_invite_routes import user_invites_bp
 from .user_routes import user_bp
 from .wishlist_routes import wishlist_bp
@@ -21,6 +22,8 @@ __all__ = [
     "itinerary_invites_bp",
     "notification_bp",
     "packing_item_bp",
+    "template_bp",
+    "template_publish_bp",
     "user_bp",
     "user_invites_bp",
     "wishlist_bp",
