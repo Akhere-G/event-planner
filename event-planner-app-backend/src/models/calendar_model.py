@@ -53,6 +53,7 @@ class TripCalendar(Base):
     )
     created_at: Mapped[datetime] = mapped_column(DateTime, default=_utc_now)
 
+    itinerary: Mapped["Itinerary"] = relationship()  # type: ignore  # noqa: F821
     links: Mapped[List["CalendarLink"]] = relationship(
         back_populates="trip_calendar",
         cascade="all, delete-orphan",
