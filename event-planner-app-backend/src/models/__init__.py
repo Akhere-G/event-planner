@@ -6,6 +6,7 @@ from src.models.itinerary_model import Itinerary
 from src.models.itinerary_user_model import ItineraryUser, UserRole
 from src.models.notification_model import Notification, NotificationSubscription
 from src.models.packing_item_model import PackingItem
+from src.models.trip_template_model import TripTemplate
 from src.models.user_model import User
 from src.models.wishlist_model import Wishlist, WishlistItem, WishlistItemVote
 
@@ -20,6 +21,7 @@ __all__ = [
     "Notification",
     "NotificationSubscription",
     "PackingItem",
+    "TripTemplate",
     "User",
     "UserRole",
     "Wishlist",
