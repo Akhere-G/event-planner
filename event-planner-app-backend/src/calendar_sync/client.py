@@ -98,7 +98,7 @@ class GoogleCalendarClient:
         self, calendar_id: str, event_id: str, body: GoogleEvent
     ) -> GoogleEvent:
         return _execute(
-            self._service.events().update(
+            self._service.events().patch(
                 calendarId=calendar_id,
                 eventId=event_id,
                 body=body,
