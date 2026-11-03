@@ -5,14 +5,14 @@ from dotenv import load_dotenv
 from flask import Flask, send_from_directory
 from flask_cors import CORS
 from marshmallow import ValidationError
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 from .config.dev_config import DevConfig
 from .config.production_config import ProductionConfig
 from .config.testing_config import TestConfig
 from .exceptions import AppError
-from .extensions import bcrypt, cache, db, limiter, migrate
+from .extensions import bcrypt, cache, db, limiter, migrate, socketio
 from .utils.format_response import api_response
-from werkzeug.middleware.proxy_fix import ProxyFix
 
 pymysql.install_as_MySQLdb()
 load_dotenv()
@@ -115,6 +115,27 @@ def initialise_extensions(app: Flask, testing: bool):
 
     if not testing:
         limiter.init_app(app)
+
+    initialise_realtime(app, testing)
+
+
+def initialise_realtime(app: Flask, testing: bool):
+    from .realtime import register_change_tracking, register_socket_handlers
+
+    # Threading mode (not gevent: gRPC in the Gemini SDK conflicts with it) and
+    # websocket-only transport, so no sticky sessions are needed behind a load balancer.
+    options = {
+        "async_mode": "threading",
+        "transports": ["websocket"],
+        "cors_allowed_origins": os.getenv("FRONTEND_URL", "http://localhost:5173"),
+    }
+    queue_url = os.getenv("STORAGE_URI")
+    if not testing and queue_url and queue_url.startswith(("redis://", "rediss://")):
+        options["message_queue"] = queue_url
+
+    socketio.init_app(app, **options)
+    register_change_tracking()
+    register_socket_handlers()
 
 
 def register_models():
