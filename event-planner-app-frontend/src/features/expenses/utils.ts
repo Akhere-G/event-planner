@@ -6,17 +6,17 @@ export const formatGbp = (amount: number) =>
     currency: "GBP",
   }).format(amount);
 
+export const roundMoney = (amount: number) => Math.round(amount * 100) / 100;
+
 export const totalSpent = (expenses: Expense[]) =>
-  Math.round(expenses.reduce((sum, e) => sum + e.amountGbp, 0) * 100) / 100;
+  roundMoney(expenses.reduce((sum, e) => sum + e.amountGbp, 0));
 
 export const spentByCategory = (expenses: Expense[]) => {
   const totals = new Map<ExpenseCategory, number>();
   for (const expense of expenses) {
     totals.set(
       expense.category,
-      Math.round(
-        ((totals.get(expense.category) ?? 0) + expense.amountGbp) * 100,
-      ) / 100,
+      roundMoney((totals.get(expense.category) ?? 0) + expense.amountGbp),
     );
   }
   return [...totals.entries()]
@@ -33,6 +33,6 @@ export const budgetProgress = (
   return {
     percent: Math.min(100, Math.round((spent / budget) * 100)),
     isOver: spent > budget,
-    remaining: Math.round((budget - spent) * 100) / 100,
+    remaining: roundMoney(budget - spent),
   };
 };
