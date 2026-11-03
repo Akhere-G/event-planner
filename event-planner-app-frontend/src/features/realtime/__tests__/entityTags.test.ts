@@ -7,11 +7,13 @@ describe("entitiesToTags", () => {
   });
 
   it("maps accommodation, packing and wishlist to their list tags", () => {
-    expect(entitiesToTags(["accommodation", "packing", "wishlist"], 7)).toEqual([
-      "Accommodations",
-      "PackingItem",
-      "Wishlists",
-    ]);
+    expect(entitiesToTags(["accommodation", "packing", "wishlist"], 7)).toEqual(
+      ["Accommodations", "PackingItem", "Wishlists"],
+    );
+  });
+
+  it("maps flights to the per-trip flights tag", () => {
+    expect(entitiesToTags(["flight"], 7)).toEqual([{ type: "Flights", id: 7 }]);
   });
 
   it("dedupes tags shared by several entities", () => {
@@ -21,6 +23,6 @@ describe("entitiesToTags", () => {
   });
 
   it("ignores entities it does not know yet", () => {
-    expect(entitiesToTags(["expense", "flight"], 3)).toEqual([]);
+    expect(entitiesToTags(["expense", "unknown"], 3)).toEqual([]);
   });
 });
