@@ -1,7 +1,7 @@
 """added_trip_templates
 
-Revision ID: d1e2f3a4b5c6
-Revises: c7d8e9f0a1b2
+Revision ID: 864964945511
+Revises: 04bf52d2d617
 Create Date: 2026-11-02 12:00:00.000000
 
 """
@@ -11,8 +11,8 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = "d1e2f3a4b5c6"
-down_revision = "c7d8e9f0a1b2"
+revision = "864964945511"
+down_revision = "04bf52d2d617"
 branch_labels = None
 depends_on = None
 
