@@ -1,6 +1,7 @@
 from src.models.accommodation_model import Accommodation
 from src.models.audit_mixins import AuditMixin
 from src.models.event_model import Event
+from src.models.exchange_rate_model import ExchangeRate
 from src.models.expense_model import (
     Expense,
     ExpenseCategory,
@@ -20,6 +21,7 @@ __all__ = [
     "Accommodation",
     "AuditMixin",
     "Event",
+    "ExchangeRate",
     "Expense",
     "ExpenseCategory",
     "ExpenseShare",
