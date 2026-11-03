@@ -37,3 +37,7 @@ class EditTripRequestSchema(Schema):
         load_default=list,
         validate=validate.Length(max=20),
     )
+
+
+class TripBuilderChatRequestSchema(EditTripRequestSchema):
+    """Same shape as an edit request: the new message plus the earlier turns."""
