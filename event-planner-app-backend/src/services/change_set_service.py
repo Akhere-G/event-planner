@@ -3,18 +3,12 @@ from typing import Any
 from marshmallow import ValidationError
 
 from ..extensions import db
-from ..schemas.accommodation_schema import AccommodationSchema
 from ..schemas.event_schema import EventSchema
-from ..schemas.packing_item_schema import PackingItemSchema
-from ..schemas.wishlist_schema import WishlistItemSchema
-from . import (
-    accommodation_service,
-    events_service,
-    packing_item_service,
-    wishlist_service,
+from .change_set_appliers import (
+    ChangeSetApplier,
+    ChangeSetApplierFactory,
+    PreparedOp,
 )
-
-DEFAULT_WISHLIST_NAME = "AI ideas"
 
 EVENT_FIELDS = (
     "name",
@@ -27,48 +21,18 @@ EVENT_FIELDS = (
     "category",
 )
 
-_CREATE_DEFAULTS: dict[str, dict[str, Any]] = {
-    "packing_item": {"is_shared": True, "category": "General"},
-}
-
-_SCHEMAS = {
-    "event": EventSchema,
-    "accommodation": AccommodationSchema,
-    "packing_item": PackingItemSchema,
-    "wishlist_item": WishlistItemSchema,
-}
+_COUNT_KEYS = {"create": "created", "update": "updated", "delete": "deleted"}
 
 
-def _pop_wishlist_name(data: dict) -> tuple[dict, str]:
-    remaining = dict(data)
-    name = remaining.pop("wishlist_name", None) or remaining.pop("wishlistName", None)
-    return remaining, (name or DEFAULT_WISHLIST_NAME)
-
-
-def _prepare_op(op: dict) -> dict:
-    """Validate an op's data with the entity's existing schema."""
-    entity, kind = op["entity"], op["op"]
-    prepared = {**op, "validated": {}, "wishlist_name": DEFAULT_WISHLIST_NAME}
-
-    if kind == "delete":
-        return prepared
-
-    data = dict(op["data"])
-    if entity == "wishlist_item":
-        data, prepared["wishlist_name"] = _pop_wishlist_name(data)
-    if kind == "create":
-        data = {**_CREATE_DEFAULTS.get(entity, {}), **data}
-
-    schema = _SCHEMAS[entity](partial=(kind == "update"))
-    prepared["validated"] = schema.load(data)
-    return prepared
-
-
-def validate_ops(ops: list[dict]) -> list[dict]:
+def validate_ops(
+    itinerary_id: int, ops: list[dict], user_id: int | None
+) -> list[tuple[ChangeSetApplier, PreparedOp]]:
+    """Validate every op up front, collecting all errors by op index."""
     prepared, errors = [], {}
     for index, op in enumerate(ops):
+        applier = ChangeSetApplierFactory.create(op["entity"], itinerary_id, user_id)
         try:
-            prepared.append(_prepare_op(op))
+            prepared.append((applier, applier.prepare(op)))
         except ValidationError as err:
             errors[str(index)] = err.messages
     if errors:
@@ -76,83 +40,17 @@ def validate_ops(ops: list[dict]) -> list[dict]:
     return prepared
 
 
-def _apply_event(itinerary_id: int, op: dict, user_id: int | None):
-    data = op["validated"]
-    if op["op"] == "create":
-        events_service.stage_create_event(
-            itinerary_id,
-            {**data, "created_by_id": user_id, "updated_by_id": user_id},
-        )
-    elif op["op"] == "update":
-        events_service.stage_update_event(itinerary_id, op["id"], data, user_id)
-    else:
-        events_service.stage_delete_event(itinerary_id, op["id"])
-
-
-def _apply_accommodation(itinerary_id: int, op: dict, user_id: int | None):
-    data = op["validated"]
-    if op["op"] == "create":
-        accommodation_service.stage_create_accommodation(user_id, itinerary_id, data)
-    elif op["op"] == "update":
-        accommodation_service.stage_update_accommodation(
-            itinerary_id, op["id"], user_id, data
-        )
-    else:
-        accommodation_service.stage_delete_accommodation(itinerary_id, op["id"])
-
-
-def _apply_packing_item(itinerary_id: int, op: dict, user_id: int | None):
-    data = op["validated"]
-    if op["op"] == "create":
-        packing_item_service.stage_create_packing_item(user_id, itinerary_id, data)
-    elif op["op"] == "update":
-        packing_item_service.stage_update_packing_item(
-            user_id, itinerary_id, op["id"], data
-        )
-    else:
-        packing_item_service.stage_delete_packing_item(
-            user_id, itinerary_id, op["id"]
-        )
-
-
-def _apply_wishlist_item(itinerary_id: int, op: dict, user_id: int | None):
-    data = op["validated"]
-    if op["op"] == "create":
-        wishlist = wishlist_service.get_wishlist_by_name(
-            itinerary_id, op["wishlist_name"]
-        ) or wishlist_service.stage_create_wishlist(
-            user_id, itinerary_id, op["wishlist_name"]
-        )
-        wishlist_service.stage_create_wishlist_item(
-            itinerary_id, wishlist.id, data, user_id
-        )
-    elif op["op"] == "update":
-        wishlist_service.stage_update_wishlist_item(
-            itinerary_id, op["id"], data, user_id
-        )
-    else:
-        wishlist_service.stage_delete_wishlist_item(itinerary_id, op["id"])
-
-
-_APPLIERS = {
-    "event": _apply_event,
-    "accommodation": _apply_accommodation,
-    "packing_item": _apply_packing_item,
-    "wishlist_item": _apply_wishlist_item,
-}
-
-
 def apply_change_set(
     itinerary_id: int, ops: list[dict], user_id: int | None
 ) -> dict[str, int]:
     """Validate every op, then apply them all in one transaction (all or nothing)."""
-    prepared = validate_ops(ops)
-    counts = {"created": 0, "updated": 0, "deleted": 0}
+    prepared = validate_ops(itinerary_id, ops, user_id)
+    counts = {key: 0 for key in _COUNT_KEYS.values()}
 
     try:
-        for op in prepared:
-            _APPLIERS[op["entity"]](itinerary_id, op, user_id)
-            counts[{"create": "created", "update": "updated", "delete": "deleted"}[op["op"]]] += 1
+        for applier, op in prepared:
+            applier.apply(op)
+            counts[_COUNT_KEYS[op.kind]] += 1
         db.session.commit()
     except Exception:
         db.session.rollback()
