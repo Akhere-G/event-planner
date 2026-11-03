@@ -13,7 +13,7 @@ import { usePostHog } from "@posthog/react";
 import { differenceInDays } from "date-fns";
 import { isApiError, isValidationError } from "../features/api/utils";
 import { toast } from "sonner";
-import { anonymousAccessCodeStorageKey } from "../features/api/apiSlice";
+import { rememberAnonymousTrip } from "../features/api/apiSlice";
 
 import useLoadAnonTrip from "../features/trips/hooks/useLoadAnonTrip";
 import { Alert, AlertDescription, AlertTitle } from "../components/ui/alert";
@@ -83,13 +83,7 @@ export default function Addtrip() {
       const tripId = newTrip.data.id;
       const anonymousAccessCode = newTrip.data.anonymousAccessCode;
       if (anonymousAccessCode) {
-        localStorage.setItem(
-          anonymousAccessCodeStorageKey,
-          JSON.stringify({
-            anonymousAccessCode,
-            tripId,
-          }),
-        );
+        rememberAnonymousTrip(tripId, anonymousAccessCode);
       }
       toast.success("Trip created.");
 

@@ -24,6 +24,17 @@ const baseQuery = fetchBaseQuery({
 
 export const anonymousAccessCodeStorageKey = "anonymousAccessCode";
 
+/** Keeps the access code of a trip made while logged out, so it can be reopened. */
+export function rememberAnonymousTrip(
+  tripId: number,
+  anonymousAccessCode: string,
+) {
+  localStorage.setItem(
+    anonymousAccessCodeStorageKey,
+    JSON.stringify({ anonymousAccessCode, tripId }),
+  );
+}
+
 const baseQueryWithErrorHandling: BaseQueryFn<
   string | FetchArgs,
   unknown,
