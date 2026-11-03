@@ -1,7 +1,7 @@
 """added_cost_estimates_to_events_accommodations_wishlist_items
 
-Revision ID: d8e9f0a1b2c3
-Revises: c7d8e9f0a1b2
+Revision ID: 04bf52d2d617
+Revises: e2f3a4b5c6d7
 Create Date: 2026-11-02 00:00:00.000000
 
 """
@@ -10,8 +10,8 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = "d8e9f0a1b2c3"
-down_revision = "c7d8e9f0a1b2"
+revision = "04bf52d2d617"
+down_revision = "e2f3a4b5c6d7"
 branch_labels = None
 depends_on = None
 
