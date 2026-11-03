@@ -11,7 +11,6 @@ from ..middleware.itinerary_access_required import (
 from ..models import UserRole
 from ..schemas.ai_schema import EventSuggestionRequestSchema
 from ..services.ai_services import (
-    generate_trip_plan,
     get_event_suggestions,
     get_insights,
     optimise_events,
@@ -20,6 +19,7 @@ from ..services.change_set_service import (
     build_event_create_ops,
     build_event_update_ops,
 )
+from ..services.trip_generation_service import generate_trip_plan
 from ..utils.format_response import api_response
 from ..utils.rate_limit import ai_generation_limit, get_user_or_ip
 

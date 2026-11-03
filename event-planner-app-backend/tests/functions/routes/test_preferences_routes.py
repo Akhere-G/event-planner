@@ -1,6 +1,7 @@
 import pytest
 from src.extensions import db
 from src.models import Itinerary, TripPreferences
+from tests.factories import ItineraryFactory
 
 BODY = {
     "tripType": "friends",
@@ -62,3 +63,33 @@ def test_trip_patch_does_not_accept_preferences(admin_client, itinerary):
     )
     assert db.session.query(TripPreferences).filter_by(itinerary_id=itinerary.id).count() == 0
     assert db.session.get(Itinerary, itinerary.id).preferences is None
+
+
+def test_put_ignores_non_editable_fields(editor_client, editor_user, itinerary):
+    other = ItineraryFactory()
+    response = editor_client.put(
+        url(itinerary.id),
+        json={
+            "groupSize": 3,
+            "id": 9999,
+            "itineraryId": other.id,
+            "createdById": 12345,
+            "updatedById": 12345,
+            "createdAt": "2000-01-01T00:00:00",
+        },
+    )
+
+    assert response.status_code == 200
+    saved = (
+        db.session.query(TripPreferences).filter_by(itinerary_id=itinerary.id).one()
+    )
+    assert saved.group_size == 3
+    assert saved.id != 9999
+    assert saved.itinerary_id == itinerary.id
+    assert saved.created_by_id == editor_user.id
+    assert saved.updated_by_id == editor_user.id
+    assert saved.created_at.year != 2000
+    assert (
+        db.session.query(TripPreferences).filter_by(itinerary_id=other.id).count()
+        == 0
+    )

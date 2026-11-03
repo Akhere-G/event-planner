@@ -1,16 +1,16 @@
 import { format } from "date-fns";
-import type { TripFormValues } from "../schemas/tripFormSchemas";
+import type { TripFormValues } from "../../schemas/tripFormSchemas";
 import {
   BUDGET_TIER_LABELS,
   PACE_LABELS,
   TRIP_TYPE_LABELS,
   VIBE_OPTIONS,
-} from "../constants";
+} from "../../constants";
 
 const vibeLabel = (value: string) =>
   VIBE_OPTIONS.find((option) => option.value === value)?.label ?? value;
 
-export default function TripReview({ values }: { values: TripFormValues }) {
+export default function ReviewStep({ values }: { values: TripFormValues }) {
   const rows: [string, string][] = [
     ["Destination", values.destination],
     ["Name", values.name],

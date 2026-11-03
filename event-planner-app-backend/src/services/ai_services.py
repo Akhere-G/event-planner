@@ -2,7 +2,7 @@ import json
 import logging
 import os
 import re
-from datetime import date, datetime, timedelta, timezone as dt_timezone
+from datetime import datetime, timezone as dt_timezone
 from typing import Any, List
 from zoneinfo import ZoneInfo
 
@@ -10,14 +10,10 @@ import googlemaps
 from google import genai
 from google.genai import types as genai_types
 from groq import Groq
-from marshmallow import ValidationError
 
-from ..schemas.change_set_schema import MAX_OPS_PER_CHANGE_SET
 from ..utils import ai_output_validators
 from ..utils.location_utils import get_place_details
-from .change_set_service import DEFAULT_WISHLIST_NAME, build_event_create_ops
 from .itineraries_service import get_itinerary
-from .trip_preferences_service import get_preferences
 
 logger = logging.getLogger(__name__)
 
@@ -509,209 +505,12 @@ Schema:
         return []
 
 
-def _local_day_bounds(itinerary) -> list[str]:
-    days = (itinerary.end_date - itinerary.start_date).days + 1
-    return [
-        (itinerary.start_date + timedelta(days=offset)).isoformat()
-        for offset in range(days)
-    ]
 
+def __getattr__(name: str):
+    # Whole-trip generation lives in trip_generation_service, which builds on
+    # this module; resolve it lazily to avoid a circular import.
+    if name == "generate_trip_plan":
+        from .trip_generation_service import generate_trip_plan
 
-def _geocode(name: str, address: str | None) -> dict[str, Any] | None:
-    try:
-        details = get_place_details(name=name, address=address)
-    except Exception:
-        logger.exception("Failed to geocode place: %s", name)
-        return None
-    return {
-        "latitude": details["latitude"],
-        "longitude": details["longitude"],
-        "address": details.get("formatted_address") or address,
-    }
-
-
-def _text(value: Any, limit: int) -> str | None:
-    if isinstance(value, str) and value.strip():
-        return value.strip()[:limit]
-    return None
-
-
-def _trip_plan_prompt(itinerary, preferences, days: list[str]) -> str:
-    prefs = preferences
-    vibes = ", ".join(prefs.vibes or []) if prefs else ""
-    interests = ", ".join(prefs.interests or []) if prefs else ""
-    return f"""
-You are an expert travel planner API.
-
-Plan a whole trip to {itinerary.destination} from {itinerary.start_date} to
-{itinerary.end_date}. Local timezone: {itinerary.timezone or "UTC"}.
-
-TRAVELLER PREFERENCES:
-- Trip type: {(prefs.trip_type if prefs else None) or "not specified"}
-- Group size: {(prefs.group_size if prefs else None) or "not specified"}
-- Vibe: {vibes or "not specified"}
-- Budget tier: {(prefs.budget_tier if prefs else None) or "not specified"}
-- Total budget (GBP): {itinerary.budget_amount_gbp or "not specified"}
-- Pace: {(prefs.pace if prefs else None) or "balanced"}
-- Interests: {interests or "general sightseeing and food"}
-- Transport: {(prefs.transport if prefs else None) or "public_transport"}
-
-REQUIREMENTS:
-1. Real-world venues only, with exact names and full street addresses.
-2. Plan events on every one of these days: {", ".join(days)}. Respect the pace.
-3. Events on a day must be chronological and must not overlap.
-4. start_at and end_at are local wall-clock times formatted YYYY-MM-DDTHH:MM:SS
-   with no offset or "Z", and both on the event's day.
-5. Suggest 1-2 accommodations. start_date and end_date are YYYY-MM-DD within the trip.
-6. Suggest 8-20 packing items and 3-8 wishlist ideas (places to consider).
-7. Every item has a "reason": one short sentence, max 120 characters.
-8. Return ONLY a JSON object, with no markdown code blocks.
-
-JSON FORMAT:
-
-{{
-  "events": [
-    {{"name": "", "description": "Max 100 characters", "address": "", "start_at": "", "end_at": "", "category": "Max 10 characters", "reason": ""}}
-  ],
-  "accommodations": [
-    {{"name": "", "address": "", "description": "", "start_date": "YYYY-MM-DD", "end_date": "YYYY-MM-DD", "reason": ""}}
-  ],
-  "packing_items": [
-    {{"name": "", "category": "Clothing", "is_shared": false, "reason": ""}}
-  ],
-  "wishlist_items": [
-    {{"name": "", "description": "", "address": "", "reason": ""}}
-  ]
-}}
-"""
-
-
-def _event_ops(events: Any, days: list[str], timezone: str | None) -> list[dict]:
-    if not isinstance(events, list):
-        return []
-    ops = []
-    for event in events:
-        if not isinstance(event, dict):
-            continue
-        day = str(event.get("start_at", ""))[:10]
-        if day not in days or not ai_output_validators.validate_event_suggestion(
-            event, day
-        ):
-            continue
-        place = _geocode(event["name"], event.get("address"))
-        if place is None:
-            continue
-        suggestion = {
-            "name": event["name"][:100],
-            "description": _text(event.get("description"), 100),
-            "category": event["category"][:10],
-            "start_at": trip_local_to_utc(event["start_at"], timezone).isoformat(),
-            "end_at": trip_local_to_utc(event["end_at"], timezone).isoformat(),
-            "reason": event.get("reason"),
-            **place,
-        }
-        try:
-            ops.extend(build_event_create_ops([suggestion]))
-        except ValidationError:
-            logger.warning("Dropped invalid generated event: %s", event["name"])
-    return ops
-
-
-def _accommodation_ops(items: Any, itinerary) -> list[dict]:
-    if not isinstance(items, list):
-        return []
-    ops = []
-    for item in items[:2]:
-        if not isinstance(item, dict) or not _text(item.get("name"), 255):
-            continue
-        try:
-            start = date.fromisoformat(str(item.get("start_date")))
-            end = date.fromisoformat(str(item.get("end_date")))
-        except ValueError:
-            continue
-        if end < start:
-            continue
-        place = _geocode(item["name"], item.get("address"))
-        if place is None:
-            continue
-        ops.append(
-            {
-                "op": "create",
-                "entity": "accommodation",
-                "data": {
-                    "name": item["name"].strip()[:255],
-                    "description": _text(item.get("description"), 255),
-                    "start_date": max(start, itinerary.start_date).isoformat(),
-                    "end_date": min(end, itinerary.end_date).isoformat(),
-                    **place,
-                },
-                "reason": _text(item.get("reason"), 200),
-            }
-        )
-    return ops
-
-
-def _packing_ops(items: Any) -> list[dict]:
-    return [
-        {
-            "op": "create",
-            "entity": "packing_item",
-            "data": {
-                "name": item["name"][:100],
-                "category": item["category"][:50],
-                "is_shared": item["is_shared"],
-            },
-            "reason": _text(raw.get("reason"), 200),
-        }
-        for raw in (items if isinstance(items, list) else [])
-        if isinstance(raw, dict)
-        for item in ai_output_validators.validate_packing_items([raw])
-    ]
-
-
-def _wishlist_ops(items: Any) -> list[dict]:
-    if not isinstance(items, list):
-        return []
-    ops = []
-    for item in items:
-        if not isinstance(item, dict) or not _text(item.get("name"), 255):
-            continue
-        place = _geocode(item["name"], item.get("address")) or {}
-        ops.append(
-            {
-                "op": "create",
-                "entity": "wishlist_item",
-                "data": {
-                    "name": item["name"].strip()[:255],
-                    "description": _text(item.get("description"), 255),
-                    "wishlist_name": DEFAULT_WISHLIST_NAME,
-                    **place,
-                },
-                "reason": _text(item.get("reason"), 200),
-            }
-        )
-    return ops
-
-
-def generate_trip_plan(itinerary_id: int) -> list[dict]:
-    """Propose a whole-trip plan as preview-only change-set ops. Saves nothing."""
-    itinerary = get_itinerary(itinerary_id)
-    preferences = get_preferences(itinerary_id)
-    days = _local_day_bounds(itinerary)
-
-    try:
-        raw_response = get_ai_response(_trip_plan_prompt(itinerary, preferences, days))
-        plan = format_json(raw_response)
-    except (ValueError, RuntimeError) as exc:
-        logger.warning("Failed to generate trip plan: %s", exc)
-        return []
-
-    if not isinstance(plan, dict):
-        return []
-
-    return [
-        *_accommodation_ops(plan.get("accommodations"), itinerary),
-        *_event_ops(plan.get("events"), days, itinerary.timezone),
-        *_packing_ops(plan.get("packing_items")),
-        *_wishlist_ops(plan.get("wishlist_items")),
-    ][:MAX_OPS_PER_CHANGE_SET]
+        return generate_trip_plan
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")

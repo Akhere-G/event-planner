@@ -11,6 +11,17 @@ BUDGET_TIERS = ("budget", "mid", "luxury")
 PACE_OPTIONS = ("relaxed", "balanced", "packed")
 TRANSPORT_OPTIONS = ("walking", "public_transport", "driving", "cycling")
 
+# The only keys a client may ever set on a TripPreferences row.
+EDITABLE_FIELDS = (
+    "trip_type",
+    "group_size",
+    "vibes",
+    "budget_tier",
+    "pace",
+    "interests",
+    "transport",
+)
+
 
 class TripPreferences(Base, AuditMixin):
     __tablename__ = "trip_preferences"

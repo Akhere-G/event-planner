@@ -67,7 +67,7 @@ def counts(itinerary_id):
 def preview(client, itinerary_id):
     with (
         patch("src.services.ai_services.get_ai_response", return_value=json.dumps(PLAN)),
-        patch("src.services.ai_services.get_place_details", return_value=PLACE),
+        patch("src.services.trip_generation_service.get_place_details", return_value=PLACE),
     ):
         return client.post(f"/api/ai/generate-trip/{itinerary_id}/preview")
 
@@ -98,7 +98,7 @@ def test_generated_ops_pass_change_set_validation(admin_client, itinerary):
     snake = [
         {**o, "data": {_snake(k): v for k, v in o["data"].items()}} for o in ops
     ]
-    assert len(validate_ops(snake)) == len(ops)
+    assert len(validate_ops(itinerary.id, snake, None)) == len(ops)
 
 
 def _snake(key):
@@ -135,3 +135,12 @@ def test_ai_generation_limit_depends_on_login(app):
         ctx.session["user_id"] = 1
         logged_in = ai_generation_limit()
     assert anonymous != logged_in
+
+
+def test_failures_are_logged_with_trip_context(editor_client, itinerary, caplog):
+    with patch(
+        "src.services.ai_services.get_ai_response", return_value="[1, 2]"
+    ), caplog.at_level("ERROR"):
+        editor_client.post(f"/api/ai/generate-trip/{itinerary.id}/preview")
+
+    assert f"Trip {itinerary.id}" in caplog.text

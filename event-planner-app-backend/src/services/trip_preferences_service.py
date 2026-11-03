@@ -2,6 +2,7 @@ from sqlalchemy import select
 
 from ..extensions import db
 from ..models import TripPreferences
+from ..models.trip_preferences_model import EDITABLE_FIELDS
 
 
 def get_preferences(itinerary_id: int) -> TripPreferences | None:
@@ -24,8 +25,9 @@ def upsert_preferences(
         )
         db.session.add(preferences)
 
-    for key, value in data.items():
-        setattr(preferences, key, value)
+    for key in EDITABLE_FIELDS:
+        if key in data:
+            setattr(preferences, key, data[key])
     preferences.updated_by_id = user_id
 
     db.session.commit()

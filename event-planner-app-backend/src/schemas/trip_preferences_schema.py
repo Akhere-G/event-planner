@@ -1,8 +1,9 @@
-import re
+from marshmallow import EXCLUDE, fields, post_dump, validate
 
-from marshmallow import Schema, fields, post_dump, pre_load, validate
-
+from .base_schema import BaseSchema
 from ..models.trip_preferences_model import (
+    EDITABLE_FIELDS,
+    TripPreferences,
     BUDGET_TIERS,
     PACE_OPTIONS,
     TRANSPORT_OPTIONS,
@@ -12,8 +13,15 @@ from ..models.trip_preferences_model import (
 _TAG = fields.String(validate=validate.Length(min=1, max=50))
 
 
-class TripPreferencesSchema(Schema):
+class TripPreferencesSchema(BaseSchema):
     """Own schema so the trip PATCH route never accepts preference fields."""
+
+    class Meta:
+        model = TripPreferences
+        load_instance = False
+        include_fk = False
+        fields = EDITABLE_FIELDS
+        unknown = EXCLUDE
 
     trip_type = fields.String(
         allow_none=True, validate=validate.OneOf(TRIP_TYPES)
@@ -31,13 +39,6 @@ class TripPreferencesSchema(Schema):
     transport = fields.String(
         allow_none=True, validate=validate.OneOf(TRANSPORT_OPTIONS)
     )
-
-    @pre_load
-    def camel_to_snake(self, data, **kwargs):
-        return {
-            re.sub(r"(?<!^)(?=[A-Z])", "_", key).lower(): value
-            for key, value in (data or {}).items()
-        }
 
     @post_dump
     def default_lists(self, data, **kwargs):

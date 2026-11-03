@@ -1,82 +1,29 @@
-import {
-  addDays,
-  addMilliseconds,
-  addMonths,
-  differenceInMilliseconds,
-  format,
-  isValid,
-} from "date-fns";
-import {
-  FormInput,
-  FormTextarea,
-  LocationInput,
-  Stepper,
-} from "../../../components";
-import { isValidationError } from "../../api/utils";
-import type { TripSchema } from "../schemas/tripSchema";
+import { Stepper } from "../../../components";
+import { TRIP_STEPS } from "../schemas/tripFormSchemas";
 import type { PreferencesInput } from "../schemas/preferencesSchema";
+import type { TripSchema } from "../schemas/tripSchema";
 import {
-  TRIP_STEPS,
-  editFormSchema,
-  makeResolver,
-  splitFormValues,
-  stepSchemas,
-  type TripFormValues,
-} from "../schemas/tripFormSchemas";
-import { emptyPreferences } from "../preferenceUtils";
-import { useForm } from "react-hook-form";
-import { useState } from "react";
-import { toast } from "sonner";
-import {
-  BudgetFields,
-  TransportFields,
-  VibeFields,
-  WhoFields,
-} from "./PreferenceFields";
-import TripReview from "./TripReview";
+  LAST_STEP,
+  useTripForm,
+  type TripSubmitAction,
+} from "../hooks/useTripForm";
+import BasicsStep from "./steps/BasicsStep";
+import BudgetStep from "./steps/BudgetStep";
+import ReviewStep from "./steps/ReviewStep";
+import TransportStep from "./steps/TransportStep";
+import VibeStep from "./steps/VibeStep";
+import WhoStep from "./steps/WhoStep";
 
-export interface TripSubmitOptions {
-  generateWithAi: boolean;
-}
+export type { TripSubmitOptions } from "../hooks/useTripForm";
 
 interface TripFormProps {
   initialData?: Partial<TripSchema>;
   initialPreferences?: Partial<PreferencesInput>;
-  submitAction: (
-    trip: TripSchema,
-    preferences: PreferencesInput,
-    options: TripSubmitOptions,
-  ) => Promise<void>;
+  submitAction: TripSubmitAction;
   submitBtnText: string;
   isLoading: boolean;
   /** "stepper" is a guided multi-step flow; "single" shows everything on one page. */
   variant?: "stepper" | "single";
-}
-
-const LAST_STEP = TRIP_STEPS.length - 1;
-
-function buildDefaults(
-  initialData: Partial<TripSchema>,
-  initialPreferences: Partial<PreferencesInput>,
-): TripFormValues {
-  const defaultStart = addMonths(new Date(), 4);
-  const defaultEnd = addDays(defaultStart, 7);
-  return {
-    name: initialData.name ?? "",
-    destination: initialData.destination ?? "",
-    description: initialData.description ?? "",
-    latitude: initialData.latitude ?? 0,
-    longitude: initialData.longitude ?? 0,
-    startDate: initialData.startDate ?? format(defaultStart, "yyyy-MM-dd"),
-    endDate: initialData.endDate ?? format(defaultEnd, "yyyy-MM-dd"),
-    budgetAmountGbp: initialData.budgetAmountGbp ?? null,
-    ...emptyPreferences,
-    groupSize:
-      initialPreferences.groupSize ?? (initialPreferences.tripType ? null : 1),
-    ...Object.fromEntries(
-      Object.entries(initialPreferences).filter(([key]) => key !== "groupSize"),
-    ),
-  };
 }
 
 export default function TripForm({
@@ -88,146 +35,28 @@ export default function TripForm({
   variant = "stepper",
 }: TripFormProps) {
   const isStepper = variant === "stepper";
-  const [errorMessage, setErrorMessage] = useState("");
-  const [step, setStep] = useState(0);
-  const [defaultValues] = useState(() =>
-    buildDefaults(initialData, initialPreferences),
-  );
-
   const {
-    register,
-    formState,
-    handleSubmit,
-    setError,
-    setValue,
-    getValues,
-    watch,
-    trigger,
-  } = useForm<TripFormValues>({
+    form,
     defaultValues,
-    resolver: makeResolver(() =>
-      isStepper ? stepSchemas[step] : editFormSchema,
-    ),
-  });
+    errorMessage,
+    step,
+    goTo,
+    handleNext,
+    submitWith,
+  } = useTripForm({ initialData, initialPreferences, isStepper, submitAction });
+  const { register, watch, setValue, getValues, formState } = form;
 
-  const goTo = (next: number) => {
-    setStep(next);
-  };
-
-  const handleNext = async () => {
-    if (await trigger()) goTo(Math.min(step + 1, LAST_STEP));
-  };
-
-  const submitWith = (generateWithAi: boolean) =>
-    handleSubmit(async (values) => {
-      const { trip, preferences } = splitFormValues(values);
-      const formattedTrip = {
-        ...trip,
-        description: trip.description,
-        startDate: format(trip.startDate, "yyyy-MM-dd"),
-        endDate: format(trip.endDate, "yyyy-MM-dd"),
-        budgetAmountGbp: trip.budgetAmountGbp ?? null,
-      };
-
-      try {
-        await submitAction(formattedTrip, preferences, { generateWithAi });
-      } catch (err) {
-        if (isValidationError(err)) {
-          const serverErrors = err.data.error;
-
-          setErrorMessage(serverErrors.general?.join(", ") ?? "");
-
-          Object.entries(serverErrors).forEach(([key, messages]) => {
-            setError(key as keyof TripFormValues, {
-              type: "server",
-              message: messages[0],
-            });
-          });
-          if (isStepper) goTo(0);
-        } else {
-          toast.error("Sorry! Something went wrong...");
-        }
-      }
-    })();
-
-  const onStartChange = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement,
-      Element
-    >,
-  ) => {
-    const newStartStr = e.target.value;
-    const currentStartStr = getValues("startDate");
-    const currentEndStr = getValues("endDate");
-
-    const currentStart = new Date(currentStartStr);
-    const currentEnd = new Date(currentEndStr);
-    const nextStart = new Date(newStartStr);
-
-    if (isValid(currentStart) && isValid(currentEnd) && isValid(nextStart)) {
-      const duration = differenceInMilliseconds(currentEnd, currentStart);
-
-      const nextEnd = addMilliseconds(nextStart, duration);
-
-      setValue("endDate", format(nextEnd, "yyyy-MM-dd"));
-    } else if (isValid(nextStart)) {
-      const nextEnd = addDays(nextStart, 7);
-
-      setValue("endDate", format(nextEnd, "yyyy-MM-dd"));
-    }
-
-    setValue("startDate", newStartStr);
-  };
-
-  const fieldProps = {
-    register,
-    watch,
-    setValue,
-    errors: formState.errors,
-  };
-
-  const basicsFields = (
-    <>
-      <LocationInput
-        name="location"
-        label="Destination"
-        initialValue={defaultValues.destination}
-        errorMessage={formState.errors.destination?.message}
-        searchTypes={["political"]}
-        onPlaceSelect={(place) => {
-          if (!place.formatted_address || !place.geometry?.location) return;
-          setValue("destination", place.formatted_address, {
-            shouldValidate: formState.isSubmitted,
-          });
-          setValue("name", `${place.name} ${new Date().getFullYear()}`);
-          setValue("latitude", place.geometry.location.lat());
-          setValue("longitude", place.geometry.location.lng());
-        }}
-      />
-      <FormInput
-        label="Name"
-        {...register("name")}
-        errorMessage={formState.errors.name?.message}
-      />
-      <FormTextarea
-        label="Description"
-        {...register("description")}
-        errorMessage={formState.errors.description?.message}
-      />
-      <FormInput
-        label="Start Date"
-        type="date"
-        {...register("startDate")}
-        errorMessage={formState.errors.startDate?.message}
-        onChange={onStartChange}
-      />
-      <FormInput
-        label="End Date"
-        type="date"
-        {...register("endDate")}
-        errorMessage={formState.errors.endDate?.message}
-      />
-    </>
+  const fieldProps = { register, watch, setValue, errors: formState.errors };
+  const basics = (
+    <BasicsStep
+      {...fieldProps}
+      getValues={getValues}
+      initialDestination={defaultValues.destination}
+      validateOnPlaceSelect={formState.isSubmitted}
+    />
+  );
+  const errorBanner = errorMessage && (
+    <p className="errorMessage">{errorMessage}</p>
   );
 
   if (!isStepper) {
@@ -239,13 +68,13 @@ export default function TripForm({
           void submitWith(false);
         }}
       >
-        {errorMessage && <p className="errorMessage">{errorMessage}</p>}
-        {basicsFields}
+        {errorBanner}
+        {basics}
         <h3 className="title mt-2">Preferences</h3>
-        <WhoFields {...fieldProps} />
-        <VibeFields {...fieldProps} />
-        <BudgetFields {...fieldProps} />
-        <TransportFields {...fieldProps} />
+        <WhoStep {...fieldProps} />
+        <VibeStep {...fieldProps} />
+        <BudgetStep {...fieldProps} />
+        <TransportStep {...fieldProps} />
         <button className="btn-primary mt-2" disabled={isLoading}>
           {submitBtnText}
         </button>
@@ -264,13 +93,13 @@ export default function TripForm({
       }}
     >
       <Stepper steps={[...TRIP_STEPS]} currentStep={step} onStepClick={goTo} />
-      {errorMessage && <p className="errorMessage">{errorMessage}</p>}
+      {errorBanner}
 
-      {step === 0 && basicsFields}
-      {step === 1 && <WhoFields {...fieldProps} />}
-      {step === 2 && <VibeFields {...fieldProps} />}
-      {step === 3 && <BudgetFields {...fieldProps} />}
-      {step === 4 && <TripReview values={getValues()} />}
+      {step === 0 && basics}
+      {step === 1 && <WhoStep {...fieldProps} />}
+      {step === 2 && <VibeStep {...fieldProps} />}
+      {step === 3 && <BudgetStep {...fieldProps} />}
+      {step === 4 && <ReviewStep values={getValues()} />}
 
       <div className="flex gap-2 justify-between mt-2 flex-wrap">
         <button
