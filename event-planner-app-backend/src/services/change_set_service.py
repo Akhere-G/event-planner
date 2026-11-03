@@ -124,3 +124,19 @@ def build_cost_estimate_ops(estimates: list[dict]) -> list[dict]:
             }
         )
     return ops
+
+
+def build_edit_ops(proposed: list[dict]) -> list[dict]:
+    """Turn sanitised AI edit ops into preview-only ops with API-shaped data.
+
+    Ops whose data fails the entity's schema are dropped rather than failing the preview.
+    """
+    ops = []
+    for op in proposed:
+        applier = ChangeSetApplierFactory.create(op["entity"], 0, None)
+        try:
+            prepared = applier.prepare(op)
+        except ValidationError:
+            continue
+        ops.append({**op, "data": applier.preview(prepared)})
+    return ops
