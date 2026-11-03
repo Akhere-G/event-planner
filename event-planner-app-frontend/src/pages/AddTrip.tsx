@@ -18,6 +18,7 @@ import { rememberAnonymousTrip } from "../features/api/apiSlice";
 import useLoadAnonTrip from "../features/trips/hooks/useLoadAnonTrip";
 import { Alert, AlertDescription, AlertTitle } from "../components/ui/alert";
 import { InfoIcon } from "lucide-react";
+import { TripBuilderChat } from "../features/tripBuilder/components";
 
 export default function Addtrip() {
   const [addTrip, { isLoading }] = useAddTripMutation();
@@ -34,6 +35,7 @@ export default function Addtrip() {
     ops: ChangeOp[];
   } | null>(null);
 
+  const [isManual, setIsManual] = useState(false);
   const { anonTrip } = useLoadAnonTrip();
 
   async function generatePlan(tripId: number, timezone: string) {
@@ -134,13 +136,24 @@ export default function Addtrip() {
             </AlertDescription>
           </Alert>
         )}
-        <TripForm
-          submitAction={onSubmit}
-          submitBtnText="Create"
-          isLoading={
-            isLoading || isSavingPreferences || isGenerating || !!anonTrip
-          }
-        />
+        <button
+          type="button"
+          className="btn-secondary mb-4"
+          onClick={() => setIsManual((manual) => !manual)}
+        >
+          {isManual ? "Plan with AI" : "Add manually"}
+        </button>
+        {isManual ? (
+          <TripForm
+            submitAction={onSubmit}
+            submitBtnText="Create"
+            isLoading={
+              isLoading || isSavingPreferences || isGenerating || !!anonTrip
+            }
+          />
+        ) : (
+          <TripBuilderChat disabled={!!anonTrip} />
+        )}
         {generated && (
           <ChangePreviewModal
             open
