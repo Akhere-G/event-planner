@@ -34,9 +34,7 @@ def _user_role(trip_calendar: TripCalendar) -> str | None:
     return db.session.execute(stmt).scalar_one_or_none()
 
 
-def _delete_from_google(
-    trip_calendar: TripCalendar, google_event: GoogleEvent
-) -> None:
+def _delete_from_google(trip_calendar: TripCalendar, google_event: GoogleEvent) -> None:
     link = find_link_by_google_event(trip_calendar, google_event["id"])
     if link is None:
         return
@@ -48,16 +46,12 @@ def _delete_from_google(
         mapper.delete(obj)
 
 
-def _create_from_google(
-    trip_calendar: TripCalendar, google_event: GoogleEvent
-) -> None:
+def _create_from_google(trip_calendar: TripCalendar, google_event: GoogleEvent) -> None:
     mapper = creation_mapper()
     obj = mapper.create_from_google(trip_calendar.itinerary, google_event)
     obj.created_by_id = obj.updated_by_id = trip_calendar.user_id
     db.session.flush()
-    save_link(
-        trip_calendar, None, mapper.entity, obj.id, google_event, obj.updated_at
-    )
+    save_link(trip_calendar, None, mapper.entity, obj.id, google_event, obj.updated_at)
 
 
 def _update_from_google(
@@ -133,6 +127,6 @@ def pull_trip_calendar(trip_calendar_id: int, client_for: ClientFactory) -> None
                 _apply_all(trip_calendar, page.events)
             trip_calendar.sync_token = page.next_sync_token
             db.session.commit()
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001 - one user must not block others
             db.session.rollback()
             handle_user_failure(user_id, exc)

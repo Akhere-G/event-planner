@@ -1,5 +1,4 @@
-from datetime import datetime, timezone
-from typing import List, Optional
+from datetime import UTC, datetime
 
 from sqlalchemy import DateTime, ForeignKey, Integer, String, Text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -8,7 +7,7 @@ from ..extensions import Base
 
 
 def _utc_now() -> datetime:
-    return datetime.now(timezone.utc)
+    return datetime.now(UTC)
 
 
 class CalendarConnection(Base):
@@ -40,21 +39,19 @@ class TripCalendar(Base):
         ForeignKey("itineraries.id", ondelete="CASCADE"), index=True
     )
     google_calendar_id: Mapped[str] = mapped_column(String(255))
-    sync_token: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
-    channel_id: Mapped[Optional[str]] = mapped_column(
+    sync_token: Mapped[str | None] = mapped_column(Text, nullable=True)
+    channel_id: Mapped[str | None] = mapped_column(
         String(64), unique=True, nullable=True
     )
-    channel_token: Mapped[Optional[str]] = mapped_column(String(64), nullable=True)
-    channel_resource_id: Mapped[Optional[str]] = mapped_column(
-        String(255), nullable=True
-    )
-    channel_expires_at: Mapped[Optional[datetime]] = mapped_column(
+    channel_token: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    channel_resource_id: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    channel_expires_at: Mapped[datetime | None] = mapped_column(
         DateTime, nullable=True, index=True
     )
     created_at: Mapped[datetime] = mapped_column(DateTime, default=_utc_now)
 
     itinerary: Mapped["Itinerary"] = relationship()  # type: ignore  # noqa: F821
-    links: Mapped[List["CalendarLink"]] = relationship(
+    links: Mapped[list["CalendarLink"]] = relationship(
         back_populates="trip_calendar",
         cascade="all, delete-orphan",
         passive_deletes=True,

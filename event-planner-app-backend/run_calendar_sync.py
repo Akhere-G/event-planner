@@ -20,8 +20,8 @@ def main() -> None:
     with app.app_context():
         try:
             run_scheduled_sync(google_client_for_user)
-        except Exception as e:
-            logger.exception(f"Error running calendar sync: {e}")
+        except Exception:
+            logger.exception("Error running calendar sync")
             sys.exit(1)
 
 

@@ -70,7 +70,7 @@ def renew_expiring_channels(client_for: ClientFactory) -> int:
         try:
             start_watch(trip_calendar, client_for(user_id))
             db.session.commit()
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001 - one user must not block others
             db.session.rollback()
             handle_user_failure(user_id, exc)
     return len(trip_calendars)
