@@ -116,5 +116,6 @@ def test_optimise_events_uses_trip_local_date(itinerary):
             "id": late_event.id,
             "start_at": datetime(2026, 8, 21, 8, 0, tzinfo=timezone.utc),
             "end_at": datetime(2026, 8, 21, 9, 0, tzinfo=timezone.utc),
+            "reason": None,
         }
     ]

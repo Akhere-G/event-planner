@@ -117,6 +117,7 @@ def validate_optimised_events(
                 "id": event_id,
                 "start_at": start,
                 "end_at": end,
+                "reason": event.get("reason"),
             }
         )
 
