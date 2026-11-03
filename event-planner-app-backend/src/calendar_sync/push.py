@@ -6,11 +6,11 @@ from ..extensions import db
 from ..models import CalendarLink, TripCalendar
 from ..realtime.change_tracker import EntityChange
 from .client import CalendarClient, ClientFactory, GoogleEventGoneError
+from .failures import handle_user_failure
 from .links import find_link, save_link, trip_calendars_for_members
 from .mappers import all_mappers, get_mapper
 from .mappers.base import EntitySyncMapper
 from .mappers.times import ensure_utc
-from .failures import handle_user_failure
 
 logger = logging.getLogger(__name__)
 
@@ -91,6 +91,6 @@ def push_changes(changes: list[EntityChange], client_for: ClientFactory) -> None
                 for change in trip_changes:
                     push_change(trip_calendar, client, change)
                 db.session.commit()
-            except Exception as exc:
+            except Exception as exc:  # noqa: BLE001 - one user must not block others
                 db.session.rollback()
                 handle_user_failure(user_id, exc)

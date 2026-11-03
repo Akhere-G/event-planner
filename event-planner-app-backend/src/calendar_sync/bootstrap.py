@@ -21,6 +21,6 @@ def bootstrap_trip_calendar(trip_calendar_id: int, client_for: ClientFactory) ->
         pull_trip_calendar(trip_calendar_id, client_for)
         start_watch(trip_calendar, client)
         db.session.commit()
-    except Exception as exc:
+    except Exception as exc:  # noqa: BLE001 - one user must not block others
         db.session.rollback()
         handle_user_failure(user_id, exc)

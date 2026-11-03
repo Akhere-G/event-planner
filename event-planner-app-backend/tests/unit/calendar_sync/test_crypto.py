@@ -1,5 +1,6 @@
 import pytest
 from cryptography.fernet import Fernet, InvalidToken
+
 from src.calendar_sync.crypto import TokenCipher
 
 

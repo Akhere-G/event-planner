@@ -1,6 +1,7 @@
 import logging
+from collections.abc import Callable
 from concurrent.futures import ThreadPoolExecutor
-from typing import Any, Callable
+from typing import Any
 
 from flask import Flask, current_app
 
