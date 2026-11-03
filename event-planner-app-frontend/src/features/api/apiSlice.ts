@@ -53,6 +53,7 @@ export const tagTypes = [
   "Flights",
   "PackingItem",
   "Notifications",
+  "CalendarSync",
 ];
 export const apiSlice = createApi({
   reducerPath: "api",
