@@ -1,161 +1,140 @@
+import { Stepper } from "../../../components";
+import { TRIP_STEPS } from "../schemas/tripFormSchemas";
+import type { PreferencesInput } from "../schemas/preferencesSchema";
+import type { TripSchema } from "../schemas/tripSchema";
 import {
-  addDays,
-  addMilliseconds,
-  addMonths,
-  differenceInMilliseconds,
-  format,
-  isValid,
-} from "date-fns";
-import { FormInput, FormTextarea, LocationInput } from "../../../components";
-import { isValidationError } from "../../api/utils";
-import { tripSchema, type TripSchema } from "../schemas/tripSchema";
-import { yupResolver } from "@hookform/resolvers/yup";
-import { useForm } from "react-hook-form";
-import { useEffect, useState } from "react";
-import { toast } from "sonner";
+  LAST_STEP,
+  useTripForm,
+  type TripSubmitAction,
+} from "../hooks/useTripForm";
+import BasicsStep from "./steps/BasicsStep";
+import BudgetStep from "./steps/BudgetStep";
+import ReviewStep from "./steps/ReviewStep";
+import TransportStep from "./steps/TransportStep";
+import VibeStep from "./steps/VibeStep";
+import WhoStep from "./steps/WhoStep";
+
+export type { TripSubmitOptions } from "../hooks/useTripForm";
 
 interface TripFormProps {
   initialData?: Partial<TripSchema>;
-  submitAction: (trip: TripSchema) => Promise<void>;
+  initialPreferences?: Partial<PreferencesInput>;
+  submitAction: TripSubmitAction;
   submitBtnText: string;
   isLoading: boolean;
+  /** "stepper" is a guided multi-step flow; "single" shows everything on one page. */
+  variant?: "stepper" | "single";
 }
 
 export default function TripForm({
   initialData = {},
+  initialPreferences = {},
   submitAction,
   submitBtnText,
   isLoading,
+  variant = "stepper",
 }: TripFormProps) {
-  const [errorMessage, setErrorMessage] = useState("");
+  const isStepper = variant === "stepper";
+  const {
+    form,
+    defaultValues,
+    errorMessage,
+    step,
+    goTo,
+    handleNext,
+    submitWith,
+  } = useTripForm({ initialData, initialPreferences, isStepper, submitAction });
+  const { register, watch, setValue, getValues, formState } = form;
 
-  const { register, formState, handleSubmit, setError, setValue, getValues } =
-    useForm({
-      resolver: yupResolver(tripSchema),
-    });
+  const fieldProps = { register, watch, setValue, errors: formState.errors };
+  const basics = (
+    <BasicsStep
+      {...fieldProps}
+      getValues={getValues}
+      initialDestination={defaultValues.destination}
+      validateOnPlaceSelect={formState.isSubmitted}
+    />
+  );
+  const errorBanner = errorMessage && (
+    <p className="errorMessage">{errorMessage}</p>
+  );
 
-  useEffect(() => {
-    const defaultStart = addMonths(new Date(), 4);
-    const defaultEnd = addDays(defaultStart, 7);
-    const defaultValues: TripSchema = {
-      name: "",
-      destination: "",
-      startDate: format(defaultStart, "yyyy-MM-dd"),
-      endDate: format(defaultEnd, "yyyy-MM-dd"),
-      description: "",
-      latitude: 0,
-      longitude: 0,
-      ...initialData,
-    };
+  if (!isStepper) {
+    return (
+      <form
+        className="form"
+        onSubmit={(e) => {
+          e.preventDefault();
+          void submitWith(false);
+        }}
+      >
+        {errorBanner}
+        {basics}
+        <h3 className="title mt-2">Preferences</h3>
+        <WhoStep {...fieldProps} />
+        <VibeStep {...fieldProps} />
+        <BudgetStep {...fieldProps} />
+        <TransportStep {...fieldProps} />
+        <button className="btn-primary mt-2" disabled={isLoading}>
+          {submitBtnText}
+        </button>
+      </form>
+    );
+  }
 
-    for (const key of Object.keys(defaultValues)) {
-      setValue(key as keyof TripSchema, defaultValues[key as keyof TripSchema]);
-    }
-  }, [initialData, setValue]);
-
-  const onSubmit = async (formState: TripSchema) => {
-    const formattedData = {
-      name: formState.name,
-      destination: formState.destination,
-      description: formState.description,
-      latitude: formState.latitude,
-      longitude: formState.longitude,
-      startDate: format(formState.startDate, "yyyy-MM-dd"),
-      endDate: format(formState.endDate, "yyyy-MM-dd"),
-    };
-
-    try {
-      await submitAction(formattedData);
-    } catch (err) {
-      if (isValidationError(err)) {
-        const serverErrors = err.data.error;
-
-        setErrorMessage(serverErrors.general?.join(", ") ?? "");
-
-        Object.entries(serverErrors).forEach(([key, messages]) => {
-          setError(key as keyof TripSchema, {
-            type: "server",
-            message: messages[0],
-          });
-        });
-      } else {
-        toast.error("Sorry! Something went wrong...");
-      }
-    }
-  };
-
-  const onStartChange = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement,
-      Element
-    >,
-  ) => {
-    const newStartStr = e.target.value;
-    const currentStartStr = getValues("startDate");
-    const currentEndStr = getValues("endDate");
-
-    const currentStart = new Date(currentStartStr);
-    const currentEnd = new Date(currentEndStr);
-    const nextStart = new Date(newStartStr);
-
-    if (isValid(currentStart) && isValid(currentEnd) && isValid(nextStart)) {
-      const duration = differenceInMilliseconds(currentEnd, currentStart);
-
-      const nextEnd = addMilliseconds(nextStart, duration);
-
-      setValue("endDate", format(nextEnd, "yyyy-MM-dd"));
-    } else if (isValid(nextStart)) {
-      const nextEnd = addDays(nextStart, 7);
-
-      setValue("endDate", format(nextEnd, "yyyy-MM-dd"));
-    }
-
-    setValue("startDate", newStartStr);
-  };
+  const isLastStep = step === LAST_STEP;
 
   return (
-    <form className="form" onSubmit={handleSubmit(onSubmit)}>
-      {errorMessage && <p className="errorMessage">{errorMessage}</p>}
+    <form
+      className="form"
+      onSubmit={(e) => {
+        e.preventDefault();
+        if (!isLastStep) void handleNext();
+      }}
+    >
+      <Stepper steps={[...TRIP_STEPS]} currentStep={step} onStepClick={goTo} />
+      {errorBanner}
 
-      <LocationInput
-        name="location"
-        label="Destination"
-        errorMessage={formState.errors.destination?.message}
-        searchTypes={["political"]}
-        onPlaceSelect={(place) => {
-          if (!place.formatted_address || !place.geometry?.location) return;
-          setValue("destination", place.formatted_address);
-          setValue("name", `${place.name} ${new Date().getFullYear()}`);
-          setValue("latitude", place.geometry.location.lat());
-          setValue("longitude", place.geometry.location.lng());
-        }}
-      />
-      <FormInput
-        label="Name"
-        {...register("name")}
-        errorMessage={formState.errors.name?.message}
-      />
-      <FormTextarea
-        label="Description"
-        {...register("description")}
-        errorMessage={formState.errors.description?.message}
-      />
-      <FormInput
-        label="Start Date"
-        type="date"
-        {...register("startDate")}
-        errorMessage={formState.errors.startDate?.message}
-        onChange={onStartChange}
-      />
-      <FormInput
-        label="End Date"
-        type="date"
-        {...register("endDate")}
-        errorMessage={formState.errors.endDate?.message}
-      />
-      <button className="btn-primary mt-2" disabled={isLoading}>
-        {submitBtnText}
-      </button>
+      {step === 0 && basics}
+      {step === 1 && <WhoStep {...fieldProps} />}
+      {step === 2 && <VibeStep {...fieldProps} />}
+      {step === 3 && <BudgetStep {...fieldProps} />}
+      {step === 4 && <ReviewStep values={getValues()} />}
+
+      <div className="flex gap-2 justify-between mt-2 flex-wrap">
+        <button
+          type="button"
+          className="btn-secondary"
+          onClick={() => goTo(step - 1)}
+          disabled={step === 0 || isLoading}
+        >
+          Back
+        </button>
+        {isLastStep ? (
+          <div className="flex gap-2 flex-wrap">
+            <button
+              type="button"
+              className="btn-secondary"
+              disabled={isLoading}
+              onClick={() => void submitWith(false)}
+            >
+              {submitBtnText}
+            </button>
+            <button
+              type="button"
+              className="btn-primary"
+              disabled={isLoading}
+              onClick={() => void submitWith(true)}
+            >
+              {submitBtnText} &amp; generate with AI
+            </button>
+          </div>
+        ) : (
+          <button type="submit" className="btn-primary">
+            Next
+          </button>
+        )}
+      </div>
     </form>
   );
 }
