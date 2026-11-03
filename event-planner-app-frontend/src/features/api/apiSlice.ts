@@ -50,6 +50,7 @@ export const tagTypes = [
   "Users",
   "Wishlists",
   "Accommodations",
+  "Flights",
   "PackingItem",
   "Notifications",
   "Expenses",

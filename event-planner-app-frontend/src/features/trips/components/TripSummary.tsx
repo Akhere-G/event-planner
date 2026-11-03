@@ -8,6 +8,7 @@ import {
   UserCog,
 } from "lucide-react";
 import type { Trip } from "../types";
+import type { Flight } from "../../flights/types";
 import { formatDateRange } from "../../../utils/dateFormattors";
 import { UserAvatarList } from "../../users/components";
 import { useSelector } from "react-redux";
@@ -29,6 +30,7 @@ import EditTripModal from "../../modal/components/EditTripModal";
 import ViewUsersModal from "../../modal/components/ViewUsersModal";
 import { usePostHog } from "@posthog/react";
 import useLoadAnonTrip from "../hooks/useLoadAnonTrip";
+import { useLazyGetFlightsQuery } from "../../flights/flightApiSlice";
 import RegisterModal from "../../modal/components/RegisterModal";
 
 type ModalType = "edit" | "delete" | "users" | "register" | null;
@@ -50,6 +52,7 @@ export default function TripSummary({
   const { userId } = useSelector((state: RootState) => state.auth);
 
   const posthog = usePostHog();
+  const [fetchFlights] = useLazyGetFlightsQuery();
 
   const { anonTrip } = useLoadAnonTrip();
   function openUsersView() {
@@ -96,7 +99,20 @@ export default function TripSummary({
               disabled={isRemoveLoading}
               onClick={async () => {
                 const { exportToCalendar } = await import("../utils");
-                exportToCalendar(trip.name, trip.events, trip.userMemberships);
+                let flights: Flight[] = [];
+                try {
+                  flights = (await fetchFlights(trip.id).unwrap()).data;
+                } catch {
+                  toast.error(
+                    "Could not load flights; exporting without them.",
+                  );
+                }
+                exportToCalendar(
+                  trip.name,
+                  trip.events,
+                  trip.userMemberships,
+                  flights,
+                );
                 posthog?.capture("export_to_calendar", { trip_id: trip.id });
               }}
               className="flex gap-2 items-center"
