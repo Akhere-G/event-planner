@@ -11,6 +11,7 @@ export interface Trip {
   role: string;
   description?: string;
   timezone: string;
+  budgetAmountGbp?: number | null;
   startDate: string;
   endDate: string;
   userMemberships: User[];
