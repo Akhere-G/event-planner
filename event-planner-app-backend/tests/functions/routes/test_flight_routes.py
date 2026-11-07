@@ -1,8 +1,13 @@
+from datetime import date, timedelta
+
 import pytest
 from src.extensions import db
-from src.models import Flight
+from src.models import Airport, Flight
 
 from tests.factories import FlightFactory, ItineraryFactory
+from tests.fakes import FakeFlightProvider
+
+DEPARTURE_DATE = (date.today() + timedelta(days=30)).isoformat()
 
 
 def url(itinerary, suffix=""):
@@ -11,21 +16,20 @@ def url(itinerary, suffix=""):
 
 def payload(**overrides):
     data = {
-        "airline": "British Airways",
-        "flightNumber": "BA117",
-        "departureAirport": "LHR",
-        "arrivalAirport": "JFK",
-        "departureTimezone": "Europe/London",
-        "arrivalTimezone": "America/New_York",
-        "departAt": "2026-08-01T10:00:00Z",
-        "arriveAt": "2026-08-01T18:00:00Z",
-        "bookingRef": "ABC123",
-        "seat": "12A",
+        "origin": ["LHR", "LGW"],
+        "destination": ["JFK"],
+        "departureDate": DEPARTURE_DATE,
+        "airline": "BA",
+        "flightNumber": "117",
         "notes": "Window",
-        "travellers": [],
     }
     data.update(overrides)
     return data
+
+
+@pytest.fixture(autouse=True)
+def use_fake_provider(flight_provider):
+    return flight_provider
 
 
 def test_list_flights_viewer(viewer_client, itinerary, flight):
@@ -54,8 +58,33 @@ def test_create_flight_admin(admin_client, itinerary):
     data = response.get_json()["data"]
     assert data["departAt"] == "2026-08-01T10:00:00Z"
     assert data["departureAirport"] == "LHR"
-    assert data["status"] is None
+    assert data["arrivalAirport"] == "JFK"
+    assert data["departureTimezone"] == "Europe/London"
+    assert data["arrivalTimezone"] == "America/New_York"
     assert db.session.query(Flight).filter_by(itinerary_id=itinerary.id).count() == 1
+
+
+def test_create_flight_creates_missing_airports_once(admin_client, itinerary):
+    admin_client.post(url(itinerary), json=payload())
+    assert db.session.query(Airport).count() == 2
+
+    admin_client.post(url(itinerary), json=payload(notes="Aisle"))
+    assert db.session.query(Airport).count() == 2
+    assert db.session.query(Flight).filter_by(itinerary_id=itinerary.id).count() == 1
+
+
+def test_create_flight_unknown_offer(admin_client, itinerary):
+    response = admin_client.post(url(itinerary), json=payload(flightNumber="999"))
+    assert response.status_code == 404
+    assert db.session.query(Flight).filter_by(itinerary_id=itinerary.id).count() == 0
+
+
+def test_create_flight_reuses_cached_search(admin_client, itinerary, flight_provider):
+    admin_client.get(
+        url(itinerary, f"/search?origin=LGW,LHR&destination=JFK&departureDate={DEPARTURE_DATE}")
+    )
+    admin_client.post(url(itinerary), json=payload())
+    assert len(flight_provider.searches) == 1
 
 
 def test_create_flight_editor_sets_audit(editor_client, editor_user, itinerary):
@@ -79,34 +108,15 @@ def test_create_flight_non_member(non_member_client, itinerary):
     assert response.status_code == 401
 
 
-def test_create_flight_with_members_as_travellers(
-    admin_client, admin_user, viewer_user, viewer_itinerary_user, itinerary
-):
-    response = admin_client.post(
-        url(itinerary), json=payload(travellers=[admin_user.id, viewer_user.id])
-    )
-    assert response.status_code == 201
-    assert response.get_json()["data"]["travellers"] == [admin_user.id, viewer_user.id]
-
-
-def test_create_flight_traveller_not_member(admin_client, non_member_user, itinerary):
-    response = admin_client.post(
-        url(itinerary), json=payload(travellers=[non_member_user.id])
-    )
-    assert response.status_code == 400
-
-
 @pytest.mark.parametrize(
     "overrides",
     [
-        {"arriveAt": "2026-08-01T10:00:00Z"},
-        {"arriveAt": "2026-08-01T09:00:00Z"},
-        {"departAt": "2026-08-01T10:00:00"},
-        {"departureAirport": "lhr"},
-        {"arrivalAirport": "JFKK"},
-        {"arrivalAirport": "LHR"},
-        {"departureTimezone": "Mars/Olympus"},
+        {"airline": "British Airways"},
         {"flightNumber": "!!"},
+        {"departureDate": "invalid"},
+        {"departureDate": "2020-01-01"},
+        {"origin": ["LONDON"]},
+        {"destination": []},
     ],
 )
 def test_create_flight_validation(admin_client, itinerary, overrides):
@@ -119,37 +129,110 @@ def test_create_flight_missing_required(admin_client, itinerary):
     assert response.status_code == 400
 
 
-def test_update_flight_editor(editor_client, itinerary, flight):
-    response = editor_client.patch(url(itinerary, f"/{flight.id}"), json={"seat": "1A"})
+def search_url(itinerary, **params):
+    params = {
+        "origin": "LHR,LGW",
+        "destination": "JFK",
+        "departureDate": DEPARTURE_DATE,
+        **params,
+    }
+    query = "&".join(f"{key}={value}" for key, value in params.items())
+    return url(itinerary, f"/search?{query}")
+
+
+def test_search_flights_editor(editor_client, itinerary, flight_provider):
+    response = editor_client.get(search_url(itinerary))
     assert response.status_code == 200
-    assert response.get_json()["data"]["seat"] == "1A"
+    [offer] = response.get_json()["data"]
+    assert offer["airline"] == "BA"
+    assert offer["flightNumber"] == "117"
+    assert offer["departAt"] == "2026-08-01T10:00:00Z"
+    assert offer["durationMinutes"] == 480
+    assert offer["departureTimezone"] == "Europe/London"
+    assert offer["arrivalTimezone"] == "America/New_York"
+    assert flight_provider.searches == [(["LGW", "LHR"], ["JFK"], date.fromisoformat(DEPARTURE_DATE))]
 
 
-def test_update_flight_arrival_before_existing_departure(
-    admin_client, itinerary, flight
-):
-    response = admin_client.patch(
-        url(itinerary, f"/{flight.id}"), json={"arriveAt": "2026-08-01T07:00:00Z"}
+def test_search_flights_is_cached(editor_client, itinerary, flight_provider):
+    editor_client.get(search_url(itinerary))
+    editor_client.get(search_url(itinerary, origin="LGW,LHR"))
+    assert len(flight_provider.searches) == 1
+
+
+def test_search_flights_provider_failure_falls_through(editor_client, itinerary, monkeypatch):
+    from src.services.flight_providers import FlightProviderFactory
+
+    failing = FakeFlightProvider(error="down")
+    working = FakeFlightProvider()
+    monkeypatch.setattr(
+        FlightProviderFactory, "PROVIDERS", [lambda: failing, lambda: working]
     )
-    assert response.status_code == 400
+
+    response = editor_client.get(search_url(itinerary))
+    assert response.status_code == 200
+    assert len(failing.searches) == 1
+    assert len(working.searches) == 1
+
+
+def test_search_flights_all_providers_fail(editor_client, itinerary, flight_provider):
+    flight_provider.error = "down"
+    response = editor_client.get(search_url(itinerary))
+    assert response.status_code == 503
+
+
+def test_search_flights_no_configured_provider(editor_client, itinerary, flight_provider):
+    flight_provider.configured = False
+    assert editor_client.get(search_url(itinerary)).status_code == 503
+
+
+def test_search_flights_viewer_forbidden(viewer_client, itinerary):
+    assert viewer_client.get(search_url(itinerary)).status_code == 403
+
+
+def test_search_flights_validation(editor_client, itinerary):
+    assert editor_client.get(search_url(itinerary, origin="LONDON")).status_code == 400
+    assert editor_client.get(url(itinerary, "/search")).status_code == 400
+
+
+def test_search_airports_viewer(viewer_client, itinerary):
+    response = viewer_client.get(url(itinerary, "/airports?q=paris&lat=48.85&lng=2.35"))
+    assert response.status_code == 200
+    first = response.get_json()["data"][0]
+    assert first["label"] == "Paris, FR"
+    assert {airport["code"] for airport in first["airports"]} >= {"CDG", "ORY"}
+
+
+def test_search_airports_requires_query(viewer_client, itinerary):
+    assert viewer_client.get(url(itinerary, "/airports")).status_code == 400
+
+
+def test_update_flight_editor(editor_client, itinerary, flight):
+    response = editor_client.patch(
+        url(itinerary, f"/{flight.id}"), json={"notes": "Changed plans"}
+    )
+    assert response.status_code == 200
+    assert response.get_json()["data"]["notes"] == "Changed plans"
 
 
 def test_update_flight_viewer_forbidden(viewer_client, itinerary, flight):
     response = viewer_client.patch(
-        url(itinerary, f"/{flight.id}"), json={"seat": "1A"}
+        url(itinerary, f"/{flight.id}"), json={"notes": "Changed plans"}
     )
     assert response.status_code == 403
 
 
 def test_update_flight_not_found(admin_client, itinerary):
-    assert admin_client.patch(url(itinerary, "/9999"), json={"seat": "1"}).status_code == 404
+    assert (
+        admin_client.patch(url(itinerary, "/9999"), json={"notes": "Changed plans"}).status_code
+        == 404
+    )
 
 
 def test_update_flight_from_other_itinerary_not_found(admin_client, itinerary, admin_user):
     other = ItineraryFactory(creator=admin_user)
     other_flight = FlightFactory(itinerary=other, creator=admin_user)
     response = admin_client.patch(
-        url(itinerary, f"/{other_flight.id}"), json={"seat": "1"}
+        url(itinerary, f"/{other_flight.id}"), json={"notes": "Changed plans"}
     )
     assert response.status_code == 404
 

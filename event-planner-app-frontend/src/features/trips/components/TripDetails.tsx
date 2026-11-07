@@ -7,16 +7,18 @@ import AccommodationPage from "../../accommodations/components/AccommodationPage
 import { getCityBounds } from "../../maps/utils";
 import { useSearchParams } from "react-router";
 import { PackingPage } from "../../packing/components";
+import FlightsPanel from "../../flights/components/FlightsPanel";
 
 // TODO Add Resizable sections from shadcn
 
-type TabOption = "activities" | "tips" | "accommodation" | "packing";
+type TabOption = "activities" | "tips" | "accommodation" | "packing" | "flights";
 
 const tabs: { name: string; tab: TabOption }[] = [
   { name: "Activities", tab: "activities" },
   { name: "Tips", tab: "tips" },
   { name: "Accommodation", tab: "accommodation" },
   { name: "Packing", tab: "packing" },
+  { name: "Flights", tab: "flights" },
 ];
 
 export default function TripDetails(trip: Trip) {
@@ -75,6 +77,7 @@ export default function TripDetails(trip: Trip) {
             <AccommodationPage trip={trip} cityBounds={getCityBounds(trip)} />
           )}
           {activeTab === "packing" && <PackingPage trip={trip} />}
+          {activeTab === "flights" && <FlightsPanel trip={trip} />}
         </div>
       </div>
     </div>

@@ -1,10 +1,13 @@
 import { apiSlice } from "../api/apiSlice";
 import type { ApiResponse } from "../api/types";
 import type {
+  AirportPlace,
   CreateFlightPayload,
   DeleteFlightPayload,
   Flight,
-  UpdateFlightPayload,
+  FlightOffer,
+  SearchAirportsPayload,
+  SearchFlightsPayload,
 } from "./types";
 
 export const flightApiSlice = apiSlice.injectEndpoints({
@@ -15,20 +18,32 @@ export const flightApiSlice = apiSlice.injectEndpoints({
         { type: "Flights", id: tripId },
       ],
     }),
+    searchFlights: builder.query<
+      ApiResponse<FlightOffer[]>,
+      SearchFlightsPayload
+    >({
+      query: ({ tripId, origin, destination, departureDate }) => ({
+        url: `/itineraries/${tripId}/flights/search`,
+        params: {
+          origin: origin.join(","),
+          destination: destination.join(","),
+          departureDate,
+        },
+      }),
+    }),
+    searchAirports: builder.query<
+      ApiResponse<AirportPlace[]>,
+      SearchAirportsPayload
+    >({
+      query: ({ tripId, ...params }) => ({
+        url: `/itineraries/${tripId}/flights/airports`,
+        params,
+      }),
+    }),
     createFlight: builder.mutation<ApiResponse<Flight>, CreateFlightPayload>({
       query: ({ tripId, ...flightData }) => ({
         url: `/itineraries/${tripId}/flights`,
         method: "POST",
-        body: flightData,
-      }),
-      invalidatesTags: (_result, _error, { tripId }) => [
-        { type: "Flights", id: tripId },
-      ],
-    }),
-    updateFlight: builder.mutation<ApiResponse<Flight>, UpdateFlightPayload>({
-      query: ({ tripId, flightId, ...flightData }) => ({
-        url: `/itineraries/${tripId}/flights/${flightId}`,
-        method: "PATCH",
         body: flightData,
       }),
       invalidatesTags: (_result, _error, { tripId }) => [
@@ -53,7 +68,8 @@ export const flightApiSlice = apiSlice.injectEndpoints({
 export const {
   useGetFlightsQuery,
   useLazyGetFlightsQuery,
+  useLazySearchFlightsQuery,
+  useSearchAirportsQuery,
   useCreateFlightMutation,
-  useUpdateFlightMutation,
   useDeleteFlightMutation,
 } = flightApiSlice;

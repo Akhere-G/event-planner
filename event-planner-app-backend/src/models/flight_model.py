@@ -1,7 +1,6 @@
 from datetime import datetime
-from typing import List, Optional
 
-from sqlalchemy import JSON, DateTime, ForeignKey, Integer, String
+from sqlalchemy import DateTime, ForeignKey, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from ..extensions import Base
@@ -15,31 +14,28 @@ class Flight(Base, AuditMixin):
     itinerary_id: Mapped[int] = mapped_column(
         ForeignKey("itineraries.id", ondelete="CASCADE"), index=True
     )
-    airline: Mapped[str] = mapped_column(String(255))
-    flight_number: Mapped[str] = mapped_column(String(16))
-    departure_airport: Mapped[str] = mapped_column(String(3))
-    arrival_airport: Mapped[str] = mapped_column(String(3))
-    departure_timezone: Mapped[str] = mapped_column(String(64))
-    arrival_timezone: Mapped[str] = mapped_column(String(64))
+    airline: Mapped[str] = mapped_column(String(3))
+    flight_number: Mapped[str] = mapped_column(String(5))
+    departure_airport_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("airports.id"), nullable=False, index=True
+    )
+    arrival_airport_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("airports.id"), nullable=False, index=True
+    )
     depart_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), index=True)
     arrive_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
-    booking_ref: Mapped[Optional[str]] = mapped_column(String(32), nullable=True)
-    seat: Mapped[Optional[str]] = mapped_column(String(16), nullable=True)
-    notes: Mapped[Optional[str]] = mapped_column(String(1000), nullable=True)
-    travellers: Mapped[List[int]] = mapped_column(JSON, default=list)
+    notes: Mapped[str | None] = mapped_column(String(1000), nullable=True)
 
-    # Reserved for a later live flight-status integration.
-    status: Mapped[Optional[str]] = mapped_column(String(32), nullable=True)
-    status_updated_at: Mapped[Optional[datetime]] = mapped_column(
-        DateTime(timezone=True), nullable=True
+    departure_airport: Mapped["Airport"] = relationship(  # type: ignore # noqa: F821
+        "Airport", foreign_keys=[departure_airport_id]
     )
-    terminal: Mapped[Optional[str]] = mapped_column(String(16), nullable=True)
-    gate: Mapped[Optional[str]] = mapped_column(String(16), nullable=True)
-
-    itinerary: Mapped["Itinerary"] = relationship(back_populates="flights")  # type: ignore  # noqa: F821
+    arrival_airport: Mapped["Airport"] = relationship(  # type: ignore # noqa: F821
+        "Airport", foreign_keys=[arrival_airport_id]
+    )
     creator: Mapped["User"] = relationship(  # type: ignore  # noqa: F821
         "User", foreign_keys="[Flight.created_by_id]"
     )
     last_editor: Mapped["User"] = relationship(  # type: ignore  # noqa: F821
         "User", foreign_keys="[Flight.updated_by_id]"
     )
+    itinerary: Mapped["Itinerary"] = relationship("Itinerary", back_populates="flights")  # type: ignore  # noqa: F821

@@ -26,10 +26,68 @@ const trip = {
   anonymousAccessCode: null,
 };
 
-async function mockTripAndFlights(page: Page) {
-  const flights: MockFlight[] = [];
-  let nextId = 1;
+const airport = (code: string, name: string, timezone: string) => ({
+  code,
+  name,
+  latitude: 0,
+  longitude: 0,
+  timezone,
+});
+
+const places = {
+  paris: {
+    label: "Paris, FR",
+    distanceKm: 14,
+    airports: [
+      airport("CDG", "Charles de Gaulle Airport", "Europe/Paris"),
+      airport("ORY", "Orly Airport", "Europe/Paris"),
+    ],
+  },
+  london: {
+    label: "London, GB",
+    distanceKm: 340,
+    airports: [airport("LHR", "Heathrow Airport", "Europe/London")],
+  },
+};
+
+const offer = {
+  airline: "BA",
+  flightNumber: "304",
+  departureAirport: "LHR",
+  arrivalAirport: "CDG",
+  departureTimezone: "Europe/London",
+  arrivalTimezone: "Europe/Paris",
+  departAt: "2026-08-01T09:00:00Z",
+  arriveAt: "2026-08-01T10:20:00Z",
+  durationMinutes: 80,
+  price: 120,
+};
+
+const savedFlight = {
+  id: 1,
+  itineraryId: 1,
+  airline: "BA",
+  flightNumber: "304",
+  departureAirport: "LHR",
+  arrivalAirport: "CDG",
+  departureTimezone: "Europe/London",
+  arrivalTimezone: "Europe/Paris",
+  departureLatitude: 51.47,
+  departureLongitude: -0.4543,
+  arrivalLatitude: 49.0097,
+  arrivalLongitude: 2.5479,
+  departAt: "2026-08-01T09:00:00Z",
+  arriveAt: "2026-08-01T10:20:00Z",
+  notes: null,
+};
+
+async function mockTripAndFlights(
+  page: Page,
+  initialFlights: MockFlight[] = [],
+) {
+  const flights = [...initialFlights];
   const created: unknown[] = [];
+  const searches: string[] = [];
 
   const json = (data: unknown, status = 200) => ({
     status,
@@ -45,11 +103,9 @@ async function mockTripAndFlights(page: Page) {
   );
   await page.route("**/api/itineraries/1/flights", async (route) => {
     if (route.request().method() === "POST") {
-      const body = route.request().postDataJSON();
-      created.push(body);
-      const flight = { id: nextId++, itineraryId: 1, ...body };
-      flights.push(flight);
-      await route.fulfill(json(flight, 201));
+      created.push(route.request().postDataJSON());
+      flights.push(savedFlight);
+      await route.fulfill(json(savedFlight, 201));
       return;
     }
     await route.fulfill(json(flights));
@@ -66,81 +122,101 @@ async function mockTripAndFlights(page: Page) {
     }
     await route.fallback();
   });
+  await page.route("**/api/itineraries/1/flights/airports*", (route) => {
+    const q = new URL(route.request().url()).searchParams.get("q") ?? "";
+    const matches = Object.entries(places)
+      .filter(([key]) => key.startsWith(q.toLowerCase()))
+      .map(([, place]) => place);
+    return route.fulfill(json(matches));
+  });
+  await page.route("**/api/itineraries/1/flights/search*", (route) => {
+    searches.push(new URL(route.request().url()).search);
+    return route.fulfill(json([offer]));
+  });
 
-  return { created };
+  return { created, searches };
 }
 
 test.describe("Flights", () => {
-  test("adds a flight, shows it on its day and in the list, then deletes it", async ({
+  test("searches for a flight, saves it, and shows it on its day", async ({
     page,
   }) => {
     await mockAuthCheck(page, true);
-    const { created } = await mockTripAndFlights(page);
+    const { created, searches } = await mockTripAndFlights(page);
 
     await page.goto("/trips/1");
     await page.getByRole("button", { name: "Flights" }).click();
-    await page.getByRole("button", { name: "Add flight" }).click();
+    await page.getByRole("button", { name: "Search for a flight" }).click();
 
-    const form = page.getByRole("form", { name: "New flight" });
-    await form.getByLabel("Airline").fill("British Airways");
-    await form.getByLabel("Flight number").fill("BA117");
-    await form.getByLabel("Airport (IATA)").first().fill("LHR");
-    await form.getByLabel("Airport (IATA)").last().fill("CDG");
-    await form.getByLabel("Timezone").first().fill("Europe/London");
-    await form.getByLabel("Timezone").last().fill("Europe/Paris");
-    await form.getByLabel("Departs (local time)").fill("2026-08-01T10:00");
-    await form.getByLabel("Arrives (local time)").fill("2026-08-01T12:20");
-    await form.getByRole("button", { name: "Add Flight" }).click();
+    const form = page.getByRole("form", { name: "Search flights" });
+    await expect(form.getByLabel("Arriving at")).toHaveValue("Paris, FR");
 
-    await expect(page.getByText("Flight added!")).toBeVisible();
+    await form.getByLabel("Departing from").fill("lon");
+    await page.getByRole("option", { name: /London, GB/ }).click();
+    await form.getByRole("button", { name: "Search flights" }).click();
 
-    // The request carries airport-local times converted to UTC.
+    const result = page.getByTestId("flight-offer-card");
+    await expect(result).toContainText("BA304");
+    await expect(result).toContainText("$120");
+    expect(searches).toHaveLength(1);
+    expect(searches[0]).toContain("origin=LHR");
+    expect(searches[0]).toContain("destination=CDG%2CORY");
+
+    await result.getByRole("button", { name: "Save" }).click();
+    await expect(page.getByText("Flight saved.")).toBeVisible();
     expect(created[0]).toMatchObject({
-      flightNumber: "BA117",
-      departAt: "2026-08-01T09:00:00.000Z",
-      arriveAt: "2026-08-01T10:20:00.000Z",
+      origin: ["LHR"],
+      destination: ["CDG", "ORY"],
+      airline: "BA",
+      flightNumber: "304",
     });
 
-    const card = page.getByTestId("flight-card");
-    await expect(card).toContainText("BA117 · British Airways");
-    await expect(card).toContainText("LHR");
+    await expect(page.getByTestId("flight-card")).toContainText("BA304");
+    await expect(result.getByRole("button", { name: "Saved" })).toBeDisabled();
 
     // The day card for 1 Aug lists the flight too.
     await expect(
       page.getByRole("list", { name: "Flights" }).first(),
-    ).toContainText("BA117 LHR → CDG");
-
-    await card.getByRole("button", { name: "Flight actions" }).click();
-    await page.getByRole("menuitem", { name: "Delete" }).click();
-    await page.getByRole("button", { name: "Delete Flight" }).click();
-    await expect(page.getByText("Flight deleted.")).toBeVisible();
-    await expect(page.getByTestId("flight-card")).toHaveCount(0);
+    ).toContainText("BA304 LHR → CDG");
   });
 
-  test("rejects arrival before departure without calling the API", async ({
+  test("lists saved flights first and keeps the search closed until asked", async ({
     page,
   }) => {
     await mockAuthCheck(page, true);
-    const { created } = await mockTripAndFlights(page);
+    await mockTripAndFlights(page, [savedFlight]);
 
     await page.goto("/trips/1");
     await page.getByRole("button", { name: "Flights" }).click();
-    await page.getByRole("button", { name: "Add flight" }).click();
 
-    const form = page.getByRole("form", { name: "New flight" });
-    await form.getByLabel("Airline").fill("British Airways");
-    await form.getByLabel("Flight number").fill("BA117");
-    await form.getByLabel("Airport (IATA)").first().fill("LHR");
-    await form.getByLabel("Airport (IATA)").last().fill("CDG");
-    await form.getByLabel("Timezone").first().fill("Europe/London");
-    await form.getByLabel("Timezone").last().fill("Europe/Paris");
-    await form.getByLabel("Departs (local time)").fill("2026-08-01T10:00");
-    await form.getByLabel("Arrives (local time)").fill("2026-08-01T08:00");
-    await form.getByRole("button", { name: "Add Flight" }).click();
-
+    await expect(page.getByTestId("flight-card")).toContainText("BA304");
     await expect(
-      form.getByText("Arrival must be after departure."),
+      page.getByRole("form", { name: "Search flights" }),
+    ).toHaveCount(0);
+
+    await page.getByRole("button", { name: "Search for flights" }).click();
+    await expect(
+      page.getByRole("form", { name: "Search flights" }),
     ).toBeVisible();
-    expect(created).toHaveLength(0);
+
+    await page.getByRole("button", { name: "Close flight search" }).click();
+    await expect(
+      page.getByRole("form", { name: "Search flights" }),
+    ).toHaveCount(0);
+  });
+
+  test("requires a departure airport before searching", async ({ page }) => {
+    await mockAuthCheck(page, true);
+    const { searches } = await mockTripAndFlights(page);
+
+    await page.goto("/trips/1");
+    await page.getByRole("button", { name: "Flights" }).click();
+    await page.getByRole("button", { name: "Search for a flight" }).click();
+
+    const form = page.getByRole("form", { name: "Search flights" });
+    await form.getByRole("button", { name: "Search flights" }).click();
+
+    await expect(form.getByText("Choose a departure airport.")).toBeVisible();
+    expect(searches).toHaveLength(0);
   });
 });

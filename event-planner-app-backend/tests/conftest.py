@@ -1,7 +1,8 @@
 import pytest
 from flask.testing import FlaskClient
 from src import create_app
-from src.extensions import db
+from src.extensions import cache, db
+from src.services.flight_providers import FlightProviderFactory
 from src.models import (
     Event,
     Flight,
@@ -15,6 +16,7 @@ from src.models import (
     WishlistItemVote,
 )
 
+from .fakes import FakeFlightProvider
 from .factories import (
     EventFactory,
     FlightFactory,
@@ -40,6 +42,16 @@ def _db_setup():
 
     with app.app_context():
         db.drop_all()
+
+
+@pytest.fixture
+def flight_provider(monkeypatch, app) -> FakeFlightProvider:
+    """Swap the registered flight providers for one fake and start with a cold cache."""
+    provider = FakeFlightProvider()
+    monkeypatch.setattr(FlightProviderFactory, "PROVIDERS", [lambda: provider])
+    cache.clear()
+    yield provider
+    cache.clear()
 
 
 @pytest.fixture

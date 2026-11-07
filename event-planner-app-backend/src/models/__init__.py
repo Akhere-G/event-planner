@@ -1,4 +1,5 @@
 from src.models.accommodation_model import Accommodation
+from src.models.airport_model import Airport
 from src.models.audit_mixins import AuditMixin
 from src.models.event_model import Event
 from src.models.flight_model import Flight
@@ -12,6 +13,7 @@ from src.models.wishlist_model import Wishlist, WishlistItem, WishlistItemVote
 
 __all__ = [
     "Accommodation",
+    "Airport",
     "AuditMixin",
     "Event",
     "Flight",
@@ -28,4 +30,3 @@ __all__ = [
     "WishlistItem",
     "WishlistItemVote",
 ]
-
