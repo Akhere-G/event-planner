@@ -38,6 +38,15 @@ def test_list_flights_viewer(viewer_client, itinerary, flight):
     assert response.get_json()["data"][0]["departAt"] == "2026-08-01T08:00:00Z"
 
 
+def test_flight_without_details_serialises_empty_lists(viewer_client, itinerary, flight):
+    data = viewer_client.get(url(itinerary, f"/{flight.id}")).get_json()["data"]
+    assert data["luggage"] == []
+    assert data["extras"] == []
+    assert data["priceGbp"] is None
+    assert data["purchaseUrl"] is None
+    assert data["departureCity"] == "London"
+
+
 def test_get_flight_viewer(viewer_client, itinerary, flight):
     response = viewer_client.get(url(itinerary, f"/{flight.id}"))
     assert response.status_code == 200
@@ -61,6 +70,18 @@ def test_create_flight_admin(admin_client, itinerary):
     assert data["arrivalAirport"] == "JFK"
     assert data["departureTimezone"] == "Europe/London"
     assert data["arrivalTimezone"] == "America/New_York"
+    assert data["departureAirportName"] == "London Heathrow Airport"
+    assert data["departureCity"] == "London"
+    assert data["arrivalCity"] == "New York"
+    assert data["travelClass"] == "Economy"
+    assert data["luggage"] == ["1 cabin bag included"]
+    assert data["extras"] == [
+        "Average legroom (31 in)",
+        "Carbon emissions estimate: 292 kg",
+    ]
+    assert data["purchaseUrl"] == "https://www.google.com/travel/flights?q=lhr-jfk"
+    assert data["priceGbp"] == 520
+    assert data["airlineLogo"] == "https://logo/ba.png"
     assert db.session.query(Flight).filter_by(itinerary_id=itinerary.id).count() == 1
 
 
@@ -150,6 +171,12 @@ def test_search_flights_editor(editor_client, itinerary, flight_provider):
     assert offer["durationMinutes"] == 480
     assert offer["departureTimezone"] == "Europe/London"
     assert offer["arrivalTimezone"] == "America/New_York"
+    assert offer["departureAirportName"] == "London Heathrow Airport"
+    assert offer["arrivalCity"] == "New York"
+    assert offer["priceGbp"] == 520
+    assert offer["travelClass"] == "Economy"
+    assert offer["luggage"] == ["1 cabin bag included"]
+    assert offer["purchaseUrl"].startswith("https://www.google.com/travel/flights")
     assert flight_provider.searches == [(["LGW", "LHR"], ["JFK"], date.fromisoformat(DEPARTURE_DATE))]
 
 

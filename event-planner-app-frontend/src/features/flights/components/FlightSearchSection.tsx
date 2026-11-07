@@ -75,7 +75,10 @@ export default function FlightSearchSection({
             message: "No nonstop flights found for this route and date",
           }}
         >
-          <div className="space-y-3">
+          <div className="space-y-4">
+            <h2 className="text-sm font-bold text-text-main">
+              {offers.length === 1 ? "Search result" : "Search results"}
+            </h2>
             {offers.map((offer) => (
               <FlightOfferCard
                 key={`${offer.airline}${offer.flightNumber}${offer.departAt}`}

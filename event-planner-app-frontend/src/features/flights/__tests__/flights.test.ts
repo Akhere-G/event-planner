@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { createEvents } from "ics";
 import { flightSearchSchema } from "../schemas/flightSchema";
-import { getFlightsForDay } from "../utils";
+import { directFlightSummary, formatGbp, getFlightsForDay } from "../utils";
 import { buildFlightCalendarEvents } from "../../trips/utils";
 import type { Flight } from "../types";
 
@@ -20,6 +20,16 @@ const flight: Flight = {
   arrivalLongitude: -73.7781,
   departAt: "2026-08-01T22:30:00Z",
   arriveAt: "2026-08-02T06:15:00Z",
+  departureAirportName: "Heathrow Airport",
+  departureCity: "London",
+  arrivalAirportName: "John F Kennedy International Airport",
+  arrivalCity: "New York",
+  travelClass: "Economy",
+  luggage: ["1 cabin bag included"],
+  extras: ["Average legroom (31 in)"],
+  purchaseUrl: "https://www.google.com/travel/flights",
+  priceGbp: 420,
+  airlineLogo: null,
   notes: null,
 };
 
@@ -39,13 +49,13 @@ describe("flightSearchSchema", () => {
   it("requires a departure airport", async () => {
     await expect(
       flightSearchSchema.validate({ ...validForm, origin: [] }),
-    ).rejects.toThrow(/departure airport/);
+    ).rejects.toThrow(/Required/);
   });
 
   it("requires an arrival airport", async () => {
     await expect(
       flightSearchSchema.validate({ ...validForm, destination: [] }),
-    ).rejects.toThrow(/arrival airport/);
+    ).rejects.toThrow(/Required/);
   });
 
   it("rejects a malformed date", async () => {
@@ -61,6 +71,20 @@ describe("flight time helpers", () => {
     expect(getFlightsForDay([flight], "2026-08-01")).toHaveLength(1);
     expect(getFlightsForDay([flight], "2026-08-02")).toHaveLength(1);
     expect(getFlightsForDay([flight], "2026-08-03")).toHaveLength(0);
+  });
+});
+
+describe("flight display helpers", () => {
+  it("formats prices in whole pounds", () => {
+    expect(formatGbp(57)).toBe("£57");
+    expect(formatGbp(1234)).toBe("£1,234");
+  });
+
+  it("summarises a direct flight with its luggage notes", () => {
+    expect(directFlightSummary([])).toBe("Direct flight");
+    expect(directFlightSummary(["1 cabin bag included"])).toBe(
+      "Direct flight · 1 cabin bag included",
+    );
   });
 });
 

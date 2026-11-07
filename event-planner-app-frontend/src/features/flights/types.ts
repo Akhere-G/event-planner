@@ -1,4 +1,18 @@
-export interface Flight {
+/** Details shared by a flight we found (offer) and one that was saved. */
+export interface FlightDetails {
+  departureAirportName: string | null;
+  departureCity: string | null;
+  arrivalAirportName: string | null;
+  arrivalCity: string | null;
+  airlineLogo?: string | null;
+  travelClass?: string | null;
+  luggage: string[];
+  extras: string[];
+  purchaseUrl?: string | null;
+  priceGbp?: number | null;
+}
+
+export interface Flight extends FlightDetails {
   id: number;
   itineraryId: number;
   airline: string;
@@ -31,7 +45,7 @@ export interface AirportPlace {
   distanceKm?: number | null;
 }
 
-export interface FlightOffer {
+export interface FlightOffer extends FlightDetails {
   airline: string;
   flightNumber: string;
   departureAirport: string;
@@ -41,8 +55,6 @@ export interface FlightOffer {
   departAt: string;
   arriveAt: string;
   durationMinutes: number;
-  price?: number | null;
-  airlineLogo?: string | null;
 }
 
 export interface FlightSearchParams {

@@ -7,6 +7,7 @@ from src.services.flight_providers import FlightProviderFactory, SerpApiFlightPr
 from tests.fakes import FakeFlightProvider
 
 SERPAPI_RESPONSE = {
+    "search_metadata": {"google_flights_url": "https://www.google.com/travel/flights?q=x"},
     "best_flights": [
         {
             "flights": [
@@ -16,7 +17,17 @@ SERPAPI_RESPONSE = {
                     "duration": 480,
                     "flight_number": "BA 117",
                     "airline_logo": "https://logo/ba.png",
+                    "travel_class": "Economy",
+                    "extensions": [
+                        "Average legroom (31 in)",
+                        "Carbon emissions estimate: 292 kg",
+                    ],
                 }
+            ],
+            "extensions": [
+                "1 carry-on bag included",
+                "Checked baggage for a fee",
+                "Full refund for cancellations",
             ],
             "price": 520,
         },
@@ -74,11 +85,46 @@ def test_serpapi_maps_nonstop_offers_to_utc(monkeypatch):
     assert offer.arrive_at == datetime(2026, 8, 1, 15, 0, tzinfo=UTC)
     assert offer.departure_timezone == "Europe/London"
     assert offer.arrival_timezone == "America/New_York"
-    assert offer.price == 520
+    assert offer.price_gbp == 520
+    assert offer.departure_airport_name == "London Heathrow Airport"
+    assert offer.departure_city == "London"
+    assert offer.arrival_city == "New York"
+    assert offer.travel_class == "Economy"
+    assert offer.extras == ("Average legroom (31 in)", "Carbon emissions estimate: 292 kg")
+    assert offer.luggage == ("1 carry-on bag included", "Checked baggage for a fee")
+    assert offer.purchase_url == "https://www.google.com/travel/flights?q=x"
+    assert offer.airline_logo == "https://logo/ba.png"
     assert calls[0]["departure_id"] == "LHR,LGW"
     assert calls[0]["arrival_id"] == "JFK"
     assert calls[0]["stops"] == 1
     assert calls[0]["type"] == 2
+    assert calls[0]["currency"] == "GBP"
+
+
+def test_serpapi_missing_optional_details_default_to_empty(monkeypatch):
+    payload = {
+        "best_flights": [
+            {
+                "flights": [
+                    {
+                        "departure_airport": {"id": "LHR", "time": "2026-08-01 08:00"},
+                        "arrival_airport": {"id": "JFK", "time": "2026-08-01 11:00"},
+                        "duration": 480,
+                        "flight_number": "BA 117",
+                    }
+                ]
+            }
+        ]
+    }
+    monkeypatch.setattr(requests, "get", lambda *a, **kw: FakeResponse(payload))
+
+    [offer] = search()
+
+    assert offer.price_gbp is None
+    assert offer.travel_class is None
+    assert offer.luggage == ()
+    assert offer.extras == ()
+    assert offer.purchase_url is None
 
 
 def test_serpapi_no_results_is_empty(monkeypatch):

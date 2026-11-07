@@ -32,7 +32,12 @@ export default function FlightsPanel({ trip }: { trip: Trip }) {
       }}
     >
       <div className="space-y-4 pb-4">
-        <div className="space-y-3">
+        {flights.length > 0 && (
+          <h2 className="text-sm font-bold text-text-main">
+            {flights.length === 1 ? "Saved flight" : "Saved flights"}
+          </h2>
+        )}
+        <div className="space-y-4">
           {flights.map((flight) => (
             <FlightCard
               key={flight.id}

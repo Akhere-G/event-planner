@@ -4,13 +4,13 @@ export const flightSearchSchema = yup.object({
   origin: yup
     .array()
     .of(yup.string().defined())
-    .min(1, "Choose a departure airport.")
-    .required("Choose a departure airport."),
+    .min(1, "Required.")
+    .required("Required."),
   destination: yup
     .array()
     .of(yup.string().defined())
-    .min(1, "Choose an arrival airport.")
-    .required("Choose an arrival airport."),
+    .min(1, "Required.")
+    .required("Required."),
   departureDate: yup
     .string()
     .required("Departure date is required.")

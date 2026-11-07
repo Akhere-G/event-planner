@@ -3,7 +3,9 @@ import { isApiError, isFetchBaseQueryError, isValidationError } from "../utils";
 
 describe("isApiError", () => {
   it("accepts an object with a string data.message", () => {
-    expect(isApiError({ data: { message: "Something went wrong." } })).toBe(true);
+    expect(isApiError({ data: { message: "Something went wrong." } })).toBe(
+      true,
+    );
   });
 
   it("rejects when data.message is missing", () => {
@@ -32,8 +34,16 @@ describe("isFetchBaseQueryError", () => {
 });
 
 describe("isValidationError", () => {
-  it("accepts an object with data.error", () => {
-    expect(isValidationError({ data: { error: "Invalid field." } })).toBe(true);
+  it("accepts an object with a field-errors object in data.error", () => {
+    expect(
+      isValidationError({ data: { error: { name: ["Invalid field."] } } }),
+    ).toBe(true);
+  });
+
+  it("rejects a plain string in data.error", () => {
+    expect(isValidationError({ data: { error: "Flight not found." } })).toBe(
+      false,
+    );
   });
 
   it("rejects an object with data but no error key", () => {

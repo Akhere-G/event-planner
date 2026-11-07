@@ -60,7 +60,16 @@ const offer = {
   departAt: "2026-08-01T09:00:00Z",
   arriveAt: "2026-08-01T10:20:00Z",
   durationMinutes: 80,
-  price: 120,
+  departureAirportName: "Heathrow Airport",
+  departureCity: "London",
+  arrivalAirportName: "Charles de Gaulle Airport",
+  arrivalCity: "Paris",
+  travelClass: "Economy",
+  luggage: ["1 cabin bag included"],
+  extras: ["Average legroom (31 in)", "Carbon emissions estimate: 63 kg"],
+  purchaseUrl: "https://www.google.com/travel/flights",
+  priceGbp: 120,
+  airlineLogo: null,
 };
 
 const savedFlight = {
@@ -78,6 +87,16 @@ const savedFlight = {
   arrivalLongitude: 2.5479,
   departAt: "2026-08-01T09:00:00Z",
   arriveAt: "2026-08-01T10:20:00Z",
+  departureAirportName: "Heathrow Airport",
+  departureCity: "London",
+  arrivalAirportName: "Charles de Gaulle Airport",
+  arrivalCity: "Paris",
+  travelClass: "Economy",
+  luggage: ["1 cabin bag included"],
+  extras: ["Average legroom (31 in)", "Carbon emissions estimate: 63 kg"],
+  purchaseUrl: "https://www.google.com/travel/flights",
+  priceGbp: 120,
+  airlineLogo: null,
   notes: null,
 };
 
@@ -157,12 +176,14 @@ test.describe("Flights", () => {
 
     const result = page.getByTestId("flight-offer-card");
     await expect(result).toContainText("BA304");
-    await expect(result).toContainText("$120");
+    await expect(result).toContainText("£120");
     expect(searches).toHaveLength(1);
     expect(searches[0]).toContain("origin=LHR");
     expect(searches[0]).toContain("destination=CDG%2CORY");
 
-    await result.getByRole("button", { name: "Save" }).click();
+    await expect(result).toContainText("London");
+    await expect(result).toContainText("Direct flight · 1 cabin bag included");
+    await result.getByRole("button", { name: "Save flight" }).click();
     await expect(page.getByText("Flight saved.")).toBeVisible();
     expect(created[0]).toMatchObject({
       origin: ["LHR"],
@@ -172,6 +193,9 @@ test.describe("Flights", () => {
     });
 
     await expect(page.getByTestId("flight-card")).toContainText("BA304");
+    await expect(
+      page.getByRole("link", { name: "Book flight" }),
+    ).toHaveAttribute("href", "https://www.google.com/travel/flights");
     await expect(result.getByRole("button", { name: "Saved" })).toBeDisabled();
 
     // The day card for 1 Aug lists the flight too.
@@ -216,7 +240,7 @@ test.describe("Flights", () => {
     const form = page.getByRole("form", { name: "Search flights" });
     await form.getByRole("button", { name: "Search flights" }).click();
 
-    await expect(form.getByText("Choose a departure airport.")).toBeVisible();
+    await expect(form.getByText("Required.")).toBeVisible();
     expect(searches).toHaveLength(0);
   });
 });
