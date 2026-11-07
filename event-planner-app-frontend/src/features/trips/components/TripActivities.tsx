@@ -3,7 +3,6 @@ import { Accordion } from "../../../components";
 import { TripCalendar } from "../../calendar/components";
 import { DayList } from "../../events/components";
 import WishlistPanel from "../../wishlist/components/WishlistPanel";
-import FlightsPanel from "../../flights/components/FlightsPanel";
 import type { Trip } from "../types";
 import { useEffect } from "react";
 import { usePostHog } from "@posthog/react";
@@ -59,20 +58,6 @@ export default function TripActivities({ trip }: { trip: Trip }) {
                 latitude={trip.latitude}
                 longitude={trip.longitude}
               />
-            </div>
-          )}
-        />
-      </div>
-
-      <div className="card p-0">
-        <Accordion
-          defaultIsOpen={false}
-          TitleComponent={() => (
-            <h2 className="text-lg font-semibold text-text-primary">Flights</h2>
-          )}
-          ContentComponent={() => (
-            <div className="px-4">
-              <FlightsPanel trip={trip} />
             </div>
           )}
         />

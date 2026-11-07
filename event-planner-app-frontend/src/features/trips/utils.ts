@@ -530,9 +530,7 @@ export const buildFlightCalendarEvents = (flights: Flight[]): IcsEvent[] =>
     endOutputType: "utc",
     title: flightTitle(flight),
     description: [
-      `${flight.airline} ${flight.flightNumber}`,
-      flight.bookingRef && `Booking ref: ${flight.bookingRef}`,
-      flight.seat && `Seat: ${flight.seat}`,
+      `${flight.airline}${flight.flightNumber}`,
       flight.notes,
     ]
       .filter(Boolean)

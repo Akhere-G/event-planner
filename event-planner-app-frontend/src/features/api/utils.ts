@@ -8,7 +8,9 @@ export function isValidationError(err: unknown): err is ValidationError {
     "data" in err &&
     typeof err.data === "object" &&
     err.data !== null &&
-    "error" in err.data
+    "error" in err.data &&
+    typeof err.data.error === "object" &&
+    err.data.error !== null
   );
 }
 

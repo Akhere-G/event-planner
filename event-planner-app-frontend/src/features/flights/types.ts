@@ -7,19 +7,31 @@ export interface Flight {
   arrivalAirport: string;
   departureTimezone: string;
   arrivalTimezone: string;
+  departureLatitude: number;
+  departureLongitude: number;
+  arrivalLatitude: number;
+  arrivalLongitude: number;
   departAt: string;
   arriveAt: string;
-  bookingRef?: string | null;
-  seat?: string | null;
   notes?: string | null;
-  travellers: number[];
-  status?: string | null;
-  statusUpdatedAt?: string | null;
-  terminal?: string | null;
-  gate?: string | null;
 }
 
-export interface FlightInput {
+export interface Airport {
+  code: string;
+  name: string;
+  latitude: number;
+  longitude: number;
+  timezone: string;
+}
+
+/** A city and the airports that serve it. */
+export interface AirportPlace {
+  label: string;
+  airports: Airport[];
+  distanceKm?: number | null;
+}
+
+export interface FlightOffer {
   airline: string;
   flightNumber: string;
   departureAirport: string;
@@ -28,19 +40,33 @@ export interface FlightInput {
   arrivalTimezone: string;
   departAt: string;
   arriveAt: string;
-  bookingRef?: string | null;
-  seat?: string | null;
+  durationMinutes: number;
+  price?: number | null;
+  airlineLogo?: string | null;
+}
+
+export interface FlightSearchParams {
+  origin: string[];
+  destination: string[];
+  departureDate: string;
+}
+
+export interface SearchFlightsPayload extends FlightSearchParams {
+  tripId: number;
+}
+
+export interface SearchAirportsPayload {
+  tripId: number;
+  q: string;
+  lat?: number;
+  lng?: number;
+}
+
+export interface CreateFlightPayload extends FlightSearchParams {
+  tripId: number;
+  airline: string;
+  flightNumber: string;
   notes?: string | null;
-  travellers: number[];
-}
-
-export interface CreateFlightPayload extends FlightInput {
-  tripId: number;
-}
-
-export interface UpdateFlightPayload extends Partial<FlightInput> {
-  tripId: number;
-  flightId: number;
 }
 
 export interface DeleteFlightPayload {
