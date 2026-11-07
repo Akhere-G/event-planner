@@ -1,11 +1,13 @@
 import { formatTimeInTripTimezone } from "../../utils/dateFormattors";
 import type { Event } from "../events/types";
+import { costEstimateLabels, type CostEstimate } from "../estimates/utils";
 import type { ChangeEntity, ChangeOp } from "./types";
 
 export interface ChangeOpSummary {
   title: string;
   detail: string;
   before?: string;
+  estimate?: CostEstimate;
 }
 
 const ENTITY_LABELS: Record<ChangeEntity, string> = {
@@ -40,7 +42,35 @@ const utcTimeRange = (
   return `${formatTimeInTripTimezone(startAt, timezone)}–${formatTimeInTripTimezone(endAt, timezone)}`;
 };
 
+const ESTIMATE_KEYS = ["estimatedCostGbp", "priceTier"];
+
+export const costEstimateFromData = (
+  data: Record<string, unknown>,
+): CostEstimate | undefined =>
+  costEstimateLabels(data.estimatedCostGbp, data.priceTier);
+
 export const describeChangeOp = (
+  op: ChangeOp,
+  events: Event[],
+  timezone: string,
+): ChangeOpSummary => {
+  const summary = describeChangeOpBase(op, events, timezone);
+  if (op.op === "delete") return summary;
+
+  const estimate = costEstimateFromData(op.data);
+  if (!estimate) return summary;
+
+  const onlyEstimate =
+    op.op === "update" &&
+    Object.keys(op.data).every((key) => ESTIMATE_KEYS.includes(key));
+  return {
+    ...summary,
+    ...(onlyEstimate && { detail: "Cost estimate", before: undefined }),
+    estimate,
+  };
+};
+
+const describeChangeOpBase = (
   op: ChangeOp,
   events: Event[],
   timezone: string,
