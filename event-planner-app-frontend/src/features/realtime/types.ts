@@ -8,6 +8,9 @@ export type TripEntity =
   | "wishlist_item"
   | "wishlist_item_vote"
   | "flight"
+  | "expense"
+  | "expense_share"
+  | "settlement"
   | "invite"
   | "itinerary_user";
 
