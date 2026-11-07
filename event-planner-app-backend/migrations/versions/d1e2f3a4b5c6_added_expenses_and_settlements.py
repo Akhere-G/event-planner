@@ -42,6 +42,7 @@ def upgrade():
         sa.Column("paid_by_id", sa.Integer(), nullable=False),
         sa.Column("event_id", sa.Integer(), nullable=True),
         sa.Column("accommodation_id", sa.Integer(), nullable=True),
+        sa.Column("flight_id", sa.Integer(), nullable=True),
         sa.Column("split_type", sa.String(length=16), nullable=False),
         *_audit_columns(),
         sa.ForeignKeyConstraint(["itinerary_id"], ["itineraries.id"], ondelete="CASCADE"),
@@ -50,13 +51,18 @@ def upgrade():
         sa.ForeignKeyConstraint(
             ["accommodation_id"], ["accommodations.id"], ondelete="SET NULL"
         ),
+        sa.ForeignKeyConstraint(["flight_id"], ["flights.id"], ondelete="SET NULL"),
         sa.PrimaryKeyConstraint("id"),
     )
     op.create_index("ix_expenses_itinerary_id", "expenses", ["itinerary_id"])
     op.create_index("ix_expenses_spent_on", "expenses", ["spent_on"])
     op.create_index("ix_expenses_paid_by_id", "expenses", ["paid_by_id"])
-    op.create_index("ix_expenses_event_id", "expenses", ["event_id"])
-    op.create_index("ix_expenses_accommodation_id", "expenses", ["accommodation_id"])
+    # An event, accommodation or flight carries at most one expense.
+    op.create_index("ix_expenses_event_id", "expenses", ["event_id"], unique=True)
+    op.create_index(
+        "ix_expenses_accommodation_id", "expenses", ["accommodation_id"], unique=True
+    )
+    op.create_index("ix_expenses_flight_id", "expenses", ["flight_id"], unique=True)
 
     op.create_table(
         "expense_shares",

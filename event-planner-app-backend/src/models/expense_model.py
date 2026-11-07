@@ -43,17 +43,39 @@ class Expense(Base, AuditMixin):
     paid_by_id: Mapped[int] = mapped_column(
         ForeignKey("users.id", ondelete="CASCADE"), index=True
     )
+    # An item carries at most one expense, so each link is unique.
     event_id: Mapped[Optional[int]] = mapped_column(
-        ForeignKey("events.id", ondelete="SET NULL"), nullable=True, index=True
+        ForeignKey("events.id", ondelete="SET NULL"),
+        nullable=True,
+        unique=True,
+        index=True,
     )
     accommodation_id: Mapped[Optional[int]] = mapped_column(
         ForeignKey("accommodations.id", ondelete="SET NULL"),
         nullable=True,
+        unique=True,
+        index=True,
+    )
+    flight_id: Mapped[Optional[int]] = mapped_column(
+        ForeignKey("flights.id", ondelete="SET NULL"),
+        nullable=True,
+        unique=True,
         index=True,
     )
     split_type: Mapped[str] = mapped_column(String(16), default="even_all")
 
     itinerary: Mapped["Itinerary"] = relationship("Itinerary")
+    # No passive_deletes on the other side: deleting an item nulls these links
+    # through the ORM, so the change tracker sees the expense change.
+    event: Mapped[Optional["Event"]] = relationship(  # type: ignore  # noqa: F821
+        "Event", back_populates="expense"
+    )
+    accommodation: Mapped[Optional["Accommodation"]] = relationship(  # type: ignore  # noqa: F821
+        "Accommodation", back_populates="expense"
+    )
+    flight: Mapped[Optional["Flight"]] = relationship(  # type: ignore  # noqa: F821
+        "Flight", back_populates="expense"
+    )
     shares: Mapped[List["ExpenseShare"]] = relationship(
         "ExpenseShare",
         back_populates="expense",

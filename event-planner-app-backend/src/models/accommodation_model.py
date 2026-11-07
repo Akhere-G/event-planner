@@ -37,3 +37,6 @@ class Accommodation(Base, AuditMixin):
     last_editor: Mapped["User"] = relationship(  # type: ignore  # noqa: F821
         "User", foreign_keys="[Accommodation.updated_by_id]"
     )
+    expense: Mapped[Optional["Expense"]] = relationship(  # type: ignore  # noqa: F821
+        "Expense", back_populates="accommodation", uselist=False
+    )

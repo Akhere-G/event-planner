@@ -45,3 +45,6 @@ class Flight(Base, AuditMixin):
         "User", foreign_keys="[Flight.updated_by_id]"
     )
     itinerary: Mapped["Itinerary"] = relationship("Itinerary", back_populates="flights")  # type: ignore  # noqa: F821
+    expense: Mapped["Expense | None"] = relationship(  # type: ignore  # noqa: F821
+        "Expense", back_populates="flight", uselist=False
+    )

@@ -35,3 +35,6 @@ class Event(Base, AuditMixin):
     itinerary: Mapped["Itinerary"] = relationship(  # type: ignore # noqa: F821
         "Itinerary", back_populates="events"
     )
+    expense: Mapped[Optional["Expense"]] = relationship(  # type: ignore # noqa: F821
+        "Expense", back_populates="event", uselist=False
+    )
