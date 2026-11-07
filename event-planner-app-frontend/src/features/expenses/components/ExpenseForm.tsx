@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { format } from "date-fns";
@@ -7,13 +8,16 @@ import { FormInput, FormSelect } from "../../../components";
 import type { RootState } from "../../../store";
 import { isApiError } from "../../api/utils";
 import { useGetAccommodationsQuery } from "../../accommodations/accomodationApiSlice";
+import { useGetFlightsQuery } from "../../flights/flightApiSlice";
 import type { Trip } from "../../trips/types";
 import { expenseSchema, type ExpenseFormValues } from "../schema";
 import {
   useAddExpenseMutation,
   useUpdateExpenseMutation,
 } from "../services/expenseApiSlice";
+import useDeleteExpense from "../hooks/useDeleteExpense";
 import { expenseCategories, type Expense, type ExpensePrefill } from "../types";
+import { canChangeExpense } from "../utils";
 
 const splitOptions = [
   { name: "Split evenly between everyone", value: "even_all" },
@@ -25,6 +29,7 @@ const linkOptions = [
   { name: "Not linked", value: "none" },
   { name: "An event", value: "event" },
   { name: "An accommodation", value: "accommodation" },
+  { name: "A flight", value: "flight" },
 ];
 
 const capitalise = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
@@ -44,12 +49,16 @@ export default function ExpenseForm({
 }) {
   const userId = useSelector((state: RootState) => state.auth.userId);
   const { data: accommodationData } = useGetAccommodationsQuery(trip.id);
+  const { data: flightData } = useGetFlightsQuery(trip.id);
+  const { remove, isDeleting } = useDeleteExpense(trip.id);
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
   const [addExpense, { isLoading: isAdding }] = useAddExpenseMutation();
   const [updateExpense, { isLoading: isUpdating }] = useUpdateExpenseMutation();
 
   const eventId = expense?.eventId ?? prefill?.eventId ?? null;
   const accommodationId =
     expense?.accommodationId ?? prefill?.accommodationId ?? null;
+  const flightId = expense?.flightId ?? prefill?.flightId ?? null;
 
   const { register, handleSubmit, watch, setValue, formState } =
     useForm<ExpenseFormValues>({
@@ -63,9 +72,16 @@ export default function ExpenseForm({
           prefill?.spentOn ??
           format(new Date(), "yyyy-MM-dd"),
         paidById: expense?.paidById ?? userId ?? trip.userMemberships[0]?.id,
-        link: eventId ? "event" : accommodationId ? "accommodation" : "none",
+        link: eventId
+          ? "event"
+          : accommodationId
+            ? "accommodation"
+            : flightId
+              ? "flight"
+              : "none",
         eventId,
         accommodationId,
+        flightId,
         splitType: expense?.splitType ?? "even_all",
         participantIds: expense?.shares.map((s) => s.userId) ?? [],
       },
@@ -74,10 +90,13 @@ export default function ExpenseForm({
   const link = watch("link");
   const splitType = watch("splitType");
   const participantIds = watch("participantIds") ?? [];
-  const isLoading = isAdding || isUpdating;
+  const isLoading = isAdding || isUpdating || isDeleting;
+  const canDelete =
+    !!expense && canChangeExpense(trip.role, userId, expense);
 
   const members = trip.userMemberships;
   const accommodations = accommodationData?.data ?? [];
+  const flights = flightData?.data ?? [];
 
   const toggleParticipant = (id: number) => {
     setValue(
@@ -96,6 +115,7 @@ export default function ExpenseForm({
       eventId: linkType === "event" ? values.eventId : null,
       accommodationId:
         linkType === "accommodation" ? values.accommodationId : null,
+      flightId: linkType === "flight" ? values.flightId : null,
       participantIds:
         values.splitType === "selected" ? values.participantIds : undefined,
     };
@@ -117,6 +137,10 @@ export default function ExpenseForm({
         isApiError(err) ? err.data.message : "Could not save the expense.",
       );
     }
+  };
+
+  const handleDelete = async () => {
+    if (expense && (await remove(expense.id))) onSuccess();
   };
 
   return (
@@ -197,6 +221,21 @@ export default function ExpenseForm({
             ]}
           />
         )}
+        {link === "flight" && (
+          <FormSelect
+            label="Flight"
+            errorMessage={formState.errors.flightId?.message}
+            {...register("flightId")}
+            value={watch("flightId") ?? ""}
+            options={[
+              { name: "Choose a flight", value: "" },
+              ...flights.map((f) => ({
+                name: `${f.airline}${f.flightNumber} · ${f.departureAirport} → ${f.arrivalAirport}`,
+                value: String(f.id),
+              })),
+            ]}
+          />
+        )}
       </div>
 
       <FormSelect
@@ -236,7 +275,40 @@ export default function ExpenseForm({
         </fieldset>
       )}
 
-      <div className="flex justify-end gap-2">
+      <div className="flex flex-wrap items-center justify-end gap-2">
+        {canDelete && !confirmingDelete && (
+          <button
+            type="button"
+            className="btn-secondary px-4 py-2 rounded-xl mr-auto text-error"
+            onClick={() => setConfirmingDelete(true)}
+            disabled={isLoading}
+          >
+            Delete
+          </button>
+        )}
+        {canDelete && confirmingDelete && (
+          <div className="mr-auto flex items-center gap-2">
+            <span className="text-sm text-text-secondary">
+              Delete this expense?
+            </span>
+            <button
+              type="button"
+              className="btn-error px-4 py-2 rounded-xl"
+              onClick={handleDelete}
+              disabled={isLoading}
+            >
+              {isDeleting ? "Deleting..." : "Yes, delete"}
+            </button>
+            <button
+              type="button"
+              className="btn-secondary px-4 py-2 rounded-xl"
+              onClick={() => setConfirmingDelete(false)}
+              disabled={isLoading}
+            >
+              Keep
+            </button>
+          </div>
+        )}
         <button
           type="button"
           className="btn-secondary px-4 py-2 rounded-xl"
