@@ -3,7 +3,9 @@ from datetime import date, datetime, timezone
 import factory
 from src.extensions import bcrypt, db
 from src.models import (
+    Airport,
     Event,
+    Flight,
     InvitationStatus,
     Invite,
     Itinerary,
@@ -154,5 +156,47 @@ class WishlistItemVoteFactory(factory.alchemy.SQLAlchemyModelFactory):
 
     is_thumbs_up = True
 
+    created_by_id = factory.LazyAttribute(lambda obj: obj.creator.id)
+    updated_by_id = factory.LazyAttribute(lambda obj: obj.creator.id)
+
+
+class AirportFactory(factory.alchemy.SQLAlchemyModelFactory):
+    class Meta:
+        model = Airport
+        sqlalchemy_session = db.session
+        sqlalchemy_session_persistence = "flush"
+        sqlalchemy_get_or_create = ("code",)
+
+    code = "LHR"
+    name = "London Heathrow Airport"
+    latitude = 51.4706
+    longitude = -0.4619
+    address = "London, GB"
+    timezone = "Europe/London"
+
+
+class FlightFactory(factory.alchemy.SQLAlchemyModelFactory):
+    class Meta:
+        model = Flight
+        sqlalchemy_session = db.session
+        sqlalchemy_session_persistence = "flush"
+
+    itinerary = factory.SubFactory(ItineraryFactory)
+    creator = factory.SubFactory(UserFactory)
+
+    airline = "BA"
+    flight_number = factory.Sequence(lambda n: str(100 + n))
+    departure_airport = factory.SubFactory(AirportFactory, code="LHR")
+    arrival_airport = factory.SubFactory(
+        AirportFactory,
+        code="CDG",
+        name="Charles de Gaulle International Airport",
+        latitude=49.0128,
+        longitude=2.55,
+        address="Paris, FR",
+        timezone="Europe/Paris",
+    )
+    depart_at = datetime(2026, 8, 1, 8, 0, tzinfo=timezone.utc)
+    arrive_at = datetime(2026, 8, 1, 9, 20, tzinfo=timezone.utc)
     created_by_id = factory.LazyAttribute(lambda obj: obj.creator.id)
     updated_by_id = factory.LazyAttribute(lambda obj: obj.creator.id)

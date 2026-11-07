@@ -22,6 +22,8 @@ import type { Day, Event } from "../events/types";
 import { makeDays } from "../events/utils";
 import type { User } from "../users/types";
 import { formatDateRange } from "../../utils/dateFormattors";
+import type { Flight } from "../flights/types";
+import { flightTitle } from "../flights/utils";
 import type { Trip } from "./types";
 
 function buildGoogleMapsUrl(event: Event): string {
@@ -505,12 +507,47 @@ export async function exportToDoc(trip: Trip): Promise<void> {
   }
 }
 
+type IcsEvent = Parameters<typeof createEvents>[0][number];
+
+const toUtcParts = (iso: string) => {
+  const date = new Date(iso);
+  return [
+    date.getUTCFullYear(),
+    date.getUTCMonth() + 1,
+    date.getUTCDate(),
+    date.getUTCHours(),
+    date.getUTCMinutes(),
+  ] as [number, number, number, number, number];
+};
+
+export const buildFlightCalendarEvents = (flights: Flight[]): IcsEvent[] =>
+  flights.map((flight) => ({
+    start: toUtcParts(flight.departAt),
+    startInputType: "utc",
+    startOutputType: "utc",
+    end: toUtcParts(flight.arriveAt),
+    endInputType: "utc",
+    endOutputType: "utc",
+    title: flightTitle(flight),
+    description: [
+      `${flight.airline}${flight.flightNumber}`,
+      flight.notes,
+    ]
+      .filter(Boolean)
+      .join("\n"),
+    location: `${flight.departureAirport} airport`,
+    categories: ["flight"],
+    status: "CONFIRMED",
+    busyStatus: "BUSY",
+  }));
+
 export const exportToCalendar = (
   tripName: string,
   tripEvents: Event[],
   tripMembers: User[],
+  flights: Flight[],
 ) => {
-  const events = tripEvents.map((event) => {
+  const events: IcsEvent[] = tripEvents.map((event) => {
     const start = new Date(event.startAt);
     const hours = differenceInHours(event.endAt, event.startAt, {
       roundingMethod: "floor",
@@ -548,7 +585,10 @@ export const exportToCalendar = (
       attendees,
     };
   });
-  const { error, value } = createEvents(events);
+  const { error, value } = createEvents([
+    ...events,
+    ...buildFlightCalendarEvents(flights),
+  ]);
 
   if (error) {
     toast.error("Could not export.");

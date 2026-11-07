@@ -10,7 +10,7 @@ from .config.dev_config import DevConfig
 from .config.production_config import ProductionConfig
 from .config.testing_config import TestConfig
 from .exceptions import AppError
-from .extensions import bcrypt, db, limiter, migrate
+from .extensions import bcrypt, cache, db, limiter, migrate
 from .utils.format_response import api_response
 from werkzeug.middleware.proxy_fix import ProxyFix
 
@@ -102,6 +102,17 @@ def initialise_extensions(app: Flask, testing: bool):
     migrate.init_app(app, db)
     bcrypt.init_app(app)
 
+    storage_uri = os.getenv("STORAGE_URI")
+    use_redis = bool(storage_uri) and not testing
+    cache.init_app(
+        app,
+        config={
+            "CACHE_TYPE": "RedisCache" if use_redis else "SimpleCache",
+            "CACHE_REDIS_URL": storage_uri,
+            "CACHE_KEY_PREFIX": "event-planner:",
+        },
+    )
+
     if not testing:
         limiter.init_app(app)
 
@@ -110,6 +121,7 @@ def register_models():
     from .models import (
         Accommodation,
         Event,
+        Flight,
         InvitationStatus,
         Invite,
         Itinerary,
@@ -133,6 +145,7 @@ def register_blueprints(app: Flask):
         auth_bp,
         change_set_bp,
         event_bp,
+        flight_bp,
         itinerary_bp,
         itinerary_invites_bp,
         notification_bp,
@@ -186,6 +199,11 @@ def register_blueprints(app: Flask):
     app.register_blueprint(
         accommodation_bp,
         url_prefix="/api/itineraries/<int:itinerary_id>/accommodations",
+    )
+
+    app.register_blueprint(
+        flight_bp,
+        url_prefix="/api/itineraries/<int:itinerary_id>/flights",
     )
 
     app.register_blueprint(
