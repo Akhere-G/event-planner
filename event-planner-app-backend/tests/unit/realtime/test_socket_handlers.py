@@ -103,6 +103,31 @@ def test_only_room_members_receive_trip_changed(
     assert outsider.get_received() == []
 
 
+def test_signed_in_sockets_receive_their_own_user_notices(
+    app, admin_client, admin_user, viewer_user
+):
+    mine = connect(app, admin_client)
+    other_http = app.test_client()
+    with other_http.session_transaction() as sess:
+        sess["user_id"] = viewer_user.id
+    other = connect(app, other_http)
+
+    mine.get_received()
+    other.get_received()
+    socketio.emit("user:changed", {"entities": ["invite"]}, to=f"user:{admin_user.id}")
+
+    assert [m["name"] for m in mine.get_received()] == ["user:changed"]
+    assert other.get_received() == []
+
+
+def test_anonymous_sockets_have_no_user_room(app, client, anonymous_itinerary):
+    guest = connect(app, client, auth={"access_code": "secret-code"})
+    guest.get_received()
+    socketio.emit("user:changed", {"entities": ["invite"]}, to="user:None")
+
+    assert guest.get_received() == []
+
+
 def test_presence_tracks_viewing_day_and_cleans_up_on_disconnect(
     app, admin_client, viewer_user, viewer_itinerary_user, itinerary, admin_user
 ):
