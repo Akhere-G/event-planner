@@ -15,6 +15,7 @@ export interface Trip {
   startDate: string;
   endDate: string;
   userMemberships: User[];
+  /** Snapshot from the trip fetch; use `useTripEvents` for live events. */
   events: Event[];
   invites: Invite[];
   adminCode?: string;

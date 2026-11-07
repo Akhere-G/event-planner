@@ -1,4 +1,5 @@
 import type { Trip } from "../../trips/types";
+import useTripEvents from "../../events/hooks/useTripEvents";
 import withDragAndDrop, {
   type DragFromOutsideItemArgs,
   type EventInteractionArgs,
@@ -72,12 +73,13 @@ type CalendarItem = {
 };
 
 export default function TripCalendar({ trip }: { trip: Trip }) {
-  const [tripEvents, setTripEvents] = useState(trip.events);
+  const { events: liveEvents } = useTripEvents(trip.id);
+  const [tripEvents, setTripEvents] = useState(liveEvents);
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [draggedEvent, setDraggedEvent] = useState<Event | null>(null);
   const [currentDate, setCurrentDate] = useState(
-    trip.events.length > 0
-      ? new Date(trip.events[0].startAt)
+    liveEvents.length > 0
+      ? new Date(liveEvents[0].startAt)
       : new Date(trip.startDate),
   );
   const [view, setView] = useState<View>(Views.MONTH);
@@ -89,10 +91,10 @@ export default function TripCalendar({ trip }: { trip: Trip }) {
 
   useEffect(() => {
     async function syncTripEvents() {
-      setTripEvents(trip.events);
+      setTripEvents(liveEvents);
     }
     syncTripEvents();
-  }, [trip.events]);
+  }, [liveEvents]);
 
   const events = useMemo(() => {
     if (!isMobile || view !== Views.MONTH) {

@@ -32,6 +32,7 @@ import { usePostHog } from "@posthog/react";
 import useLoadAnonTrip from "../hooks/useLoadAnonTrip";
 import { useLazyGetFlightsQuery } from "../../flights/flightApiSlice";
 import RegisterModal from "../../modal/components/RegisterModal";
+import useTripEvents from "../../events/hooks/useTripEvents";
 import { PresenceAvatars } from "../../realtime";
 
 type ModalType = "edit" | "delete" | "users" | "register" | null;
@@ -54,6 +55,7 @@ export default function TripSummary({
 
   const posthog = usePostHog();
   const [fetchFlights] = useLazyGetFlightsQuery();
+  const { events } = useTripEvents(trip.id);
 
   const { anonTrip } = useLoadAnonTrip();
   function openUsersView() {
@@ -110,7 +112,7 @@ export default function TripSummary({
                 }
                 exportToCalendar(
                   trip.name,
-                  trip.events,
+                  events,
                   trip.userMemberships,
                   flights,
                 );
@@ -124,7 +126,7 @@ export default function TripSummary({
             <DropdownMenuItem
               onClick={async () => {
                 const { exportToDoc } = await import("../utils");
-                exportToDoc(trip);
+                exportToDoc({ ...trip, events });
                 posthog?.capture("export_to_doc", { trip_id: trip.id });
               }}
               className="flex gap-2 items-center"

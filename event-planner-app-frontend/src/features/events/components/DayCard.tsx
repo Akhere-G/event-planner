@@ -20,6 +20,7 @@ import type { ChangeOp } from "../../ai/types";
 import { useParams } from "react-router";
 import { toast } from "sonner";
 import { useGetTripQuery } from "../../trips/services/tripsApiSlice";
+import useTripEvents from "../hooks/useTripEvents";
 import { useDispatch } from "react-redux";
 import { setRoutes, toggleDayOpen } from "../../maps/service/mapSlice";
 import type { Route } from "../../maps/types";
@@ -54,7 +55,8 @@ export default function DayCard({
   day: Day;
 }) {
   const tripId = Number(useParams()?.tripId);
-  const { data: tripData, isFetching } = useGetTripQuery(tripId);
+  const { data: tripData } = useGetTripQuery(tripId);
+  const { events: tripEvents, isFetching } = useTripEvents(tripId);
   const { data } = useGetAccommodationsQuery(tripId);
   const accommodations = data?.data ?? [];
   const { data: flightsData } = useGetFlightsQuery(tripId);
@@ -288,7 +290,7 @@ export default function DayCard({
           tripId={tripId}
           timezone={tripData.data.timezone}
           ops={preview.ops}
-          events={tripData.data.events ?? []}
+          events={tripEvents}
           title={
             preview.kind === "fill"
               ? `Fill Day ${day.day}: review suggestions`

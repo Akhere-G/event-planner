@@ -94,7 +94,7 @@ export default function TripActivities({ trip }: { trip: Trip }) {
       </div>
 
       {activityView === "list" ? (
-        <DayList role={trip.role} />
+        <DayList role={trip.role} tripId={trip.id} />
       ) : (
         <TripCalendar trip={trip} />
       )}
