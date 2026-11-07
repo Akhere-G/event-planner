@@ -74,7 +74,6 @@ class FlightSchema(BaseSchema):
     luggage = fields.Method("get_luggage", dump_only=True)
     extras = fields.Method("get_extras", dump_only=True)
     purchase_url = auto_field(dump_only=True)
-    price_gbp = auto_field(dump_only=True)
     airline_logo = auto_field(dump_only=True)
     notes = fields.String(allow_none=True, validate=validate.Length(max=1000))
 

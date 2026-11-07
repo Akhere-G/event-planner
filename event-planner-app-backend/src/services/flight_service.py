@@ -1,5 +1,6 @@
 import logging
-from datetime import date
+from datetime import UTC, date
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
@@ -12,6 +13,7 @@ from ..exceptions import (
 )
 from ..extensions import cache, db
 from ..models import Airport, Flight
+from . import expense_service
 from .airport_directory import get_airport_info
 from .flight_providers import FlightOffer, FlightProviderFactory
 
@@ -100,6 +102,53 @@ def get_or_create_airport(code: str) -> Airport:
     return airport
 
 
+def _local_departure_date(flight: Flight, airport: Airport) -> date:
+    # Naive datetimes (MySQL) are always UTC.
+    departs_at = flight.depart_at
+    if departs_at.tzinfo is None:
+        departs_at = departs_at.replace(tzinfo=UTC)
+    try:
+        zone = ZoneInfo(airport.timezone) if airport.timezone else UTC
+    except ZoneInfoNotFoundError:
+        zone = UTC
+    return departs_at.astimezone(zone).date()
+
+
+def flight_expense_data(
+    flight: Flight, price_gbp: int, departure: Airport, arrival: Airport
+) -> dict:
+    return {
+        "description": (
+            f"{flight.airline}{flight.flight_number} · {departure.code} → {arrival.code}"
+        ),
+        "category": "transport",
+        "amount": price_gbp,
+        "spent_on": _local_departure_date(flight, departure),
+        "flight_id": flight.id,
+    }
+
+
+def stage_flight_expense(
+    user_id: int | None,
+    flight: Flight,
+    price_gbp: int | None,
+    departure: Airport,
+    arrival: Airport,
+):
+    """Give a new flight its expense, in the same transaction as the flight.
+
+    A flight with no price, or one saved without a signed-in user (anonymous
+    trips have no expenses), starts without an expense.
+    """
+    if price_gbp is None or user_id is None:
+        return None
+    return expense_service.stage_create_expense(
+        user_id,
+        flight.itinerary_id,
+        flight_expense_data(flight, price_gbp, departure, arrival),
+    )
+
+
 def create_flight(user_id: int | None, itinerary_id: int, flight_data: dict):
     try:
         airline = flight_data["airline"].upper()
@@ -131,6 +180,7 @@ def create_flight(user_id: int | None, itinerary_id: int, flight_data: dict):
             Flight.depart_at == offer.depart_at,
         )
         flight = db.session.execute(stmt).scalar_one_or_none()
+        is_new = flight is None
 
         if flight:
             flight.updated_by_id = user_id
@@ -152,9 +202,15 @@ def create_flight(user_id: int | None, itinerary_id: int, flight_data: dict):
         flight.luggage = list(offer.luggage)
         flight.extras = list(offer.extras)
         flight.purchase_url = offer.purchase_url
-        flight.price_gbp = offer.price_gbp
         flight.airline_logo = offer.airline_logo
         flight.notes = flight_data.get("notes")
+
+        # Saving a flight again only refreshes it; a deleted expense stays deleted.
+        if is_new:
+            db.session.flush()
+            stage_flight_expense(
+                user_id, flight, offer.price_gbp, dep_airport, arr_airport
+            )
 
         db.session.commit()
 
