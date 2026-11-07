@@ -1,7 +1,12 @@
 import { describe, expect, it } from "vitest";
 import { createEvents } from "ics";
 import { flightSearchSchema } from "../schemas/flightSchema";
-import { directFlightSummary, formatGbp, getFlightsForDay } from "../utils";
+import {
+  directFlightSummary,
+  flightExpensePrefill,
+  formatGbp,
+  getFlightsForDay,
+} from "../utils";
 import { buildFlightCalendarEvents } from "../../trips/utils";
 import type { Flight } from "../types";
 
@@ -84,6 +89,17 @@ describe("flight display helpers", () => {
     expect(directFlightSummary(["1 cabin bag included"])).toBe(
       "Direct flight · 1 cabin bag included",
     );
+  });
+});
+
+describe("flightExpensePrefill", () => {
+  it("links the flight and uses its code, route and local departure date", () => {
+    expect(flightExpensePrefill(flight)).toEqual({
+      flightId: 1,
+      description: "BA117 · LHR → JFK",
+      category: "transport",
+      spentOn: "2026-08-01",
+    });
   });
 });
 
