@@ -57,6 +57,7 @@ export const aiApiSlice = apiSlice.injectEndpoints({
       invalidatesTags: (_, __, args) => [
         { type: "Trips", id: "LIST" },
         { type: "Trips", id: args.tripId },
+        { type: "Events", id: args.tripId },
         "Accommodations",
         "Wishlists",
         { type: "PackingItem", id: "LIST" },
