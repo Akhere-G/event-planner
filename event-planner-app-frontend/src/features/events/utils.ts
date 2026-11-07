@@ -77,3 +77,31 @@ export const getDayColor = (day: number) => {
 
   return `hsl(${hue}, 95%, 35%)`;
 };
+
+const sameEvents = (a: Event[], b: Event[]) =>
+  a.length === b.length && a.every((event, i) => event === b[i]);
+
+/**
+ * Applies freshly built days on top of the ones on screen: what the user is
+ * doing (which days are open or hidden) is kept, only the events change. Days
+ * whose events are unchanged keep their identity so they do not re-render.
+ */
+export function mergeDays(existing: Day[], incoming: Day[]): Day[] {
+  const byDate = new Map(existing.map((day) => [day.date, day]));
+
+  return incoming.map((day) => {
+    const previous = byDate.get(day.date);
+    if (!previous) return day;
+
+    const merged = {
+      ...day,
+      isOpen: previous.isOpen,
+      show: previous.show,
+    };
+
+    return sameEvents(previous.events, merged.events) &&
+      previous.day === merged.day
+      ? previous
+      : merged;
+  });
+}
