@@ -7,7 +7,7 @@ from ..extensions import db, socketio
 from ..models import User
 from .access import resolve_trip_role
 from .presence import get_presence_store
-from .rooms import PRESENCE_EVENT, trip_room
+from .rooms import PRESENCE_EVENT, trip_room, user_room
 
 logger = logging.getLogger(__name__)
 
@@ -71,6 +71,11 @@ def register_socket_handlers():
             "access_code": access_code,
             "trips": {},
         }
+
+        # Invites and membership changes reach people who are not (yet) in any
+        # trip room, so every signed-in socket also listens on its own room.
+        if user_id is not None:
+            join_room(user_room(user_id))
 
     @socketio.on("trip:join")
     def on_join(data):

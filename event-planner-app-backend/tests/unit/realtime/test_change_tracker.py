@@ -1,9 +1,10 @@
 import pytest
 from src.extensions import db
 from src.models import Accommodation, Event, PackingItem, Wishlist, WishlistItem
-from src.realtime.change_tracker import SESSION_INFO_KEY
+from src.realtime.change_tracker import SESSION_INFO_KEY, USER_SESSION_INFO_KEY
 from tests.factories import (
     EventFactory,
+    InviteFactory,
     ItineraryUserFactory,
     WishlistFactory,
     WishlistItemFactory,
@@ -101,8 +102,69 @@ def test_flights_invites_and_memberships_are_tracked(
         itinerary=itinerary, user=viewer_user, creator=admin_user, role="viewer"
     )
     db.session.commit()
-    assert emitted[-1][1]["entities"] == ["itinerary_user"]
-    assert emitted[-1][2]["to"] == f"trip:{itinerary.id}"
+    trip_notice = [c for c in emitted if c[0] == "trip:changed"][-1]
+    assert trip_notice[1]["entities"] == ["itinerary_user"]
+    assert trip_notice[2]["to"] == f"trip:{itinerary.id}"
+
+
+def test_invitee_is_notified_in_their_own_room(
+    emitted, itinerary, admin_user, invite, invited_user
+):
+    db.session.commit()
+    emitted.clear()
+
+    invite.status = "revoked"
+    db.session.commit()
+
+    user_notice = [c for c in emitted if c[0] == "user:changed"]
+    assert len(user_notice) == 1
+    _, payload, kwargs = user_notice[0]
+    assert payload == {
+        "entities": ["invite"],
+        "trip_ids": [itinerary.id],
+        "by_user_id": None,
+    }
+    assert kwargs["to"] == f"user:{invited_user.id}"
+
+
+def test_member_is_notified_when_added_or_removed(
+    emitted, itinerary, admin_user, viewer_user
+):
+    membership = ItineraryUserFactory(
+        itinerary=itinerary, user=viewer_user, creator=admin_user
+    )
+    db.session.commit()
+    added = [c for c in emitted if c[0] == "user:changed"][-1]
+    assert added[1]["entities"] == ["itinerary_user"]
+    assert added[1]["trip_ids"] == [itinerary.id]
+    assert added[2]["to"] == f"user:{viewer_user.id}"
+
+    emitted.clear()
+    db.session.delete(membership)
+    db.session.commit()
+    removed = [c for c in emitted if c[0] == "user:changed"][-1]
+    assert removed[2]["to"] == f"user:{viewer_user.id}"
+
+
+def test_invite_for_unregistered_email_only_reaches_the_trip(
+    emitted, itinerary, admin_user
+):
+    InviteFactory(itinerary=itinerary, creator=admin_user, email="nobody@example.com")
+    db.session.commit()
+
+    assert [c[0] for c in emitted] == ["trip:changed"]
+
+
+def test_rollback_discards_user_changes(emitted, itinerary, admin_user, invite):
+    db.session.commit()
+    emitted.clear()
+
+    invite.status = "revoked"
+    db.session.flush()
+    assert USER_SESSION_INFO_KEY in db.session.info
+
+    db.session.rollback()
+    assert USER_SESSION_INFO_KEY not in db.session.info
 
 
 def test_rollback_discards_changes(emitted, itinerary, admin_user):
