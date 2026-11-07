@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 import type { Expense } from "../types";
-import { budgetProgress, spentByCategory, totalSpent } from "../utils";
+import {
+  budgetProgress,
+  formatCurrency,
+  spentByCategory,
+  totalSpent,
+} from "../utils";
 
 const make = (category: Expense["category"], amountGbp: number): Expense => ({
   id: Math.random(),
@@ -56,5 +61,15 @@ describe("expense utils", () => {
       isOver: false,
       remaining: null,
     });
+  });
+});
+
+describe("formatCurrency", () => {
+  it("defaults to pounds", () => {
+    expect(formatCurrency(45)).toBe("£45.00");
+  });
+
+  it("formats an expense in its own currency", () => {
+    expect(formatCurrency(820, "EUR")).toBe("€820.00");
   });
 });

@@ -1,10 +1,12 @@
 import type { Expense, ExpenseCategory } from "./types";
 
-export const formatGbp = (amount: number) =>
+export const formatCurrency = (amount: number, currency = "GBP") =>
   new Intl.NumberFormat("en-GB", {
     style: "currency",
-    currency: "GBP",
+    currency,
   }).format(amount);
+
+export const formatGbp = (amount: number) => formatCurrency(amount);
 
 export const totalSpent = (expenses: Expense[]) =>
   Math.round(expenses.reduce((sum, e) => sum + e.amountGbp, 0) * 100) / 100;
