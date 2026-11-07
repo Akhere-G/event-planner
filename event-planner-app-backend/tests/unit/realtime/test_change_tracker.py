@@ -1,9 +1,21 @@
 import pytest
 from src.extensions import db
-from src.models import Accommodation, Event, PackingItem, Wishlist, WishlistItem
+from src.models import (
+    Accommodation,
+    Event,
+    Expense,
+    ExpenseShare,
+    PackingItem,
+    Wishlist,
+    WishlistItem,
+)
 from src.realtime.change_tracker import SESSION_INFO_KEY, USER_SESSION_INFO_KEY
 from tests.factories import (
     EventFactory,
+    ExpenseFactory,
+    ExpenseShareFactory,
+    FlightFactory,
+    SettlementFactory,
     InviteFactory,
     ItineraryUserFactory,
     WishlistFactory,
@@ -206,3 +218,104 @@ def test_by_user_id_comes_from_request_session(emitted, app, itinerary, admin_us
         db.session.commit()
 
     assert emitted[-1][1]["by_user_id"] == admin_user.id
+
+
+def trip_notices(emitted):
+    return [payload for name, payload, _ in emitted if name == "trip:changed"]
+
+
+def test_expenses_and_their_shares_are_tracked(emitted, itinerary, admin_user):
+    expense = ExpenseFactory(itinerary=itinerary, paid_by=admin_user)
+    ExpenseShareFactory(expense=expense, user=admin_user)
+    db.session.commit()
+    assert trip_notices(emitted)[-1]["entities"] == ["expense", "expense_share"]
+
+    emitted.clear()
+    expense.description = "Renamed"
+    db.session.commit()
+    assert trip_notices(emitted)[-1]["entities"] == ["expense"]
+
+    emitted.clear()
+    expense.shares[0].amount_gbp = 5
+    db.session.commit()
+    assert trip_notices(emitted)[-1] == {
+        "trip_id": itinerary.id,
+        "entities": ["expense_share"],
+        "by_user_id": None,
+    }
+
+    emitted.clear()
+    expense_id = expense.id
+    db.session.delete(expense)
+    db.session.commit()
+    assert "expense" in trip_notices(emitted)[-1]["entities"]
+    assert db.session.query(ExpenseShare).filter_by(expense_id=expense_id).count() == 0
+
+
+def test_settlements_are_tracked(emitted, itinerary, admin_user, viewer_user):
+    settlement = SettlementFactory(
+        itinerary_id=itinerary.id, from_user=viewer_user, to_user=admin_user
+    )
+    db.session.commit()
+    assert trip_notices(emitted)[-1]["entities"] == ["settlement"]
+
+    emitted.clear()
+    settlement.amount_gbp = 5
+    db.session.commit()
+    assert trip_notices(emitted)[-1]["entities"] == ["settlement"]
+
+    emitted.clear()
+    db.session.delete(settlement)
+    db.session.commit()
+    assert trip_notices(emitted)[-1]["entities"] == ["settlement"]
+
+
+def test_flight_and_its_expense_are_announced_together(
+    emitted, admin_client, itinerary, flight_provider
+):
+    emitted.clear()
+
+    admin_client.post(
+        f"/api/itineraries/{itinerary.id}/flights",
+        json={
+            "origin": ["LHR"],
+            "destination": ["JFK"],
+            "departureDate": "2099-08-01",
+            "airline": "BA",
+            "flightNumber": "117",
+        },
+    )
+
+    [notice] = trip_notices(emitted)
+    assert notice["entities"] == ["expense", "expense_share", "flight"]
+
+
+@pytest.mark.parametrize("item", ["event", "accommodation", "flight"])
+def test_deleting_an_item_announces_the_expense_it_unlinks(
+    emitted, itinerary, admin_user, event, flight, item
+):
+    target = {"event": event, "flight": flight}.get(item)
+    if item == "accommodation":
+        target = Accommodation(
+            itinerary_id=itinerary.id,
+            name="Stay",
+            address="1 Street",
+            latitude=1.0,
+            longitude=2.0,
+            start_date=event.start_at.date(),
+            end_date=event.start_at.date(),
+            created_by_id=admin_user.id,
+        )
+        db.session.add(target)
+        db.session.flush()
+    expense = ExpenseFactory(
+        itinerary=itinerary, paid_by=admin_user, **{f"{item}_id": target.id}
+    )
+    db.session.commit()
+    emitted.clear()
+
+    db.session.delete(target)
+    db.session.commit()
+
+    assert "expense" in trip_notices(emitted)[-1]["entities"]
+    assert db.session.get(Expense, expense.id).__getattribute__(f"{item}_id") is None
