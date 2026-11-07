@@ -3,7 +3,9 @@ from typing import Any
 from marshmallow import ValidationError
 
 from ..extensions import db
+from ..schemas.accommodation_schema import AccommodationSchema
 from ..schemas.event_schema import EventSchema
+from ..schemas.wishlist_schema import WishlistItemSchema
 from .change_set_appliers import (
     ChangeSetApplier,
     ChangeSetApplierFactory,
@@ -19,7 +21,16 @@ EVENT_FIELDS = (
     "start_at",
     "end_at",
     "category",
+    "estimated_cost_gbp",
+    "price_tier",
 )
+
+_ESTIMATE_FIELDS = ("estimated_cost_gbp", "price_tier")
+_ESTIMATE_SCHEMAS = {
+    "event": EventSchema,
+    "accommodation": AccommodationSchema,
+    "wishlist_item": WishlistItemSchema,
+}
 
 _COUNT_KEYS = {"create": "created", "update": "updated", "delete": "deleted"}
 
@@ -41,9 +52,13 @@ def validate_ops(
 
 
 def apply_change_set(
-    itinerary_id: int, ops: list[dict], user_id: int | None
+    itinerary_id: int, ops: list[dict], user_id: int | None, commit: bool = True
 ) -> dict[str, int]:
-    """Validate every op, then apply them all in one transaction (all or nothing)."""
+    """Validate every op, then apply them all in one transaction (all or nothing).
+
+    Pass ``commit=False`` to flush only, so the caller can join the ops to a larger
+    transaction (the caller then owns the commit and rollback).
+    """
     prepared = validate_ops(itinerary_id, ops, user_id)
     counts = {key: 0 for key in _COUNT_KEYS.values()}
 
@@ -51,9 +66,11 @@ def apply_change_set(
         for applier, op in prepared:
             applier.apply(op)
             counts[_COUNT_KEYS[op.kind]] += 1
-        db.session.commit()
+        if commit:
+            db.session.commit()
     except Exception:
-        db.session.rollback()
+        if commit:
+            db.session.rollback()
         raise
 
     return counts
@@ -95,3 +112,37 @@ def build_event_update_ops(updates: list[dict]) -> list[dict]:
         }
         for update in updates
     ]
+
+
+def build_cost_estimate_ops(estimates: list[dict]) -> list[dict]:
+    """Turn AI cost estimates for existing items into preview-only update ops."""
+    ops = []
+    for estimate in estimates:
+        schema = _ESTIMATE_SCHEMAS[estimate["entity"]](only=_ESTIMATE_FIELDS)
+        fields = {k: estimate[k] for k in _ESTIMATE_FIELDS if k in estimate}
+        ops.append(
+            {
+                "op": "update",
+                "entity": estimate["entity"],
+                "id": estimate["id"],
+                "data": schema.dump(schema.load(fields)),
+                "reason": _clean_reason(estimate.get("reason")),
+            }
+        )
+    return ops
+
+
+def build_edit_ops(proposed: list[dict]) -> list[dict]:
+    """Turn sanitised AI edit ops into preview-only ops with API-shaped data.
+
+    Ops whose data fails the entity's schema are dropped rather than failing the preview.
+    """
+    ops = []
+    for op in proposed:
+        applier = ChangeSetApplierFactory.create(op["entity"], 0, None)
+        try:
+            prepared = applier.prepare(op)
+        except ValidationError:
+            continue
+        ops.append({**op, "data": applier.preview(prepared)})
+    return ops
