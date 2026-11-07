@@ -29,7 +29,7 @@ class TrackedModel:
     user_resolver: Resolver | None = None
 
 
-# Later features (expenses, ...) add themselves here with register_tracked_model.
+# Models are registered in register_default_models with register_tracked_model.
 _TRACKED: dict[type, TrackedModel] = {}
 
 
@@ -66,6 +66,13 @@ def _wishlist_item_vote_itinerary_id(session: Session, obj):
     return wishlist.itinerary_id if wishlist else None
 
 
+def _expense_share_itinerary_id(session: Session, obj):
+    from ..models import Expense
+
+    expense = session.get(Expense, obj.expense_id)
+    return expense.itinerary_id if expense else None
+
+
 def _invitee_user_id(session: Session, obj):
     from ..models import User
 
@@ -82,11 +89,14 @@ def register_default_models():
     from ..models import (
         Accommodation,
         Event,
+        Expense,
+        ExpenseShare,
         Flight,
         Invite,
         Itinerary,
         ItineraryUser,
         PackingItem,
+        Settlement,
         Wishlist,
         WishlistItem,
         WishlistItemVote,
@@ -102,6 +112,11 @@ def register_default_models():
         WishlistItemVote, "wishlist_item_vote", _wishlist_item_vote_itinerary_id
     )
     register_tracked_model(Flight, "flight")
+    register_tracked_model(Expense, "expense")
+    register_tracked_model(
+        ExpenseShare, "expense_share", _expense_share_itinerary_id
+    )
+    register_tracked_model(Settlement, "settlement")
     register_tracked_model(
         ItineraryUser, "itinerary_user", user_resolver=_member_user_id
     )
