@@ -199,6 +199,11 @@ EXPENSE_LOADER_OPTIONS = (
 )
 
 
+def expense_loader(relationship):
+    """Load the expense on an itinerary item with what ExpenseSchema dumps."""
+    return selectinload(relationship).options(*EXPENSE_LOADER_OPTIONS)
+
+
 def get_expenses(itinerary_id: int) -> list[Expense]:
     stmt = (
         select(Expense)
