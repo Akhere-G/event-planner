@@ -1,16 +1,13 @@
 import { useState } from "react";
 import { Pencil, Trash2 } from "lucide-react";
 import { format, parseISO } from "date-fns";
-import { toast } from "sonner";
 import { useSelector } from "react-redux";
 import { ConfirmModal } from "../../../components";
 import type { RootState } from "../../../store";
-import { isApiError } from "../../api/utils";
 import type { Trip } from "../../trips/types";
-import { canUserEdit, isAdmin } from "../../users/utils";
-import { useDeleteExpenseMutation } from "../services/expenseApiSlice";
+import useDeleteExpense from "../hooks/useDeleteExpense";
 import type { Expense } from "../types";
-import { formatGbp } from "../utils";
+import { canChangeExpense, formatGbp } from "../utils";
 import ExpenseModal from "./ExpenseModal";
 
 export default function ExpenseList({
@@ -21,28 +18,19 @@ export default function ExpenseList({
   expenses: Expense[];
 }) {
   const userId = useSelector((state: RootState) => state.auth.userId);
-  const [deleteExpense] = useDeleteExpenseMutation();
+  const { remove } = useDeleteExpense(trip.id);
   const [editing, setEditing] = useState<Expense | null>(null);
   const [deleting, setDeleting] = useState<Expense | null>(null);
 
   const canChange = (expense: Expense) =>
-    canUserEdit(trip.role) &&
-    (isAdmin(trip.role) || expense.createdById === userId);
+    canChangeExpense(trip.role, userId, expense);
 
   const linkedName = (expense: Expense) =>
     trip.events.find((e) => e.id === expense.eventId)?.name;
 
   const handleDelete = async () => {
     if (!deleting) return;
-    try {
-      await deleteExpense({ tripId: trip.id, expenseId: deleting.id }).unwrap();
-      toast.success("Expense deleted.");
-      setDeleting(null);
-    } catch (err) {
-      toast.error(
-        isApiError(err) ? err.data.message : "Could not delete the expense.",
-      );
-    }
+    if (await remove(deleting.id)) setDeleting(null);
   };
 
   return (

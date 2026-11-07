@@ -1,3 +1,4 @@
+import { canUserEdit, isAdmin } from "../users/utils";
 import type { Expense, ExpenseCategory } from "./types";
 
 export const formatCurrency = (amount: number, currency = "GBP") =>
@@ -7,6 +8,13 @@ export const formatCurrency = (amount: number, currency = "GBP") =>
   }).format(amount);
 
 export const formatGbp = (amount: number) => formatCurrency(amount);
+
+/** Admins can change any expense; editors only the ones they added. */
+export const canChangeExpense = (
+  role: string,
+  userId: number | null | undefined,
+  expense: Expense,
+) => canUserEdit(role) && (isAdmin(role) || expense.createdById === userId);
 
 export const totalSpent = (expenses: Expense[]) =>
   Math.round(expenses.reduce((sum, e) => sum + e.amountGbp, 0) * 100) / 100;
