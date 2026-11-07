@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import type { Expense } from "../types";
 import {
   budgetProgress,
+  canChangeExpense,
   formatCurrency,
   spentByCategory,
   totalSpent,
@@ -71,5 +72,22 @@ describe("formatCurrency", () => {
 
   it("formats an expense in its own currency", () => {
     expect(formatCurrency(820, "EUR")).toBe("€820.00");
+  });
+});
+
+describe("canChangeExpense", () => {
+  const expense = { ...make("food", 10), createdById: 5 };
+
+  it("lets admins change anyone's expense", () => {
+    expect(canChangeExpense("admin", 1, expense)).toBe(true);
+  });
+
+  it("lets editors change only their own", () => {
+    expect(canChangeExpense("editor", 5, expense)).toBe(true);
+    expect(canChangeExpense("editor", 6, expense)).toBe(false);
+  });
+
+  it("never lets viewers change one", () => {
+    expect(canChangeExpense("viewer", 5, expense)).toBe(false);
   });
 });
