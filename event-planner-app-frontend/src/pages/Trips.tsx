@@ -4,10 +4,13 @@ import { TripCardSkeleton, TripList } from "../features/trips/components";
 import { useGetTripsQuery } from "../features/trips/services/tripsApiSlice";
 import { useState } from "react";
 import useDemoButton from "../hooks/useDemoButton";
+import { useSelector } from "react-redux";
+import { selectIsAuthenticated } from "../features/auth/services/authSlice";
 
 const LIMIT = 12;
 
 export default function Trips() {
+  const isAuthenticated = useSelector(selectIsAuthenticated);
   const [offset, setOffset] = useState(0);
   const { data, isLoading, isError } = useGetTripsQuery({
     limit: LIMIT,
@@ -17,6 +20,37 @@ export default function Trips() {
   const navigate = useNavigate();
 
   const getMore = () => setOffset((prev) => prev + LIMIT);
+
+  const actions = [
+    {
+      text: "Create new trip?",
+      onClick: () => navigate("/addtrip"),
+      className: "btn-primary text-text-inverse px-4 py-2",
+    },
+  ];
+
+  const guestActions = [
+    {
+      text: "Login?",
+      onClick: () => navigate("/login"),
+      className: "btn-secondary px-4 py-2",
+    },
+    {
+      text: "Make a new account?",
+      onClick: () => navigate("/register"),
+      className: "btn-secondary px-4 py-2",
+    },
+    {
+      text: "Try the demo?",
+      onClick: onTryDemo,
+      className: "btn-secondary px-4 py-2",
+      disabled: demoResult.isLoading,
+    },
+  ];
+
+  if (!isAuthenticated) {
+    actions.push(...guestActions);
+  }
   return (
     <div className="container flex flex-col gap-6">
       <div className="card">
@@ -40,29 +74,7 @@ export default function Trips() {
           isEmpty: !data || data?.data.itineraries.length === 0,
           message: "No trips.",
           height: 300,
-          actions: [
-            {
-              text: "Create new trip?",
-              onClick: () => navigate("/addtrip"),
-              className: "btn-primary text-text-inverse px-4 py-2",
-            },
-            {
-              text: "Login?",
-              onClick: () => navigate("/login"),
-              className: "btn-secondary px-4 py-2",
-            },
-            {
-              text: "Make a new account?",
-              onClick: () => navigate("/register"),
-              className: "btn-secondary px-4 py-2",
-            },
-            {
-              text: "Try the demo?",
-              onClick: onTryDemo,
-              className: "btn-secondary px-4 py-2",
-              disabled: demoResult.isLoading,
-            },
-          ],
+          actions: actions,
         }}
       >
         <TripList

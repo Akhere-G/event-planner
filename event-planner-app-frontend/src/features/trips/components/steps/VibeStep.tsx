@@ -3,10 +3,12 @@ import { ToggleButton } from "../../../../components";
 import { PACES, PACE_LABELS, VIBE_OPTIONS } from "../../constants";
 import Label from "./Label";
 import { toggleInList, type FieldGroupProps } from "./fieldTypes";
+import { useWatch } from "react-hook-form";
 
-export default function VibeStep({ watch, setValue }: FieldGroupProps) {
-  const vibes = watch("vibes") ?? [];
-  const pace = watch("pace");
+export default function VibeStep({ control, setValue }: FieldGroupProps) {
+  const vibes = useWatch({ name: "vibes", control });
+  const pace = useWatch({ name: "pace", control });
+
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-col gap-2">
