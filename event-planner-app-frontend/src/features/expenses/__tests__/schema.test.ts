@@ -45,6 +45,17 @@ describe("expenseSchema", () => {
   });
 });
 
+describe("expenseSchema flight link", () => {
+  it("requires a flight when linked to one", async () => {
+    await expect(
+      expenseSchema.isValid({ ...valid, link: "flight", flightId: "" }),
+    ).resolves.toBe(false);
+    await expect(
+      expenseSchema.isValid({ ...valid, link: "flight", flightId: 9 }),
+    ).resolves.toBe(true);
+  });
+});
+
 describe("settlementSchema", () => {
   const base = {
     fromUserId: 1,

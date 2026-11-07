@@ -11,7 +11,10 @@ export const expenseSchema = yup.object({
   category: yup.string().oneOf(expenseCategories).required(),
   spentOn: yup.string().required("Date is required."),
   paidById: yup.number().required("Choose who paid."),
-  link: yup.string().oneOf(["none", "event", "accommodation"]).required(),
+  link: yup
+    .string()
+    .oneOf(["none", "event", "accommodation", "flight"])
+    .required(),
   eventId: yup
     .number()
     .transform((value, original) => (original === "" ? null : value))
@@ -28,6 +31,15 @@ export const expenseSchema = yup.object({
     .default(null)
     .when("link", {
       is: "accommodation",
+      then: (schema) => schema.required("Choose one."),
+    }),
+  flightId: yup
+    .number()
+    .transform((value, original) => (original === "" ? null : value))
+    .nullable()
+    .default(null)
+    .when("link", {
+      is: "flight",
       then: (schema) => schema.required("Choose one."),
     }),
   splitType: yup.string().oneOf(splitTypes).required(),
