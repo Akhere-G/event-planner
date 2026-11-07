@@ -37,6 +37,9 @@ import EventModal from "./EventModal";
 import type { Event } from "../../events/types";
 import { useUpdateEvent } from "../../trips/hooks";
 import { toast } from "sonner";
+import { useGetFlightsQuery } from "../../flights/flightApiSlice";
+import type { Flight } from "../../flights/types";
+import { flightTitle } from "../../flights/utils";
 import CalendarEventList from "./CalendarEventList";
 
 const locales = { "en-GB": enGB };
@@ -64,7 +67,8 @@ type CalendarItem = {
   end: Date;
   allDay: boolean;
   isSummary?: boolean;
-  resource: Event | number;
+  isFlight?: boolean;
+  resource: Event | Flight | number;
 };
 
 export default function TripCalendar({ trip }: { trip: Trip }) {
@@ -78,6 +82,8 @@ export default function TripCalendar({ trip }: { trip: Trip }) {
   );
   const [view, setView] = useState<View>(Views.MONTH);
   const { handleEdit } = useUpdateEvent({ tripId: trip.id });
+  const { data: flightsData } = useGetFlightsQuery(trip.id);
+  const flights = useMemo(() => flightsData?.data ?? [], [flightsData]);
   const breakpoint = useBreakpoint();
   const isMobile = ["xs", "sm", "md"].includes(breakpoint);
 
@@ -90,20 +96,40 @@ export default function TripCalendar({ trip }: { trip: Trip }) {
 
   const events = useMemo(() => {
     if (!isMobile || view !== Views.MONTH) {
-      return tripEvents.map((event) => ({
-        id: event.id,
-        title: event.name,
-        start: new Date(event.startAt),
-        end: new Date(event.endAt),
+      const flightItems: CalendarItem[] = flights.map((flight) => ({
+        id: `flight-${flight.id}`,
+        title: flightTitle(flight),
+        start: new Date(flight.departAt),
+        end: new Date(flight.arriveAt),
         allDay: false,
-        resource: event,
+        isFlight: true,
+        resource: flight,
       }));
+      return [
+        ...tripEvents.map((event) => ({
+          id: event.id,
+          title: event.name,
+          start: new Date(event.startAt),
+          end: new Date(event.endAt),
+          allDay: false,
+          resource: event,
+        })),
+        ...flightItems,
+      ];
     }
 
     const groupedEvents = new Map<number, number>();
 
     tripEvents.forEach((event) => {
       const dayTimestamp = startOfDay(new Date(event.startAt)).getTime();
+      groupedEvents.set(
+        dayTimestamp,
+        (groupedEvents.get(dayTimestamp) || 0) + 1,
+      );
+    });
+
+    flights.forEach((flight) => {
+      const dayTimestamp = startOfDay(new Date(flight.departAt)).getTime();
       groupedEvents.set(
         dayTimestamp,
         (groupedEvents.get(dayTimestamp) || 0) + 1,
@@ -119,7 +145,7 @@ export default function TripCalendar({ trip }: { trip: Trip }) {
       isSummary: true,
       resource: count,
     }));
-  }, [tripEvents, isMobile, view]);
+  }, [tripEvents, flights, isMobile, view]);
 
   const getDayClasses = (date: Date) => {
     const isSelected = isSameDay(date, currentDate);
@@ -144,7 +170,7 @@ export default function TripCalendar({ trip }: { trip: Trip }) {
   };
 
   const handleEventClick = (calendarEvent: CalendarItem) => {
-    if (calendarEvent.isSummary) return;
+    if (calendarEvent.isSummary || calendarEvent.isFlight) return;
 
     setSelectedEvent(calendarEvent.resource as Event);
   };
@@ -208,7 +234,7 @@ export default function TripCalendar({ trip }: { trip: Trip }) {
     const newEnd = new Date(end as Date);
     const eventItem = event.resource as Event;
 
-    if ("isSummary" in event) return;
+    if ("isSummary" in event || "isFlight" in event) return;
 
     const formattedStart = format(newStart, "yyyy-MM-dd HH:mm:ss");
     const formattedEnd = format(newEnd, "yyyy-MM-dd HH:mm:ss");
@@ -254,6 +280,7 @@ export default function TripCalendar({ trip }: { trip: Trip }) {
   }: EventInteractionArgs<CalendarEvent>) => {
     const formattedStart = format(start, "yyyy-MM-dd HH:mm:ss");
     const formattedEnd = format(end, "yyyy-MM-dd HH:mm:ss");
+    if ("isFlight" in event) return;
     const eventItem = event.resource as Event;
 
     if (isBefore(start, trip.startDate)) {
@@ -305,7 +332,11 @@ export default function TripCalendar({ trip }: { trip: Trip }) {
             dayFormat: ((date, culture, localizer) =>
               isMobile
                 ? localizer!.format(date, "dd", culture)
-                : localizer!.format(date, "EEE dd/MM", culture)) as DateFormatFunction,
+                : localizer!.format(
+                    date,
+                    "EEE dd/MM",
+                    culture,
+                  )) as DateFormatFunction,
             timeGutterFormat: ((date, culture, localizer) =>
               isMobile
                 ? localizer!.format(date, "HH", culture)
@@ -322,6 +353,8 @@ export default function TripCalendar({ trip }: { trip: Trip }) {
           views={[Views.MONTH, Views.WEEK, Views.DAY]}
           popup={!isMobile}
           selectable
+          draggableAccessor={(event: CalendarItem) => !event.isFlight}
+          resizableAccessor={(event: CalendarItem) => !event.isFlight}
           onEventDrop={onEventDrop}
           onEventResize={onEventResize}
           onSelectEvent={handleEventClick}
@@ -343,7 +376,9 @@ export default function TripCalendar({ trip }: { trip: Trip }) {
           eventPropGetter={(event: CalendarItem) => ({
             className: event.isSummary
               ? "!bg-transparent !border-none !shadow-none p-0 m-0 hover:!bg-transparent !pointer-events-none" // Hide container for dots
-              : "!border-none !shadow-sm !rounded-md !px-1 !py-1 !text-xs !font-medium transition-all !bg-brand-primary !text-text-inverse",
+              : event.isFlight
+                ? "!border-none !shadow-sm !rounded-md !px-1 !py-1 !text-xs !font-medium transition-all !bg-info !text-text-inverse"
+                : "!border-none !shadow-sm !rounded-md !px-1 !py-1 !text-xs !font-medium transition-all !bg-brand-primary !text-text-inverse",
           })}
           components={{
             toolbar: () => (
