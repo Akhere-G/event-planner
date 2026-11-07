@@ -6,6 +6,9 @@ import {
   AccordionTrigger,
 } from "./ui/accordion";
 
+// `TitleComponent` and `ContentComponent` are called rather than rendered as
+// elements: callers pass inline closures, and a new component type on every
+// render would remount the subtree and wipe its state (typed form values, etc.).
 export default function Accordion({
   open,
   defaultIsOpen = false,
@@ -50,13 +53,11 @@ export default function Accordion({
         <AccordionTrigger
           className={`flex cursor-pointer items-center gap-1 p-4 ${headerStyles}`}
         >
-          <div className="flex flex-1">
-            <TitleComponent />
-          </div>
+          <div className="flex flex-1">{TitleComponent()}</div>
         </AccordionTrigger>
         <AccordionContent>
           <div className={`pb-4 text-sm ${contentStyles}`}>
-            <ContentComponent />
+            {ContentComponent()}
           </div>
         </AccordionContent>
       </AccordionItem>
