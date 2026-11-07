@@ -1,8 +1,9 @@
 import logging
 from collections import defaultdict
-from typing import Callable
+from collections.abc import Callable
 
-from flask import has_request_context, session as flask_session
+from flask import has_request_context
+from flask import session as flask_session
 from sqlalchemy import event
 from sqlalchemy.orm import Session
 
@@ -18,38 +19,41 @@ SESSION_INFO_KEY = "realtime_changes"
 _TRACKED: dict[type, tuple[str, Callable[[Session, object], int | None]]] = {}
 
 
-def register_tracked_model(model, entity: str, resolver: Callable | None = None):
+def register_tracked_model(model: type, entity: str, resolver: Callable | None = None):
     _TRACKED[model] = (
         entity,
         resolver or (lambda _session, obj: getattr(obj, "itinerary_id", None)),
     )
 
 
-def _wishlist_itinerary_id(session: Session, wishlist_id: int | None):
-    from ..models import Wishlist
+def _wishlist_item_itinerary_id(session: Session, obj):
+    from ..models import (
+        Wishlist,
+    )
 
-    if wishlist_id is None:
-        return None
-    wishlist = session.get(Wishlist, wishlist_id)
+    wishlist = session.get(Wishlist, obj.wishlist_id)
     return wishlist.itinerary_id if wishlist else None
 
 
-def _item_itinerary_id(session: Session, obj):
-    from ..models import WishlistItem
+def _wishlist_item_vote_itinerary_id(session: Session, obj):
+    from ..models import Wishlist, WishlistItem
 
-    item = obj.wishlist_item if hasattr(obj, "wishlist_item") else obj
-    wishlist_id = getattr(item, "wishlist_id", None)
-    if wishlist_id is None and hasattr(obj, "wishlist_item_id"):
-        parent = session.get(WishlistItem, obj.wishlist_item_id)
-        wishlist_id = parent.wishlist_id if parent else None
-    return _wishlist_itinerary_id(session, wishlist_id)
+    item = session.get(WishlistItem, obj.wishlist_item_id)
+    if item is None:
+        return None
+
+    wishlist = session.get(Wishlist, item.wishlist_id)
+    return wishlist.itinerary_id if wishlist else None
 
 
 def register_default_models():
     from ..models import (
         Accommodation,
         Event,
+        Flight,
+        Invite,
         Itinerary,
+        ItineraryUser,
         PackingItem,
         Wishlist,
         WishlistItem,
@@ -61,8 +65,13 @@ def register_default_models():
     register_tracked_model(PackingItem, "packing")
     register_tracked_model(Wishlist, "wishlist")
     register_tracked_model(Itinerary, "itinerary", lambda _s, obj: obj.id)
-    register_tracked_model(WishlistItem, "wishlist", _item_itinerary_id)
-    register_tracked_model(WishlistItemVote, "wishlist", _item_itinerary_id)
+    register_tracked_model(WishlistItem, "wishlist_item", _wishlist_item_itinerary_id)
+    register_tracked_model(
+        WishlistItemVote, "wishlist_item_vote", _wishlist_item_vote_itinerary_id
+    )
+    register_tracked_model(Flight, "flight")
+    register_tracked_model(ItineraryUser, "itinerary_user")
+    register_tracked_model(Invite, "invite")
 
 
 def collect_changes(session: Session, flush_context):
@@ -70,7 +79,9 @@ def collect_changes(session: Session, flush_context):
 
     # A backref append marks the parent dirty without changing its row, so only
     # count dirty objects whose own columns changed.
-    dirty = [o for o in session.dirty if session.is_modified(o, include_collections=False)]
+    dirty = [
+        o for o in session.dirty if session.is_modified(o, include_collections=False)
+    ]
 
     for obj in [*session.new, *dirty, *session.deleted]:
         tracked = _TRACKED.get(type(obj))
@@ -120,8 +131,8 @@ def register_change_tracking():
     global _registered
     if _registered:
         return
-    _registered = True
     register_default_models()
     event.listen(Session, "after_flush", collect_changes)
     event.listen(Session, "after_commit", emit_changes)
     event.listen(Session, "after_rollback", discard_changes)
+    _registered = True

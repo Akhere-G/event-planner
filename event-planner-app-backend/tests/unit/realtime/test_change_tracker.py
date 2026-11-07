@@ -4,6 +4,7 @@ from src.models import Accommodation, Event, PackingItem, Wishlist, WishlistItem
 from src.realtime.change_tracker import SESSION_INFO_KEY
 from tests.factories import (
     EventFactory,
+    ItineraryUserFactory,
     WishlistFactory,
     WishlistItemFactory,
     WishlistItemVoteFactory,
@@ -71,7 +72,7 @@ def test_wishlist_items_and_votes_resolve_trip_through_parent(
     db.session.commit()
     assert emitted[-1][1] == {
         "trip_id": itinerary.id,
-        "entities": ["wishlist"],
+        "entities": ["wishlist_item"],
         "by_user_id": None,
     }
 
@@ -79,7 +80,29 @@ def test_wishlist_items_and_votes_resolve_trip_through_parent(
     WishlistItemVoteFactory(wishlist_item=item, user=admin_user, creator=admin_user)
     db.session.commit()
     assert emitted[-1][1]["trip_id"] == itinerary.id
-    assert emitted[-1][1]["entities"] == ["wishlist"]
+    assert emitted[-1][1]["entities"] == ["wishlist_item_vote"]
+
+
+def test_flights_invites_and_memberships_are_tracked(
+    emitted, itinerary, admin_user, flight, invite, viewer_user
+):
+    db.session.commit()
+    emitted.clear()
+
+    flight.airline = "Changed Air"
+    db.session.commit()
+    assert emitted[-1][1]["entities"] == ["flight"]
+
+    invite.status = "revoked"
+    db.session.commit()
+    assert emitted[-1][1]["entities"] == ["invite"]
+
+    ItineraryUserFactory(
+        itinerary=itinerary, user=viewer_user, creator=admin_user, role="viewer"
+    )
+    db.session.commit()
+    assert emitted[-1][1]["entities"] == ["itinerary_user"]
+    assert emitted[-1][2]["to"] == f"trip:{itinerary.id}"
 
 
 def test_rollback_discards_changes(emitted, itinerary, admin_user):
