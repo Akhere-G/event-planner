@@ -3,6 +3,7 @@ from decimal import ROUND_HALF_UP, Decimal
 from typing import Iterable
 
 from sqlalchemy import select
+from sqlalchemy.orm import selectinload
 
 from ..exceptions import BadRequestError, NotFoundError, UserNotAuthorisedError
 from ..extensions import db
@@ -11,6 +12,7 @@ from ..models import (
     Event,
     Expense,
     ExpenseShare,
+    Flight,
     ItineraryUser,
     Settlement,
     SplitType,
@@ -19,6 +21,18 @@ from ..models import (
 )
 
 CENT = Decimal("0.01")
+
+# An expense hangs off at most one itinerary item, and an item has one expense.
+LINK_MODELS = {
+    "event_id": Event,
+    "accommodation_id": Accommodation,
+    "flight_id": Flight,
+}
+LINK_LABELS = {
+    "event_id": "event",
+    "accommodation_id": "accommodation",
+    "flight_id": "flight",
+}
 
 
 def to_money(value) -> Decimal:
@@ -105,28 +119,54 @@ def _require_user(user_id: int | None) -> int:
     return user_id
 
 
-def _validate_links(itinerary_id: int, data: dict):
-    event_id = data.get("event_id")
-    accommodation_id = data.get("accommodation_id")
-    if event_id and accommodation_id:
-        raise BadRequestError("An expense can link to an event or an accommodation, not both.")
-    if event_id:
+def _resolve_links(current: dict, data: dict) -> dict:
+    """Merge requested links over the current ones; setting one clears the others."""
+    links = {
+        field: data[field] if field in data else current.get(field)
+        for field in LINK_MODELS
+    }
+    for field in LINK_MODELS:
+        if data.get(field):
+            for other in LINK_MODELS:
+                if other != field and other not in data:
+                    links[other] = None
+    return links
+
+
+def _validate_links(itinerary_id: int, links: dict, expense_id: int | None = None):
+    chosen = {field: value for field, value in links.items() if value}
+    if len(chosen) > 1:
+        raise BadRequestError(
+            "An expense can link to an event, an accommodation or a flight, not more than one."
+        )
+    for field, value in chosen.items():
+        model = LINK_MODELS[field]
+        label = LINK_LABELS[field]
         found = db.session.execute(
-            select(Event.id).where(
-                Event.id == event_id, Event.itinerary_id == itinerary_id
+            select(model.id).where(
+                model.id == value, model.itinerary_id == itinerary_id
             )
         ).scalar_one_or_none()
         if not found:
-            raise BadRequestError("That event is not part of this trip.")
-    if accommodation_id:
-        found = db.session.execute(
-            select(Accommodation.id).where(
-                Accommodation.id == accommodation_id,
-                Accommodation.itinerary_id == itinerary_id,
+            raise BadRequestError(f"That {label} is not part of this trip.")
+        taken = db.session.execute(
+            select(Expense.id).where(
+                getattr(Expense, field) == value, Expense.id != expense_id
             )
         ).scalar_one_or_none()
-        if not found:
-            raise BadRequestError("That accommodation is not part of this trip.")
+        if taken:
+            raise BadRequestError(f"That {label} already has an expense.")
+
+
+def _money_fields(amount) -> dict:
+    """An amount with its GBP value. Only GBP is accepted today, so the rate is 1."""
+    amount = to_money(amount)
+    return {
+        "amount": amount,
+        "currency": "GBP",
+        "amount_gbp": amount,
+        "fx_rate": Decimal("1"),
+    }
 
 
 def _participants(itinerary_id: int, split_type: str, payer_id: int, data: dict):
@@ -152,9 +192,17 @@ def _write_shares(expense: Expense, itinerary_id: int, data: dict):
         expense.shares.append(ExpenseShare(user_id=user_id, amount_gbp=amount))
 
 
+# Everything ExpenseSchema dumps, so serialising a list never lazy-loads per row.
+EXPENSE_LOADER_OPTIONS = (
+    selectinload(Expense.shares),
+    selectinload(Expense.paid_by),
+)
+
+
 def get_expenses(itinerary_id: int) -> list[Expense]:
     stmt = (
         select(Expense)
+        .options(*EXPENSE_LOADER_OPTIONS)
         .where(Expense.itinerary_id == itinerary_id)
         .order_by(Expense.spent_on.desc(), Expense.id.desc())
     )
@@ -171,32 +219,36 @@ def get_expense(itinerary_id: int, expense_id: int) -> Expense:
     return expense
 
 
-def create_expense(user_id: int | None, itinerary_id: int, data: dict) -> Expense:
+def stage_create_expense(
+    user_id: int | None, itinerary_id: int, data: dict
+) -> Expense:
+    """Add an expense and its shares to the session without committing."""
     user_id = _require_user(user_id)
+    payer_id = data.get("paid_by_id") or user_id
+    _require_members(itinerary_id, [payer_id])
+    links = _resolve_links({}, data)
+    _validate_links(itinerary_id, links)
+    expense = Expense(
+        itinerary_id=itinerary_id,
+        description=data["description"],
+        category=data.get("category", "other"),
+        **_money_fields(data["amount"]),
+        spent_on=data["spent_on"],
+        paid_by_id=payer_id,
+        **links,
+        split_type=data.get("split_type", SplitType.EVEN_ALL.value),
+        created_by_id=user_id,
+        updated_by_id=user_id,
+    )
+    db.session.add(expense)
+    db.session.flush()
+    _write_shares(expense, itinerary_id, data)
+    return expense
+
+
+def create_expense(user_id: int | None, itinerary_id: int, data: dict) -> Expense:
     try:
-        payer_id = data.get("paid_by_id") or user_id
-        _require_members(itinerary_id, [payer_id])
-        _validate_links(itinerary_id, data)
-        amount = to_money(data["amount"])
-        expense = Expense(
-            itinerary_id=itinerary_id,
-            description=data["description"],
-            category=data.get("category", "other"),
-            amount=amount,
-            currency="GBP",
-            amount_gbp=amount,
-            fx_rate=Decimal("1"),
-            spent_on=data["spent_on"],
-            paid_by_id=payer_id,
-            event_id=data.get("event_id"),
-            accommodation_id=data.get("accommodation_id"),
-            split_type=data.get("split_type", SplitType.EVEN_ALL.value),
-            created_by_id=user_id,
-            updated_by_id=user_id,
-        )
-        db.session.add(expense)
-        db.session.flush()
-        _write_shares(expense, itinerary_id, data)
+        expense = stage_create_expense(user_id, itinerary_id, data)
         db.session.commit()
         return expense
     except Exception:
@@ -219,27 +271,19 @@ def update_expense(
         expense = get_expense(itinerary_id, expense_id)
         _require_owner_or_admin(user_id, role, expense)
 
-        event_id = data["event_id"] if "event_id" in data else expense.event_id
-        accommodation_id = (
-            data["accommodation_id"]
-            if "accommodation_id" in data
-            else expense.accommodation_id
+        links = _resolve_links(
+            {field: getattr(expense, field) for field in LINK_MODELS}, data
         )
-        if data.get("event_id") and "accommodation_id" not in data:
-            accommodation_id = None
-        if data.get("accommodation_id") and "event_id" not in data:
-            event_id = None
-        _validate_links(
-            itinerary_id, {"event_id": event_id, "accommodation_id": accommodation_id}
-        )
-        expense.event_id = event_id
-        expense.accommodation_id = accommodation_id
+        _validate_links(itinerary_id, links, expense.id)
+        for field, value in links.items():
+            setattr(expense, field, value)
 
         for field in ("description", "category", "spent_on"):
             if field in data:
                 setattr(expense, field, data[field])
         if "amount" in data:
-            expense.amount = expense.amount_gbp = to_money(data["amount"])
+            for field, value in _money_fields(data["amount"]).items():
+                setattr(expense, field, value)
         if "paid_by_id" in data:
             _require_members(itinerary_id, [data["paid_by_id"]])
             expense.paid_by_id = data["paid_by_id"]
