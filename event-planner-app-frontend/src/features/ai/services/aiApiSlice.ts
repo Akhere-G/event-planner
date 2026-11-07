@@ -36,6 +36,15 @@ export const aiApiSlice = apiSlice.injectEndpoints({
         body: { date },
       }),
     }),
+    previewGeneratedTrip: builder.mutation<
+      ApiResponse<ChangePreview>,
+      { tripId: number }
+    >({
+      query: ({ tripId }) => ({
+        url: `/ai/generate-trip/${tripId}/preview`,
+        method: "POST",
+      }),
+    }),
     applyChangeSet: builder.mutation<
       ApiResponse<ApplyChangeSetResult>,
       { tripId: number; ops: ChangeOp[] }
@@ -60,5 +69,6 @@ export const {
   useLazyGetTripInsightsQuery,
   usePreviewEventSuggestionsMutation,
   usePreviewOptimisedEventsMutation,
+  usePreviewGeneratedTripMutation,
   useApplyChangeSetMutation,
 } = aiApiSlice;
