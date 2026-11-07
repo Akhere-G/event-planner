@@ -6,7 +6,12 @@ from sqlalchemy import event as sa_event
 from src.extensions import db
 from src.models import Accommodation, Expense, ExpenseShare
 
-from tests.factories import EventFactory, FlightFactory
+from tests.factories import (
+    EventFactory,
+    ExpenseFactory,
+    ExpenseShareFactory,
+    FlightFactory,
+)
 
 TRIP_DAY = date(2026, 8, 1)
 
@@ -28,31 +33,14 @@ def count_selects():
         sa_event.remove(bind, "before_cursor_execute", record)
 
 
-def add_expense(itinerary, members, amount=30, **link):
-    expense = Expense(
-        itinerary_id=itinerary.id,
-        description="Cost",
-        category="other",
-        amount=amount,
-        currency="GBP",
-        amount_gbp=amount,
-        fx_rate=1,
-        spent_on=TRIP_DAY,
-        paid_by_id=members[0].user_id,
-        split_type="even_all",
-        **link,
-    )
-    db.session.add(expense)
-    db.session.flush()
+def add_expense(itinerary, members, **link):
+    expense = ExpenseFactory(itinerary=itinerary, paid_by=members[0].user, **link)
     for member in members:
-        db.session.add(
-            ExpenseShare(
-                expense_id=expense.id,
-                user_id=member.user_id,
-                amount_gbp=amount / len(members),
-            )
+        ExpenseShareFactory(
+            expense=expense,
+            user=member.user,
+            amount_gbp=expense.amount / len(members),
         )
-    db.session.flush()
     return expense
 
 
