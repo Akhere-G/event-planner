@@ -1,5 +1,6 @@
-import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
+import { createSlice, original, type PayloadAction } from "@reduxjs/toolkit";
 import type { Day, Event } from "../../events/types";
+import { mergeDays } from "../../events/utils";
 import type { EventSearchResult, Route } from "../types";
 import type { WishlistItem } from "../../wishlist/types";
 import type { Accommodation } from "../../accommodations/types";
@@ -39,6 +40,10 @@ export const mapSlice = createSlice({
   reducers: {
     setDays: (state, action: PayloadAction<Day[]>) => {
       state.days = action.payload;
+    },
+    // Replaces the days' events while keeping which days are open or hidden.
+    syncDays: (state, action: PayloadAction<Day[]>) => {
+      state.days = mergeDays(original(state.days) ?? [], action.payload);
     },
     setDayOpen: (state, action: PayloadAction<string>) => {
       const date = action.payload;
@@ -125,6 +130,7 @@ export const mapSlice = createSlice({
 
 export const {
   setDays,
+  syncDays,
   setDayOpen,
   toggleDayOpen,
   setSearchEvents,
