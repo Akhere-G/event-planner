@@ -93,6 +93,79 @@ def test_link_to_both_rejected(admin_client, base, members, event):
     assert res.status_code == 400
 
 
+def test_link_to_flight(admin_client, base, members, flight):
+    res = admin_client.post(base, json=payload(flightId=flight.id))
+    assert res.status_code == 201
+    assert res.get_json()["data"]["flightId"] == flight.id
+
+
+def test_link_to_event_and_flight_rejected(admin_client, base, members, event, flight):
+    res = admin_client.post(base, json=payload(eventId=event.id, flightId=flight.id))
+    assert res.status_code == 400
+
+
+def test_link_to_other_trips_flight_rejected(admin_client, base, members):
+    from tests.factories import FlightFactory
+
+    other = FlightFactory()
+    res = admin_client.post(base, json=payload(flightId=other.id))
+    assert res.status_code == 400
+    assert "not part of this trip" in res.get_json()["message"]
+
+
+@pytest.mark.parametrize("link", ["event", "flight"])
+def test_second_expense_on_an_item_is_rejected(
+    admin_client, base, members, event, flight, itinerary, link
+):
+    item = {"event": ("eventId", event), "flight": ("flightId", flight)}[link]
+    body = payload(**{item[0]: item[1].id})
+    assert admin_client.post(base, json=body).status_code == 201
+
+    res = admin_client.post(base, json=body)
+
+    assert res.status_code == 400
+    assert "already has an expense" in res.get_json()["message"]
+    assert db.session.query(Expense).filter_by(itinerary_id=itinerary.id).count() == 1
+
+
+def test_expense_can_be_edited_without_tripping_the_one_per_item_rule(
+    admin_client, base, members, flight
+):
+    created = admin_client.post(base, json=payload(flightId=flight.id)).get_json()[
+        "data"
+    ]
+
+    res = admin_client.patch(f"{base}/{created['id']}", json={"description": "Fare"})
+
+    assert res.status_code == 200
+    assert res.get_json()["data"]["flightId"] == flight.id
+
+
+def test_expense_can_move_to_a_free_item_but_not_a_taken_one(
+    admin_client, base, members, event, flight
+):
+    on_event = admin_client.post(base, json=payload(eventId=event.id)).get_json()[
+        "data"
+    ]
+    on_flight = admin_client.post(base, json=payload(flightId=flight.id)).get_json()[
+        "data"
+    ]
+
+    taken = admin_client.patch(f"{base}/{on_event['id']}", json={"flightId": flight.id})
+    assert taken.status_code == 400
+
+    moved = admin_client.patch(f"{base}/{on_flight['id']}", json={"flightId": None})
+    assert moved.status_code == 200
+    assert moved.get_json()["data"]["flightId"] is None
+    moved_again = admin_client.patch(
+        f"{base}/{on_event['id']}", json={"flightId": flight.id}
+    )
+    assert moved_again.status_code == 200
+    data = moved_again.get_json()["data"]
+    assert data["flightId"] == flight.id
+    assert data["eventId"] is None
+
+
 def test_viewer_cannot_create_but_can_read(viewer_client, base, members):
     assert viewer_client.post(base, json=payload()).status_code == 403
     assert viewer_client.get(base).status_code == 200
