@@ -6,20 +6,29 @@ from ..exceptions import (
 )
 from ..extensions import db
 from ..models import Event
+from .expense_service import expense_loader
 from .itineraries_service import get_itinerary
 
 
 def get_event(itinerary_id: int, event_id: int):
-    stmt = select(Event).where(
-        Event.itinerary_id == itinerary_id,
-        Event.id == event_id,
+    stmt = (
+        select(Event)
+        .options(expense_loader(Event.expense))
+        .where(
+            Event.itinerary_id == itinerary_id,
+            Event.id == event_id,
+        )
     )
 
     return db.session.execute(stmt).scalar_one_or_none()
 
 
 def get_events(itinerary_id: int):
-    stmt = select(Event).where(Event.itinerary_id == itinerary_id)
+    stmt = (
+        select(Event)
+        .options(expense_loader(Event.expense))
+        .where(Event.itinerary_id == itinerary_id)
+    )
 
     results = db.session.execute(stmt).scalars().all()
     return results

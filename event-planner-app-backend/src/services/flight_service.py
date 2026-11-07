@@ -29,6 +29,7 @@ def get_flights(itinerary_id: int):
         .options(
             selectinload(Flight.departure_airport),
             selectinload(Flight.arrival_airport),
+            expense_service.expense_loader(Flight.expense),
         )
         .where(Flight.itinerary_id == itinerary_id)
         .order_by(Flight.depart_at)
@@ -42,6 +43,7 @@ def get_flight(itinerary_id: int, flight_id: int):
         .options(
             selectinload(Flight.departure_airport),
             selectinload(Flight.arrival_airport),
+            expense_service.expense_loader(Flight.expense),
         )
         .where(
             Flight.itinerary_id == itinerary_id,

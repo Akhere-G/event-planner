@@ -3,11 +3,13 @@ from ..models import Accommodation
 from ..exceptions import BadRequestError, NotFoundError
 from sqlalchemy import select
 from ..utils.location_utils import get_place_details
+from .expense_service import expense_loader
 
 
 def get_accommodations(itinerary_id: int):
     stmt = (
         select(Accommodation)
+        .options(expense_loader(Accommodation.expense))
         .where(Accommodation.itinerary_id == itinerary_id)
         .order_by(Accommodation.start_date)
     )
@@ -16,9 +18,13 @@ def get_accommodations(itinerary_id: int):
 
 
 def get_accommodation(itinerary_id: int, accommodation_id: int):
-    stmt = select(Accommodation).where(
-        Accommodation.itinerary_id == itinerary_id,
-        Accommodation.id == accommodation_id,
+    stmt = (
+        select(Accommodation)
+        .options(expense_loader(Accommodation.expense))
+        .where(
+            Accommodation.itinerary_id == itinerary_id,
+            Accommodation.id == accommodation_id,
+        )
     )
 
     return db.session.execute(stmt).scalar_one_or_none()
