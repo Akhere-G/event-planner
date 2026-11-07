@@ -95,16 +95,31 @@ const savedFlight = {
   luggage: ["1 cabin bag included"],
   extras: ["Average legroom (31 in)", "Carbon emissions estimate: 63 kg"],
   purchaseUrl: "https://www.google.com/travel/flights",
-  priceGbp: 120,
   airlineLogo: null,
   notes: null,
+  expense: {
+    id: 7,
+    itineraryId: 1,
+    description: "BA304 · LHR → CDG",
+    category: "transport",
+    amount: 120,
+    currency: "GBP",
+    amountGbp: 120,
+    spentOn: "2026-08-01",
+    paidById: 1,
+    paidBy: { id: 1, username: "testuser" },
+    flightId: 1,
+    splitType: "even_all",
+    shares: [{ userId: 1, amountGbp: 120 }],
+    createdById: 1,
+  },
 };
 
 async function mockTripAndFlights(
   page: Page,
   initialFlights: MockFlight[] = [],
 ) {
-  const flights = [...initialFlights];
+  const flights = initialFlights.map((flight) => structuredClone(flight));
   const created: unknown[] = [];
   const searches: string[] = [];
 
@@ -123,7 +138,7 @@ async function mockTripAndFlights(
   await page.route("**/api/itineraries/1/flights", async (route) => {
     if (route.request().method() === "POST") {
       created.push(route.request().postDataJSON());
-      flights.push(savedFlight);
+      flights.push(structuredClone(savedFlight));
       await route.fulfill(json(savedFlight, 201));
       return;
     }
@@ -136,6 +151,19 @@ async function mockTripAndFlights(
         flights.findIndex((f) => f.id === id),
         1,
       );
+      await route.fulfill(json({ deletedId: id }));
+      return;
+    }
+    await route.fallback();
+  });
+  await page.route("**/api/itineraries/1/expenses/*", async (route) => {
+    if (route.request().method() === "DELETE") {
+      const id = Number(route.request().url().split("/").pop());
+      flights.forEach((flight) => {
+        if ((flight.expense as { id: number } | null)?.id === id) {
+          flight.expense = null;
+        }
+      });
       await route.fulfill(json({ deletedId: id }));
       return;
     }
@@ -227,6 +255,38 @@ test.describe("Flights", () => {
     await expect(
       page.getByRole("form", { name: "Search flights" }),
     ).toHaveCount(0);
+  });
+
+  test("shows the flight's expense and lets it be deleted on its own", async ({
+    page,
+  }) => {
+    await mockAuthCheck(page, true);
+    await mockTripAndFlights(page, [savedFlight]);
+
+    await page.goto("/trips/1");
+    await page.getByRole("button", { name: "Flights" }).click();
+
+    const card = page.getByTestId("flight-card");
+    const chip = card.getByRole("button", {
+      name: "Edit expense: BA304 · LHR → CDG",
+    });
+    await expect(chip).toContainText("£120");
+    await expect(card.getByRole("button", { name: "Add expense" })).toHaveCount(
+      0,
+    );
+
+    await chip.click();
+    await expect(page.getByLabel("Description")).toHaveValue(
+      "BA304 · LHR → CDG",
+    );
+    await page.getByRole("button", { name: "Delete" }).click();
+    await page.getByRole("button", { name: "Yes, delete" }).click();
+
+    await expect(page.getByText("Expense deleted.")).toBeVisible();
+    await expect(card).toContainText("BA304");
+    await expect(
+      card.getByRole("button", { name: "Add expense" }),
+    ).toBeVisible();
   });
 
   test("requires a departure airport before searching", async ({ page }) => {
