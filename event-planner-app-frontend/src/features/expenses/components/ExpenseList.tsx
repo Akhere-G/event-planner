@@ -4,6 +4,7 @@ import { format, parseISO } from "date-fns";
 import { useSelector } from "react-redux";
 import { ConfirmModal } from "../../../components";
 import type { RootState } from "../../../store";
+import useTripEvents from "../../events/hooks/useTripEvents";
 import type { Trip } from "../../trips/types";
 import useDeleteExpense from "../hooks/useDeleteExpense";
 import type { Expense } from "../types";
@@ -18,6 +19,7 @@ export default function ExpenseList({
   expenses: Expense[];
 }) {
   const userId = useSelector((state: RootState) => state.auth.userId);
+  const { events } = useTripEvents(trip.id);
   const { remove } = useDeleteExpense(trip.id);
   const [editing, setEditing] = useState<Expense | null>(null);
   const [deleting, setDeleting] = useState<Expense | null>(null);
@@ -26,7 +28,7 @@ export default function ExpenseList({
     canChangeExpense(trip.role, userId, expense);
 
   const linkedName = (expense: Expense) =>
-    trip.events.find((e) => e.id === expense.eventId)?.name;
+    events.find((e) => e.id === expense.eventId)?.name;
 
   const handleDelete = async () => {
     if (!deleting) return;
