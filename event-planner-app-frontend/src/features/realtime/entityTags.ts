@@ -1,5 +1,6 @@
 import type { TagDescription } from "@reduxjs/toolkit/query";
 import type { tagTypes } from "../api/apiSlice";
+import { expenseDependentTags } from "../expenses/tags";
 import type { TripEntity, UserEntity } from "./types";
 
 export type ApiTag = TagDescription<(typeof tagTypes)[number]>;
@@ -22,6 +23,9 @@ const TRIP_ENTITY_TAGS: Record<TripEntity, (tripId: number) => ApiTag[]> = {
   wishlist_item: wishlistTags,
   wishlist_item_vote: wishlistTags,
   flight: (tripId) => [{ type: "Flights", id: tripId }],
+  expense: expenseDependentTags,
+  expense_share: expenseDependentTags,
+  settlement: (tripId) => [{ type: "Settlements", id: tripId }],
   invite: () => [{ type: "Invites", id: "LIST" }],
   // Membership shows up in the trip's avatars and in the users table.
   itinerary_user: (tripId) => [
