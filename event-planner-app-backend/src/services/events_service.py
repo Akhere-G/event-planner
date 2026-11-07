@@ -67,6 +67,8 @@ UPDATABLE_EVENT_FIELDS = [
     "description",
     "end_at",
     "start_at",
+    "estimated_cost_gbp",
+    "price_tier",
 ]
 
 

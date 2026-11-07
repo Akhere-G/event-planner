@@ -143,6 +143,8 @@ def stage_create_wishlist_item(
         longitude=item_data.get("longitude"),
         description=item_data.get("description"),
         place_id=item_data.get("place_id"),
+        estimated_cost_gbp=item_data.get("estimated_cost_gbp"),
+        price_tier=item_data.get("price_tier"),
         created_by_id=user_id,
         updated_by_id=user_id,
     )
@@ -233,6 +235,8 @@ UPDATABLE_WISHLIST_ITEM_FIELDS = {
     "latitude",
     "longitude",
     "place_id",
+    "estimated_cost_gbp",
+    "price_tier",
 }
 
 

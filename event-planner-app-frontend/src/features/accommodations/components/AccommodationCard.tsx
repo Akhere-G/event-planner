@@ -21,6 +21,9 @@ import { useParams } from "react-router";
 import { useGetTripQuery } from "../../trips/services/tripsApiSlice";
 import { getCityBounds } from "../../maps/utils";
 import { canUserEdit } from "../../users/utils";
+import { AddExpenseButton } from "../../expenses/components";
+import { CostEstimateChip } from "../../estimates/components";
+import { costEstimateLabels } from "../../estimates/utils";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -157,6 +160,14 @@ export default function AccommodationCard({
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
+          <div className="flex items-center gap-2 flex-wrap mt-1">
+            <CostEstimateChip
+              estimate={costEstimateLabels(
+                accommodation.estimatedCostGbp,
+                accommodation.priceTier,
+              )}
+            />
+          </div>
           <div className="flex items-center gap-2 text-text-secondary text-sm mt-1">
             <MapPin size={14} className="shrink-0" />
             <span>{accommodation.address}</span>
@@ -199,6 +210,16 @@ export default function AccommodationCard({
           )}
         </div>
       )}
+
+      <AddExpenseButton
+        trip={trip}
+        prefill={{
+          accommodationId: accommodation.id,
+          description: accommodation.name,
+          category: "lodging",
+          spentOn: accommodation.startDate,
+        }}
+      />
 
       <UpdateAccommodationModal
         open={isUpdateModalOpen}
