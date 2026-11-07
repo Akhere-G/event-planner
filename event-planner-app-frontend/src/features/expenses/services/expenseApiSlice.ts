@@ -1,6 +1,7 @@
 import { apiSlice } from "../../api/apiSlice";
 import type { ApiResponse } from "../../api/types";
 import type { ExpenseFormValues, SettlementFormValues } from "../schema";
+import { expenseDependentTags } from "../tags";
 import type { Balances, Expense, Settlement } from "../types";
 
 type ExpensePayload = Omit<ExpenseFormValues, "link" | "participantIds"> & {
@@ -33,9 +34,7 @@ export const expenseApiSlice = apiSlice.injectEndpoints({
         method: "POST",
         body: expense,
       }),
-      invalidatesTags: (_r, _e, { tripId }) => [
-        { type: "Expenses", id: tripId },
-      ],
+      invalidatesTags: (_r, _e, { tripId }) => expenseDependentTags(tripId),
     }),
     updateExpense: builder.mutation<
       ApiResponse<Expense>,
@@ -46,9 +45,7 @@ export const expenseApiSlice = apiSlice.injectEndpoints({
         method: "PATCH",
         body: expense,
       }),
-      invalidatesTags: (_r, _e, { tripId }) => [
-        { type: "Expenses", id: tripId },
-      ],
+      invalidatesTags: (_r, _e, { tripId }) => expenseDependentTags(tripId),
     }),
     deleteExpense: builder.mutation<
       ApiResponse<number>,
@@ -58,9 +55,7 @@ export const expenseApiSlice = apiSlice.injectEndpoints({
         url: `/itineraries/${tripId}/expenses/${expenseId}`,
         method: "DELETE",
       }),
-      invalidatesTags: (_r, _e, { tripId }) => [
-        { type: "Expenses", id: tripId },
-      ],
+      invalidatesTags: (_r, _e, { tripId }) => expenseDependentTags(tripId),
     }),
     addSettlement: builder.mutation<
       ApiResponse<Settlement>,

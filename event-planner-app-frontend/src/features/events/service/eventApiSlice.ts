@@ -98,7 +98,11 @@ export const eventApi = apiSlice.injectEndpoints({
         url: `/itineraries/${tripId}/events/${eventId}`,
         method: "DELETE",
       }),
-      invalidatesTags: invalidateTripEvents,
+      // The event's expense stays on the Budget tab, unlinked.
+      invalidatesTags: (result, error, arg) => [
+        ...invalidateTripEvents(result, error, arg),
+        { type: "Expenses" as const, id: arg.tripId },
+      ],
     }),
   }),
 });
