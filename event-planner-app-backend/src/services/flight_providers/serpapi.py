@@ -1,17 +1,19 @@
 import os
+import re
 from datetime import date, datetime, timezone
 from zoneinfo import ZoneInfo
 
 import requests
 
 from ...exceptions import FlightProviderError
-from ..airport_directory import get_airport_info
+from ..airport_directory import AirportInfo, get_airport_info
 from .base import FlightApiProvider, FlightOffer
 
 API_URL = "https://serpapi.com/search"
 REQUEST_TIMEOUT_SECONDS = 10
 ONE_WAY = 2
 NONSTOP = 1
+BAGGAGE_PATTERN = re.compile(r"\bbag", re.IGNORECASE)
 
 
 class SerpApiFlightProvider(FlightApiProvider):
@@ -31,11 +33,13 @@ class SerpApiFlightProvider(FlightApiProvider):
     ) -> list[FlightOffer]:
         payload = self._request(origin_codes, destination_codes, departure_date)
 
+        purchase_url = payload.get("search_metadata", {}).get("google_flights_url")
+
         try:
             return [
                 offer
                 for itinerary in payload.get("best_flights", [])
-                if (offer := self._to_offer(itinerary)) is not None
+                if (offer := self._to_offer(itinerary, purchase_url)) is not None
             ]
         except (KeyError, TypeError, ValueError) as exc:
             raise FlightProviderError(
@@ -76,43 +80,54 @@ class SerpApiFlightProvider(FlightApiProvider):
 
         return payload
 
-    def _to_offer(self, itinerary: dict) -> FlightOffer | None:
+    def _to_offer(
+        self, itinerary: dict, purchase_url: str | None
+    ) -> FlightOffer | None:
         legs = itinerary["flights"]
         if len(legs) != 1:
             return None
 
         leg = legs[0]
         airline_code, _, number = leg["flight_number"].partition(" ")
-        departure_code = leg["departure_airport"]["id"]
-        arrival_code = leg["arrival_airport"]["id"]
-
-        depart_at, departure_timezone = self._to_utc(
-            leg["departure_airport"]["time"], departure_code
+        depart_at, departure = self._to_utc(
+            leg["departure_airport"]["time"], leg["departure_airport"]["id"]
         )
-        arrive_at, arrival_timezone = self._to_utc(
-            leg["arrival_airport"]["time"], arrival_code
+        arrive_at, arrival = self._to_utc(
+            leg["arrival_airport"]["time"], leg["arrival_airport"]["id"]
         )
 
         return FlightOffer(
             airline=airline_code,
             flight_number=number,
-            departure_airport=departure_code,
-            arrival_airport=arrival_code,
-            departure_timezone=departure_timezone,
-            arrival_timezone=arrival_timezone,
+            departure_airport=departure.code,
+            departure_airport_name=departure.name,
+            departure_city=departure.city,
+            arrival_airport=arrival.code,
+            arrival_airport_name=arrival.name,
+            arrival_city=arrival.city,
+            departure_timezone=departure.timezone,
+            arrival_timezone=arrival.timezone,
             depart_at=depart_at,
             arrive_at=arrive_at,
             duration_minutes=int(leg["duration"]),
-            price=itinerary.get("price"),
+            price_gbp=itinerary.get("price"),
             airline_logo=leg.get("airline_logo"),
+            travel_class=leg.get("travel_class"),
+            luggage=tuple(
+                note
+                for note in itinerary.get("extensions", [])
+                if BAGGAGE_PATTERN.search(note)
+            ),
+            extras=tuple(leg.get("extensions", [])),
+            purchase_url=purchase_url,
         )
 
     @staticmethod
-    def _to_utc(local_time: str, airport_code: str) -> tuple[datetime, str]:
+    def _to_utc(local_time: str, airport_code: str) -> tuple[datetime, AirportInfo]:
         airport = get_airport_info(airport_code)
         if airport is None:
             raise ValueError(f"Unknown airport {airport_code}.")
 
         local = datetime.strptime(local_time, "%Y-%m-%d %H:%M")
         utc = local.replace(tzinfo=ZoneInfo(airport.timezone)).astimezone(timezone.utc)
-        return utc, airport.timezone
+        return utc, airport

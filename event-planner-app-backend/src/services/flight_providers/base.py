@@ -8,14 +8,22 @@ class FlightOffer:
     airline: str
     flight_number: str
     departure_airport: str
+    departure_airport_name: str
+    departure_city: str
     arrival_airport: str
+    arrival_airport_name: str
+    arrival_city: str
     departure_timezone: str
     arrival_timezone: str
     depart_at: datetime
     arrive_at: datetime
     duration_minutes: int
-    price: int | None = None
+    price_gbp: int | None = None
     airline_logo: str | None = None
+    travel_class: str | None = None
+    luggage: tuple[str, ...] = ()
+    extras: tuple[str, ...] = ()
+    purchase_url: str | None = None
 
 
 class FlightApiProvider(ABC):

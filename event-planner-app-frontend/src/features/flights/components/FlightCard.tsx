@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { MoreVertical, Plane, Trash2 } from "lucide-react";
+import { MoreVertical, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { ConfirmModal } from "../../../components";
 import {
@@ -8,15 +8,16 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "../../../components/ui/dropdown-menu";
-import { formatInTimeZone } from "date-fns-tz";
 import { isApiError } from "../../api/utils";
 import { useDeleteFlightMutation } from "../flightApiSlice";
 import type { Flight } from "../types";
 import {
+  directFlightSummary,
   flightDurationMinutes,
-  formatDuration,
-  formatFlightTime,
+  formatGbp,
 } from "../utils";
+import FlightExtras from "./FlightExtras";
+import FlightSummary from "./FlightSummary";
 
 interface FlightCardProps {
   flight: Flight;
@@ -44,73 +45,88 @@ export default function FlightCard({
     }
   };
 
+  const hasFooter =
+    flight.luggage.length > 0 ||
+    flight.extras.length > 0 ||
+    !!flight.purchaseUrl ||
+    !!flight.notes;
+
   return (
-    <div className="card p-4 space-y-2" data-testid="flight-card">
-      <div className="flex justify-between items-start gap-2">
-        <div className="flex items-center gap-2">
-          <Plane size={16} className="text-brand-primary shrink-0" />
-          <h3 className="font-semibold text-text-main">
-            {flight.airline}{flight.flightNumber}
-          </h3>
-        </div>
-        {canEdit && (
-          <DropdownMenu>
-            <DropdownMenuTrigger
-              aria-label="Flight actions"
-              className="p-1 hover:bg-surface-muted rounded transition-colors text-text-secondary"
-            >
-              <MoreVertical size={16} />
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem
-                onClick={() => setIsDeleteOpen(true)}
-                className="flex gap-2 items-center text-error"
-              >
-                <Trash2 size={16} />
-                Delete
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        )}
-      </div>
-
-      <div className="flex items-center gap-3 text-text-main">
-        <div>
-          <p className="text-lg font-bold">{flight.departureAirport}</p>
-          <p className="text-xs text-text-secondary">
-            Scheduled departure time
-          </p>
-          <p className="text-xs text-text-secondary">
-            {formatInTimeZone(
-              flight.departAt,
-              flight.departureTimezone,
-              "EEE d MMM",
-            )}{" "}
-            · {formatFlightTime(flight.departAt, flight.departureTimezone)}
-          </p>
-        </div>
-        <span className="text-xs text-text-secondary">
-          {formatDuration(flightDurationMinutes(flight))}
-        </span>
-        <div>
-          <p className="text-lg font-bold">{flight.arrivalAirport}</p>
-          <p className="text-xs text-text-secondary">
-            Scheduled arrival time
-          </p>
-          <p className="text-xs text-text-secondary">
-            {formatInTimeZone(
-              flight.arriveAt,
-              flight.arrivalTimezone,
-              "EEE d MMM",
-            )}{" "}
-            · {formatFlightTime(flight.arriveAt, flight.arrivalTimezone)}
-          </p>
-        </div>
-      </div>
-
-      {flight.notes && (
-        <p className="text-sm text-text-secondary">{flight.notes}</p>
-      )}
+    <>
+      <FlightSummary
+        testId="flight-card"
+        flightCode={`${flight.airline}${flight.flightNumber}`}
+        airlineLogo={flight.airlineLogo}
+        travelClass={flight.travelClass}
+        headerEnd={
+          <div className="flex items-center gap-3">
+            {flight.priceGbp != null && (
+              <span className="text-xl font-bold text-text-main">
+                {formatGbp(flight.priceGbp)}
+              </span>
+            )}
+            {canEdit && (
+              <DropdownMenu>
+                <DropdownMenuTrigger
+                  aria-label="Flight actions"
+                  className="rounded p-1 text-text-secondary transition-colors hover:bg-surface-muted"
+                >
+                  <MoreVertical size={20} />
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem
+                    onClick={() => setIsDeleteOpen(true)}
+                    className="flex items-center gap-2 text-error"
+                  >
+                    <Trash2 size={16} />
+                    Delete
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
+          </div>
+        }
+        departure={{
+          code: flight.departureAirport,
+          city: flight.departureCity,
+          airportName: flight.departureAirportName,
+          time: flight.departAt,
+          timezone: flight.departureTimezone,
+        }}
+        arrival={{
+          code: flight.arrivalAirport,
+          city: flight.arrivalCity,
+          airportName: flight.arrivalAirportName,
+          time: flight.arriveAt,
+          timezone: flight.arrivalTimezone,
+        }}
+        durationMinutes={flightDurationMinutes(flight)}
+        footer={
+          hasFooter && (
+            <div className="space-y-3">
+              <div className="flex flex-wrap items-center justify-between gap-4">
+                <p className="text-sm text-text-secondary">
+                  {directFlightSummary(flight.luggage)}
+                </p>
+                {flight.purchaseUrl && (
+                  <a
+                    href={flight.purchaseUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="btn-secondary rounded-xl px-5 py-2 font-semibold"
+                  >
+                    Book flight
+                  </a>
+                )}
+              </div>
+              {flight.notes && (
+                <p className="text-sm text-text-secondary">{flight.notes}</p>
+              )}
+              <FlightExtras extras={flight.extras} />
+            </div>
+          )
+        }
+      />
 
       <ConfirmModal
         open={isDeleteOpen}
@@ -125,7 +141,8 @@ export default function FlightCard({
           </p>
           <div className="bg-surface-muted p-3 rounded-md">
             <p className="font-semibold text-text-main">
-              {flight.airline}{flight.flightNumber} {flight.departureAirport} →{" "}
+              {flight.airline}
+              {flight.flightNumber} {flight.departureAirport} →{" "}
               {flight.arrivalAirport}
             </p>
           </div>
@@ -134,6 +151,6 @@ export default function FlightCard({
           </p>
         </div>
       </ConfirmModal>
-    </div>
+    </>
   );
 }

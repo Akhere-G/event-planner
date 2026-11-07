@@ -55,7 +55,7 @@ def search_flights(
     origins = sorted({code.upper() for code in origin_codes})
     destinations = sorted({code.upper() for code in destination_codes})
     cache_key = (
-        f"flight_search:{','.join(origins)}:{','.join(destinations)}:"
+        f"flight_search:v2:{','.join(origins)}:{','.join(destinations)}:"
         f"{departure_date.isoformat()}"
     )
 
@@ -148,6 +148,12 @@ def create_flight(user_id: int | None, itinerary_id: int, flight_data: dict):
         flight.arrival_airport_id = arr_airport.id
         flight.depart_at = offer.depart_at
         flight.arrive_at = offer.arrive_at
+        flight.travel_class = offer.travel_class
+        flight.luggage = list(offer.luggage)
+        flight.extras = list(offer.extras)
+        flight.purchase_url = offer.purchase_url
+        flight.price_gbp = offer.price_gbp
+        flight.airline_logo = offer.airline_logo
         flight.notes = flight_data.get("notes")
 
         db.session.commit()

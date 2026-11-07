@@ -16,6 +16,11 @@ def _utc_iso(value: datetime) -> str:
     return value.astimezone(timezone.utc).isoformat().replace("+00:00", "Z")
 
 
+def _city(airport) -> str | None:
+    # Airports are saved with the address "City, Country".
+    return airport.address.split(",")[0] if airport.address else None
+
+
 def _not_in_past(value: date):
     if value < date.today():
         raise ValidationError("Departure date cannot be in the past.")
@@ -57,8 +62,20 @@ class FlightSchema(BaseSchema):
     arrival_latitude = fields.Method("get_arrival_latitude", dump_only=True)
     arrival_longitude = fields.Method("get_arrival_longitude", dump_only=True)
 
+    departure_airport_name = fields.Method("get_departure_airport_name", dump_only=True)
+    arrival_airport_name = fields.Method("get_arrival_airport_name", dump_only=True)
+    departure_city = fields.Method("get_departure_city", dump_only=True)
+    arrival_city = fields.Method("get_arrival_city", dump_only=True)
+
     depart_at = fields.Method("get_depart_at", dump_only=True)
     arrive_at = fields.Method("get_arrive_at", dump_only=True)
+
+    travel_class = auto_field(dump_only=True)
+    luggage = fields.Method("get_luggage", dump_only=True)
+    extras = fields.Method("get_extras", dump_only=True)
+    purchase_url = auto_field(dump_only=True)
+    price_gbp = auto_field(dump_only=True)
+    airline_logo = auto_field(dump_only=True)
     notes = fields.String(allow_none=True, validate=validate.Length(max=1000))
 
     created_by_id = auto_field(dump_only=True)
@@ -70,6 +87,24 @@ class FlightSchema(BaseSchema):
 
     def get_arrival_airport(self, obj):
         return obj.arrival_airport.code
+
+    def get_departure_airport_name(self, obj):
+        return obj.departure_airport.name
+
+    def get_arrival_airport_name(self, obj):
+        return obj.arrival_airport.name
+
+    def get_departure_city(self, obj):
+        return _city(obj.departure_airport)
+
+    def get_arrival_city(self, obj):
+        return _city(obj.arrival_airport)
+
+    def get_luggage(self, obj):
+        return obj.luggage or []
+
+    def get_extras(self, obj):
+        return obj.extras or []
 
     def get_depart_at(self, obj):
         return _utc_iso(obj.depart_at)
@@ -120,14 +155,22 @@ class FlightOfferSchema(Schema):
     airline = fields.String()
     flight_number = fields.String()
     departure_airport = fields.String()
+    departure_airport_name = fields.String()
+    departure_city = fields.String()
     arrival_airport = fields.String()
+    arrival_airport_name = fields.String()
+    arrival_city = fields.String()
     departure_timezone = fields.String()
     arrival_timezone = fields.String()
     depart_at = fields.Function(lambda offer: _utc_iso(offer.depart_at))
     arrive_at = fields.Function(lambda offer: _utc_iso(offer.arrive_at))
     duration_minutes = fields.Integer()
-    price = fields.Integer(allow_none=True)
+    price_gbp = fields.Integer(allow_none=True)
     airline_logo = fields.String(allow_none=True)
+    travel_class = fields.String(allow_none=True)
+    luggage = fields.List(fields.String())
+    extras = fields.List(fields.String())
+    purchase_url = fields.String(allow_none=True)
 
 
 class AirportSchema(Schema):

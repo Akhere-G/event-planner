@@ -30,3 +30,14 @@ export const flightDurationMinutes = (flight: Flight) =>
 
 export const formatDuration = (minutes: number) =>
   `${Math.floor(minutes / 60)}h ${String(minutes % 60).padStart(2, "0")}m`;
+
+export const formatGbp = (amount: number) =>
+  new Intl.NumberFormat("en-GB", {
+    style: "currency",
+    currency: "GBP",
+    maximumFractionDigits: 0,
+  }).format(amount);
+
+/** Every flight we show is nonstop; luggage notes follow when Google lists any. */
+export const directFlightSummary = (luggage: string[]) =>
+  ["Direct flight", ...luggage].join(" · ");
