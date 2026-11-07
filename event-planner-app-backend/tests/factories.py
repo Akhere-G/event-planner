@@ -244,7 +244,7 @@ class SettlementFactory(factory.alchemy.SQLAlchemyModelFactory):
         sqlalchemy_session = db.session
         sqlalchemy_session_persistence = "flush"
 
-    itinerary = factory.SubFactory(ItineraryFactory)
+    itinerary_id = factory.LazyFunction(lambda: ItineraryFactory().id)
     from_user = factory.SubFactory(UserFactory)
     to_user = factory.SubFactory(UserFactory)
     amount_gbp = Decimal("10.00")
