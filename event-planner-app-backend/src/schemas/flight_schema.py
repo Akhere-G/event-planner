@@ -5,6 +5,7 @@ from marshmallow_sqlalchemy import auto_field
 
 from ..models import Flight
 from .base_schema import BaseSchema
+from .expense_schema import ExpenseSchema
 
 AIRPORT_CODE = validate.Regexp(r"^[A-Za-z]{3}$", error="Use 3-letter airport codes.")
 
@@ -76,6 +77,7 @@ class FlightSchema(BaseSchema):
     purchase_url = auto_field(dump_only=True)
     airline_logo = auto_field(dump_only=True)
     notes = fields.String(allow_none=True, validate=validate.Length(max=1000))
+    expense = fields.Nested(ExpenseSchema, dump_only=True, allow_none=True)
 
     created_by_id = auto_field(dump_only=True)
     created_at = auto_field(dump_only=True)

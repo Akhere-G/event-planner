@@ -4,7 +4,7 @@ from ..middleware.itinerary_access_required import (
     ItineraryAccess,
     itinerary_access_required,
 )
-from ..schemas.accommodation_schema import AccommodationSchema
+from ..schemas.accommodation_schema import AccommodationWithExpenseSchema
 from ..schemas.itinerary_schema import UserRole
 from ..services.accommodation_service import (
     create_accommodation,
@@ -24,7 +24,7 @@ accommodation_bp = Blueprint("accommodation", __name__)
 )
 def get_accommodations_route(itinerary_id: int, access: ItineraryAccess):
     results = get_accommodations(itinerary_id)
-    schema = AccommodationSchema(many=True)
+    schema = AccommodationWithExpenseSchema(many=True)
     return api_response(
         success=True,
         data=schema.dump(results),
@@ -39,7 +39,7 @@ def get_accommodations_route(itinerary_id: int, access: ItineraryAccess):
     message="You must be an admin or an editor to add accommodations.",
 )
 def create_accommodation_route(itinerary_id: int, access: ItineraryAccess):
-    schema = AccommodationSchema()
+    schema = AccommodationWithExpenseSchema()
 
     validated_data = schema.load(request.json)
     accommodation = create_accommodation(access.user_id, itinerary_id, validated_data)
@@ -66,7 +66,7 @@ def get_accommodation_route(
             message="Accommodation not found.",
             status_code=404,
         )
-    schema = AccommodationSchema()
+    schema = AccommodationWithExpenseSchema()
     return api_response(
         success=True,
         data=schema.dump(accommodation),
@@ -83,7 +83,7 @@ def get_accommodation_route(
 def update_accommodation_route(
     itinerary_id: int, access: ItineraryAccess, accommodation_id: int
 ):
-    schema = AccommodationSchema()
+    schema = AccommodationWithExpenseSchema()
     validated_data = schema.load(request.json, partial=True)
     accommodation = update_accommodation(
         itinerary_id, accommodation_id, access.user_id, validated_data

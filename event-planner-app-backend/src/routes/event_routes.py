@@ -4,7 +4,7 @@ from ..middleware.itinerary_access_required import (
     ItineraryAccess,
     itinerary_access_required,
 )
-from ..schemas.event_schema import EventSchema
+from ..schemas.event_schema import EventWithExpenseSchema
 from ..schemas.itinerary_schema import UserRole
 from ..services.events_service import (
     create_event,
@@ -22,7 +22,7 @@ event_bp = Blueprint("events", __name__)
     allowed_roles=[UserRole.ADMIN, UserRole.EDITOR, UserRole.VIEWER]
 )
 def get_events_route(itinerary_id: int, access: ItineraryAccess):
-    schema = EventSchema(many=True)
+    schema = EventWithExpenseSchema(many=True)
 
     events = get_events(itinerary_id)
     return api_response(
@@ -39,7 +39,7 @@ def get_events_route(itinerary_id: int, access: ItineraryAccess):
     message="You must be an admin or an editor to add events.",
 )
 def create_events_route(itinerary_id: int, access: ItineraryAccess):
-    schema = EventSchema()
+    schema = EventWithExpenseSchema()
 
     validated_event = schema.load(request.json)
     validated_event["created_by_id"] = access.user_id
@@ -59,7 +59,7 @@ def create_events_route(itinerary_id: int, access: ItineraryAccess):
     message="You must be an admin or an editor to update events.",
 )
 def update_event_route(itinerary_id: int, access: ItineraryAccess, event_id: int):
-    schema = EventSchema(partial=True)
+    schema = EventWithExpenseSchema(partial=True)
     validated_event = schema.load(request.json)
     validated_event["updated_by_id"] = access.user_id
     updated_event = update_event(itinerary_id, event_id, validated_event)
