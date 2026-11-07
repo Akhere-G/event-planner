@@ -44,9 +44,14 @@ export default function TripForm({
     handleNext,
     submitWith,
   } = useTripForm({ initialData, initialPreferences, isStepper, submitAction });
-  const { register, watch, setValue, getValues, formState } = form;
+  const { register, control, setValue, getValues, formState } = form;
 
-  const fieldProps = { register, watch, setValue, errors: formState.errors };
+  const fieldProps = {
+    register,
+    setValue,
+    control,
+    errors: formState.errors,
+  };
   const basics = (
     <BasicsStep
       {...fieldProps}
