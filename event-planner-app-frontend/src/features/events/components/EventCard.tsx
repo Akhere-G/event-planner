@@ -12,7 +12,7 @@ import {
 import { format } from "date-fns";
 import { type Event } from "../types";
 import { canUserEdit } from "../../users/utils";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   ConfirmModal,
   EditableSelect,
@@ -75,6 +75,10 @@ export default function EventCard({
       throw err;
     }
   };
+
+  useEffect(() => {
+    setEventData(event);
+  }, [event]);
 
   const handleView = () => {
     dispatch(setSelectedEvent(event));
