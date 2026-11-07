@@ -3,6 +3,7 @@ from marshmallow_sqlalchemy import auto_field
 
 from ..models import Accommodation
 from .base_schema import BaseSchema
+from .cost_estimate_fields import estimated_cost_field, price_tier_field
 
 
 class AccommodationSchema(BaseSchema):
@@ -58,6 +59,8 @@ class AccommodationSchema(BaseSchema):
             "invalid": "Check-out date must be a valid date.",
         }
     )
+    estimated_cost_gbp = estimated_cost_field()
+    price_tier = price_tier_field()
     created_by_id = auto_field(dump_only=True)
     created_at = auto_field(dump_only=True)
     updated_at = auto_field(dump_only=True)

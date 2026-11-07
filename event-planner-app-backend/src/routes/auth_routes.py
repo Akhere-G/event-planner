@@ -77,6 +77,7 @@ def check_auth():
                 "email": user.email,
                 "username": user.username,
                 "is_demo": user.is_demo,
+                "home_currency": user.home_currency,
             },
             message="User is authenticated.",
         )

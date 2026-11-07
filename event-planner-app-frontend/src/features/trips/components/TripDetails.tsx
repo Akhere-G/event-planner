@@ -1,27 +1,32 @@
-import { isAdmin } from "../../users/utils";
+import { canUserEdit, isAdmin } from "../../users/utils";
 import type { Trip } from "../types";
 import TripSummary from "./TripSummary";
-import { TripInsights } from "../../ai/components";
+import { EditTripDrawer, TripInsights } from "../../ai/components";
 import TripActivities from "./TripActivities";
 import AccommodationPage from "../../accommodations/components/AccommodationPage";
 import { getCityBounds } from "../../maps/utils";
 import { useSearchParams } from "react-router";
 import { PackingPage } from "../../packing/components";
+import { BudgetPage } from "../../expenses/components";
+import { useTripRealtime } from "../../realtime";
 
 // TODO Add Resizable sections from shadcn
 
-type TabOption = "activities" | "tips" | "accommodation" | "packing";
+type TabOption = "activities" | "tips" | "accommodation" | "packing" | "budget";
 
 const tabs: { name: string; tab: TabOption }[] = [
   { name: "Activities", tab: "activities" },
   { name: "Tips", tab: "tips" },
   { name: "Accommodation", tab: "accommodation" },
   { name: "Packing", tab: "packing" },
+  { name: "Budget", tab: "budget" },
 ];
 
 export default function TripDetails(trip: Trip) {
   const [searchParams, setSearchParams] = useSearchParams();
   const activeTab = searchParams.get("activeTab") ?? "activities";
+
+  useTripRealtime(trip.id);
 
   function setActiveTab(tab: TabOption) {
     setSearchParams((current) => {
@@ -37,6 +42,7 @@ export default function TripDetails(trip: Trip) {
       <div className="card">
         <TripSummary trip={trip} showActions={isAdmin(trip.role)} />
       </div>
+      {canUserEdit(trip.role) && <EditTripDrawer trip={trip} />}
       <div>
         <div className="ml-auto w-full mb-4 flex items-center overflow-x-scroll">
           {tabs.map((tab, i) => {
@@ -75,6 +81,7 @@ export default function TripDetails(trip: Trip) {
             <AccommodationPage trip={trip} cityBounds={getCityBounds(trip)} />
           )}
           {activeTab === "packing" && <PackingPage trip={trip} />}
+          {activeTab === "budget" && <BudgetPage trip={trip} />}
         </div>
       </div>
     </div>
