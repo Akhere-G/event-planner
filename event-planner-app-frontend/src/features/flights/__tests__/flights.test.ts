@@ -28,7 +28,6 @@ const flight: Flight = {
   luggage: ["1 cabin bag included"],
   extras: ["Average legroom (31 in)"],
   purchaseUrl: "https://www.google.com/travel/flights",
-  priceGbp: 420,
   airlineLogo: null,
   notes: null,
 };

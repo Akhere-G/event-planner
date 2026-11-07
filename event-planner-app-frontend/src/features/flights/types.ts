@@ -1,3 +1,5 @@
+import type { Expense } from "../expenses/types";
+
 /** Details shared by a flight we found (offer) and one that was saved. */
 export interface FlightDetails {
   departureAirportName: string | null;
@@ -9,7 +11,6 @@ export interface FlightDetails {
   luggage: string[];
   extras: string[];
   purchaseUrl?: string | null;
-  priceGbp?: number | null;
 }
 
 export interface Flight extends FlightDetails {
@@ -28,6 +29,8 @@ export interface Flight extends FlightDetails {
   departAt: string;
   arriveAt: string;
   notes?: string | null;
+  /** What the flight costs; absent when it has none (or the user deleted it). */
+  expense?: Expense | null;
 }
 
 export interface Airport {
@@ -46,6 +49,7 @@ export interface AirportPlace {
 }
 
 export interface FlightOffer extends FlightDetails {
+  priceGbp?: number | null;
   airline: string;
   flightNumber: string;
   departureAirport: string;

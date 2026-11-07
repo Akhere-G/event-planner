@@ -11,11 +11,7 @@ import {
 import { isApiError } from "../../api/utils";
 import { useDeleteFlightMutation } from "../flightApiSlice";
 import type { Flight } from "../types";
-import {
-  directFlightSummary,
-  flightDurationMinutes,
-  formatGbp,
-} from "../utils";
+import { directFlightSummary, flightDurationMinutes } from "../utils";
 import FlightExtras from "./FlightExtras";
 import FlightSummary from "./FlightSummary";
 
@@ -60,11 +56,6 @@ export default function FlightCard({
         travelClass={flight.travelClass}
         headerEnd={
           <div className="flex items-center gap-3">
-            {flight.priceGbp != null && (
-              <span className="text-xl font-bold text-text-main">
-                {formatGbp(flight.priceGbp)}
-              </span>
-            )}
             {canEdit && (
               <DropdownMenu>
                 <DropdownMenuTrigger

@@ -1,3 +1,5 @@
+import type { Expense } from "../expenses/types";
+
 export interface Event {
   id: number;
   description?: string;
@@ -8,6 +10,7 @@ export interface Event {
   startAt: string;
   endAt: string;
   category: string;
+  expense?: Expense | null;
 }
 
 export type Day = {
