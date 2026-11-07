@@ -2,10 +2,47 @@ import type { Event } from "../types";
 import type { EventSchema } from "../schemas/eventSchema";
 import { apiSlice } from "../../api/apiSlice";
 import type { ApiResponse } from "../../api/types";
-import { convertTripTimezoneToUtc } from "../../../utils/dateFormattors";
+import {
+  convertTripTimezoneToUtc,
+  convertUtcToTripTimezone,
+} from "../../../utils/dateFormattors";
+
+const invalidateTripEvents = (
+  _: unknown,
+  __: unknown,
+  { tripId }: { tripId: number },
+) => [
+  { type: "Trips" as const, id: "LIST" as const },
+  { type: "Events" as const, id: tripId },
+];
 
 export const eventApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
+    getEvents: builder.query<
+      ApiResponse<{ events: Event[] }>,
+      { tripId: number; timezone: string }
+    >({
+      query: ({ tripId }) => `/itineraries/${tripId}/events`,
+      transformResponse: (
+        response: ApiResponse<{ events: Event[] }>,
+        _meta,
+        { timezone },
+      ) => ({
+        ...response,
+        data: {
+          ...response.data,
+          events: response.data.events.map((event) => ({
+            ...event,
+            startAt: convertUtcToTripTimezone(event.startAt, timezone),
+            endAt: convertUtcToTripTimezone(event.endAt, timezone),
+          })),
+        },
+      }),
+      providesTags: (_result, _error, { tripId }) => [
+        { type: "Events", id: tripId },
+      ],
+    }),
+
     addEvent: builder.mutation<
       ApiResponse<Event>,
       { tripId: number; event: EventSchema; timezone: string }
@@ -23,10 +60,7 @@ export const eventApi = apiSlice.injectEndpoints({
           body,
         };
       },
-      invalidatesTags: (_, __, { tripId }) => [
-        { type: "Trips", id: "LIST" },
-        { type: "Trips", id: tripId },
-      ],
+      invalidatesTags: invalidateTripEvents,
     }),
 
     updateEvent: builder.mutation<
@@ -53,10 +87,7 @@ export const eventApi = apiSlice.injectEndpoints({
           body,
         };
       },
-      invalidatesTags: (_, __, { tripId }) => [
-        { type: "Trips", id: "LIST" },
-        { type: "Trips", id: tripId },
-      ],
+      invalidatesTags: invalidateTripEvents,
     }),
 
     deleteEvent: builder.mutation<
@@ -67,15 +98,13 @@ export const eventApi = apiSlice.injectEndpoints({
         url: `/itineraries/${tripId}/events/${eventId}`,
         method: "DELETE",
       }),
-      invalidatesTags: (_, __, { tripId }) => [
-        { type: "Trips", id: "LIST" },
-        { type: "Trips", id: tripId },
-      ],
+      invalidatesTags: invalidateTripEvents,
     }),
   }),
 });
 
 export const {
+  useGetEventsQuery,
   useAddEventMutation,
   useDeleteEventMutation,
   useUpdateEventMutation,
