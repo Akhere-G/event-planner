@@ -29,6 +29,7 @@ export interface Expense {
   paidBy?: { id: number; username: string };
   eventId?: number | null;
   accommodationId?: number | null;
+  flightId?: number | null;
   splitType: SplitType;
   shares: ExpenseShare[];
   createdById?: number | null;
@@ -67,6 +68,7 @@ export interface ExpensePrefill {
   description?: string;
   eventId?: number;
   accommodationId?: number;
+  flightId?: number;
   category?: ExpenseCategory;
   spentOn?: string;
 }
