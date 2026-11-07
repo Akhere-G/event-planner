@@ -4,6 +4,7 @@ import factory
 from src.extensions import bcrypt, db
 from src.models import (
     Event,
+    Flight,
     InvitationStatus,
     Invite,
     Itinerary,
@@ -153,6 +154,29 @@ class WishlistItemVoteFactory(factory.alchemy.SQLAlchemyModelFactory):
     user = factory.SelfAttribute("creator")
 
     is_thumbs_up = True
+
+    created_by_id = factory.LazyAttribute(lambda obj: obj.creator.id)
+    updated_by_id = factory.LazyAttribute(lambda obj: obj.creator.id)
+
+
+class FlightFactory(factory.alchemy.SQLAlchemyModelFactory):
+    class Meta:
+        model = Flight
+        sqlalchemy_session = db.session
+        sqlalchemy_session_persistence = "flush"
+
+    itinerary = factory.SubFactory(ItineraryFactory)
+    creator = factory.SubFactory(UserFactory)
+
+    airline = "British Airways"
+    flight_number = factory.Sequence(lambda n: f"BA{100 + n}")
+    departure_airport = "LHR"
+    arrival_airport = "CDG"
+    departure_timezone = "Europe/London"
+    arrival_timezone = "Europe/Paris"
+    depart_at = datetime(2026, 8, 1, 8, 0, tzinfo=timezone.utc)
+    arrive_at = datetime(2026, 8, 1, 9, 20, tzinfo=timezone.utc)
+    travellers: list = []
 
     created_by_id = factory.LazyAttribute(lambda obj: obj.creator.id)
     updated_by_id = factory.LazyAttribute(lambda obj: obj.creator.id)

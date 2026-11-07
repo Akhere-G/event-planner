@@ -1,12 +1,14 @@
 """Whole-trip AI generation: turns saved preferences into preview-only change-set ops."""
 
 import logging
+from dataclasses import dataclass
 from datetime import date, timedelta
-from typing import Any
+from typing import Any, Protocol
 
 from marshmallow import ValidationError
 
 from ..schemas.change_set_schema import MAX_OPS_PER_CHANGE_SET
+from ..models.trip_preferences_model import EDITABLE_FIELDS
 from ..utils import ai_output_validators
 from ..utils.location_utils import get_place_details
 from . import ai_services
@@ -18,6 +20,29 @@ from .trip_preferences_service import get_preferences
 logger = logging.getLogger(__name__)
 
 PLAN_SECTIONS = ("accommodations", "events", "packing_items", "wishlist_items")
+
+
+class PlannableTrip(Protocol):
+    """What the planner reads from a trip, so it works before the trip is saved."""
+
+    id: int | None
+    destination: str
+    start_date: date
+    end_date: date
+    timezone: str | None
+    budget_amount_gbp: float | None
+
+
+@dataclass(frozen=True)
+class TripBrief:
+    """A trip that has not been saved yet."""
+
+    destination: str
+    start_date: date
+    end_date: date
+    timezone: str | None
+    budget_amount_gbp: float | None = None
+    id: int | None = None
 
 
 def _text(value: Any, limit: int) -> str | None:
@@ -50,9 +75,9 @@ def _geocode(itinerary_id: int, name: str, address: str | None) -> dict | None:
     }
 
 
-def _build_prompt(itinerary, preferences, days: list[str]) -> str:
+def _build_prompt(itinerary, preferences: dict, days: list[str]) -> str:
     def pref(attribute: str, fallback: str) -> str:
-        value = getattr(preferences, attribute, None)
+        value = preferences.get(attribute)
         if isinstance(value, list):
             value = ", ".join(value)
         return str(value) if value else fallback
@@ -245,22 +270,34 @@ def _request_plan(itinerary_id: int, prompt: str) -> dict | None:
     return plan
 
 
-def generate_trip_plan(itinerary_id: int) -> list[dict]:
-    """Propose a whole-trip plan as preview-only change-set ops. Saves nothing."""
-    itinerary = get_itinerary(itinerary_id)
-    days = _trip_days(itinerary)
-    prompt = _build_prompt(itinerary, get_preferences(itinerary_id), days)
+def preferences_to_dict(preferences) -> dict:
+    """The editable preference fields of a saved row, or {} when there is none."""
+    if preferences is None:
+        return {}
+    return {field: getattr(preferences, field) for field in EDITABLE_FIELDS}
 
-    plan = _request_plan(itinerary_id, prompt)
+
+def generate_plan_ops(trip: PlannableTrip, preferences: dict) -> list[dict]:
+    """Propose a whole-trip plan as preview-only change-set ops. Saves nothing."""
+    days = _trip_days(trip)
+    plan = _request_plan(trip.id, _build_prompt(trip, preferences, days))
     if plan is None:
         return []
 
-    ops = _convert_plan(itinerary, plan, days)
+    ops = _convert_plan(trip, plan, days)
     if len(ops) > MAX_OPS_PER_CHANGE_SET:
         logger.warning(
             "Trip %s: truncating %s generated ops to %s.",
-            itinerary_id,
+            trip.id,
             len(ops),
             MAX_OPS_PER_CHANGE_SET,
         )
     return ops[:MAX_OPS_PER_CHANGE_SET]
+
+
+def generate_trip_plan(itinerary_id: int) -> list[dict]:
+    """Plan a saved trip from its stored preferences."""
+    return generate_plan_ops(
+        get_itinerary(itinerary_id),
+        preferences_to_dict(get_preferences(itinerary_id)),
+    )

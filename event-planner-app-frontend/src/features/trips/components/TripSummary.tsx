@@ -1,6 +1,7 @@
 import {
   Calendar,
   FileText,
+  Globe,
   MoreVertical,
   Pencil,
   SquareArrowRightExit,
@@ -8,6 +9,7 @@ import {
   UserCog,
 } from "lucide-react";
 import type { Trip } from "../types";
+import type { Flight } from "../../flights/types";
 import { formatDateRange } from "../../../utils/dateFormattors";
 import { UserAvatarList } from "../../users/components";
 import { useSelector } from "react-redux";
@@ -29,9 +31,19 @@ import EditTripModal from "../../modal/components/EditTripModal";
 import ViewUsersModal from "../../modal/components/ViewUsersModal";
 import { usePostHog } from "@posthog/react";
 import useLoadAnonTrip from "../hooks/useLoadAnonTrip";
+import { useLazyGetFlightsQuery } from "../../flights/flightApiSlice";
 import RegisterModal from "../../modal/components/RegisterModal";
+import PublishTemplateModal from "../../templates/components/PublishTemplateModal";
+import { PresenceAvatars } from "../../realtime";
+import { TripSyncMenuItem } from "../../googleCalendar";
 
-type ModalType = "edit" | "delete" | "users" | "register" | null;
+type ModalType =
+  | "edit"
+  | "delete"
+  | "users"
+  | "register"
+  | "publish"
+  | null;
 
 interface TripSummaryProps {
   trip: Trip;
@@ -50,6 +62,7 @@ export default function TripSummary({
   const { userId } = useSelector((state: RootState) => state.auth);
 
   const posthog = usePostHog();
+  const [fetchFlights] = useLazyGetFlightsQuery();
 
   const { anonTrip } = useLoadAnonTrip();
   function openUsersView() {
@@ -96,7 +109,20 @@ export default function TripSummary({
               disabled={isRemoveLoading}
               onClick={async () => {
                 const { exportToCalendar } = await import("../utils");
-                exportToCalendar(trip.name, trip.events, trip.userMemberships);
+                let flights: Flight[] = [];
+                try {
+                  flights = (await fetchFlights(trip.id).unwrap()).data;
+                } catch {
+                  toast.error(
+                    "Could not load flights; exporting without them.",
+                  );
+                }
+                exportToCalendar(
+                  trip.name,
+                  trip.events,
+                  trip.userMemberships,
+                  flights,
+                );
                 posthog?.capture("export_to_calendar", { trip_id: trip.id });
               }}
               className="flex gap-2 items-center"
@@ -115,6 +141,7 @@ export default function TripSummary({
               <FileText size={16} />
               Export to Word
             </DropdownMenuItem>
+            {!anonTrip && <TripSyncMenuItem tripId={trip.id} />}
             {isAdmin(trip.role) && (
               <>
                 <DropdownMenuItem
@@ -124,6 +151,15 @@ export default function TripSummary({
                   <Pencil size={16} />
                   Edit
                 </DropdownMenuItem>
+                {!anonTrip && (
+                  <DropdownMenuItem
+                    onClick={() => setModalType("publish")}
+                    className="flex gap-2 items-center"
+                  >
+                    <Globe size={16} />
+                    Publish as template
+                  </DropdownMenuItem>
+                )}
               </>
             )}
             {!anonTrip && (
@@ -152,7 +188,8 @@ export default function TripSummary({
         <div className="flex gap-2 items-center">
           <Calendar size={20} /> {formatDateRange(startDate, endDate)}
         </div>
-        <div className="flex gap-1">
+        <div className="flex items-center gap-3">
+          <PresenceAvatars />
           <UserAvatarList users={userMemberships} />
           {showActions && (
             <button
@@ -176,6 +213,13 @@ export default function TripSummary({
       )}
       {modalType === "edit" && (
         <EditTripModal
+          trip={trip}
+          open={true}
+          onOpenChange={handleCloseModal}
+        />
+      )}
+      {modalType === "publish" && (
+        <PublishTemplateModal
           trip={trip}
           open={true}
           onOpenChange={handleCloseModal}

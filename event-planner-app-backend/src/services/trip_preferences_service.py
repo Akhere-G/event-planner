@@ -11,9 +11,10 @@ def get_preferences(itinerary_id: int) -> TripPreferences | None:
     ).scalar_one_or_none()
 
 
-def upsert_preferences(
+def stage_preferences(
     itinerary_id: int, data: dict, user_id: int | None
 ) -> TripPreferences:
+    """Create or update an itinerary's preferences without committing."""
     preferences = get_preferences(itinerary_id)
 
     if preferences is None:
@@ -30,5 +31,17 @@ def upsert_preferences(
             setattr(preferences, key, data[key])
     preferences.updated_by_id = user_id
 
-    db.session.commit()
+    db.session.flush()
     return preferences
+
+
+def upsert_preferences(
+    itinerary_id: int, data: dict, user_id: int | None
+) -> TripPreferences:
+    try:
+        preferences = stage_preferences(itinerary_id, data, user_id)
+        db.session.commit()
+        return preferences
+    except Exception:
+        db.session.rollback()
+        raise

@@ -59,3 +59,25 @@ class BadRequestError(AppError):
 class NotFoundError(AppError):
     status_code = 404
     default_message = "Item not found."
+
+
+class CalendarNotConfiguredError(AppError):
+    status_code = 503
+    default_message = "Google Calendar sync is not configured on this server."
+
+
+class GoogleCalendarApiError(AppError):
+    status_code = 502
+    default_message = "Google Calendar could not be reached. Please try again."
+
+
+class TemplateNotFoundError(AppError):
+    status_code = 404
+    default_message = "Template not found."
+
+
+class FxUnavailableError(AppError):
+    status_code = 503
+    default_message = (
+        "Exchange rates are unavailable right now. Please try again shortly."
+    )

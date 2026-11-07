@@ -109,3 +109,55 @@ describe("ChangePreviewModal", () => {
     expect(onOpenChange).not.toHaveBeenCalledWith(false);
   });
 });
+
+describe("ChangePreviewModal cost estimates", () => {
+  it("shows a cost chip and price tier on rows that carry an estimate", () => {
+    const estimated: ChangeOp[] = [
+      {
+        op: "create",
+        entity: "event",
+        data: {
+          name: "Dinner",
+          address: "1 Rue Cler",
+          startAt: "2026-08-20T17:00:00Z",
+          endAt: "2026-08-20T19:00:00Z",
+          estimatedCostGbp: 24.5,
+          priceTier: 2,
+        },
+      },
+      {
+        op: "update",
+        entity: "event",
+        id: 3,
+        data: { estimatedCostGbp: 10, priceTier: 1 },
+      },
+      {
+        op: "create",
+        entity: "event",
+        data: {
+          name: "Walk",
+          startAt: "2026-08-20T08:00:00Z",
+          endAt: "2026-08-20T09:00:00Z",
+        },
+      },
+    ];
+
+    renderWithProviders(
+      <ChangePreviewModal
+        open
+        onOpenChange={vi.fn()}
+        tripId={5}
+        timezone="Europe/Paris"
+        ops={estimated}
+        events={[]}
+        title="Estimate costs"
+      />,
+    );
+
+    expect(screen.getByText("~£24.50 pp")).toBeInTheDocument();
+    expect(screen.getByLabelText("Price tier 2 of 4")).toHaveTextContent("££");
+    expect(screen.getByText("~£10 pp")).toBeInTheDocument();
+    expect(screen.getByText("Cost estimate")).toBeInTheDocument();
+    expect(screen.getAllByText(/pp$/)).toHaveLength(2);
+  });
+});
