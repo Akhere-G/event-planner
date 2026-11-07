@@ -1,4 +1,5 @@
 import { formatInTimeZone } from "date-fns-tz";
+import type { ExpensePrefill } from "../expenses/types";
 import type { Flight } from "./types";
 
 export const flightDepartureDate = (flight: Flight) =>
@@ -12,6 +13,14 @@ export const formatFlightTime = (utc: string, timeZone: string) =>
 
 export const flightTitle = (flight: Flight) =>
   `${flight.airline}${flight.flightNumber} ${flight.departureAirport} → ${flight.arrivalAirport}`;
+
+/** What the Add expense form starts with for a flight that has no expense. */
+export const flightExpensePrefill = (flight: Flight): ExpensePrefill => ({
+  flightId: flight.id,
+  description: `${flight.airline}${flight.flightNumber} · ${flight.departureAirport} → ${flight.arrivalAirport}`,
+  category: "transport",
+  spentOn: flightDepartureDate(flight),
+});
 
 /** A flight appears on the day it departs, and on the day it lands if that differs. */
 export const getFlightsForDay = (flights: Flight[], date: string) =>

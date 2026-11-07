@@ -42,7 +42,7 @@ export default function FlightsPanel({ trip }: { trip: Trip }) {
             <FlightCard
               key={flight.id}
               flight={flight}
-              tripId={trip.id}
+              trip={trip}
               canEdit={canEdit}
             />
           ))}
