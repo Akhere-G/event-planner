@@ -3,14 +3,16 @@ import { FormInput, ToggleButton } from "../../../../components";
 import { BUDGET_TIERS, BUDGET_TIER_LABELS } from "../../constants";
 import Label from "./Label";
 import type { FieldGroupProps } from "./fieldTypes";
+import { useWatch } from "react-hook-form";
 
 export default function BudgetStep({
   register,
-  watch,
+  control,
   setValue,
   errors,
 }: FieldGroupProps) {
-  const tier = watch("budgetTier");
+  const tier = useWatch({ name: "budgetTier", control });
+
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-col gap-2">
