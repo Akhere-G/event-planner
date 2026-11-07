@@ -65,6 +65,7 @@ class ExpenseSchema(_CamelToSnake):
     paid_by = fields.Nested(ExpenseUserSchema, dump_only=True)
     event_id = fields.Int(allow_none=True)
     accommodation_id = fields.Int(allow_none=True)
+    flight_id = fields.Int(allow_none=True)
     split_type = fields.Str(
         validate=validate.OneOf(
             [s.value for s in SplitType], error="Invalid split type."
