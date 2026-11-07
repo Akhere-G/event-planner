@@ -4,6 +4,7 @@ export interface User {
   email: string;
   role: string;
   isDemo?: boolean;
+  homeCurrency?: string;
 }
 
 export const UserRole = {

@@ -21,6 +21,7 @@ import { useParams } from "react-router";
 import { useGetTripQuery } from "../../trips/services/tripsApiSlice";
 import { getCityBounds } from "../../maps/utils";
 import { canUserEdit } from "../../users/utils";
+import { AddExpenseButton } from "../../expenses/components";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -199,6 +200,16 @@ export default function AccommodationCard({
           )}
         </div>
       )}
+
+      <AddExpenseButton
+        trip={trip}
+        prefill={{
+          accommodationId: accommodation.id,
+          description: accommodation.name,
+          category: "lodging",
+          spentOn: accommodation.startDate,
+        }}
+      />
 
       <UpdateAccommodationModal
         open={isUpdateModalOpen}

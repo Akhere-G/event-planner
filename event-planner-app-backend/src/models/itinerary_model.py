@@ -61,6 +61,12 @@ class Itinerary(Base, AuditMixin):
     accommodations: Mapped[List["Accommodation"]] = relationship(  # type: ignore  # noqa: F821
         back_populates="itinerary", cascade="all, delete-orphan", passive_deletes=True
     )
+    flights: Mapped[List["Flight"]] = relationship(  # type: ignore  # noqa: F821
+        back_populates="itinerary",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
+        order_by="Flight.depart_at",
+    )
     packing_items: Mapped[List["PackingItem"]] = relationship(  # type: ignore  # noqa: F821
         "PackingItem",
         back_populates="itinerary",

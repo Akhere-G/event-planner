@@ -29,6 +29,7 @@ import EditEventDatesModal from "./EditEventDatesModal";
 import { useDispatch } from "react-redux";
 import { setIsMapView, setSelectedEvent } from "../../maps/service/mapSlice";
 import EditEventModal from "./EditEventModal";
+import { AddExpenseButton } from "../../expenses/components";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -225,6 +226,17 @@ export default function EventCard({
                 )}
               </div>
             </div>
+          </div>
+
+          <div className="mt-2">
+            <AddExpenseButton
+              trip={trip}
+              prefill={{
+                eventId: event.id,
+                description: eventData.name,
+                spentOn: format(start, "yyyy-MM-dd"),
+              }}
+            />
           </div>
 
           {isModalOpen && (
