@@ -13,7 +13,8 @@ import {
 } from "../components/ui/resizable";
 import type { Trip } from "../features/trips/types";
 import { useBreakpoint } from "../hooks/useBreakpoint";
-import { setDays } from "../features/maps/service/mapSlice";
+import { setDays, syncDays } from "../features/maps/service/mapSlice";
+import useTripEvents from "../features/events/hooks/useTripEvents";
 import { getDaysWithFilter } from "../features/events/utils";
 import { format, isAfter, isBefore, isSameDay, startOfToday } from "date-fns";
 import { usePostHog } from "@posthog/react";
@@ -37,6 +38,7 @@ function getDefaultOpenDate(startDate: string, endDate: string) {
 export default function TripPage() {
   const { tripId } = useParams();
   const { data, isLoading, isError, error } = useGetTripQuery(Number(tripId));
+  const { events, isSuccess: hasEvents } = useTripEvents(Number(tripId));
   const [showUsersModal, setShowUsersModal] = useState(false);
   const dispatch = useDispatch();
 
@@ -51,15 +53,26 @@ export default function TripPage() {
     });
   }, [posthog, tripId]);
 
+  const startDate = data?.data?.startDate;
+  const endDate = data?.data?.endDate;
+
+  // Merged rather than replaced, so a refetch (e.g. after someone else edits an
+  // event) does not collapse the days or wipe what the user has open.
   useEffect(() => {
-    if (data?.data) {
-      const { events, startDate, endDate } = data.data;
-      const defaultOpenDate = getDefaultOpenDate(startDate, endDate);
-      dispatch(
-        setDays(getDaysWithFilter(events, startDate, endDate, defaultOpenDate)),
-      );
-    }
-  }, [data, dispatch]);
+    if (!startDate || !endDate || !hasEvents) return;
+
+    const defaultOpenDate = getDefaultOpenDate(startDate, endDate);
+    dispatch(
+      syncDays(getDaysWithFilter(events, startDate, endDate, defaultOpenDate)),
+    );
+  }, [events, hasEvents, startDate, endDate, dispatch]);
+
+  // Days belong to one trip; don't carry their state into the next.
+  useEffect(() => {
+    return () => {
+      dispatch(setDays([]));
+    };
+  }, [tripId, dispatch]);
 
   useEffect(() => {
     if (data?.data) {
