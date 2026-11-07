@@ -3,9 +3,11 @@ import { ToggleButton } from "../../../../components";
 import { TRANSPORTS, TRANSPORT_LABELS } from "../../constants";
 import Label from "./Label";
 import type { FieldGroupProps } from "./fieldTypes";
+import { useWatch } from "react-hook-form";
 
-export default function TransportStep({ watch, setValue }: FieldGroupProps) {
-  const transport = watch("transport");
+export default function TransportStep({ control, setValue }: FieldGroupProps) {
+  const transport = useWatch({ name: "transport", control });
+
   return (
     <div className="flex flex-col gap-2">
       <Label>Getting around</Label>

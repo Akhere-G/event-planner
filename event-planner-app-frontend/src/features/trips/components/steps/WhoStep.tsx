@@ -11,6 +11,7 @@ import { FormInput, ToggleButton } from "../../../../components";
 import { TRIP_TYPES, TRIP_TYPE_LABELS } from "../../constants";
 import Label from "./Label";
 import type { FieldGroupProps } from "./fieldTypes";
+import { useWatch } from "react-hook-form";
 
 const TRIP_TYPE_ICONS: Record<
   (typeof TRIP_TYPES)[number],
@@ -24,11 +25,12 @@ const TRIP_TYPE_ICONS: Record<
 
 export default function WhoStep({
   register,
-  watch,
   setValue,
+  control,
   errors,
 }: FieldGroupProps) {
-  const tripType = watch("tripType");
+  const tripType = useWatch({ name: "tripType", control });
+
   return (
     <div className="flex flex-col gap-3">
       <Label>Who is going?</Label>
@@ -40,7 +42,10 @@ export default function WhoStep({
             value={type}
             isSelected={tripType === type}
             icon={TRIP_TYPE_ICONS[type] ?? Users}
-            onClick={() => setValue("tripType", type, { shouldValidate: true })}
+            onClick={() => {
+              console.log("clicked");
+              setValue("tripType", type, { shouldValidate: true });
+            }}
           />
         ))}
       </div>
