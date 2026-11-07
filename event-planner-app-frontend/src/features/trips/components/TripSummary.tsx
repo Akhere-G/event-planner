@@ -33,7 +33,6 @@ import useLoadAnonTrip from "../hooks/useLoadAnonTrip";
 import { useLazyGetFlightsQuery } from "../../flights/flightApiSlice";
 import RegisterModal from "../../modal/components/RegisterModal";
 import useTripEvents from "../../events/hooks/useTripEvents";
-import { PresenceAvatars } from "../../realtime";
 
 type ModalType = "edit" | "delete" | "users" | "register" | null;
 
@@ -172,7 +171,6 @@ export default function TripSummary({
           <Calendar size={20} /> {formatDateRange(startDate, endDate)}
         </div>
         <div className="flex items-center gap-3">
-          <PresenceAvatars />
           <UserAvatarList users={userMemberships} />
           {showActions && (
             <button
