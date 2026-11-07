@@ -87,10 +87,12 @@ def test_create_flight_admin(admin_client, itinerary):
 
 def test_create_flight_creates_missing_airports_once(admin_client, itinerary):
     admin_client.post(url(itinerary), json=payload())
-    assert db.session.query(Airport).count() == 2
+    codes = db.session.query(Airport.code).filter(Airport.code.in_(["LHR", "JFK"]))
+    assert sorted(code for (code,) in codes) == ["JFK", "LHR"]
+    airport_count = db.session.query(Airport).count()
 
     admin_client.post(url(itinerary), json=payload(notes="Aisle"))
-    assert db.session.query(Airport).count() == 2
+    assert db.session.query(Airport).count() == airport_count
     assert db.session.query(Flight).filter_by(itinerary_id=itinerary.id).count() == 1
 
 
