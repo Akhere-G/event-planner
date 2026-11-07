@@ -59,3 +59,12 @@ class BadRequestError(AppError):
 class NotFoundError(AppError):
     status_code = 404
     default_message = "Item not found."
+
+
+class FlightProviderError(Exception):
+    """A single flight provider failed to answer a search."""
+
+
+class FlightSearchUnavailableError(AppError):
+    status_code = 503
+    default_message = "Flight search is temporarily unavailable. Please try again later."
