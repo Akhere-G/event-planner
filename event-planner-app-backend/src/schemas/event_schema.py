@@ -4,6 +4,7 @@ from marshmallow_sqlalchemy import auto_field
 
 from ..models import Event
 from .base_schema import BaseSchema
+from .expense_schema import ExpenseSchema
 
 
 class AwareDateTimeField(fields.Field):
@@ -94,3 +95,9 @@ class EventSchema(BaseSchema):
             raise ValidationError(
                 "End time must be after the start time.", field_name="end_at"
             )
+
+
+class EventWithExpenseSchema(EventSchema):
+    """For event routes: the event with the expense attached to it, if any."""
+
+    expense = fields.Nested(ExpenseSchema, dump_only=True, allow_none=True)
