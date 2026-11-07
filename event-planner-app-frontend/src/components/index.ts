@@ -14,3 +14,5 @@ export { default as LocationInput } from "./LocationInput";
 export { default as ConfirmModal } from "./ConfirmModal";
 export { default as ToggleButton } from "./ToggleButton";
 export { default as Stepper } from "./Stepper";
+export { default as ChatThread } from "./ChatThread";
+export type { ChatMessage } from "./ChatThread";
