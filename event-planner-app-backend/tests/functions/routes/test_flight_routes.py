@@ -1,11 +1,13 @@
+from dataclasses import replace
 from datetime import date, timedelta
 
 import pytest
 from src.extensions import db
-from src.models import Airport, Flight
+from src.models import Airport, Expense, Flight
+from src.services import expense_service, flight_service
 
 from tests.factories import FlightFactory, ItineraryFactory
-from tests.fakes import FakeFlightProvider
+from tests.fakes import BA117, FakeFlightProvider
 
 DEPARTURE_DATE = (date.today() + timedelta(days=30)).isoformat()
 
@@ -42,7 +44,7 @@ def test_flight_without_details_serialises_empty_lists(viewer_client, itinerary,
     data = viewer_client.get(url(itinerary, f"/{flight.id}")).get_json()["data"]
     assert data["luggage"] == []
     assert data["extras"] == []
-    assert data["priceGbp"] is None
+    assert "priceGbp" not in data
     assert data["purchaseUrl"] is None
     assert data["departureCity"] == "London"
 
@@ -80,7 +82,7 @@ def test_create_flight_admin(admin_client, itinerary):
         "Carbon emissions estimate: 292 kg",
     ]
     assert data["purchaseUrl"] == "https://www.google.com/travel/flights?q=lhr-jfk"
-    assert data["priceGbp"] == 520
+    assert "priceGbp" not in data
     assert data["airlineLogo"] == "https://logo/ba.png"
     assert db.session.query(Flight).filter_by(itinerary_id=itinerary.id).count() == 1
 
@@ -290,3 +292,102 @@ def test_anonymous_access_code(client, admin_user):
     assert client.get(url(itinerary), headers=headers).status_code == 200
     bad = client.get(url(itinerary), headers={"X-Itinerary-Access-Code": "nope"})
     assert bad.status_code == 401
+
+
+def flight_expenses(itinerary):
+    return db.session.query(Expense).filter_by(itinerary_id=itinerary.id).all()
+
+
+def test_create_flight_also_creates_its_expense(admin_client, itinerary, admin_user):
+    response = admin_client.post(url(itinerary), json=payload())
+
+    flight_id = response.get_json()["data"]["id"]
+    [expense] = flight_expenses(itinerary)
+    assert expense.flight_id == flight_id
+    assert expense.description == "BA117 · LHR → JFK"
+    assert expense.category == "transport"
+    assert expense.amount == expense.amount_gbp == 520
+    assert expense.currency == "GBP"
+    assert expense.paid_by_id == expense.created_by_id == admin_user.id
+    assert expense.split_type == "even_all"
+    assert str(expense.spent_on) == "2026-08-01"
+    assert sum(share.amount_gbp for share in expense.shares) == 520
+
+
+def test_expense_date_is_the_departure_airports_local_date(
+    admin_client, itinerary, flight_provider
+):
+    late = replace(BA117, depart_at=BA117.depart_at.replace(day=1, hour=23))
+    flight_provider.offers = [late]
+
+    admin_client.post(url(itinerary), json=payload())
+
+    assert str(flight_expenses(itinerary)[0].spent_on) == "2026-08-02"
+
+
+def test_flight_without_a_price_gets_no_expense(admin_client, itinerary, flight_provider):
+    flight_provider.offers = [replace(BA117, price_gbp=None)]
+
+    response = admin_client.post(url(itinerary), json=payload())
+
+    assert response.status_code == 201
+    assert flight_expenses(itinerary) == []
+
+
+def test_saving_the_same_flight_again_adds_no_expense(admin_client, itinerary):
+    admin_client.post(url(itinerary), json=payload())
+    admin_client.post(url(itinerary), json=payload(notes="Aisle"))
+
+    assert len(flight_expenses(itinerary)) == 1
+
+
+def test_a_deleted_flight_expense_is_not_recreated_on_resave(admin_client, itinerary):
+    admin_client.post(url(itinerary), json=payload())
+    expense_url = f"/api/itineraries/{itinerary.id}/expenses/{flight_expenses(itinerary)[0].id}"
+    assert admin_client.delete(expense_url).status_code == 200
+
+    admin_client.post(url(itinerary), json=payload(notes="Aisle"))
+
+    assert flight_expenses(itinerary) == []
+
+
+def test_deleting_the_expense_keeps_the_flight(admin_client, itinerary):
+    flight_id = admin_client.post(url(itinerary), json=payload()).get_json()["data"]["id"]
+    expense_id = flight_expenses(itinerary)[0].id
+
+    admin_client.delete(f"/api/itineraries/{itinerary.id}/expenses/{expense_id}")
+
+    assert db.session.get(Flight, flight_id) is not None
+
+
+def test_deleting_the_flight_keeps_its_expense_unlinked(admin_client, itinerary):
+    flight_id = admin_client.post(url(itinerary), json=payload()).get_json()["data"]["id"]
+
+    assert admin_client.delete(url(itinerary, f"/{flight_id}")).status_code == 200
+
+    [expense] = flight_expenses(itinerary)
+    assert expense.flight_id is None
+
+
+def test_flight_and_expense_are_saved_in_one_transaction(
+    admin_client, itinerary, monkeypatch
+):
+    def fail(*args, **kwargs):
+        raise RuntimeError("boom")
+
+    monkeypatch.setattr(expense_service, "stage_create_expense", fail)
+
+    with pytest.raises(RuntimeError):
+        admin_client.post(url(itinerary), json=payload())
+
+    assert db.session.query(Flight).filter_by(itinerary_id=itinerary.id).count() == 0
+    assert flight_expenses(itinerary) == []
+
+
+def test_no_expense_without_a_signed_in_user(flight):
+    assert (
+        flight_service.stage_flight_expense(
+            None, flight, 520, flight.departure_airport, flight.arrival_airport
+        )
+        is None
+    )
