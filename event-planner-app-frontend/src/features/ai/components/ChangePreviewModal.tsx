@@ -92,7 +92,7 @@ export default function ChangePreviewModal({
               <label className="flex gap-3 items-start cursor-pointer">
                 <input
                   type="checkbox"
-                  className="mt-1 accent-brand-primary"
+                  className="mt-1 accent-brand-primary w-auto"
                   checked={selected.has(index)}
                   onChange={() => toggle(index)}
                   aria-label={`${OP_LABELS[op.op]} ${summary.title}`}

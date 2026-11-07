@@ -10,13 +10,13 @@ export interface EmptyStateProps {
 
 export default function EmptyState({
   message = "No data found.",
-  height = 20,
+  height,
   actions,
 }: EmptyStateProps) {
   return (
     <div
-      style={{ height: height + "px" }}
-      className={`bg-surface border-dashed border-surface-border border-2 rounded-md flex flex-col gap-4 justify-center items-center`}
+      style={{ height: height ? height + "px" : "auto" }}
+      className={`bg-surface border-dashed border-surface-border border-2 rounded-md flex flex-col gap-4 justify-center items-center py-8`}
     >
       <h2 className="text-text-secondary title">{message}</h2>
       {actions && (

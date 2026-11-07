@@ -65,14 +65,18 @@ export default function EditTripModal({
             message: "Could not load trip preferences.",
           }}
         >
-          <TripForm
-            variant="single"
-            submitBtnText="Save changes"
-            submitAction={onSubmit}
-            isLoading={isLoading || isSavingPreferences}
-            initialData={trip}
-            initialPreferences={preferencesFromApi(preferencesQuery.data?.data)}
-          />
+          <div className="max-h-[90vh] overflow-y-scroll">
+            <TripForm
+              variant="single"
+              submitBtnText="Save changes"
+              submitAction={onSubmit}
+              isLoading={isLoading || isSavingPreferences}
+              initialData={trip}
+              initialPreferences={preferencesFromApi(
+                preferencesQuery.data?.data,
+              )}
+            />
+          </div>
         </StateGate>
       </DialogContent>
     </Dialog>
