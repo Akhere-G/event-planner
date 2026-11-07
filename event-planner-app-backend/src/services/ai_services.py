@@ -503,3 +503,14 @@ Schema:
             exc,
         )
         return []
+
+
+
+def __getattr__(name: str):
+    # Whole-trip generation lives in trip_generation_service, which builds on
+    # this module; resolve it lazily to avoid a circular import.
+    if name == "generate_trip_plan":
+        from .trip_generation_service import generate_trip_plan
+
+        return generate_trip_plan
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
