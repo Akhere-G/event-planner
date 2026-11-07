@@ -1,4 +1,5 @@
 import { ConfirmModal } from "../../../components";
+import useRemoteChangeWarning from "../../realtime/useRemoteChangeWarning";
 import type { Trip } from "../../trips/types";
 import type { Expense, ExpensePrefill } from "../types";
 import ExpenseForm from "./ExpenseForm";
@@ -16,6 +17,8 @@ export default function ExpenseModal({
   expense?: Expense;
   prefill?: ExpensePrefill;
 }) {
+  useRemoteChangeWarning("expense", open && !!expense);
+
   return (
     <ConfirmModal
       open={open}

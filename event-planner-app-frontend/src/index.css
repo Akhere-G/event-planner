@@ -460,6 +460,10 @@
     @apply bg-surface-muted text-text-primary hover:brightness-110;
   }
 
+  .expense-chip {
+    @apply inline-flex items-center gap-2 rounded-lg border border-brand-primary/30 bg-brand-primary/10 px-3 py-1.5 text-sm font-semibold text-brand-primary;
+  }
+
   .btn-menu {
     @apply hover:bg-surface-muted disabled:hover:bg-inherit rounded-md
   }

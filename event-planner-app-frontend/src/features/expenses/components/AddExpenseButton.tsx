@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Receipt } from "lucide-react";
+import { Plus } from "lucide-react";
 import type { Trip } from "../../trips/types";
 import { canUserEdit } from "../../users/utils";
 import type { ExpensePrefill } from "../types";
@@ -21,9 +21,9 @@ export default function AddExpenseButton({
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="flex items-center gap-1 text-xs text-text-secondary hover:text-brand-primary"
+        className="flex items-center gap-1 px-2 py-1 text-sm text-text-secondary hover:text-brand-primary"
       >
-        <Receipt size={14} />
+        <Plus size={16} aria-hidden />
         Add expense
       </button>
       {open && (
