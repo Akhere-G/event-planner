@@ -8,6 +8,7 @@ import { FormInput, FormSelect } from "../../../components";
 import type { RootState } from "../../../store";
 import { isApiError } from "../../api/utils";
 import { useGetAccommodationsQuery } from "../../accommodations/accomodationApiSlice";
+import useTripEvents from "../../events/hooks/useTripEvents";
 import { useGetFlightsQuery } from "../../flights/flightApiSlice";
 import type { Trip } from "../../trips/types";
 import { expenseSchema, type ExpenseFormValues } from "../schema";
@@ -48,6 +49,7 @@ export default function ExpenseForm({
   onCancel: () => void;
 }) {
   const userId = useSelector((state: RootState) => state.auth.userId);
+  const { events } = useTripEvents(trip.id);
   const { data: accommodationData } = useGetAccommodationsQuery(trip.id);
   const { data: flightData } = useGetFlightsQuery(trip.id);
   const { remove, isDeleting } = useDeleteExpense(trip.id);
@@ -199,7 +201,7 @@ export default function ExpenseForm({
             value={watch("eventId") ?? ""}
             options={[
               { name: "Choose an event", value: "" },
-              ...trip.events.map((e) => ({
+              ...events.map((e) => ({
                 name: e.name,
                 value: String(e.id),
               })),
