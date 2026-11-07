@@ -5,20 +5,25 @@ import { apiSlice } from "../api/apiSlice";
 import type { RootState } from "../../store";
 import { entitiesToTags } from "./entityTags";
 import { remoteChanged, resetRealtime, setPresence } from "./realtimeSlice";
-import { createTripSocket } from "./socket";
-import type { JoinAck, PresenceUser, PresenceWireUser } from "./types";
+import { acquireSocket, releaseSocket } from "./socket";
+import type {
+  JoinAck,
+  PresenceUser,
+  PresenceWireUser,
+  TripChangedWire,
+} from "./types";
 
 const HEARTBEAT_MS = 20_000;
 
-let activeSocket: { socket: Socket; tripId: number } | null = null;
+let activeTrip: { socket: Socket; tripId: number } | null = null;
 let viewingDay: string | null = null;
 
 /** Tells everyone else which day this user is looking at (null = none). */
 export function setViewingDay(day: string | null) {
   viewingDay = day;
-  if (activeSocket?.socket.connected) {
-    activeSocket.socket.emit("presence:heartbeat", {
-      trip_id: activeSocket.tripId,
+  if (activeTrip?.socket.connected) {
+    activeTrip.socket.emit("presence:heartbeat", {
+      trip_id: activeTrip.tripId,
       day,
     });
   }
@@ -36,43 +41,50 @@ export default function useTripRealtime(tripId: number) {
   useEffect(() => {
     if (!Number.isInteger(tripId)) return;
 
-    const socket = createTripSocket();
-    activeSocket = { socket, tripId };
+    const socket = acquireSocket();
+    activeTrip = { socket, tripId };
 
-    socket.on("connect", () => {
+    // Runs on first connect and again after every reconnect, since the server
+    // forgets room membership when the connection drops.
+    const join = () => {
       socket.emit(
         "trip:join",
         { trip_id: tripId, day: viewingDay },
         (ack: JoinAck) => {
-          if (!ack?.ok) socket.disconnect();
+          if (!ack?.ok) socket.off("connect", join);
         },
       );
-    });
+    };
 
-    socket.on(
-      "trip:changed",
-      (payload: { trip_id: number; entities: string[]; by_user_id: number | null }) => {
-        if (payload.trip_id !== tripId) return;
-        // Our own mutations already invalidate their tags.
-        if (payload.by_user_id !== null && payload.by_user_id === myUserId) return;
+    const onTripChanged = (payload: TripChangedWire) => {
+      if (payload.trip_id !== tripId) return;
+      // Our own mutations already invalidate their tags.
+      if (payload.by_user_id !== null && payload.by_user_id === myUserId)
+        return;
 
-        dispatch(apiSlice.util.invalidateTags(entitiesToTags(payload.entities, tripId)));
-        dispatch(remoteChanged(payload.entities));
-      },
-    );
+      dispatch(
+        apiSlice.util.invalidateTags(entitiesToTags(payload.entities, tripId)),
+      );
+      dispatch(remoteChanged(payload.entities));
+    };
 
-    socket.on(
-      "presence:update",
-      (payload: { trip_id: number; users: PresenceWireUser[] }) => {
-        if (payload.trip_id !== tripId) return;
-        const users: PresenceUser[] = payload.users.map((u) => ({
-          userId: u.user_id,
-          name: u.name,
-          day: u.day,
-        }));
-        dispatch(setPresence(users));
-      },
-    );
+    const onPresence = (payload: {
+      trip_id: number;
+      users: PresenceWireUser[];
+    }) => {
+      if (payload.trip_id !== tripId) return;
+      const users: PresenceUser[] = payload.users.map((u) => ({
+        userId: u.user_id,
+        name: u.name,
+        day: u.day,
+      }));
+      dispatch(setPresence(users));
+    };
+
+    socket.on("connect", join);
+    socket.on("trip:changed", onTripChanged);
+    socket.on("presence:update", onPresence);
+    if (socket.connected) join();
 
     const heartbeat = setInterval(() => {
       if (socket.connected) {
@@ -82,8 +94,12 @@ export default function useTripRealtime(tripId: number) {
 
     return () => {
       clearInterval(heartbeat);
-      socket.disconnect();
-      if (activeSocket?.socket === socket) activeSocket = null;
+      socket.off("connect", join);
+      socket.off("trip:changed", onTripChanged);
+      socket.off("presence:update", onPresence);
+      if (socket.connected) socket.emit("trip:leave", { trip_id: tripId });
+      if (activeTrip?.socket === socket) activeTrip = null;
+      releaseSocket(socket);
       dispatch(resetRealtime());
     };
   }, [tripId, myUserId, dispatch]);

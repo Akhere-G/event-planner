@@ -40,6 +40,7 @@ import NotificationsPrompt from "./features/notifications/components/Notificatio
 import { usePostHog } from "@posthog/react";
 import useLoadAnonTrip from "./features/trips/hooks/useLoadAnonTrip";
 import { useSaveTripMutation } from "./features/trips/services/tripsApiSlice";
+import { useUserRealtime } from "./features/realtime";
 
 function App() {
   const isAuthenticated = useSelector(selectIsAuthenticated);
@@ -49,6 +50,8 @@ function App() {
   const posthog = usePostHog();
   const [saveTrip] = useSaveTripMutation();
   const navigate = useNavigate();
+
+  useUserRealtime();
 
   useEffect(() => {
     dispatch(syncDOM());
