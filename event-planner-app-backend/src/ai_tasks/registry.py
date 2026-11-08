@@ -1,7 +1,7 @@
 from typing import TypeVar
 
 from ..exceptions import UnknownAiTaskTypeError
-from .handlers.base import AiTaskHandler
+from .handler import AiTaskHandler
 
 _HANDLERS: dict[str, AiTaskHandler] = {}
 

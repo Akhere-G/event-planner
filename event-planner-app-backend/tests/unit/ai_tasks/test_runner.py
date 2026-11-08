@@ -3,7 +3,7 @@ from datetime import timedelta
 import pytest
 from marshmallow import Schema
 from src.ai_tasks import registry
-from src.ai_tasks.handlers.base import AiTaskHandler
+from src.ai_tasks.handler import AiTaskHandler
 from src.ai_tasks.runner import LEASE, RunOutcome, TaskRunner
 from src.exceptions import AIProviderError, AIResponseError
 from src.extensions import db

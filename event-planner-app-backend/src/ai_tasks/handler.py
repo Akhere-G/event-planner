@@ -3,7 +3,7 @@ from typing import Any, Callable, ClassVar
 
 from marshmallow import Schema
 
-from ..context import TaskContext
+from .context import TaskContext
 
 CONFLICTS_WITH_ANYTHING = frozenset({"*"})
 
