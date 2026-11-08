@@ -44,6 +44,7 @@ export interface Settlement {
   settledOn: string;
   fromUser?: { id: number; username: string };
   toUser?: { id: number; username: string };
+  createdById?: number | null;
 }
 
 export interface Balance {

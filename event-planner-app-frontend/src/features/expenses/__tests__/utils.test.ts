@@ -1,9 +1,11 @@
 import { describe, expect, it } from "vitest";
-import type { Expense } from "../types";
+import type { Expense, Settlement } from "../types";
 import {
   budgetProgress,
   canChangeExpense,
+  canChangeSettlement,
   formatCurrency,
+  payerOptions,
   spentByCategory,
   totalSpent,
 } from "../utils";
@@ -89,5 +91,53 @@ describe("canChangeExpense", () => {
 
   it("never lets viewers change one", () => {
     expect(canChangeExpense("viewer", 5, expense)).toBe(false);
+  });
+});
+
+describe("canChangeSettlement", () => {
+  const payment: Settlement = {
+    id: 1,
+    itineraryId: 1,
+    fromUserId: 5,
+    toUserId: 6,
+    amountGbp: 10,
+    settledOn: "2026-08-02",
+    createdById: 5,
+  };
+
+  it("lets admins delete any payment", () => {
+    expect(canChangeSettlement("admin", 1, payment)).toBe(true);
+  });
+
+  it("lets editors delete only the payments they recorded", () => {
+    expect(canChangeSettlement("editor", 5, payment)).toBe(true);
+    expect(canChangeSettlement("editor", 6, payment)).toBe(false);
+  });
+
+  it("never lets viewers delete one", () => {
+    expect(canChangeSettlement("viewer", 5, payment)).toBe(false);
+  });
+});
+
+describe("payerOptions", () => {
+  const members = [
+    { id: 1, username: "ada" },
+    { id: 5, username: "sam" },
+    { id: 6, username: "kit" },
+  ];
+
+  it("offers every member to an admin", () => {
+    expect(payerOptions(members, "admin", 1)).toEqual(members);
+  });
+
+  it("offers an editor only themselves", () => {
+    expect(payerOptions(members, "editor", 5)).toEqual([members[1]]);
+  });
+
+  it("keeps the current payer so editing does not change it", () => {
+    expect(payerOptions(members, "editor", 5, 6)).toEqual([
+      members[1],
+      members[2],
+    ]);
   });
 });

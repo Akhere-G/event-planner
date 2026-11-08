@@ -1,5 +1,5 @@
 import { canUserEdit, isAdmin } from "../users/utils";
-import type { Expense, ExpenseCategory } from "./types";
+import type { Expense, ExpenseCategory, Settlement } from "./types";
 
 export const formatCurrency = (amount: number, currency = "GBP") =>
   new Intl.NumberFormat("en-GB", {
@@ -15,6 +15,33 @@ export const canChangeExpense = (
   userId: number | null | undefined,
   expense: Expense,
 ) => canUserEdit(role) && (isAdmin(role) || expense.createdById === userId);
+
+/** Same rule as expenses: admins change any payment, editors the ones they recorded. */
+export const canChangeSettlement = (
+  role: string,
+  userId: number | null | undefined,
+  settlement: Settlement,
+) => canUserEdit(role) && (isAdmin(role) || settlement.createdById === userId);
+
+interface Person {
+  id: number;
+  username: string;
+}
+
+/**
+ * Who a payment or an expense can be paid by. Admins pick anyone; everyone else
+ * only themselves, plus whoever it is already recorded against so that editing
+ * it does not silently change the payer.
+ */
+export const payerOptions = <T extends Person>(
+  members: T[],
+  role: string,
+  userId: number | null | undefined,
+  currentId?: number | null,
+) =>
+  isAdmin(role)
+    ? members
+    : members.filter((m) => m.id === userId || m.id === currentId);
 
 export const totalSpent = (expenses: Expense[]) =>
   Math.round(expenses.reduce((sum, e) => sum + e.amountGbp, 0) * 100) / 100;
