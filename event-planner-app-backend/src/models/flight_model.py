@@ -28,7 +28,6 @@ class Flight(Base, AuditMixin):
     luggage: Mapped[list[str] | None] = mapped_column(JSON, nullable=True)
     extras: Mapped[list[str] | None] = mapped_column(JSON, nullable=True)
     purchase_url: Mapped[str | None] = mapped_column(Text, nullable=True)
-    price_gbp: Mapped[int | None] = mapped_column(Integer, nullable=True)
     airline_logo: Mapped[str | None] = mapped_column(String(255), nullable=True)
     notes: Mapped[str | None] = mapped_column(String(1000), nullable=True)
 
@@ -45,3 +44,6 @@ class Flight(Base, AuditMixin):
         "User", foreign_keys="[Flight.updated_by_id]"
     )
     itinerary: Mapped["Itinerary"] = relationship("Itinerary", back_populates="flights")  # type: ignore  # noqa: F821
+    expense: Mapped["Expense | None"] = relationship(  # type: ignore  # noqa: F821
+        "Expense", back_populates="flight", uselist=False
+    )

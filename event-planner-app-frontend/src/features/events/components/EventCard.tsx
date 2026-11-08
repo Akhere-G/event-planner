@@ -29,6 +29,7 @@ import EditEventDatesModal from "./EditEventDatesModal";
 import { useDispatch } from "react-redux";
 import { setIsMapView, setSelectedEvent } from "../../maps/service/mapSlice";
 import EditEventModal from "./EditEventModal";
+import { ExpenseChip } from "../../expenses/components";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -198,7 +199,7 @@ export default function EventCard({
             emptyText="Add notes"
           />
 
-          <div className="mt-2 flex gap-4 justify-between text-xs text-text-secondary">
+          <div className="mt-2 flex items-center gap-4 justify-between text-xs text-text-secondary">
             <div className="flex items-center gap-2 ">
               <Clock size={16} className="text-brand-primary" />
               <div className="flex gap-1 text-sm ">
@@ -229,6 +230,15 @@ export default function EventCard({
                 )}
               </div>
             </div>
+            <ExpenseChip
+              trip={trip}
+              expense={event.expense}
+              prefill={{
+                eventId: event.id,
+                description: eventData.name,
+                spentOn: format(start, "yyyy-MM-dd"),
+              }}
+            />
           </div>
 
           {isModalOpen && (

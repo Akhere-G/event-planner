@@ -1,3 +1,5 @@
+import type { Expense } from "../expenses/types";
+
 export interface Accommodation {
   id: number;
   itineraryId: number;
@@ -8,6 +10,7 @@ export interface Accommodation {
   description?: string;
   startDate: string;
   endDate: string;
+  expense?: Expense | null;
 }
 
 export interface CreateAccommodationPayload {

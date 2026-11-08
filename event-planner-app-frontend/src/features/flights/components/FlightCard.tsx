@@ -8,34 +8,32 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "../../../components/ui/dropdown-menu";
+import { ExpenseChip } from "../../expenses/components";
 import { isApiError } from "../../api/utils";
+import type { Trip } from "../../trips/types";
 import { useDeleteFlightMutation } from "../flightApiSlice";
 import type { Flight } from "../types";
 import {
   directFlightSummary,
   flightDurationMinutes,
-  formatGbp,
+  flightExpensePrefill,
 } from "../utils";
 import FlightExtras from "./FlightExtras";
 import FlightSummary from "./FlightSummary";
 
 interface FlightCardProps {
   flight: Flight;
-  tripId: number;
+  trip: Trip;
   canEdit: boolean;
 }
 
-export default function FlightCard({
-  flight,
-  tripId,
-  canEdit,
-}: FlightCardProps) {
+export default function FlightCard({ flight, trip, canEdit }: FlightCardProps) {
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [deleteFlight] = useDeleteFlightMutation();
 
   const handleDelete = async () => {
     try {
-      await deleteFlight({ tripId, flightId: flight.id }).unwrap();
+      await deleteFlight({ tripId: trip.id, flightId: flight.id }).unwrap();
       setIsDeleteOpen(false);
       toast.success("Flight deleted.");
     } catch (err) {
@@ -44,12 +42,6 @@ export default function FlightCard({
       toast.error("Could not delete flight.");
     }
   };
-
-  const hasFooter =
-    flight.luggage.length > 0 ||
-    flight.extras.length > 0 ||
-    !!flight.purchaseUrl ||
-    !!flight.notes;
 
   return (
     <>
@@ -60,11 +52,6 @@ export default function FlightCard({
         travelClass={flight.travelClass}
         headerEnd={
           <div className="flex items-center gap-3">
-            {flight.priceGbp != null && (
-              <span className="text-xl font-bold text-text-main">
-                {formatGbp(flight.priceGbp)}
-              </span>
-            )}
             {canEdit && (
               <DropdownMenu>
                 <DropdownMenuTrigger
@@ -102,12 +89,12 @@ export default function FlightCard({
         }}
         durationMinutes={flightDurationMinutes(flight)}
         footer={
-          hasFooter && (
-            <div className="space-y-3">
-              <div className="flex flex-wrap items-center justify-between gap-4">
-                <p className="text-sm text-text-secondary">
-                  {directFlightSummary(flight.luggage)}
-                </p>
+          <div className="space-y-3">
+            <div className="flex flex-wrap items-center justify-between gap-4">
+              <p className="text-sm text-text-secondary">
+                {directFlightSummary(flight.luggage)}
+              </p>
+              <div className="flex items-center gap-3">
                 {flight.purchaseUrl && (
                   <a
                     href={flight.purchaseUrl}
@@ -118,13 +105,18 @@ export default function FlightCard({
                     Book flight
                   </a>
                 )}
+                <ExpenseChip
+                  trip={trip}
+                  expense={flight.expense}
+                  prefill={flightExpensePrefill(flight)}
+                />
               </div>
-              {flight.notes && (
-                <p className="text-sm text-text-secondary">{flight.notes}</p>
-              )}
-              <FlightExtras extras={flight.extras} />
             </div>
-          )
+            {flight.notes && (
+              <p className="text-sm text-text-secondary">{flight.notes}</p>
+            )}
+            <FlightExtras extras={flight.extras} />
+          </div>
         }
       />
 

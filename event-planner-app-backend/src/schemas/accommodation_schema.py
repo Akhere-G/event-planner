@@ -1,8 +1,9 @@
-from marshmallow import ValidationError, validates_schema
+from marshmallow import ValidationError, fields, validates_schema
 from marshmallow_sqlalchemy import auto_field
 
 from ..models import Accommodation
 from .base_schema import BaseSchema
+from .expense_schema import ExpenseSchema
 
 
 class AccommodationSchema(BaseSchema):
@@ -61,3 +62,9 @@ class AccommodationSchema(BaseSchema):
     created_by_id = auto_field(dump_only=True)
     created_at = auto_field(dump_only=True)
     updated_at = auto_field(dump_only=True)
+
+
+class AccommodationWithExpenseSchema(AccommodationSchema):
+    """For accommodation routes: the stay with the expense attached to it, if any."""
+
+    expense = fields.Nested(ExpenseSchema, dump_only=True, allow_none=True)
