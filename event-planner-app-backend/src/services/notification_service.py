@@ -134,36 +134,57 @@ def mark_all_notifications_read(user_id: int) -> int:
     return count
 
 
-def send_push_notification(
+def create_notification(
     user_id: int,
     title: str,
     message: str,
     link_url: Optional[str] = None,
 ) -> Notification:
-    notification = Notification(
-        user_id=user_id,
-        title=title,
-        message=message,
-        link_url=link_url,
-        is_read=False,
-    )
-    db.session.add(notification)
+    """Store an in-app notification without sending a web push."""
+    return create_notifications([user_id], title, message, link_url)[0]
+
+
+def create_notifications(
+    user_ids: List[int],
+    title: str,
+    message: str,
+    link_url: Optional[str] = None,
+) -> List[Notification]:
+    notifications = [
+        Notification(
+            user_id=user_id,
+            title=title,
+            message=message,
+            link_url=link_url,
+            is_read=False,
+        )
+        for user_id in user_ids
+    ]
+    db.session.add_all(notifications)
     try:
         db.session.commit()
     except Exception:
         db.session.rollback()
         raise
+    return notifications
 
+
+def send_web_push(
+    user_ids: List[int],
+    title: str,
+    message: str,
+    link_url: Optional[str] = None,
+) -> None:
+    """Push to every subscribed device of these users. Stores nothing in-app."""
     private_key = DEFAULT_VAPID_PRIVATE_KEY
     if not private_key:
         logger.warning("VAPID_PRIVATE_KEY not set. Push dispatch skipped.")
-        return notification
+        return
 
     stmt = select(NotificationSubscription).where(
-        NotificationSubscription.user_id == user_id
+        NotificationSubscription.user_id.in_(user_ids)
     )
     subscriptions = db.session.execute(stmt).scalars().all()
-    print(f"no. subscriptions {len(subscriptions)}")
     payload = json.dumps(
         {
             "title": title,
@@ -200,6 +221,15 @@ def send_push_notification(
         except Exception as ex:
             logger.exception(f"Unexpected error sending push: {ex}")
 
+
+def send_push_notification(
+    user_id: int,
+    title: str,
+    message: str,
+    link_url: Optional[str] = None,
+) -> Notification:
+    notification = create_notification(user_id, title, message, link_url)
+    send_web_push([user_id], title, message, link_url)
     return notification
 
 
@@ -212,60 +242,8 @@ def send_push_notifications_bulk(
     if not user_ids:
         return []
 
-    notifications = [
-        Notification(
-            user_id=user_id,
-            title=title,
-            message=message,
-            link_url=link_url,
-            is_read=False,
-        )
-        for user_id in user_ids
-    ]
-    db.session.add_all(notifications)
-    db.session.commit()
-
-    private_key = DEFAULT_VAPID_PRIVATE_KEY
-    if not private_key:
-        logger.warning("VAPID_PRIVATE_KEY not set. Push dispatch skipped.")
-        return notifications
-
-    stmt = select(NotificationSubscription).where(
-        NotificationSubscription.user_id.in_(user_ids)
-    )
-    subscriptions = db.session.execute(stmt).scalars().all()
-    payload = json.dumps(
-        {
-            "title": title,
-            "message": message,
-            "url": link_url or "/",
-        }
-    )
-
-    claims: Dict[str, str | int] = {"sub": DEFAULT_VAPID_CLAIMS_SUB}
-
-    for sub in subscriptions:
-        try:
-            webpush(
-                subscription_info={
-                    "endpoint": sub.endpoint,
-                    "keys": {
-                        "p256dh": sub.p256dh,
-                        "auth": sub.auth,
-                    },
-                },
-                data=payload,
-                vapid_private_key=private_key,
-                vapid_claims=claims,
-            )
-        except WebPushException as ex:
-            logger.error(f"WebPush error for subscription {sub.id}: {ex}")
-            if ex.response is not None and ex.response.status_code in [404, 410]:
-                db.session.delete(sub)
-                db.session.commit()
-        except Exception as ex:
-            logger.exception(f"Unexpected error sending push: {ex}")
-
+    notifications = create_notifications(user_ids, title, message, link_url)
+    send_web_push(user_ids, title, message, link_url)
     return notifications
 
 

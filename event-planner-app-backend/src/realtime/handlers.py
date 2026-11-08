@@ -6,6 +6,7 @@ from flask_socketio import ConnectionRefusedError, join_room, leave_room
 from ..extensions import db, socketio
 from ..models import User
 from .access import resolve_trip_role
+from .connections import get_connection_store
 from .presence import get_presence_store
 from .rooms import PRESENCE_EVENT, trip_room, user_room
 
@@ -76,6 +77,14 @@ def register_socket_handlers():
         # trip room, so every signed-in socket also listens on its own room.
         if user_id is not None:
             join_room(user_room(user_id))
+            get_connection_store().touch(user_id, request.sid)  # type: ignore[attr-defined]
+
+    @socketio.on("connection:heartbeat")
+    def on_connection_heartbeat(*_args):
+        """Keeps a signed-in user counted as online while the app is open."""
+        identity = _connections.get(request.sid)  # type: ignore[attr-defined]
+        if identity and identity["user_id"] is not None:
+            get_connection_store().touch(identity["user_id"], request.sid)  # type: ignore[attr-defined]
 
     @socketio.on("trip:join")
     def on_join(data):
@@ -142,6 +151,8 @@ def register_socket_handlers():
         identity = _connections.pop(sid, None)
         if identity is None:
             return
+        if identity["user_id"] is not None:
+            get_connection_store().remove(identity["user_id"], sid)
         for trip_id in list(identity.get("trips", {})):
             get_presence_store().remove(trip_id, sid)
             _broadcast_presence(trip_id)
