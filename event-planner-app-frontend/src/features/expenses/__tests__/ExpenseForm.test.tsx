@@ -1,7 +1,11 @@
-import { screen } from "@testing-library/react";
+import { screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { renderWithProviders } from "../../../test-utils/renderWithProviders";
+import { setCredentials } from "../../auth/services/authSlice";
+import {
+  createTestStore,
+  renderWithProviders,
+} from "../../../test-utils/renderWithProviders";
 import type { Trip } from "../../trips/types";
 import ExpenseForm from "../components/ExpenseForm";
 
@@ -10,7 +14,10 @@ const trip = {
   id: 1,
   role: "admin",
   timezone: "Europe/London",
-  userMemberships: [{ id: 5, username: "sam" }],
+  userMemberships: [
+    { id: 5, username: "sam" },
+    { id: 6, username: "kit" },
+  ],
   events: [],
 } as unknown as Trip;
 
@@ -54,5 +61,28 @@ describe("ExpenseForm", () => {
     expect(
       await screen.findByRole("option", { name: "Louvre visit" }),
     ).toBeInTheDocument();
+  });
+
+  it.each([
+    ["editor", ["sam"]],
+    ["admin", ["sam", "kit"]],
+  ])("offers a %s these payers", async (role, names) => {
+    stubApi();
+    const store = createTestStore();
+    store.dispatch(setCredentials({ id: 5 }));
+    renderWithProviders(
+      <ExpenseForm
+        trip={{ ...trip, role }}
+        onSuccess={vi.fn()}
+        onCancel={vi.fn()}
+      />,
+      { store },
+    );
+
+    const select = screen.getByLabelText("Paid by");
+    const offered = within(select)
+      .getAllByRole("option")
+      .map((option) => option.textContent);
+    expect(offered).toEqual(names);
   });
 });

@@ -2,12 +2,15 @@ import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { format } from "date-fns";
 import { toast } from "sonner";
+import { useSelector } from "react-redux";
 import { ConfirmModal, FormInput, FormSelect } from "../../../components";
+import type { RootState } from "../../../store";
 import { isApiError } from "../../api/utils";
 import type { Trip } from "../../trips/types";
 import { settlementSchema, type SettlementFormValues } from "../schema";
 import { useAddSettlementMutation } from "../services/expenseApiSlice";
 import type { Transfer } from "../types";
+import { payerOptions } from "../utils";
 
 export default function SettlementModal({
   open,
@@ -21,32 +24,37 @@ export default function SettlementModal({
   suggestion?: Transfer;
 }) {
   const [addSettlement, { isLoading }] = useAddSettlementMutation();
+  const userId = useSelector((state: RootState) => state.auth.userId);
   const members = trip.userMemberships;
+  const fromUserId = suggestion?.fromUserId ?? userId ?? members[0]?.id;
 
   const { register, handleSubmit, watch, formState } =
     useForm<SettlementFormValues>({
       resolver: yupResolver(settlementSchema),
       defaultValues: {
-        fromUserId: suggestion?.fromUserId ?? members[0]?.id,
-        toUserId: suggestion?.toUserId ?? members[1]?.id ?? members[0]?.id,
+        fromUserId,
+        toUserId:
+          suggestion?.toUserId ??
+          members.find((m) => m.id !== fromUserId)?.id ??
+          members[0]?.id,
         amountGbp: suggestion?.amountGbp,
         settledOn: format(new Date(), "yyyy-MM-dd"),
       },
     });
 
-  const options = members.map((m) => ({
+  const toOption = (m: (typeof members)[number]) => ({
     name: m.username,
     value: String(m.id),
-  }));
+  });
 
   const onSubmit = async (settlement: SettlementFormValues) => {
     try {
       await addSettlement({ tripId: trip.id, settlement }).unwrap();
-      toast.success("Settlement recorded.");
+      toast.success("Payment recorded.");
       onOpenChange(false);
     } catch (err) {
       toast.error(
-        isApiError(err) ? err.data.message : "Could not record the settlement.",
+        isApiError(err) ? err.data.message : "Could not record the payment.",
       );
     }
   };
@@ -55,7 +63,7 @@ export default function SettlementModal({
     <ConfirmModal
       open={open}
       onOpenChange={onOpenChange}
-      title="Record settlement"
+      title="Record payment"
       hideButtons
     >
       <form className="form p-1" onSubmit={handleSubmit(onSubmit)}>
@@ -64,13 +72,15 @@ export default function SettlementModal({
             label="Who paid"
             {...register("fromUserId")}
             value={watch("fromUserId")}
-            options={options}
+            options={payerOptions(members, trip.role, userId, fromUserId).map(
+              toOption,
+            )}
           />
           <FormSelect
             label="Who received it"
             {...register("toUserId")}
             value={watch("toUserId")}
-            options={options}
+            options={members.map(toOption)}
             errorMessage={formState.errors.toUserId?.message}
           />
           <FormInput
@@ -102,7 +112,7 @@ export default function SettlementModal({
             className="btn-primary px-4 py-2 rounded-xl"
             disabled={isLoading}
           >
-            {isLoading ? "Saving..." : "Record settlement"}
+            {isLoading ? "Saving..." : "Record payment"}
           </button>
         </div>
       </form>

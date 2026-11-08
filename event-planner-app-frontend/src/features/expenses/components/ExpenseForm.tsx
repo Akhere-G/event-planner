@@ -18,7 +18,7 @@ import {
 } from "../services/expenseApiSlice";
 import useDeleteExpense from "../hooks/useDeleteExpense";
 import { expenseCategories, type Expense, type ExpensePrefill } from "../types";
-import { canChangeExpense } from "../utils";
+import { canChangeExpense, payerOptions } from "../utils";
 
 const splitOptions = [
   { name: "Split evenly between everyone", value: "even_all" },
@@ -182,7 +182,12 @@ export default function ExpenseForm({
           label="Paid by"
           {...register("paidById")}
           value={watch("paidById")}
-          options={members.map((m) => ({
+          options={payerOptions(
+            members,
+            trip.role,
+            userId,
+            expense?.paidById,
+          ).map((m) => ({
             name: m.username,
             value: String(m.id),
           }))}
