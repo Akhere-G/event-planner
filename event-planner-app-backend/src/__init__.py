@@ -169,7 +169,6 @@ def register_blueprints(app: Flask):
         ai_bp,
         ai_task_bp,
         auth_bp,
-        change_set_bp,
         event_bp,
         flight_bp,
         expense_bp,
@@ -193,11 +192,6 @@ def register_blueprints(app: Flask):
     app.register_blueprint(
         itinerary_bp,
         url_prefix="/api/itineraries",
-    )
-
-    app.register_blueprint(
-        change_set_bp,
-        url_prefix="/api/itineraries/<int:itinerary_id>/changes",
     )
 
     app.register_blueprint(
