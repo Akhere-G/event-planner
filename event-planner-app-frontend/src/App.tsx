@@ -41,6 +41,7 @@ import { usePostHog } from "@posthog/react";
 import useLoadAnonTrip from "./features/trips/hooks/useLoadAnonTrip";
 import { useSaveTripMutation } from "./features/trips/services/tripsApiSlice";
 import { useUserRealtime } from "./features/realtime";
+import { ProposalsHost } from "./features/aiTasks/components";
 
 function App() {
   const isAuthenticated = useSelector(selectIsAuthenticated);
@@ -116,6 +117,7 @@ function App() {
       <Header links={links} />
       <Toaster position="top-right" richColors />
       {isAuth && <NotificationsPrompt />}
+      {isAuth && <ProposalsHost />}
 
       <main className="min-h-[93.5vh] 2xl:min-h-[96vh]">
         <Suspense
