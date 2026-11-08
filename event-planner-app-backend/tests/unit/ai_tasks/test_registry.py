@@ -1,7 +1,7 @@
 import pytest
 from marshmallow import Schema
 from src.ai_tasks import registry
-from src.ai_tasks.handlers.base import CONFLICTS_WITH_ANYTHING, AiTaskHandler
+from src.ai_tasks.handler import CONFLICTS_WITH_ANYTHING, AiTaskHandler
 from src.exceptions import UnknownAiTaskTypeError
 
 

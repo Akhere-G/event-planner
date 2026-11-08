@@ -4,7 +4,7 @@ import pytest
 from marshmallow import Schema
 from sqlalchemy import select
 from src.ai_tasks import registry
-from src.ai_tasks.handlers.base import AiTaskHandler
+from src.ai_tasks.handler import AiTaskHandler
 from src.extensions import db
 from src.ai_tasks.notifier import TaskNotifier, task_event_payload
 from src.models import Notification

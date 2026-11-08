@@ -1,8 +1,16 @@
 from marshmallow import Schema, fields, validate
 
+from .base_schema import CamelToSnakeMixin
 
-class EventSuggestionRequestSchema(Schema):
-    date = fields.String(required=True, error_messages={"required": "Date is required."})
+
+class EventSuggestionRequestSchema(CamelToSnakeMixin, Schema):
+    """Parameters of a "fill in day" task."""
+
+    date = fields.Date(
+        required=True,
+        format="%Y-%m-%d",
+        error_messages={"required": "Date is required."},
+    )
     pace = fields.String(
         load_default="balanced",
         validate=validate.OneOf(["relaxed", "balanced", "packed"]),
@@ -19,3 +27,7 @@ class EventSuggestionRequestSchema(Schema):
         fields.String(validate=validate.Length(max=50)),
         load_default=None,
     )
+
+
+class NoParamsSchema(CamelToSnakeMixin, Schema):
+    """Parameters of tasks that take none (the trip's saved data is the input)."""
