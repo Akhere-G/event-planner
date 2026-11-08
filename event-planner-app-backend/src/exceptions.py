@@ -86,6 +86,11 @@ class InvalidAiTaskStateError(AppError):
     default_message = "This AI task can no longer be changed."
 
 
+class AiTaskQueueError(AppError):
+    status_code = 503
+    default_message = "Could not start this AI task. Please try again."
+
+
 class AIProviderError(AppError, RuntimeError):
     """Every AI provider failed or timed out. Safe to retry."""
 
