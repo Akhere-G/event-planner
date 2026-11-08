@@ -140,7 +140,7 @@ export default function OptimiseDayForm({
         ),
       )}
     >
-      <div className="flex min-h-0 flex-1 flex-col gap-6 overflow-y-auto p-5">
+      <div className="relative flex min-h-0 flex-1 flex-col gap-6 overflow-y-auto p-5">
         <div className="flex flex-col gap-1">
           <OptimiseDayPicker
             days={days}
@@ -252,7 +252,7 @@ export default function OptimiseDayForm({
             />
 
             <div className="flex flex-col gap-2">
-              <label className="flex cursor-pointer items-center justify-between gap-3">
+              <label className="relative flex cursor-pointer items-center justify-between gap-3">
                 <span className="flex flex-col">
                   <span className="font-semibold text-text-primary">
                     Allow event changes
