@@ -61,6 +61,20 @@ class NotFoundError(AppError):
     default_message = "Item not found."
 
 
+class AIProviderError(AppError, RuntimeError):
+    """Every AI provider failed or timed out. Safe to retry."""
+
+    status_code = 503
+    default_message = "The AI service is temporarily unavailable. Please try again."
+
+
+class AIResponseError(AppError, ValueError):
+    """The AI answered, but not with usable output. Retrying rarely helps."""
+
+    status_code = 502
+    default_message = "The AI returned a response that could not be used."
+
+
 class FlightProviderError(Exception):
     """A single flight provider failed to answer a search."""
 

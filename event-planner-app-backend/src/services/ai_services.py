@@ -11,6 +11,7 @@ from google import genai
 from google.genai import types as genai_types
 from groq import Groq
 
+from ..exceptions import AIProviderError, AIResponseError
 from ..utils import ai_output_validators
 from ..utils.location_utils import get_place_details
 from .itineraries_service import get_itinerary
@@ -25,7 +26,7 @@ def format_json(raw_json: str) -> Any:
     Handles normal JSON as well as JSON wrapped in markdown code fences.
     """
     if not isinstance(raw_json, str):
-        raise ValueError("AI response must be a string.")
+        raise AIResponseError("AI response must be a string.")
 
     clean_json = raw_json.strip()
 
@@ -52,14 +53,14 @@ def format_json(raw_json: str) -> Any:
         ]
 
         if not starts:
-            raise ValueError("No JSON object or array found in AI response.")
+            raise AIResponseError("No JSON object or array found in AI response.")
 
         clean_json = clean_json[min(starts) :]
 
     try:
         return json.loads(clean_json)
     except json.JSONDecodeError as exc:
-        raise ValueError("AI response contained invalid JSON.") from exc
+        raise AIResponseError("AI response contained invalid JSON.") from exc
 
 
 def _trip_zone(timezone_name: str | None) -> ZoneInfo:
@@ -95,7 +96,7 @@ def get_ai_response(prompt: str) -> str:
         try:
             client_gemini = genai.Client(
                 api_key=gemini_api_key,
-                http_options=genai_types.HttpOptions(timeout=10000),
+                http_options=genai_types.HttpOptions(timeout=100000),
             )
 
             response = client_gemini.models.generate_content(
@@ -123,7 +124,8 @@ def get_ai_response(prompt: str) -> str:
                         "content": (
                             "You are an encouraging travel assistant. "
                             "Use British English. "
-                            "Respond ONLY with valid JSON."
+                            "Respond ONLY with valid JSON. "
+                            "Never leave JSON incomplete."
                         ),
                     },
                     {
@@ -131,10 +133,21 @@ def get_ai_response(prompt: str) -> str:
                         "content": prompt,
                     },
                 ],
-                timeout=10.0,
+                max_completion_tokens=8192,
+                timeout=100.0,
             )
 
-            content = completion.choices[0].message.content
+            choice = completion.choices[0]
+            content = choice.message.content
+
+            logger.info(
+                "Groq response: finish_reason=%s, completion_tokens=%s",
+                choice.finish_reason,
+                completion.usage.completion_tokens,
+            )
+
+            if choice.finish_reason == "length":
+                raise RuntimeError("Groq response was truncated by the token limit.")
 
             if content:
                 return content
@@ -144,7 +157,7 @@ def get_ai_response(prompt: str) -> str:
         except Exception:
             logger.exception("Groq request failed.")
 
-    raise RuntimeError("All AI providers failed.")
+    raise AIProviderError("All AI providers failed.")
 
 
 def get_insights(itinerary_id: int):
@@ -478,7 +491,7 @@ Instructions:
 
 6. Set "is_shared" to false for individual/personal items.
 
-Return ONLY a JSON array.
+Return ONLY a JSON array. Max 10 items.
 
 Schema:
 
@@ -503,7 +516,6 @@ Schema:
             exc,
         )
         return []
-
 
 
 def __getattr__(name: str):
