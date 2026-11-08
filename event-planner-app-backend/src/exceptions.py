@@ -61,6 +61,31 @@ class NotFoundError(AppError):
     default_message = "Item not found."
 
 
+class UnknownAiTaskTypeError(AppError):
+    status_code = 404
+    default_message = "Unknown AI task type."
+
+
+class AiTaskNotFoundError(AppError):
+    status_code = 404
+    default_message = "AI task not found."
+
+
+class ActiveAiTaskConflictError(AppError):
+    status_code = 409
+    default_message = "This is already being worked on. Please wait for it to finish."
+
+
+class TooManyActiveAiTasksError(AppError):
+    status_code = 429
+    default_message = "You have too many AI tasks running. Please wait for one to finish."
+
+
+class InvalidAiTaskStateError(AppError):
+    status_code = 409
+    default_message = "This AI task can no longer be changed."
+
+
 class AIProviderError(AppError, RuntimeError):
     """Every AI provider failed or timed out. Safe to retry."""
 
