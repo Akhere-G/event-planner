@@ -13,7 +13,9 @@ from groq import Groq
 
 from ..exceptions import AIProviderError, AIResponseError
 from ..utils import ai_output_validators
+from ..utils.db_utils import release_connection
 from ..utils.location_utils import get_place_details
+from ..utils.progress import ProgressCallback, no_progress
 from .itineraries_service import get_itinerary
 
 logger = logging.getLogger(__name__)
@@ -202,6 +204,7 @@ def get_event_suggestions(
     companions: str = "couple",
     transport: str = "public_transport",
     interests: List[str] | None = None,
+    progress: ProgressCallback = no_progress,
 ):
     itinerary = get_itinerary(itinerary_id)
 
@@ -281,60 +284,44 @@ JSON FORMAT:
 ]
 """
 
-    try:
-        raw_response = get_ai_response(prompt)
-        suggestions = format_json(raw_response)
+    release_connection()
+    progress("Asking the AI for ideas", None, None)
+    suggestions = format_json(get_ai_response(prompt))
 
-        if not isinstance(suggestions, list):
-            return []
+    if not isinstance(suggestions, list):
+        raise AIResponseError("AI suggestions must be a list.")
 
-        valid_suggestions = [
-            event
-            for event in suggestions
-            if ai_output_validators.validate_event_suggestion(
-                event,
-                requested_date,
+    valid_suggestions = [
+        event
+        for event in suggestions
+        if ai_output_validators.validate_event_suggestion(event, requested_date)
+    ]
+
+    geocoded_events = []
+
+    for index, event in enumerate(valid_suggestions, start=1):
+        progress("Looking up places", index, len(valid_suggestions))
+        try:
+            details = get_place_details(
+                name=event["name"],
+                address=event.get("address"),
             )
-        ]
 
-        if not valid_suggestions:
-            return []
-
-        geocoded_events = []
-
-        for event in valid_suggestions:
-            try:
-                details = get_place_details(
-                    name=event["name"],
-                    address=event.get("address"),
-                )
-
-                event_with_location = {
+            geocoded_events.append(
+                {
                     **event,
-                    "start_at": trip_local_to_utc(
-                        event["start_at"], timezone
-                    ).isoformat(),
+                    "start_at": trip_local_to_utc(event["start_at"], timezone).isoformat(),
                     "end_at": trip_local_to_utc(event["end_at"], timezone).isoformat(),
                     "latitude": details["latitude"],
                     "longitude": details["longitude"],
                     "address": details.get("formatted_address") or event.get("address"),
                 }
+            )
 
-                geocoded_events.append(event_with_location)
+        except Exception:
+            logger.exception("Failed to geocode venue: %s", event.get("name"))
 
-            except Exception:
-                logger.exception(
-                    "Failed to geocode venue: %s",
-                    event.get("name"),
-                )
-        return geocoded_events
-
-    except (ValueError, RuntimeError) as exc:
-        logger.warning(
-            "Failed to generate event suggestions: %s",
-            exc,
-        )
-        return []
+    return geocoded_events
 
 
 def optimise_events(
@@ -447,7 +434,9 @@ Events:
         return []
 
 
-def generate_packing_list(itinerary_id: int):
+def generate_packing_list(
+    itinerary_id: int, progress: ProgressCallback = no_progress
+):
     itinerary = get_itinerary(itinerary_id)
 
     duration = (itinerary.end_date - itinerary.start_date).days + 1
@@ -504,18 +493,11 @@ Schema:
 ]
 """
 
-    try:
-        raw_response = get_ai_response(prompt)
-        items = format_json(raw_response)
-
-        return ai_output_validators.validate_packing_items(items)
-
-    except (ValueError, RuntimeError) as exc:
-        logger.warning(
-            "Failed to generate packing list: %s",
-            exc,
-        )
-        return []
+    release_connection()
+    progress("Asking the AI for a packing list", None, None)
+    return ai_output_validators.validate_packing_items(
+        format_json(get_ai_response(prompt))
+    )
 
 
 def __getattr__(name: str):

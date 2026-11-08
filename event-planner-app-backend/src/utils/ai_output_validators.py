@@ -1,12 +1,13 @@
 from datetime import datetime
 from typing import Any
 
+from ..exceptions import AIResponseError
 from ..models import Event
 
 
 def validate_insights(insights: Any) -> list[dict[str, str]]:
     if not isinstance(insights, list):
-        raise ValueError("AI response must be a list.")
+        raise AIResponseError("AI response must be a list.")
 
     validated = []
 
@@ -74,7 +75,7 @@ def validate_optimised_events(
     Validate AI-generated event optimisation results.
     """
     if not isinstance(optimised_events, list):
-        raise ValueError("AI response must be a list.")
+        raise AIResponseError("AI response must be a list.")
 
     original_events_by_id = {event.id: event for event in original_events}
 
@@ -128,7 +129,7 @@ def validate_packing_items(
     items: Any,
 ) -> list[dict[str, Any]]:
     if not isinstance(items, list):
-        raise ValueError("AI response must be a list.")
+        raise AIResponseError("AI response must be a list.")
 
     validated = []
 

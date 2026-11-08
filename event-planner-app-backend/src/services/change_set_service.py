@@ -95,3 +95,18 @@ def build_event_update_ops(updates: list[dict]) -> list[dict]:
         }
         for update in updates
     ]
+
+
+def build_packing_create_op(
+    name: str,
+    category: str,
+    is_shared: bool,
+    reason: str | None = None,
+) -> dict:
+    """A preview-only op that adds one packing item."""
+    return {
+        "op": "create",
+        "entity": "packing_item",
+        "data": {"name": name[:100], "category": category[:50], "is_shared": is_shared},
+        "reason": _clean_reason(reason),
+    }
