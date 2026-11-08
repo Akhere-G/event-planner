@@ -141,6 +141,7 @@ def initialise_realtime(app: Flask, testing: bool):
 def register_models():
     from .models import (
         Accommodation,
+        AiTask,
         Event,
         Flight,
         Expense,
