@@ -46,8 +46,10 @@ export const flightApiSlice = apiSlice.injectEndpoints({
         method: "POST",
         body: flightData,
       }),
+      // A new flight gets an expense, and deleting one unlinks its expense.
       invalidatesTags: (_result, _error, { tripId }) => [
         { type: "Flights", id: tripId },
+        { type: "Expenses", id: tripId },
       ],
     }),
     deleteFlight: builder.mutation<
@@ -58,8 +60,10 @@ export const flightApiSlice = apiSlice.injectEndpoints({
         url: `/itineraries/${tripId}/flights/${flightId}`,
         method: "DELETE",
       }),
+      // A new flight gets an expense, and deleting one unlinks its expense.
       invalidatesTags: (_result, _error, { tripId }) => [
         { type: "Flights", id: tripId },
+        { type: "Expenses", id: tripId },
       ],
     }),
   }),

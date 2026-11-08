@@ -4,12 +4,16 @@ import { Provider } from "react-redux";
 import { MemoryRouter, Route, Routes } from "react-router";
 import { render, type RenderOptions } from "@testing-library/react";
 import { apiSlice } from "../features/api/apiSlice";
+import { authSlice } from "../features/auth/services/authSlice";
+import { realtimeSlice } from "../features/realtime/realtimeSlice";
 import mapReducer from "../features/maps/service/mapSlice";
 
 export function createTestStore() {
   return configureStore({
     reducer: {
       [apiSlice.reducerPath]: apiSlice.reducer,
+      [authSlice.name]: authSlice.reducer,
+      [realtimeSlice.name]: realtimeSlice.reducer,
       map: mapReducer,
     },
     middleware: (getDefaultMiddleware) =>

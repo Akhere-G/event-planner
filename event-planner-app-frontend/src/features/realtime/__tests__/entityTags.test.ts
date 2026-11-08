@@ -28,6 +28,26 @@ describe("entitiesToTags", () => {
     expect(entitiesToTags(["flight"], 7)).toEqual([{ type: "Flights", id: 7 }]);
   });
 
+  it("maps expenses and shares to everything that embeds an expense", () => {
+    const tags = [
+      { type: "Expenses", id: 7 },
+      { type: "Events", id: 7 },
+      { type: "Flights", id: 7 },
+      "Accommodations",
+    ];
+    expect(entitiesToTags(["expense"], 7)).toEqual(tags);
+    expect(entitiesToTags(["expense_share"], 7)).toEqual(tags);
+    expect(entitiesToTags(["expense", "expense_share", "flight"], 7)).toEqual(
+      tags,
+    );
+  });
+
+  it("maps settlements to the settlements tag only", () => {
+    expect(entitiesToTags(["settlement"], 7)).toEqual([
+      { type: "Settlements", id: 7 },
+    ]);
+  });
+
   it("maps invites to the invites list", () => {
     expect(entitiesToTags(["invite"], 7)).toEqual([
       { type: "Invites", id: "LIST" },
@@ -49,7 +69,7 @@ describe("entitiesToTags", () => {
   });
 
   it("ignores entities it does not know yet", () => {
-    expect(entitiesToTags(["expense"], 3)).toEqual([]);
+    expect(entitiesToTags(["receipt"], 3)).toEqual([]);
   });
 });
 

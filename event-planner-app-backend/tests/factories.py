@@ -1,15 +1,19 @@
 from datetime import date, datetime, timezone
+from decimal import Decimal
 
 import factory
 from src.extensions import bcrypt, db
 from src.models import (
     Airport,
     Event,
+    Expense,
+    ExpenseShare,
     Flight,
     InvitationStatus,
     Invite,
     Itinerary,
     ItineraryUser,
+    Settlement,
     User,
     UserRole,
     Wishlist,
@@ -200,3 +204,50 @@ class FlightFactory(factory.alchemy.SQLAlchemyModelFactory):
     arrive_at = datetime(2026, 8, 1, 9, 20, tzinfo=timezone.utc)
     created_by_id = factory.LazyAttribute(lambda obj: obj.creator.id)
     updated_by_id = factory.LazyAttribute(lambda obj: obj.creator.id)
+
+
+class ExpenseFactory(factory.alchemy.SQLAlchemyModelFactory):
+    class Meta:
+        model = Expense
+        sqlalchemy_session = db.session
+        sqlalchemy_session_persistence = "flush"
+
+    itinerary = factory.SubFactory(ItineraryFactory)
+    paid_by = factory.SubFactory(UserFactory)
+
+    description = "Cost"
+    category = "other"
+    amount = Decimal("30.00")
+    currency = "GBP"
+    amount_gbp = factory.SelfAttribute("amount")
+    fx_rate = Decimal("1")
+    spent_on = date(2026, 8, 1)
+    split_type = "even_all"
+    created_by_id = factory.LazyAttribute(lambda obj: obj.paid_by.id)
+    updated_by_id = factory.LazyAttribute(lambda obj: obj.paid_by.id)
+
+
+class ExpenseShareFactory(factory.alchemy.SQLAlchemyModelFactory):
+    class Meta:
+        model = ExpenseShare
+        sqlalchemy_session = db.session
+        sqlalchemy_session_persistence = "flush"
+
+    expense = factory.SubFactory(ExpenseFactory)
+    user = factory.SubFactory(UserFactory)
+    amount_gbp = Decimal("10.00")
+
+
+class SettlementFactory(factory.alchemy.SQLAlchemyModelFactory):
+    class Meta:
+        model = Settlement
+        sqlalchemy_session = db.session
+        sqlalchemy_session_persistence = "flush"
+
+    itinerary_id = factory.LazyFunction(lambda: ItineraryFactory().id)
+    from_user = factory.SubFactory(UserFactory)
+    to_user = factory.SubFactory(UserFactory)
+    amount_gbp = Decimal("10.00")
+    settled_on = date(2026, 8, 2)
+    created_by_id = factory.LazyAttribute(lambda obj: obj.from_user.id)
+    updated_by_id = factory.LazyAttribute(lambda obj: obj.from_user.id)
