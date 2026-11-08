@@ -22,6 +22,9 @@ from ..models import (
 
 CENT = Decimal("0.01")
 
+PAID_BY_OTHERS_MESSAGE = "Only an admin can set someone else as the payer."
+PAYMENT_FROM_OTHERS_MESSAGE = "Only an admin can record a payment made by someone else."
+
 # An expense hangs off at most one itinerary item, and an item has one expense.
 LINK_MODELS = {
     "event_id": Event,
@@ -251,14 +254,27 @@ def stage_create_expense(
     return expense
 
 
-def create_expense(user_id: int | None, itinerary_id: int, data: dict) -> Expense:
+def create_expense(
+    user_id: int | None, role: str, itinerary_id: int, data: dict
+) -> Expense:
     try:
+        if data.get("paid_by_id") is not None:
+            _require_self_unless_admin(
+                user_id, role, data["paid_by_id"], PAID_BY_OTHERS_MESSAGE
+            )
         expense = stage_create_expense(user_id, itinerary_id, data)
         db.session.commit()
         return expense
     except Exception:
         db.session.rollback()
         raise
+
+
+def _require_self_unless_admin(
+    user_id: int | None, role: str, person_id: int, message: str
+):
+    if role != UserRole.ADMIN.value and person_id != user_id:
+        raise UserNotAuthorisedError(message)
 
 
 def _require_owner_or_admin(user_id: int | None, role: str, expense: Expense):
@@ -290,6 +306,10 @@ def update_expense(
             for field, value in _money_fields(data["amount"]).items():
                 setattr(expense, field, value)
         if "paid_by_id" in data:
+            if data["paid_by_id"] != expense.paid_by_id:
+                _require_self_unless_admin(
+                    user_id, role, data["paid_by_id"], PAID_BY_OTHERS_MESSAGE
+                )
             _require_members(itinerary_id, [data["paid_by_id"]])
             expense.paid_by_id = data["paid_by_id"]
         if "split_type" in data:
@@ -344,9 +364,14 @@ def get_settlement(itinerary_id: int, settlement_id: int) -> Settlement:
     return settlement
 
 
-def create_settlement(user_id: int | None, itinerary_id: int, data: dict) -> Settlement:
+def create_settlement(
+    user_id: int | None, role: str, itinerary_id: int, data: dict
+) -> Settlement:
     user_id = _require_user(user_id)
     try:
+        _require_self_unless_admin(
+            user_id, role, data["from_user_id"], PAYMENT_FROM_OTHERS_MESSAGE
+        )
         if data["from_user_id"] == data["to_user_id"]:
             raise BadRequestError("A settlement needs two different people.")
         _require_members(itinerary_id, [data["from_user_id"], data["to_user_id"]])
@@ -376,6 +401,10 @@ def update_settlement(
         _require_owner_or_admin(user_id, role, settlement)  # type: ignore[arg-type]
         from_id = data.get("from_user_id", settlement.from_user_id)
         to_id = data.get("to_user_id", settlement.to_user_id)
+        if from_id != settlement.from_user_id:
+            _require_self_unless_admin(
+                user_id, role, from_id, PAYMENT_FROM_OTHERS_MESSAGE
+            )
         if from_id == to_id:
             raise BadRequestError("A settlement needs two different people.")
         _require_members(itinerary_id, [from_id, to_id])

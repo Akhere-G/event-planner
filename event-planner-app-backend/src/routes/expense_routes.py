@@ -31,7 +31,9 @@ def get_expenses_route(itinerary_id: int, access: ItineraryAccess):
 def create_expense_route(itinerary_id: int, access: ItineraryAccess):
     schema = ExpenseSchema()
     data = schema.load(request.json)
-    expense = expense_service.create_expense(access.user_id, itinerary_id, data)
+    expense = expense_service.create_expense(
+        access.user_id, access.role, itinerary_id, data
+    )
     return api_response(
         success=True,
         data=schema.dump(expense),
@@ -99,7 +101,9 @@ def get_settlements_route(itinerary_id: int, access: ItineraryAccess):
 def create_settlement_route(itinerary_id: int, access: ItineraryAccess):
     schema = SettlementSchema()
     data = schema.load(request.json)
-    settlement = expense_service.create_settlement(access.user_id, itinerary_id, data)
+    settlement = expense_service.create_settlement(
+        access.user_id, access.role, itinerary_id, data
+    )
     return api_response(
         success=True,
         data=schema.dump(settlement),
