@@ -62,7 +62,7 @@ export default function OptimiseLockedEvents({
                   const isLocked = locked.includes(event.id);
                   return (
                     <li key={event.id} className="border-t border-surface-border">
-                      <label className="flex cursor-pointer items-center gap-3 bg-surface px-3 py-2.5 has-focus-visible:ring-2 has-focus-visible:ring-inset has-focus-visible:ring-brand-primary">
+                      <label className="relative flex cursor-pointer items-center gap-3 bg-surface px-3 py-2.5 has-focus-visible:ring-2 has-focus-visible:ring-inset has-focus-visible:ring-brand-primary">
                         <input
                           type="checkbox"
                           className="sr-only"
