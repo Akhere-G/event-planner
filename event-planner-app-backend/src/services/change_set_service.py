@@ -97,6 +97,20 @@ def build_event_update_ops(updates: list[dict]) -> list[dict]:
     ]
 
 
+def build_event_delete_ops(removals: list[dict]) -> list[dict]:
+    """Turn AI event removals into preview-only delete ops."""
+    return [
+        {
+            "op": "delete",
+            "entity": "event",
+            "id": removal["id"],
+            "data": {},
+            "reason": _clean_reason(removal.get("reason")),
+        }
+        for removal in removals
+    ]
+
+
 def build_packing_create_op(
     name: str,
     category: str,

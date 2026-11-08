@@ -1,6 +1,4 @@
-from datetime import datetime
-
-from flask import Blueprint, request
+from flask import Blueprint
 
 from ..extensions import limiter
 from ..middleware.itinerary_access_required import (
@@ -8,8 +6,7 @@ from ..middleware.itinerary_access_required import (
     itinerary_access_required,
 )
 from ..models import UserRole
-from ..services.ai_services import get_insights, optimise_events
-from ..services.change_set_service import build_event_update_ops
+from ..services.ai_services import get_insights
 from ..utils.format_response import api_response
 from ..utils.rate_limit import get_user_or_ip
 
@@ -24,35 +21,3 @@ ai_bp = Blueprint("ai", __name__)
 def get_insights_route(itinerary_id: int, access: ItineraryAccess):
     insights = get_insights(itinerary_id)
     return api_response(success=True, data=insights, message="Fetched insights")
-
-
-@ai_bp.route("/optimise-events/<int:itinerary_id>/preview", methods=["POST"])
-@itinerary_access_required(
-    allowed_roles=[UserRole.ADMIN, UserRole.EDITOR],
-    message="You must be an admin or an editor to change events.",
-)
-@limiter.limit("10 per minute", key_func=get_user_or_ip)
-def preview_optimised_events_route(itinerary_id: int, access: ItineraryAccess):
-    """Propose new times for a day's events. Nothing is saved until applied."""
-    body = request.get_json(silent=True) or {}
-    date = body.get("date")
-
-    if not date:
-        return api_response(success=False, error="Date is required.", status_code=400)
-
-    try:
-        event_date = datetime.strptime(date, "%Y-%m-%d")
-    except ValueError:
-        return api_response(
-            success=False,
-            error="Invalid format for date.",
-            message="Invalid format for date.",
-            status_code=400,
-        )
-
-    optimised_events = optimise_events(itinerary_id, event_date)
-    return api_response(
-        success=True,
-        data={"ops": build_event_update_ops(optimised_events)},
-        message="Generated optimised times.",
-    )
