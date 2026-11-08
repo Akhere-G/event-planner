@@ -1,4 +1,10 @@
 from src.models.accommodation_model import Accommodation
+from src.models.ai_task_model import (
+    ACTIVE_STATUSES,
+    FINISHED_STATUSES,
+    AiTask,
+    AiTaskStatus,
+)
 from src.models.airport_model import Airport
 from src.models.audit_mixins import AuditMixin
 from src.models.event_model import Event
@@ -20,7 +26,11 @@ from src.models.user_model import User
 from src.models.wishlist_model import Wishlist, WishlistItem, WishlistItemVote
 
 __all__ = [
+    "ACTIVE_STATUSES",
+    "FINISHED_STATUSES",
     "Accommodation",
+    "AiTask",
+    "AiTaskStatus",
     "Airport",
     "AuditMixin",
     "Event",
