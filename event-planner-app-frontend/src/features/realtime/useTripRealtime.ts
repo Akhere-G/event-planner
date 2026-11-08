@@ -13,6 +13,9 @@ import type {
   TripChangedWire,
 } from "./types";
 
+import { AI_TASK_EVENT, handleAiTaskChanged } from "../aiTasks/realtime";
+import type { AiTaskChangedWire } from "../aiTasks/types";
+
 const HEARTBEAT_MS = 20_000;
 
 let activeTrip: { socket: Socket; tripId: number } | null = null;
@@ -81,7 +84,16 @@ export default function useTripRealtime(tripId: number) {
       dispatch(setPresence(users));
     };
 
+    // Signed-in users hear about their tasks on their own room (see
+    // useUserRealtime); only anonymous visitors are told through the trip's.
+    const onAiTaskChanged = (payload: AiTaskChangedWire) => {
+      if (myUserId === null && payload.trip_id === tripId) {
+        handleAiTaskChanged(payload, dispatch);
+      }
+    };
+
     socket.on("connect", join);
+    socket.on(AI_TASK_EVENT, onAiTaskChanged);
     socket.on("trip:changed", onTripChanged);
     socket.on("presence:update", onPresence);
     if (socket.connected) join();
@@ -95,6 +107,7 @@ export default function useTripRealtime(tripId: number) {
     return () => {
       clearInterval(heartbeat);
       socket.off("connect", join);
+      socket.off(AI_TASK_EVENT, onAiTaskChanged);
       socket.off("trip:changed", onTripChanged);
       socket.off("presence:update", onPresence);
       if (socket.connected) socket.emit("trip:leave", { trip_id: tripId });
