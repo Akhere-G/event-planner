@@ -3,6 +3,7 @@ from datetime import timedelta
 import pytest
 from marshmallow import Schema, fields
 from sqlalchemy import select
+import src.ai_tasks.handlers  # noqa: F401  (registers the real handlers before they are swapped out)
 from src.ai_tasks import registry
 from src.ai_tasks.handler import AiTaskHandler
 from src.extensions import db
