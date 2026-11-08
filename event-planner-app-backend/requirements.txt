@@ -36,10 +36,12 @@ google-api-core==2.30.3
 google-api-python-client==2.195.0
 google-auth==2.50.0
 google-auth-httplib2==0.3.1
+google-cloud-tasks==2.23.0
 google-genai==1.74.0
 google-generativeai==0.8.6
 googleapis-common-protos==1.74.0
 googlemaps==4.10.0
+grpc-google-iam-v1==0.14.4
 groq==1.2.0
 grpcio==1.80.0
 grpcio-status==1.71.2
