@@ -11,22 +11,22 @@ export const OPTIMISE_GOALS: {
   {
     value: "minimise_travel",
     label: "Minimise travel",
-    hint: "Order events so the trips between them are short.",
+    hint: "Shorter journeys between stops.",
   },
   {
     value: "group_by_area",
     label: "Group by neighbourhood",
-    hint: "Keep events in the same area together.",
+    hint: "Keep nearby places together.",
   },
   {
     value: "respect_opening_hours",
     label: "Respect opening hours",
-    hint: "Only schedule venues while they are open.",
+    hint: "Only visit venues while they're open.",
   },
 ];
 
 export const PACE_CHOICES = [
-  { value: "", label: "Keep as is" },
+  { value: "", label: "No preference" },
   { value: "relaxed", label: "Relaxed" },
   { value: "balanced", label: "Balanced" },
   { value: "packed", label: "Packed" },
