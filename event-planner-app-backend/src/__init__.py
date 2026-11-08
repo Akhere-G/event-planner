@@ -167,6 +167,7 @@ def register_blueprints(app: Flask):
     from .routes import (
         accommodation_bp,
         ai_bp,
+        ai_task_bp,
         auth_bp,
         change_set_bp,
         event_bp,
@@ -176,6 +177,7 @@ def register_blueprints(app: Flask):
         itinerary_invites_bp,
         notification_bp,
         packing_item_bp,
+        pending_ai_task_bp,
         preferences_bp,
         user_bp,
         user_invites_bp,
@@ -235,6 +237,16 @@ def register_blueprints(app: Flask):
     app.register_blueprint(
         ai_bp,
         url_prefix="/api/ai",
+    )
+
+    app.register_blueprint(
+        ai_task_bp,
+        url_prefix="/api/itineraries/<int:itinerary_id>/ai-tasks",
+    )
+
+    app.register_blueprint(
+        pending_ai_task_bp,
+        url_prefix="/api/ai-tasks",
     )
 
     app.register_blueprint(
