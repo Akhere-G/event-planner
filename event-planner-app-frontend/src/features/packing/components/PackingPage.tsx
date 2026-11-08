@@ -1,10 +1,9 @@
 import { useEffect, useState } from "react";
 import { StateGate } from "../../../components";
 import type { Trip } from "../../trips/types";
-import {
-  useGetPackingItemsQuery,
-  useGeneratePackingItemsMutation,
-} from "../services/packingApiSlice";
+import { useGetPackingItemsQuery } from "../services/packingApiSlice";
+import { useCreateAiTaskMutation } from "../../aiTasks/services/aiTaskApiSlice";
+import { useTripAiTasks } from "../../aiTasks/hooks";
 import PackingItems from "./PackingItems";
 import {
   Sparkles,
@@ -17,6 +16,7 @@ import { toast } from "sonner";
 import { isApiError } from "../../api/utils";
 import { usePostHog } from "@posthog/react";
 import useLoadAnonTrip from "../../trips/hooks/useLoadAnonTrip";
+import { isActive } from "../../aiTasks/utils";
 
 type PackingSubTab = "personal" | "shared";
 
@@ -24,8 +24,11 @@ export default function PackingPage({ trip }: { trip: Trip }) {
   const { data, isLoading, isError } = useGetPackingItemsQuery({
     tripId: trip.id,
   });
-  const [generatePackingItems, { isLoading: isGenerating }] =
-    useGeneratePackingItemsMutation();
+  const [createAiTask, { isLoading: isQueueing }] = useCreateAiTaskMutation();
+  const { tasks } = useTripAiTasks(trip.id);
+  const isGenerating =
+    isQueueing ||
+    tasks.some((task) => task.type === "generate_packing" && isActive(task));
   const posthog = usePostHog();
   const { anonTrip } = useLoadAnonTrip();
 
@@ -51,16 +54,15 @@ export default function PackingPage({ trip }: { trip: Trip }) {
 
   const handleGenerateAI = async () => {
     try {
-      await generatePackingItems({ tripId: trip.id }).unwrap();
-      posthog?.capture("packing_items_generated", {
-        trip_id: trip.id,
-      });
-      toast.success("Smart generated customised packing recommendations!");
+      await createAiTask({ tripId: trip.id, type: "generate_packing" }).unwrap();
+      toast.success(
+        "Building your packing list. We'll let you know when it's ready.",
+      );
     } catch (err) {
       if (isApiError(err)) {
         toast.error(err.data.message);
       } else {
-        toast.error("Failed to generate packing recommendations");
+        toast.error("Could not start the packing list.");
       }
     }
   };

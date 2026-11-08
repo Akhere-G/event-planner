@@ -58,16 +58,6 @@ export const packingApiSlice = apiSlice.injectEndpoints({
       }),
       invalidatesTags: [{ type: "PackingItem", id: "LIST" }],
     }),
-    generatePackingItems: builder.mutation<
-      ApiResponse<PackingItem[]>,
-      { tripId: number }
-    >({
-      query: ({ tripId }) => ({
-        url: `/itineraries/${tripId}/packing_items/generate`,
-        method: "POST",
-      }),
-      invalidatesTags: [{ type: "PackingItem", id: "LIST" }],
-    }),
   }),
 });
 
@@ -76,5 +66,4 @@ export const {
   useAddPackingItemMutation,
   useUpdatePackingItemMutation,
   useDeletePackingItemMutation,
-  useGeneratePackingItemsMutation,
 } = packingApiSlice;
