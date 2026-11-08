@@ -266,7 +266,9 @@ def test_balances_and_settlements(admin_client, base, members, admin_user, edito
     assert len(listed) == 1
     sid = listed[0]["id"]
     assert (
-        admin_client.patch(f"{base}/settlements/{sid}", json={"amountGbp": 5}).status_code
+        admin_client.patch(
+            f"{base}/settlements/{sid}", json={"amountGbp": 5}
+        ).status_code
         == 200
     )
     assert admin_client.delete(f"{base}/settlements/{sid}").status_code == 200
@@ -283,3 +285,101 @@ def test_settlement_same_person_rejected(admin_client, base, members, admin_user
         },
     )
     assert res.status_code == 400
+
+
+def payment(from_user, to_user, **kw):
+    body = {
+        "fromUserId": from_user.id,
+        "toUserId": to_user.id,
+        "amountGbp": 10,
+        "settledOn": "2026-08-02",
+    }
+    body.update(kw)
+    return body
+
+
+def test_editor_cannot_set_someone_else_as_payer(
+    editor_client, base, members, admin_user
+):
+    res = editor_client.post(base, json=payload(paidById=admin_user.id))
+    assert res.status_code == 403
+
+
+def test_editor_can_name_themselves_as_payer(editor_client, base, members, editor_user):
+    res = editor_client.post(base, json=payload(paidById=editor_user.id))
+    assert res.status_code == 201
+    assert res.get_json()["data"]["paidById"] == editor_user.id
+
+
+def test_admin_can_set_someone_else_as_payer(admin_client, base, members, editor_user):
+    res = admin_client.post(base, json=payload(paidById=editor_user.id))
+    assert res.status_code == 201
+    assert res.get_json()["data"]["paidById"] == editor_user.id
+
+
+def test_editor_cannot_change_payer_to_someone_else(
+    editor_client, base, members, admin_user
+):
+    created = editor_client.post(base, json=payload()).get_json()["data"]
+    res = editor_client.patch(
+        f"{base}/{created['id']}", json={"paidById": admin_user.id}
+    )
+    assert res.status_code == 403
+
+
+def test_editor_can_resave_an_expense_paid_by_someone_else(
+    client, base, members, admin_user, editor_user
+):
+    """The edit form always sends the payer, so an unchanged payer must be accepted."""
+    login_as(client, admin_user.id)
+    created = client.post(base, json=payload(paidById=editor_user.id)).get_json()[
+        "data"
+    ]
+    db.session.get(Expense, created["id"]).created_by_id = editor_user.id
+    db.session.commit()
+    login_as(client, editor_user.id)
+    res = client.patch(
+        f"{base}/{created['id']}",
+        json={"paidById": editor_user.id, "description": "Lunch"},
+    )
+    assert res.status_code == 200
+
+
+def test_editor_cannot_record_a_payment_from_someone_else(
+    editor_client, base, members, admin_user, editor_user
+):
+    res = editor_client.post(
+        f"{base}/settlements", json=payment(admin_user, editor_user)
+    )
+    assert res.status_code == 403
+
+
+def test_editor_can_record_their_own_payment(
+    editor_client, base, members, admin_user, editor_user
+):
+    res = editor_client.post(
+        f"{base}/settlements", json=payment(editor_user, admin_user)
+    )
+    assert res.status_code == 201
+    assert res.get_json()["data"]["fromUserId"] == editor_user.id
+
+
+def test_admin_can_record_a_payment_between_other_members(
+    admin_client, base, members, editor_user, viewer_user
+):
+    res = admin_client.post(
+        f"{base}/settlements", json=payment(editor_user, viewer_user)
+    )
+    assert res.status_code == 201
+
+
+def test_editor_cannot_change_a_payment_to_be_from_someone_else(
+    editor_client, base, members, admin_user, editor_user
+):
+    created = editor_client.post(
+        f"{base}/settlements", json=payment(editor_user, admin_user)
+    ).get_json()["data"]
+    res = editor_client.patch(
+        f"{base}/settlements/{created['id']}", json={"fromUserId": admin_user.id}
+    )
+    assert res.status_code == 403
