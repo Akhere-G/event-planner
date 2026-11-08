@@ -1,20 +1,26 @@
 import { useState } from "react";
 import { ArrowRight, HandCoins } from "lucide-react";
+import { useSelector } from "react-redux";
 import { StateGate } from "../../../components";
+import type { RootState } from "../../../store";
 import type { Trip } from "../../trips/types";
-import { canUserEdit } from "../../users/utils";
+import { canUserEdit, isAdmin } from "../../users/utils";
 import { useGetBalancesQuery } from "../services/expenseApiSlice";
 import type { Transfer } from "../types";
 import { formatGbp } from "../utils";
+import PaymentsList from "./PaymentsList";
 import SettlementModal from "./SettlementModal";
 
 export default function BalancesPanel({ trip }: { trip: Trip }) {
+  const userId = useSelector((state: RootState) => state.auth.userId);
   const { data, isLoading, isError } = useGetBalancesQuery(trip.id);
   const [settling, setSettling] = useState<{ suggestion?: Transfer } | null>(
     null,
   );
 
   const balances = data?.data;
+  const canMarkPaid = (t: Transfer) =>
+    canUserEdit(trip.role) && (isAdmin(trip.role) || t.fromUserId === userId);
   const nameOf = (id: number) =>
     balances?.balances.find((b) => b.userId === id)?.username ?? "Unknown";
 
@@ -29,7 +35,7 @@ export default function BalancesPanel({ trip }: { trip: Trip }) {
             onClick={() => setSettling({})}
           >
             <HandCoins size={16} />
-            Record settlement
+            Record payment
           </button>
         )}
       </div>
@@ -86,7 +92,7 @@ export default function BalancesPanel({ trip }: { trip: Trip }) {
                   <span className="font-semibold">
                     {formatGbp(t.amountGbp)}
                   </span>
-                  {canUserEdit(trip.role) && (
+                  {canMarkPaid(t) && (
                     <button
                       type="button"
                       className="text-brand-primary hover:underline"
@@ -101,6 +107,7 @@ export default function BalancesPanel({ trip }: { trip: Trip }) {
           )}
         </div>
       </StateGate>
+      <PaymentsList trip={trip} />
       {settling && (
         <SettlementModal
           open
