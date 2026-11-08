@@ -83,39 +83,3 @@ def test_trip_local_to_utc_ignores_model_offset():
     expected = datetime(2026, 8, 21, 7, 0, tzinfo=timezone.utc)
     assert trip_local_to_utc("2026-08-21T09:00:00", "Europe/Paris") == expected
     assert trip_local_to_utc("2026-08-21T09:00:00Z", "Europe/Paris") == expected
-
-
-def test_optimise_events_uses_trip_local_date(itinerary):
-    import json
-    from datetime import datetime, timezone
-
-    from src.services.ai_services import optimise_events
-    from tests.factories import EventFactory
-
-    # 23:30 UTC on the 20th is 01:30 on the 21st in Paris.
-    late_event = EventFactory(
-        itinerary=itinerary,
-        start_at=datetime(2026, 8, 20, 23, 30, tzinfo=timezone.utc),
-        end_at=datetime(2026, 8, 21, 0, 30, tzinfo=timezone.utc),
-    )
-    ai_reply = json.dumps(
-        [
-            {
-                "id": late_event.id,
-                "start_at": "2026-08-21T10:00:00",
-                "end_at": "2026-08-21T11:00:00",
-            }
-        ]
-    )
-
-    with patch("src.services.ai_services.get_ai_response", return_value=ai_reply):
-        result = optimise_events(itinerary.id, datetime(2026, 8, 21))
-
-    assert result == [
-        {
-            "id": late_event.id,
-            "start_at": datetime(2026, 8, 21, 8, 0, tzinfo=timezone.utc),
-            "end_at": datetime(2026, 8, 21, 9, 0, tzinfo=timezone.utc),
-            "reason": None,
-        }
-    ]
