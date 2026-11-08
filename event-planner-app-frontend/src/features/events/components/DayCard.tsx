@@ -14,9 +14,7 @@ import {
 import { useCreateAiTaskMutation } from "../../aiTasks/services/aiTaskApiSlice";
 import { useTripAiTasks } from "../../aiTasks/hooks";
 import { activeTaskForDay } from "../../aiTasks/utils";
-import OptimiseDayForm, {
-  OPTIMISE_FORM_ID,
-} from "../../aiTasks/components/OptimiseDayForm";
+import OptimiseDayDialog from "../../aiTasks/components/OptimiseDayDialog";
 import type {
   AiTaskParams,
   AiTaskType,
@@ -290,37 +288,22 @@ export default function DayCard({
       )}
 
       {isOptimiseOpen && tripData?.data && (
-        <ConfirmModal
+        <OptimiseDayDialog
           open={isOptimiseOpen}
           onOpenChange={setIsOptimiseOpen}
-          title={`Optimise Day ${day.day}`}
-          description="Choose what the AI should aim for. It works in the background and nothing changes until you accept."
-          confirmText="Optimise"
-          confirmAction={() => {}}
-          confirmBtnClasses="bg-brand-primary h-11 px-4"
-          confirmButtonProps={{
-            type: "submit",
-            form: OPTIMISE_FORM_ID,
-            disabled: isQueueing,
-          }}
-        >
-          <div className="p-4">
-            <OptimiseDayForm
-              tripStart={tripData.data.startDate}
-              tripEnd={tripData.data.endDate}
-              initialDate={day.date}
-              events={tripEvents}
-              defaultPace={
-                autofillDefaultsFromPreferences(preferencesData?.data).pace
-              }
-              onSubmit={(params: OptimiseDayParams) =>
-                queueTask("optimise_day", params, () =>
-                  setIsOptimiseOpen(false),
-                )
-              }
-            />
-          </div>
-        </ConfirmModal>
+          tripStart={tripData.data.startDate}
+          tripEnd={tripData.data.endDate}
+          initialDate={day.date}
+          events={tripEvents}
+          tasks={aiTasks}
+          isSubmitting={isQueueing}
+          defaultPace={
+            autofillDefaultsFromPreferences(preferencesData?.data).pace
+          }
+          onSubmit={(params: OptimiseDayParams) =>
+            queueTask("optimise_day", params, () => setIsOptimiseOpen(false))
+          }
+        />
       )}
     </div>
   );
