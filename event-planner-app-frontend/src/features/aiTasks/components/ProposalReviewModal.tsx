@@ -1,12 +1,12 @@
 import { useState } from "react";
-import { Info, Sparkles } from "lucide-react";
+import { Info } from "lucide-react";
 import { toast } from "sonner";
 import { usePostHog } from "@posthog/react";
 import { StateGate } from "../../../components";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
+  DialogHeader,
   DialogTitle,
 } from "../../../components/ui/dialog";
 import type { ChangeStaleness } from "../../ai/components/ChangePreviewList";
@@ -55,27 +55,15 @@ export default function ProposalReviewModal({
 
   return (
     <Dialog open onOpenChange={(open) => !open && onClose(false)}>
-      <DialogContent className="flex max-h-[92vh] w-full flex-col gap-0 overflow-hidden p-0 max-sm:top-auto max-sm:bottom-0 max-sm:max-w-full! max-sm:translate-y-0 max-sm:rounded-b-none sm:w-[min(92vw,900px)]">
-        <header className="relative flex items-center gap-3 overflow-hidden bg-linear-to-br from-brand-primary to-brand-primary/80 p-5 pr-12 text-text-inverse">
-          <span
-            aria-hidden
-            className="pointer-events-none absolute -top-10 right-6 h-36 w-36 rounded-full border-[18px] border-text-inverse/10"
-          />
-          <span className="relative flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-text-inverse/20">
-            <Sparkles size={22} />
-          </span>
-          <div className="relative flex flex-col gap-0.5">
+      <DialogContent className="flex max-h-[92vh] w-full flex-col gap-0 overflow-scroll p-0 max-sm:top-auto max-sm:bottom-0 max-sm:max-w-full! max-sm:translate-y-0 max-sm:rounded-b-none sm:w-[min(92vw,900px)]">
+        <DialogHeader className="bg-brand-primary pl-4 py-4">
+          <DialogTitle className="text-xl font-bold">
             <p className="text-[0.65rem] font-bold uppercase tracking-widest text-text-inverse/80">
               AI suggestions ready
             </p>
-            <DialogTitle className="text-xl font-bold">
-              Review proposed changes
-            </DialogTitle>
-            <DialogDescription className="text-text-inverse/85">
-              Nothing changes until you choose what to apply.
-            </DialogDescription>
-          </div>
-        </header>
+            Review proposed changes
+          </DialogTitle>
+        </DialogHeader>
         <StateGate
           loadingStateProps={{ isLoading: task.isLoading || trip.isLoading }}
           errorStateProps={{ isError: task.isError || trip.isError }}
@@ -143,7 +131,10 @@ function ProposalReview({
             ? "This proposal has expired."
             : "This proposal has already been dealt with."}
         </p>
-        <button className="btn-secondary self-end" onClick={() => onClose(true)}>
+        <button
+          className="btn-secondary self-end"
+          onClick={() => onClose(true)}
+        >
           Close
         </button>
       </div>
@@ -205,7 +196,9 @@ function ProposalReview({
       onClose(true);
     } catch (err) {
       toast.error(
-        isApiError(err) ? err.data.message : "Could not dismiss the suggestions.",
+        isApiError(err)
+          ? err.data.message
+          : "Could not dismiss the suggestions.",
       );
     }
   };

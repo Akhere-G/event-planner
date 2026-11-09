@@ -13,12 +13,18 @@ const BADGE_CLASSES: Record<ChangeOp["op"], string> = {
 /** What happened to a change's target while the AI was working. */
 export type ChangeStaleness = "changed" | "deleted";
 
-const STALENESS_CHIP: Record<ChangeStaleness, { label: string; classes: string }> = {
+const STALENESS_CHIP: Record<
+  ChangeStaleness,
+  { label: string; classes: string }
+> = {
   changed: { label: "Changed since", classes: "bg-warning/15 text-warning" },
   deleted: { label: "No longer available", classes: "bg-error/10 text-error" },
 };
 
-const STALENESS_NOTE: Record<ChangeStaleness, { text: string; classes: string }> = {
+const STALENESS_NOTE: Record<
+  ChangeStaleness,
+  { text: string; classes: string }
+> = {
   changed: {
     text: "This item was edited after the AI started. Applying this suggestion may overwrite those edits.",
     classes: "border-warning bg-warning/10 text-text-primary",
@@ -95,7 +101,11 @@ export default function ChangePreviewList({
                       : "border-surface-border bg-surface"
                 }`}
               >
-                {isUnavailable ? <Ban size={14} /> : isSelected && <Check size={14} />}
+                {isUnavailable ? (
+                  <Ban size={14} />
+                ) : (
+                  isSelected && <Check size={14} />
+                )}
               </span>
               <div className="flex min-w-0 flex-1 flex-col gap-1">
                 <div className="flex flex-wrap items-center gap-2">

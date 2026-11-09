@@ -16,7 +16,11 @@ const AREAS: Record<
   ChangeEntity,
   { title: string; subtitle: string; Icon: LucideIcon }
 > = {
-  event: { title: "Events", subtitle: "Schedule, times and places", Icon: Calendar },
+  event: {
+    title: "Events",
+    subtitle: "Schedule, times and places",
+    Icon: Calendar,
+  },
   packing_item: {
     title: "Packing",
     subtitle: "Items and quantities",
@@ -65,8 +69,11 @@ export default function ProposalAreaSection({
   const applicable = items
     .filter((item) => staleness.get(item.index) !== "deleted")
     .map((item) => item.index);
-  const selectedCount = applicable.filter((index) => selected.has(index)).length;
-  const allSelected = applicable.length > 0 && selectedCount === applicable.length;
+  const selectedCount = applicable.filter((index) =>
+    selected.has(index),
+  ).length;
+  const allSelected =
+    applicable.length > 0 && selectedCount === applicable.length;
 
   return (
     <section className="overflow-hidden rounded-2xl border border-surface-border bg-surface">
@@ -83,7 +90,9 @@ export default function ProposalAreaSection({
           </span>
           <span className="flex min-w-0 flex-1 flex-col">
             <span className="font-semibold text-text-primary">{title}</span>
-            <span className="truncate text-sm text-text-secondary">{subtitle}</span>
+            <span className="truncate text-sm text-text-secondary">
+              {subtitle}
+            </span>
           </span>
           <span className="shrink-0 text-xs font-semibold text-text-secondary">
             {selectedCount}/{applicable.length} selected
@@ -104,7 +113,7 @@ export default function ProposalAreaSection({
         )}
       </div>
       {isOpen && (
-        <div className="border-t border-surface-border bg-surface-muted/50 p-3">
+        <div className="border-t border-surface-border bg-surface-muted/50 p-3 max-h-100 overflow-y-scroll">
           <ChangePreviewList
             items={items}
             events={events}

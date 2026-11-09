@@ -26,7 +26,7 @@ export default function ProposalFilterTabs({
     <div
       role="group"
       aria-label="Filter suggestions"
-      className="flex gap-1 overflow-x-auto border-b border-surface-border bg-surface-muted px-5 py-3"
+      className="flex flex-wrap gap-2 border-b border-surface-border bg-surface-muted px-5 py-2"
     >
       {TABS.map((tab) => {
         const count = tab.value === "all" ? ops.length : counts[tab.value];
@@ -37,7 +37,7 @@ export default function ProposalFilterTabs({
             type="button"
             aria-pressed={isActive}
             onClick={() => onChange(tab.value)}
-            className={`flex shrink-0 items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold ${
+            className={`flex shrink-0 items-center gap-2 rounded-xl px-4.5 py-1 text-sm font-semibold ${
               isActive
                 ? "bg-surface text-brand-primary shadow-sm"
                 : "text-text-secondary hover:bg-surface/60"
