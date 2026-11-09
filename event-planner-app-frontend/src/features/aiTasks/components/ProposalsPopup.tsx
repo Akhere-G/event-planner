@@ -26,7 +26,10 @@ export default function ProposalsPopup({
       description="Review them now, or decide later. They stay available for 7 days."
       hideButtons
     >
-      <ul className="flex flex-col gap-2 p-4" aria-label="Pending AI suggestions">
+      <ul
+        className="flex flex-col gap-2 p-4"
+        aria-label="Pending AI suggestions"
+      >
         {proposals.map((task) => (
           <li
             key={task.id}

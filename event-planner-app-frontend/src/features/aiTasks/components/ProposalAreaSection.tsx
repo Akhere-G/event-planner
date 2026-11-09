@@ -75,7 +75,7 @@ export default function ProposalAreaSection({
     applicable.length > 0 && selectedCount === applicable.length;
 
   return (
-    <section className="overflow-hidden rounded-2xl border border-surface-border bg-surface">
+    <section className="rounded-2xl border border-surface-border bg-surface">
       <div className="flex items-center gap-2 pr-4">
         <button
           type="button"
@@ -112,7 +112,7 @@ export default function ProposalAreaSection({
         )}
       </div>
       {isOpen && (
-        <div className="border-t border-surface-border bg-surface-muted/50 p-3 max-h-100 overflow-y-scroll">
+        <div className="border-t border-surface-border bg-surface-muted/50 p-3 rounded-2xl">
           <ChangePreviewList
             items={items}
             events={events}

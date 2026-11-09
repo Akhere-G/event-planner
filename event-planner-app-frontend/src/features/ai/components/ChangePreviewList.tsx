@@ -52,7 +52,10 @@ export default function ChangePreviewList({
   onToggle,
 }: ChangePreviewListProps) {
   return (
-    <ul className="flex flex-col gap-2" aria-label="Proposed changes">
+    <ul
+      className="flex flex-col gap-2  h-[44vh] overflow-y-scroll"
+      aria-label="Proposed changes"
+    >
       {items.map(({ op, index }) => {
         const summary = describeChangeOp(op, events, timezone);
         const stale = staleness.get(index);
@@ -61,7 +64,7 @@ export default function ChangePreviewList({
         return (
           <li
             key={index}
-            className={`relative overflow-hidden rounded-xl border ${
+            className={`relative shrink-0 overflow-hidden rounded-xl border ${
               isUnavailable
                 ? "border-surface-border bg-surface-muted opacity-70"
                 : isSelected
