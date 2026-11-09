@@ -13,7 +13,7 @@ EXTENSION_KEY = "ai_task_dispatcher"
 
 _BUILDERS: dict[str, Callable[[Flask], TaskDispatcher]] = {
     "cloud_tasks": lambda app: CloudTasksDispatcher(CloudTasksSettings.from_env()),
-    "thread": lambda app: LocalThreadDispatcher(app),
+    "thread": LocalThreadDispatcher,
     "inline": lambda app: InlineDispatcher(),
 }
 
@@ -25,7 +25,7 @@ def default_dispatcher_name(app: Flask) -> str:
 
 
 def get_dispatcher() -> TaskDispatcher:
-    """The app's dispatcher, built on first use so settings are only needed when queueing."""
+    """Built on first use, so settings are only needed once something is queued."""
     app = current_app._get_current_object()  # type: ignore[attr-defined]
     if EXTENSION_KEY not in app.extensions:
         name = os.getenv("AI_TASK_DISPATCHER") or default_dispatcher_name(app)

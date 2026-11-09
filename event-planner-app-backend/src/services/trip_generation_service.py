@@ -21,7 +21,6 @@ from .trip_preferences_service import get_preferences
 logger = logging.getLogger(__name__)
 
 PLAN_SECTIONS = ("accommodations", "events", "packing_items", "wishlist_items")
-# Sections whose items need a Google Places lookup.
 PLACE_SECTIONS = ("accommodations", "events", "wishlist_items")
 
 
@@ -224,9 +223,7 @@ def _convert_plan(
     }
     sections = {name: _section(plan, name, itinerary.id) for name in PLAN_SECTIONS}
     sections["accommodations"] = sections["accommodations"][:2]
-    places_total = sum(
-        len(sections[name]) for name in PLACE_SECTIONS
-    )
+    places_total = sum(len(sections[name]) for name in PLACE_SECTIONS)
 
     ops = []
     looked_up = 0

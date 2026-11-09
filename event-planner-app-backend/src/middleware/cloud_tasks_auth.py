@@ -10,14 +10,12 @@ from ..exceptions import InvalidCredentialsError, UserNotAuthorisedError
 
 
 def verify_google_token(token: str, audience: str) -> dict:
-    """Check a Google-signed OIDC token's signature, expiry and audience."""
     return id_token.verify_oauth2_token(
         token, google_requests.Request(), audience=audience
     )
 
 
 def cloud_tasks_only(f):
-    """Only lets through requests that Cloud Tasks signed as our queue's service account."""
 
     @wraps(f)
     def decorated(*args, **kwargs):

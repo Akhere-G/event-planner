@@ -291,11 +291,10 @@ JSON FORMAT:
     if not isinstance(suggestions, list):
         raise AIResponseError("AI suggestions must be a list.")
 
-    valid_suggestions = [
-        event
-        for event in suggestions
-        if ai_output_validators.validate_event_suggestion(event, requested_date)
-    ]
+    valid_suggestions = []
+    for event in suggestions:
+        if ai_output_validators.validate_event_suggestion(event, requested_date):
+            valid_suggestions.append(event)
 
     geocoded_events = []
 

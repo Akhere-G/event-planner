@@ -15,8 +15,10 @@ def configured(monkeypatch):
 
 @pytest.fixture
 def claims(monkeypatch):
-    """Make token verification return these claims (or raise when None)."""
-    state = {"value": {"email": QUEUE_ACCOUNT, "email_verified": True}, "audience": None}
+    state = {
+        "value": {"email": QUEUE_ACCOUNT, "email_verified": True},
+        "audience": None,
+    }
 
     def verify(token, audience):
         state["audience"] = audience
@@ -32,14 +34,15 @@ def claims(monkeypatch):
 def runner(monkeypatch):
     class Runner:
         outcome = RunOutcome.FINISHED
-        ran = []
+
+        def __init__(self):
+            self.ran = []
 
         def run(self, task_id):
             self.ran.append(task_id)
             return self.outcome
 
     instance = Runner()
-    instance.ran = []
     monkeypatch.setattr(internal_task_routes, "TaskRunner", lambda: instance)
     return instance
 

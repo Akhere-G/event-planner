@@ -48,7 +48,12 @@ PLAN = {
         }
     ],
     "packing_items": [
-        {"name": "Umbrella", "category": "Misc", "is_shared": True, "reason": "Showers."},
+        {
+            "name": "Umbrella",
+            "category": "Misc",
+            "is_shared": True,
+            "reason": "Showers.",
+        },
         {"name": 5},
     ],
     "wishlist_items": [{"name": "Seine cruise", "reason": "Relaxing."}],
@@ -121,7 +126,10 @@ def test_generated_ops_pass_change_set_validation(itinerary):
 def test_progress_counts_the_places_to_look_up(itinerary):
     _, reports = run_handler(itinerary)
 
-    lookups = [call for call in reports.calls if call[0] == "Looking up places"]
+    lookups = []
+    for call in reports.calls:
+        if call[0] == "Looking up places":
+            lookups.append(call)
     assert lookups[-1][1:] == (lookups[-1][2], lookups[-1][2])
     assert reports.calls[0][0] == "Asking the AI to plan your trip"
 

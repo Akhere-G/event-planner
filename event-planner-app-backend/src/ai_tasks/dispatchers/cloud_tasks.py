@@ -1,3 +1,4 @@
+from contextlib import suppress
 from typing import Any
 
 from google.api_core import exceptions as gcp_exceptions
@@ -39,16 +40,12 @@ class CloudTasksDispatcher:
                 ),
             ),
         )
-        try:
+        with suppress(gcp_exceptions.AlreadyExists):
             self._client.create_task(request={"parent": self._queue_path, "task": task})
-        except gcp_exceptions.AlreadyExists:
-            pass  # Dispatched already (for example, the caller retried).
         return task.name
 
     def cancel(self, dispatch_name: str | None) -> None:
         if not dispatch_name:
             return
-        try:
+        with suppress(gcp_exceptions.NotFound):
             self._client.delete_task(name=dispatch_name)
-        except gcp_exceptions.NotFound:
-            pass  # Already ran or was removed: the runner skips cancelled rows anyway.

@@ -17,8 +17,6 @@ class _Params(Schema):
 
 
 class Behaviour:
-    """What the dummy handler does on each call, popped in order."""
-
     def __init__(self, *steps):
         self.steps = list(steps)
         self.calls = 0
@@ -108,7 +106,10 @@ def test_no_ops_ends_empty_without_an_expiry(runner, notifier, itinerary):
 
 def test_provider_error_requeues_while_attempts_remain(runner, itinerary):
     task = AiTaskFactory(itinerary=itinerary)
-    behaviour.steps = [AIProviderError(), [{"op": "create", "entity": "event", "data": {}}]]
+    behaviour.steps = [
+        AIProviderError(),
+        [{"op": "create", "entity": "event", "data": {}}],
+    ]
 
     first = runner.run(task.id)
     assert first is RunOutcome.RETRY
@@ -118,9 +119,7 @@ def test_provider_error_requeues_while_attempts_remain(runner, itinerary):
     assert reload(task).attempts == 2
 
 
-def test_provider_error_on_the_last_attempt_fails_the_task(
-    runner, notifier, itinerary
-):
+def test_provider_error_on_the_last_attempt_fails_the_task(runner, notifier, itinerary):
     task = AiTaskFactory(itinerary=itinerary, attempts=2)
     behaviour.steps = [AIProviderError()]
 
@@ -156,9 +155,7 @@ def test_unexpected_error_fails_with_a_generic_message(runner, itinerary):
 
 
 def test_duplicate_delivery_while_running_is_skipped(runner, itinerary):
-    task = AiTaskFactory(
-        itinerary=itinerary, status="running", heartbeat_at=utcnow()
-    )
+    task = AiTaskFactory(itinerary=itinerary, status="running", heartbeat_at=utcnow())
 
     assert runner.run(task.id) is RunOutcome.SKIPPED
     assert behaviour.calls == 0

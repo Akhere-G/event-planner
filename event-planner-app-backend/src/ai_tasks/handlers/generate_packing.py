@@ -17,11 +17,10 @@ class GeneratePackingHandler(AiTaskHandler):
     def run(self, ctx: TaskContext) -> list[dict[str, Any]]:
         items = generate_packing_list(ctx.itinerary_id, progress=ctx.progress)
         # Personal items belong to a user, so an anonymous requester gets shared ones.
-        return [
-            build_packing_create_op(
-                item["name"],
-                item["category"],
-                item["is_shared"] or ctx.user_id is None,
+        ops = []
+        for item in items:
+            is_shared = item["is_shared"] or ctx.user_id is None
+            ops.append(
+                build_packing_create_op(item["name"], item["category"], is_shared)
             )
-            for item in items
-        ]
+        return ops

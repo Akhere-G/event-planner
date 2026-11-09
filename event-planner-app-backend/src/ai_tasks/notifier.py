@@ -42,7 +42,7 @@ class TaskNotifier:
     def finished(self, task: AiTask) -> None:
         self.status_changed(task)
         if task.created_by_id is None:
-            return  # Anonymous requesters have no account to notify.
+            return
 
         status = AiTaskStatus(task.status)
         title, message, link = self._describe(task, status)

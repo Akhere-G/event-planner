@@ -2,8 +2,6 @@ from ..runner import TaskRunner
 
 
 class InlineDispatcher:
-    """Runs the task before returning. For tests, where nothing may run in the background."""
-
     def __init__(self, runner: TaskRunner | None = None):
         self._runner = runner or TaskRunner()
 

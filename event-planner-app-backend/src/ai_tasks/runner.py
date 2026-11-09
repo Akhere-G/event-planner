@@ -32,14 +32,12 @@ _DEFAULT_MESSAGE = "Something went wrong while running this task."
 
 
 class RunOutcome(Enum):
-    FINISHED = "finished"  # reached a final state (ready, empty or failed)
-    RETRY = "retry"  # transient failure: run it again
-    SKIPPED = "skipped"  # duplicate delivery, or cancelled
+    FINISHED = "finished"
+    RETRY = "retry"
+    SKIPPED = "skipped"
 
 
 class TaskRunner:
-    """Runs one task: claim it, let its handler work, store the result, notify."""
-
     def __init__(self, notifier: TaskNotifier | None = None):
         self._notifier = notifier or TaskNotifier()
 
@@ -120,9 +118,7 @@ class TaskRunner:
             return self._fail(task_id, error)
 
         logger.warning("AI task %s will be retried: %s", task_id, error)
-        self._transition(
-            task_id, AiTaskStatus.QUEUED, progress_text="Waiting to retry"
-        )
+        self._transition(task_id, AiTaskStatus.QUEUED, progress_text="Waiting to retry")
         self._notifier.status_changed(db.session.get(AiTask, task_id))
         db.session.commit()
         return RunOutcome.RETRY
@@ -156,12 +152,10 @@ class TaskRunner:
 
     @staticmethod
     def _transition(task_id: int, status: AiTaskStatus, **values) -> bool:
-        """Move a running task to `status`. False if it is no longer running (cancelled)."""
+        """Move a running task to `status`; False if it is no longer running."""
         result = db.session.execute(
             update(AiTask)
-            .where(
-                AiTask.id == task_id, AiTask.status == AiTaskStatus.RUNNING.value
-            )
+            .where(AiTask.id == task_id, AiTask.status == AiTaskStatus.RUNNING.value)
             .values(status=status.value, **values)
         )
         db.session.commit()

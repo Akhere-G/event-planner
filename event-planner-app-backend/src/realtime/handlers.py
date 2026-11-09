@@ -81,7 +81,6 @@ def register_socket_handlers():
 
     @socketio.on("connection:heartbeat")
     def on_connection_heartbeat(*_args):
-        """Keeps a signed-in user counted as online while the app is open."""
         identity = _connections.get(request.sid)  # type: ignore[attr-defined]
         if identity and identity["user_id"] is not None:
             get_connection_store().touch(identity["user_id"], request.sid)  # type: ignore[attr-defined]

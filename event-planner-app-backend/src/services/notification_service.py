@@ -140,7 +140,6 @@ def create_notification(
     message: str,
     link_url: Optional[str] = None,
 ) -> Notification:
-    """Store an in-app notification without sending a web push."""
     return create_notifications([user_id], title, message, link_url)[0]
 
 
@@ -150,16 +149,17 @@ def create_notifications(
     message: str,
     link_url: Optional[str] = None,
 ) -> List[Notification]:
-    notifications = [
-        Notification(
-            user_id=user_id,
-            title=title,
-            message=message,
-            link_url=link_url,
-            is_read=False,
+    notifications = []
+    for user_id in user_ids:
+        notifications.append(
+            Notification(
+                user_id=user_id,
+                title=title,
+                message=message,
+                link_url=link_url,
+                is_read=False,
+            )
         )
-        for user_id in user_ids
-    ]
     db.session.add_all(notifications)
     try:
         db.session.commit()
@@ -175,7 +175,6 @@ def send_web_push(
     message: str,
     link_url: Optional[str] = None,
 ) -> None:
-    """Push to every subscribed device of these users. Stores nothing in-app."""
     private_key = DEFAULT_VAPID_PRIVATE_KEY
     if not private_key:
         logger.warning("VAPID_PRIVATE_KEY not set. Push dispatch skipped.")

@@ -10,7 +10,7 @@ from src.extensions import db
 from src.models import AiTask, AiTaskStatus, Event
 from src.services import ai_task_service
 from src.utils.clock import utcnow
-from tests.factories import AiTaskFactory, EventFactory, ItineraryFactory, UserFactory
+from tests.factories import AiTaskFactory, EventFactory, ItineraryFactory
 
 
 class _Params(Schema):
@@ -87,9 +87,6 @@ def ready_task(itinerary, user, ops, **fields):
     )
 
 
-# --- enqueue ---------------------------------------------------------------
-
-
 def test_editor_queues_a_task(editor_client, editor_user, itinerary, dispatcher):
     response = queue(editor_client, itinerary)
 
@@ -124,7 +121,9 @@ def test_invalid_params_are_rejected(editor_client, itinerary, dispatcher):
 
 
 def test_overlapping_active_task_is_a_conflict(editor_client, itinerary, dispatcher):
-    assert queue(editor_client, itinerary, "2026-08-01", "2026-08-02").status_code == 202
+    assert (
+        queue(editor_client, itinerary, "2026-08-01", "2026-08-02").status_code == 202
+    )
 
     assert queue(editor_client, itinerary, "2026-08-02").status_code == 409
     assert queue(editor_client, itinerary, "2026-08-03").status_code == 202
@@ -144,7 +143,7 @@ def test_failed_dispatch_marks_the_task_failed(editor_client, itinerary, monkeyp
         def dispatch(self, task_id):
             raise RuntimeError("queue down")
 
-    monkeypatch.setattr(ai_task_service, "get_dispatcher", lambda: Broken())
+    monkeypatch.setattr(ai_task_service, "get_dispatcher", Broken)
 
     response = queue(editor_client, itinerary)
 
@@ -184,7 +183,9 @@ def test_anonymous_trip_can_queue_with_access_code(client, dispatcher):
     )
 
     assert response.status_code == 202
-    assert db.session.get(AiTask, response.get_json()["data"]["id"]).created_by_id is None
+    assert (
+        db.session.get(AiTask, response.get_json()["data"]["id"]).created_by_id is None
+    )
 
 
 def test_anonymous_cap_is_per_trip(client, dispatcher):
@@ -200,10 +201,9 @@ def test_anonymous_cap_is_per_trip(client, dispatcher):
     assert blocked.status_code == 429
 
 
-# --- reading ---------------------------------------------------------------
-
-
-def test_list_returns_only_my_live_tasks(editor_client, editor_user, itinerary, admin_user):
+def test_list_returns_only_my_live_tasks(
+    editor_client, editor_user, itinerary, admin_user
+):
     mine = make_task(itinerary, editor_user, status="running")
     make_task(itinerary, editor_user, status="accepted")
     make_task(itinerary, admin_user, status="running")
@@ -302,9 +302,6 @@ def test_pending_requires_login(client):
     assert client.get("/api/ai-tasks/pending").status_code == 401
 
 
-# --- cancel / retry / reject ----------------------------------------------
-
-
 def test_cancel_a_queued_task(editor_client, editor_user, itinerary, dispatcher):
     task = make_task(itinerary, editor_user, cloud_task_name="ai-task-x")
 
@@ -315,7 +312,9 @@ def test_cancel_a_queued_task(editor_client, editor_user, itinerary, dispatcher)
     assert dispatcher.cancelled == ["ai-task-x"]
 
 
-def test_cannot_cancel_a_finished_task(editor_client, editor_user, itinerary, dispatcher):
+def test_cannot_cancel_a_finished_task(
+    editor_client, editor_user, itinerary, dispatcher
+):
     task = ready_task(itinerary, editor_user, [])
 
     assert editor_client.post(url(itinerary, f"/{task.id}/cancel")).status_code == 409
@@ -336,7 +335,9 @@ def test_retry_queues_a_copy_and_dismisses_the_failure(
     assert dispatcher.dispatched == [new_id]
 
 
-def test_only_failed_tasks_can_be_retried(editor_client, editor_user, itinerary, dispatcher):
+def test_only_failed_tasks_can_be_retried(
+    editor_client, editor_user, itinerary, dispatcher
+):
     task = ready_task(itinerary, editor_user, [])
 
     assert editor_client.post(url(itinerary, f"/{task.id}/retry")).status_code == 409
@@ -349,9 +350,6 @@ def test_reject_a_proposal(editor_client, editor_user, itinerary):
 
     assert response.get_json()["data"]["status"] == "rejected"
     assert editor_client.post(url(itinerary, f"/{task.id}/reject")).status_code == 409
-
-
-# --- accept ----------------------------------------------------------------
 
 
 def event_op(name="Dinner"):
@@ -377,12 +375,13 @@ def accept(client, itinerary, task, indexes):
 
 
 def trip_event_names(itinerary):
-    return {
-        e.name
-        for e in db.session.execute(
-            select(Event).where(Event.itinerary_id == itinerary.id)
-        ).scalars()
-    }
+    names = set()
+    events = db.session.execute(
+        select(Event).where(Event.itinerary_id == itinerary.id)
+    ).scalars()
+    for event in events:
+        names.add(event.name)
+    return names
 
 
 def test_accept_applies_only_the_chosen_changes(editor_client, editor_user, itinerary):

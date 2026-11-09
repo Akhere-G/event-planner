@@ -9,7 +9,6 @@ H = TypeVar("H", bound=type[AiTaskHandler])
 
 
 def register(handler_class: H) -> H:
-    """Class decorator that makes a handler available under its `task_type`."""
     _HANDLERS[handler_class.task_type] = handler_class()
     return handler_class
 
