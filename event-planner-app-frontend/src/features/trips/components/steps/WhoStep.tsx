@@ -43,7 +43,6 @@ export default function WhoStep({
             isSelected={tripType === type}
             icon={TRIP_TYPE_ICONS[type] ?? Users}
             onClick={() => {
-              console.log("clicked");
               setValue("tripType", type, { shouldValidate: true });
             }}
           />

@@ -48,7 +48,6 @@ export default function Login() {
     } catch (err) {
       if (isValidationError(err)) {
         const serverErrors = err.data.error;
-        console.log(serverErrors);
         if (typeof serverErrors == "string")
           setErrorMessage(serverErrors ?? "");
 

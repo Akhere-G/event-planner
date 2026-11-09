@@ -13,8 +13,6 @@ const PROJECT_HOST = import.meta.env.VITE_POSTHOG_HOST;
 
 if (!PROJECT_HOST || !PROJECT_TOKEN) {
   console.error("Missing project host and error. Analytics disabled");
-} else {
-  console.log("keys loaded");
 }
 
 posthog.init(PROJECT_TOKEN, {

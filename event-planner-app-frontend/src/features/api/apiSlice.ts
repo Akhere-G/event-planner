@@ -7,7 +7,6 @@ import {
 } from "@reduxjs/toolkit/query/react";
 import { toast } from "sonner";
 const baseUrl = import.meta.env.VITE_API_URL || "/api";
-console.log(import.meta.env.VITE_API_URL);
 const baseQuery = fetchBaseQuery({
   baseUrl,
   credentials: "include",
