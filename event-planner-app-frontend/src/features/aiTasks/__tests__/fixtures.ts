@@ -69,7 +69,8 @@ export function aiTaskDetail(
       },
       { op: "delete", entity: "event", id: 11, data: {} },
     ],
-    outdatedOpIndexes: [],
+    changedOpIndexes: [],
+    unavailableOpIndexes: [],
     ...overrides,
   };
 }

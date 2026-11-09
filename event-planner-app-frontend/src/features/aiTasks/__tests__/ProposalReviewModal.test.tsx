@@ -41,7 +41,7 @@ describe("ProposalReviewModal", () => {
     const { requests, onClose } = setup(aiTaskDetail(), {
       "POST /itineraries/5/ai-tasks/1/accept": ok({
         applied: { created: 1, updated: 0, deleted: 0 },
-        skippedOutdated: 0,
+        skippedUnavailable: 0,
       }),
     });
 
@@ -54,33 +54,105 @@ describe("ProposalReviewModal", () => {
     expect(await screen.findByText("Changes applied: 1 added.")).toBeInTheDocument();
   });
 
-  it("mentions changes skipped because the trip moved on", async () => {
+  it("mentions changes skipped because their target was deleted", async () => {
     const user = userEvent.setup();
     setup(aiTaskDetail(), {
       "POST /itineraries/5/ai-tasks/1/accept": ok({
         applied: { created: 1, updated: 0, deleted: 0 },
-        skippedOutdated: 1,
+        skippedUnavailable: 1,
       }),
     });
 
     await user.click(await screen.findByRole("button", { name: "Apply 2 changes" }));
 
     expect(
-      await screen.findByText(/1 skipped because they changed since/),
+      await screen.findByText(/1 skipped because what they change was deleted/),
     ).toBeInTheDocument();
   });
 
-  it("disables changes whose target was edited since", async () => {
-    setup(aiTaskDetail({ outdatedOpIndexes: [1] }));
+  it("keeps a change to an edited item selectable, with an overwrite warning", async () => {
+    const user = userEvent.setup();
+    const { requests } = setup(aiTaskDetail({ changedOpIndexes: [1] }), {
+      "POST /itineraries/5/ai-tasks/1/accept": ok({
+        applied: { created: 1, updated: 0, deleted: 1 },
+        skippedUnavailable: 0,
+      }),
+    });
 
-    const outdated = await screen.findByRole("checkbox", { name: /Remove/ });
+    const edited = await screen.findByRole("checkbox", { name: /Remove/ });
 
-    expect(outdated).toBeDisabled();
-    expect(outdated).not.toBeChecked();
+    expect(edited).toBeEnabled();
+    expect(edited).toBeChecked();
     expect(screen.getByText("Changed since")).toBeInTheDocument();
+    expect(screen.getByText(/may overwrite those edits/)).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Apply 2 changes" }));
+    await waitFor(() =>
+      expect(requests.find((r) => r.path.endsWith("/accept"))?.body).toEqual({
+        opIndexes: [0, 1],
+      }),
+    );
+  });
+
+  it("disables a change whose target was deleted", async () => {
+    setup(aiTaskDetail({ unavailableOpIndexes: [1] }));
+
+    const gone = await screen.findByRole("checkbox", { name: /Remove/ });
+
+    expect(gone).toBeDisabled();
+    expect(gone).not.toBeChecked();
+    expect(screen.getByText("No longer available")).toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: "Apply 1 change" }),
-    ).toBeEnabled();
+      screen.getByText(/1 unavailable suggestion won't be applied/),
+    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Apply 1 change" })).toBeEnabled();
+  });
+
+  it("summarises the proposal and filters it by kind", async () => {
+    const user = userEvent.setup();
+    setup(aiTaskDetail());
+
+    expect(await screen.findByText("2 suggestions across 1 area")).toBeInTheDocument();
+    expect(screen.getByText("1 add")).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: /^Add/ }));
+
+    expect(screen.getByRole("checkbox", { name: /Add Dinner/ })).toBeInTheDocument();
+    expect(screen.queryByRole("checkbox", { name: /Remove/ })).toBeNull();
+  });
+
+  it("clears and reselects a whole area", async () => {
+    const user = userEvent.setup();
+    setup(aiTaskDetail());
+
+    await user.click(await screen.findByRole("button", { name: "Clear" }));
+    expect(screen.getByRole("button", { name: "Select changes" })).toBeDisabled();
+
+    await user.click(screen.getByRole("button", { name: "Select all" }));
+    expect(screen.getByRole("button", { name: "Apply 2 changes" })).toBeEnabled();
+  });
+
+  it("opens only the first area to begin with", async () => {
+    const user = userEvent.setup();
+    setup(
+      aiTaskDetail({
+        ops: [
+          ...aiTaskDetail().ops,
+          {
+            op: "create",
+            entity: "packing_item",
+            data: { name: "Rain jacket", category: "Clothing" },
+          },
+        ],
+      }),
+    );
+
+    expect(await screen.findByText("Dinner")).toBeInTheDocument();
+    expect(screen.queryByText("Rain jacket")).toBeNull();
+
+    await user.click(screen.getByRole("button", { name: /^Packing/ }));
+
+    expect(screen.getByText("Rain jacket")).toBeInTheDocument();
   });
 
   it("rejects the proposal", async () => {
@@ -89,7 +161,7 @@ describe("ProposalReviewModal", () => {
       "POST /itineraries/5/ai-tasks/1/reject": ok({}),
     });
 
-    await user.click(await screen.findByRole("button", { name: "Reject" }));
+    await user.click(await screen.findByRole("button", { name: "Reject all" }));
 
     await waitFor(() => expect(onClose).toHaveBeenCalledWith(true));
     expect(requests.some((r) => r.path.endsWith("/reject"))).toBe(true);

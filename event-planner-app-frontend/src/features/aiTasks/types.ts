@@ -39,13 +39,15 @@ export interface AiTask {
 
 export interface AiTaskDetail extends AiTask {
   ops: ChangeOp[];
-  /** Indexes of ops whose target was edited or deleted after the task started. */
-  outdatedOpIndexes: number[];
+  /** Ops whose target was edited after the task started: still applicable, but may overwrite. */
+  changedOpIndexes: number[];
+  /** Ops whose target was deleted after the task started: can no longer be applied. */
+  unavailableOpIndexes: number[];
 }
 
 export interface AcceptAiTaskResult {
   applied: ApplyChangeSetResult;
-  skippedOutdated: number;
+  skippedUnavailable: number;
 }
 
 export type FillDayParams = AutofillConfig & { date: string };
