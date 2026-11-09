@@ -1,5 +1,5 @@
 import json
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from unittest.mock import patch
 
 import pytest
@@ -12,7 +12,7 @@ from tests.factories import EventFactory
 
 def paris(day, hour):
     """A UTC datetime for a Paris wall-clock time in August (UTC+2)."""
-    return datetime(2026, 8, day, hour - 2, tzinfo=timezone.utc)
+    return datetime(2026, 8, day, hour - 2, tzinfo=UTC)
 
 
 class Reports:
@@ -26,13 +26,22 @@ class Reports:
 def make_events(itinerary):
     return {
         "morning": EventFactory(
-            itinerary=itinerary, name="Louvre", start_at=paris(2, 9), end_at=paris(2, 11)
+            itinerary=itinerary,
+            name="Louvre",
+            start_at=paris(2, 9),
+            end_at=paris(2, 11),
         ),
         "lunch": EventFactory(
-            itinerary=itinerary, name="Bistro", start_at=paris(2, 12), end_at=paris(2, 13)
+            itinerary=itinerary,
+            name="Bistro",
+            start_at=paris(2, 12),
+            end_at=paris(2, 13),
         ),
         "other_day": EventFactory(
-            itinerary=itinerary, name="Eiffel", start_at=paris(3, 9), end_at=paris(3, 10)
+            itinerary=itinerary,
+            name="Eiffel",
+            start_at=paris(3, 9),
+            end_at=paris(3, 10),
         ),
     }
 
@@ -89,7 +98,10 @@ def test_new_times_become_utc_update_ops(itinerary):
             "op": "update",
             "entity": "event",
             "id": events["lunch"].id,
-            "data": {"start_at": "2026-08-02T11:00:00Z", "end_at": "2026-08-02T12:00:00Z"},
+            "data": {
+                "start_at": "2026-08-02T11:00:00Z",
+                "end_at": "2026-08-02T12:00:00Z",
+            },
             "reason": "Less walking.",
         }
     ]
@@ -166,7 +178,11 @@ def test_unknown_opening_hours_are_flagged_not_invented(itinerary):
 def test_adding_and_removing_events_only_when_allowed(itinerary):
     events = make_events(itinerary)
     reply = [
-        {"action": "delete", "id": events["lunch"].id, "reason": "Too close to brunch."},
+        {
+            "action": "delete",
+            "id": events["lunch"].id,
+            "reason": "Too close to brunch.",
+        },
         {
             "action": "create",
             "name": "Cafe de Flore",
@@ -224,8 +240,8 @@ def test_event_belongs_to_the_trip_local_day(itinerary):
     # 23:30 UTC on 1 Aug is 01:30 on 2 Aug in Paris.
     late = EventFactory(
         itinerary=itinerary,
-        start_at=datetime(2026, 8, 1, 23, 30, tzinfo=timezone.utc),
-        end_at=datetime(2026, 8, 2, 0, 30, tzinfo=timezone.utc),
+        start_at=datetime(2026, 8, 1, 23, 30, tzinfo=UTC),
+        end_at=datetime(2026, 8, 2, 0, 30, tzinfo=UTC),
     )
 
     _, prompts, _, _ = run(itinerary, {"dates": ["2026-08-02"]}, [[]])

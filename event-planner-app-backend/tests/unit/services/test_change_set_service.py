@@ -24,9 +24,7 @@ def trip_events(itinerary_id):
     )
 
 
-def event_data(
-    name="Dinner", start="2026-08-21T18:00:00Z", end="2026-08-21T20:00:00Z"
-):
+def event_data(name="Dinner", start="2026-08-21T18:00:00Z", end="2026-08-21T20:00:00Z"):
     return {
         "name": name,
         "address": "1 Rue Cler, Paris",
@@ -75,9 +73,9 @@ def test_apply_mixed_change_set_succeeds(editor_user, itinerary, event, doomed):
 
     assert counts == {"created": 4, "updated": 1, "deleted": 1}
 
-    created = db.session.execute(select(Event).where(
-            Event.itinerary_id == itinerary.id, Event.name == "Dinner"
-        )).scalar_one()
+    created = db.session.execute(
+        select(Event).where(Event.itinerary_id == itinerary.id, Event.name == "Dinner")
+    ).scalar_one()
     assert created.created_by_id == editor_user.id
     assert created.updated_by_id == editor_user.id
 
@@ -121,7 +119,9 @@ def test_apply_reuses_existing_wishlist_by_name(editor_user, itinerary, wishlist
     apply_change_set(itinerary.id, ops, editor_user.id)
 
     wishlists = (
-        db.session.execute(select(Wishlist).where(Wishlist.itinerary_id == itinerary.id))
+        db.session.execute(
+            select(Wishlist).where(Wishlist.itinerary_id == itinerary.id)
+        )
         .scalars()
         .all()
     )
@@ -140,9 +140,7 @@ def test_invalid_op_rejects_whole_set(editor_user, itinerary):
     assert trip_events(itinerary.id) == []
 
 
-def test_rolls_back_and_never_commits_when_a_target_is_missing(
-    editor_user, itinerary
-):
+def test_rolls_back_and_never_commits_when_a_target_is_missing(editor_user, itinerary):
     ops = [
         create_event("Should not persist"),
         {"op": "delete", "entity": "event", "id": 999999},

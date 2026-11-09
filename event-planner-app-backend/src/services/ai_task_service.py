@@ -43,11 +43,7 @@ def _notifier() -> TaskNotifier:
     return TaskNotifier()
 
 
-# --- housekeeping -----------------------------------------------------------
-
-
 def expire_due_proposals() -> None:
-    """Proposals nobody decided on in time can no longer be accepted."""
     db.session.execute(
         update(AiTask)
         .where(
@@ -79,20 +75,14 @@ def fail_abandoned_tasks() -> None:
 
 
 def purge_old_tasks() -> None:
-    """Delete tasks that were decided, expired or failed long ago."""
     finished = func.coalesce(AiTask.decided_at, AiTask.expires_at, AiTask.finished_at)
-    db.session.execute(
-        delete(AiTask).where(finished < utcnow() - FINISHED_RETENTION)
-    )
+    db.session.execute(delete(AiTask).where(finished < utcnow() - FINISHED_RETENTION))
     db.session.commit()
 
 
 def _housekeeping() -> None:
     expire_due_proposals()
     fail_abandoned_tasks()
-
-
-# --- queries ----------------------------------------------------------------
 
 
 def _own_tasks(itinerary_id: int, user_id: int | None):
@@ -114,7 +104,6 @@ def get_task(itinerary_id: int, task_id: int, user_id: int | None) -> AiTask:
 
 
 def list_trip_tasks(itinerary_id: int, user_id: int | None) -> list[AiTask]:
-    """The caller's tasks on this trip that still need attention."""
     _housekeeping()
     live = [*_ACTIVE, AiTaskStatus.READY.value, AiTaskStatus.FAILED.value]
     stmt = (
@@ -126,7 +115,6 @@ def list_trip_tasks(itinerary_id: int, user_id: int | None) -> list[AiTask]:
 
 
 def list_pending_proposals(user_id: int) -> list[AiTask]:
-    """Proposals waiting for this user's decision, on any trip they can still edit."""
     _housekeeping()
     can_edit = exists().where(
         and_(
@@ -151,9 +139,6 @@ def stale_ops(task: AiTask) -> dict[int, snapshots.Staleness]:
     return snapshots.find_stale(task.itinerary_id, task.result_ops or [])
 
 
-# --- enqueue ----------------------------------------------------------------
-
-
 def _assert_no_conflict(itinerary_id: int, task_type: str, params: dict) -> None:
     handler = get_handler(task_type)
     scope = handler.conflict_scope(params)
@@ -169,14 +154,16 @@ def _assert_no_conflict(itinerary_id: int, task_type: str, params: dict) -> None
 
 
 def _assert_under_cap(itinerary_id: int, user_id: int | None) -> None:
-    if user_id is None:  # Anonymous requesters are identified by their trip.
+    if user_id is None:
         scope = and_(
             AiTask.itinerary_id == itinerary_id, AiTask.created_by_id.is_(None)
         )
     else:
         scope = AiTask.created_by_id == user_id
     active = db.session.execute(
-        select(func.count()).select_from(AiTask).where(scope, AiTask.status.in_(_ACTIVE))
+        select(func.count())
+        .select_from(AiTask)
+        .where(scope, AiTask.status.in_(_ACTIVE))
     ).scalar_one()
     if active >= MAX_ACTIVE_TASKS:
         raise TooManyActiveAiTasksError()
@@ -187,7 +174,7 @@ def enqueue(
 ) -> AiTask:
     handler = get_handler(task_type)
     schema = handler.params_schema()
-    params = schema.dump(schema.load(raw_params))  # normalised and JSON-safe
+    params = schema.dump(schema.load(raw_params))
     handler.validate_for_trip(get_itinerary(itinerary_id), params)
 
     purge_old_tasks()
@@ -239,9 +226,6 @@ def _dispatch(task_id: int) -> AiTask:
     return db.session.get(AiTask, task_id)
 
 
-# --- decisions --------------------------------------------------------------
-
-
 def _finish_without_result(
     task: AiTask, from_statuses: list[str], to: AiTaskStatus, message: str
 ) -> None:
@@ -249,7 +233,11 @@ def _finish_without_result(
     result = db.session.execute(
         update(AiTask)
         .where(AiTask.id == task.id, AiTask.status.in_(from_statuses))
-        .values(status=to.value, decided_at=now, finished_at=func.coalesce(AiTask.finished_at, now))
+        .values(
+            status=to.value,
+            decided_at=now,
+            finished_at=func.coalesce(AiTask.finished_at, now),
+        )
     )
     db.session.commit()
     if result.rowcount == 0:
@@ -267,7 +255,6 @@ def cancel(task: AiTask) -> AiTask:
 
 
 def reject(task: AiTask) -> AiTask:
-    """Discard a proposal, or dismiss a failed task."""
     _finish_without_result(
         task,
         [AiTaskStatus.READY.value, AiTaskStatus.FAILED.value],
@@ -286,7 +273,6 @@ def retry(task: AiTask, user_id: int | None) -> AiTask:
 
 
 def accept(task: AiTask, op_indexes: list[int], user_id: int | None) -> dict[str, Any]:
-    """Apply the chosen changes that are still valid, in one transaction."""
     if task.status == AiTaskStatus.EXPIRED.value:
         raise InvalidAiTaskStateError("This proposal has expired.")
     if task.status != AiTaskStatus.READY.value:
@@ -299,9 +285,10 @@ def accept(task: AiTask, op_indexes: list[int], user_id: int | None) -> dict[str
 
     stale = stale_ops(task)
     # An edited target is still applied; only a deleted one has nothing left to change.
-    applicable = [
-        i for i in chosen_indexes if stale.get(i) != snapshots.Staleness.DELETED
-    ]
+    applicable = []
+    for index in chosen_indexes:
+        if stale.get(index) != snapshots.Staleness.DELETED:
+            applicable.append(index)
     if not applicable:
         raise BadRequestError(
             "None of the chosen changes can be applied: what they change was deleted."

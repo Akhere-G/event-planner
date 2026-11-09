@@ -78,7 +78,9 @@ class ActiveAiTaskConflictError(AppError):
 
 class TooManyActiveAiTasksError(AppError):
     status_code = 429
-    default_message = "You have too many AI tasks running. Please wait for one to finish."
+    default_message = (
+        "You have too many AI tasks running. Please wait for one to finish."
+    )
 
 
 class InvalidAiTaskStateError(AppError):

@@ -1,6 +1,6 @@
-import enum
+from enum import StrEnum
 from datetime import datetime
-from typing import Any, Optional
+from typing import Any
 
 from sqlalchemy import JSON, DateTime, ForeignKey, Index, Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -9,7 +9,7 @@ from ..extensions import Base
 from .audit_mixins import AuditMixin
 
 
-class AiTaskStatus(str, enum.Enum):
+class AiTaskStatus(StrEnum):
     QUEUED = "queued"
     RUNNING = "running"
     READY = "ready"
@@ -52,27 +52,23 @@ class AiTask(Base, AuditMixin):
     )
 
     params: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict)
-    result_ops: Mapped[Optional[list[dict[str, Any]]]] = mapped_column(
-        JSON, nullable=True
-    )
-    applied_counts: Mapped[Optional[dict[str, int]]] = mapped_column(
-        JSON, nullable=True
-    )
+    result_ops: Mapped[list[dict[str, Any | None]]] = mapped_column(JSON, nullable=True)
+    applied_counts: Mapped[dict[str, int | None]] = mapped_column(JSON, nullable=True)
 
-    progress_text: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
-    progress_current: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
-    progress_total: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
-    error_message: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    progress_text: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    progress_current: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    progress_total: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    error_message: Mapped[str | None] = mapped_column(Text, nullable=True)
 
     attempts: Mapped[int] = mapped_column(Integer, default=0)
     max_attempts: Mapped[int] = mapped_column(Integer, default=3)
-    heartbeat_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
-    cloud_task_name: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
+    heartbeat_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    cloud_task_name: Mapped[str | None] = mapped_column(String(255), nullable=True)
 
-    started_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
-    finished_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
-    decided_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
-    expires_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
+    started_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    finished_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    decided_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    expires_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
 
     itinerary: Mapped["Itinerary"] = relationship(  # type: ignore  # noqa: F821
         "Itinerary", back_populates="ai_tasks"

@@ -27,7 +27,11 @@ SUGGESTIONS = [
         "category": "Museum",
     },
 ]
-PLACE = {"latitude": 48.86, "longitude": 2.33, "formatted_address": "Rue de Rivoli, Paris"}
+PLACE = {
+    "latitude": 48.86,
+    "longitude": 2.33,
+    "formatted_address": "Rue de Rivoli, Paris",
+}
 PARAMS = {"date": "2026-08-02", "pace": "balanced", "companions": "couple"}
 
 

@@ -71,6 +71,12 @@ def test_creates_are_never_stale(itinerary):
 
 
 def test_strip_base_removes_only_the_snapshot():
-    op = {"op": "update", "entity": "event", "id": 1, "data": {}, "base": {"updated_at": "x"}}
+    op = {
+        "op": "update",
+        "entity": "event",
+        "id": 1,
+        "data": {},
+        "base": {"updated_at": "x"},
+    }
 
     assert strip_base(op) == {"op": "update", "entity": "event", "id": 1, "data": {}}

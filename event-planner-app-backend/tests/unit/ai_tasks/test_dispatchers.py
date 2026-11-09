@@ -24,7 +24,9 @@ SETTINGS = CloudTasksSettings(
 @pytest.fixture
 def client():
     fake = MagicMock()
-    fake.queue_path.return_value = "projects/proj/locations/europe-west2/queues/ai-tasks"
+    fake.queue_path.return_value = (
+        "projects/proj/locations/europe-west2/queues/ai-tasks"
+    )
     return fake
 
 
@@ -32,9 +34,16 @@ def test_task_posts_back_to_the_internal_run_route_with_an_oidc_token(client):
     name = CloudTasksDispatcher(SETTINGS, client).dispatch(42)
 
     task = client.create_task.call_args.kwargs["request"]["task"]
-    assert name == "projects/proj/locations/europe-west2/queues/ai-tasks/tasks/ai-task-42"
-    assert task.http_request.url == "https://app.example.com/api/internal/ai-tasks/42/run"
-    assert task.http_request.oidc_token.service_account_email == SETTINGS.service_account_email
+    assert (
+        name == "projects/proj/locations/europe-west2/queues/ai-tasks/tasks/ai-task-42"
+    )
+    assert (
+        task.http_request.url == "https://app.example.com/api/internal/ai-tasks/42/run"
+    )
+    assert (
+        task.http_request.oidc_token.service_account_email
+        == SETTINGS.service_account_email
+    )
     assert task.http_request.oidc_token.audience == "https://app.example.com"
     assert task.dispatch_deadline.seconds == 900
 

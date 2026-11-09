@@ -33,7 +33,11 @@ def _detail(task):
     )
 
     def indexes(kind: Staleness) -> list[int]:
-        return sorted(index for index, found in stale.items() if found == kind)
+        matching = []
+        for index, found in stale.items():
+            if found == kind:
+                matching.append(index)
+        return sorted(matching)
 
     return {
         **AiTaskDetailSchema().dump(task),

@@ -57,12 +57,10 @@ def make_task(admin_user, itinerary, status, **extra):
 
 def notified(task, connections=None):
     emit = Recorder()
-    with patch(
-        "src.ai_tasks.notifier.notification_service.send_web_push"
-    ) as push:
-        TaskNotifier(emit=emit, connections=connections or UserConnectionStore()).finished(
-            task
-        )
+    with patch("src.ai_tasks.notifier.notification_service.send_web_push") as push:
+        TaskNotifier(
+            emit=emit, connections=connections or UserConnectionStore()
+        ).finished(task)
     return emit, push
 
 
@@ -87,9 +85,7 @@ def test_ready_task_stores_notification_and_emits_to_the_requester(
     assert emit.calls[0][2] == user_room(admin_user.id)
 
 
-def test_push_is_sent_only_when_the_user_has_no_open_connection(
-    admin_user, itinerary
-):
+def test_push_is_sent_only_when_the_user_has_no_open_connection(admin_user, itinerary):
     task = make_task(admin_user, itinerary, "ready", result_ops=[{}])
 
     _, push = notified(task)

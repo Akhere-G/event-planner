@@ -8,9 +8,7 @@ class CloudTasksSettings:
     location: str
     queue: str
     service_account_email: str
-    # Public URL of this service: the callback host, and the OIDC token audience.
     base_url: str
-    # Cloud Tasks gives up on a request after this long.
     dispatch_deadline_seconds: int = 900
 
     @classmethod

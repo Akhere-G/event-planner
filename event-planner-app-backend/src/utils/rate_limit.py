@@ -26,7 +26,6 @@ def _requested_task_type() -> str | None:
 
 
 def ai_task_limit() -> str:
-    """The limit of the AI task type being requested, so each type brings its own."""
     from ..ai_tasks.registry import get_handler
     from ..exceptions import UnknownAiTaskTypeError
 

@@ -24,8 +24,6 @@ class AiTaskSchema(Schema):
 
 
 class AiTaskDetailSchema(AiTaskSchema):
-    """A single task, with the changes it proposes for the user to review."""
-
     ops = fields.Function(lambda task: task.result_ops or [])
 
 

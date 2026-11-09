@@ -3,14 +3,14 @@ from typing import Any, Protocol
 
 
 class TaskCancelledError(Exception):
-    """Raised inside a running task once the user has cancelled it."""
+    pass
 
 
 class ProgressReporter(Protocol):
     def report(
         self, text: str, current: int | None = None, total: int | None = None
     ) -> None:
-        """Record a progress step. Raises TaskCancelledError if the task was cancelled."""
+        """Record a progress step; raises TaskCancelledError once cancelled."""
 
 
 @dataclass

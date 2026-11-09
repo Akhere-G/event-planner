@@ -4,7 +4,6 @@ from .base_schema import CamelToSnakeMixin
 
 
 class EventSuggestionRequestSchema(CamelToSnakeMixin, Schema):
-    """Parameters of a "fill in day" task."""
 
     date = fields.Date(
         required=True,
@@ -30,7 +29,7 @@ class EventSuggestionRequestSchema(CamelToSnakeMixin, Schema):
 
 
 class NoParamsSchema(CamelToSnakeMixin, Schema):
-    """Parameters of tasks that take none (the trip's saved data is the input)."""
+    pass
 
 
 OPTIMISE_GOALS = ("minimise_travel", "group_by_area", "respect_opening_hours")
@@ -38,7 +37,6 @@ MAX_INSTRUCTIONS_LENGTH = 500
 
 
 class OptimiseDayParamsSchema(CamelToSnakeMixin, Schema):
-    """Parameters of an "optimise days" task."""
 
     dates = fields.List(
         fields.Date(format="%Y-%m-%d"),

@@ -13,9 +13,7 @@ class UserConnectionStore:
     the TTL are ignored, so a crashed instance cannot leave a user "online" forever.
     """
 
-    def __init__(
-        self, redis_url: str | None = None, ttl: int = CONNECTION_TTL_SECONDS
-    ):
+    def __init__(self, redis_url: str | None = None, ttl: int = CONNECTION_TTL_SECONDS):
         self.ttl = ttl
         self._redis = None
         self._memory: dict[int, dict[str, float]] = {}
@@ -31,7 +29,6 @@ class UserConnectionStore:
         return f"connections:user:{user_id}"
 
     def touch(self, user_id: int, sid: str):
-        """Register a socket, or refresh its heartbeat."""
         if self._redis is not None:
             key = self._key(user_id)
             pipe = self._redis.pipeline()

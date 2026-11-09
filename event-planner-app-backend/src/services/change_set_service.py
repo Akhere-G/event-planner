@@ -98,17 +98,18 @@ def build_event_update_ops(updates: list[dict]) -> list[dict]:
 
 
 def build_event_delete_ops(removals: list[dict]) -> list[dict]:
-    """Turn AI event removals into preview-only delete ops."""
-    return [
-        {
-            "op": "delete",
-            "entity": "event",
-            "id": removal["id"],
-            "data": {},
-            "reason": _clean_reason(removal.get("reason")),
-        }
-        for removal in removals
-    ]
+    ops = []
+    for removal in removals:
+        ops.append(
+            {
+                "op": "delete",
+                "entity": "event",
+                "id": removal["id"],
+                "data": {},
+                "reason": _clean_reason(removal.get("reason")),
+            }
+        )
+    return ops
 
 
 def build_packing_create_op(
@@ -117,7 +118,6 @@ def build_packing_create_op(
     is_shared: bool,
     reason: str | None = None,
 ) -> dict:
-    """A preview-only op that adds one packing item."""
     return {
         "op": "create",
         "entity": "packing_item",

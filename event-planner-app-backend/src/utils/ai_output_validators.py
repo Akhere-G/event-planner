@@ -69,7 +69,6 @@ def validate_event_suggestion(event: Any, requested_date: str) -> bool:
 
 @dataclass(frozen=True)
 class OptimisationRules:
-    """What one optimisation run may change on one day."""
 
     day: date
     event_ids: frozenset[int]
@@ -135,7 +134,9 @@ def validate_optimisation_ops(
                 )
         elif action == "delete" and rules.allow_add_remove:
             if rules.can_change(item.get("id")):
-                validated.append({"action": "delete", "id": item["id"], "reason": reason})
+                validated.append(
+                    {"action": "delete", "id": item["id"], "reason": reason}
+                )
         elif action == "create" and rules.allow_add_remove:
             times = _parse_times(item)
             if (
