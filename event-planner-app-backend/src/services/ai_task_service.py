@@ -147,8 +147,8 @@ def list_pending_proposals(user_id: int) -> list[AiTask]:
     return list(db.session.execute(stmt).scalars())
 
 
-def outdated_indexes(task: AiTask) -> set[int]:
-    return snapshots.find_outdated(task.itinerary_id, task.result_ops or [])
+def stale_ops(task: AiTask) -> dict[int, snapshots.Staleness]:
+    return snapshots.find_stale(task.itinerary_id, task.result_ops or [])
 
 
 # --- enqueue ----------------------------------------------------------------
@@ -297,11 +297,14 @@ def accept(task: AiTask, op_indexes: list[int], user_id: int | None) -> dict[str
     if not chosen_indexes or chosen_indexes[-1] >= len(ops) or chosen_indexes[0] < 0:
         raise BadRequestError("Choose which of the proposed changes to apply.")
 
-    outdated = outdated_indexes(task)
-    applicable = [i for i in chosen_indexes if i not in outdated]
+    stale = stale_ops(task)
+    # An edited target is still applied; only a deleted one has nothing left to change.
+    applicable = [
+        i for i in chosen_indexes if stale.get(i) != snapshots.Staleness.DELETED
+    ]
     if not applicable:
         raise BadRequestError(
-            "None of the chosen changes can be applied: the trip has changed since."
+            "None of the chosen changes can be applied: what they change was deleted."
         )
 
     claimed = db.session.execute(
@@ -332,4 +335,4 @@ def accept(task: AiTask, op_indexes: list[int], user_id: int | None) -> dict[str
         update(AiTask).where(AiTask.id == task.id).values(applied_counts=counts)
     )
     db.session.commit()
-    return {"applied": counts, "skipped_outdated": skipped}
+    return {"applied": counts, "skipped_unavailable": skipped}

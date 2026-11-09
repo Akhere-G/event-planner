@@ -220,16 +220,23 @@ def test_someone_elses_task_looks_missing(editor_client, itinerary, admin_user):
     assert editor_client.post(url(itinerary, f"/{task.id}/reject")).status_code == 404
 
 
-def test_detail_includes_ops_and_outdated_indexes(
+def test_detail_separates_edited_from_deleted_targets(
     editor_client, editor_user, itinerary
 ):
-    stale = EventFactory(itinerary=itinerary)
+    edited = EventFactory(itinerary=itinerary)
     ops = [
         {"op": "create", "entity": "event", "data": {"name": "New"}},
         {
+            "op": "update",
+            "entity": "event",
+            "id": edited.id,
+            "data": {"name": "Renamed"},
+            "base": {"updated_at": "2000-01-01T00:00:00"},
+        },
+        {
             "op": "delete",
             "entity": "event",
-            "id": stale.id,
+            "id": edited.id + 1000,
             "base": {"updated_at": "2000-01-01T00:00:00"},
         },
     ]
@@ -237,8 +244,9 @@ def test_detail_includes_ops_and_outdated_indexes(
 
     data = editor_client.get(url(itinerary, f"/{task.id}")).get_json()["data"]
 
-    assert len(data["ops"]) == 2
-    assert data["outdatedOpIndexes"] == [1]
+    assert len(data["ops"]) == 3
+    assert data["changedOpIndexes"] == [1]
+    assert data["unavailableOpIndexes"] == [2]
 
 
 def test_expired_proposals_are_marked_on_read(editor_client, editor_user, itinerary):
@@ -398,36 +406,54 @@ def test_second_accept_is_a_conflict(editor_client, editor_user, itinerary):
     assert len(trip_event_names(itinerary)) == 1
 
 
-def test_accept_skips_outdated_changes_and_applies_the_rest(
+def test_accept_still_applies_a_change_to_an_edited_target(
     editor_client, editor_user, itinerary
 ):
     edited = EventFactory(itinerary=itinerary)
-    outdated = {
-        "op": "delete",
+    stale_update = {
+        "op": "update",
         "entity": "event",
         "id": edited.id,
+        "data": {"name": "AI name"},
         "base": {"updated_at": "2000-01-01T00:00:00"},
     }
-    task = ready_task(itinerary, editor_user, [outdated, event_op("Fresh")])
+    task = ready_task(itinerary, editor_user, [stale_update, event_op("Fresh")])
 
     response = accept(editor_client, itinerary, task, [0, 1])
 
     assert response.status_code == 200
-    assert response.get_json()["data"]["skippedOutdated"] == 1
-    assert trip_event_names(itinerary) == {edited.name, "Fresh"}
+    assert response.get_json()["data"]["skippedUnavailable"] == 0
+    assert trip_event_names(itinerary) == {"AI name", "Fresh"}
 
 
-def test_accept_fails_when_every_chosen_change_is_outdated(
+def test_accept_skips_changes_to_deleted_targets_and_applies_the_rest(
     editor_client, editor_user, itinerary
 ):
-    edited = EventFactory(itinerary=itinerary)
-    outdated = {
+    gone = {
         "op": "delete",
         "entity": "event",
-        "id": edited.id,
+        "id": EventFactory(itinerary=itinerary).id + 1000,
         "base": {"updated_at": "2000-01-01T00:00:00"},
     }
-    task = ready_task(itinerary, editor_user, [outdated])
+    task = ready_task(itinerary, editor_user, [gone, event_op("Fresh")])
+
+    response = accept(editor_client, itinerary, task, [0, 1])
+
+    assert response.status_code == 200
+    assert response.get_json()["data"]["skippedUnavailable"] == 1
+    assert "Fresh" in trip_event_names(itinerary)
+
+
+def test_accept_fails_when_every_chosen_change_targets_something_deleted(
+    editor_client, editor_user, itinerary
+):
+    gone = {
+        "op": "delete",
+        "entity": "event",
+        "id": EventFactory(itinerary=itinerary).id + 1000,
+        "base": {"updated_at": "2000-01-01T00:00:00"},
+    }
+    task = ready_task(itinerary, editor_user, [gone])
 
     assert accept(editor_client, itinerary, task, [0]).status_code == 400
     db.session.expire_all()

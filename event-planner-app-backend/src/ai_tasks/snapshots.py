@@ -1,11 +1,13 @@
 """Detects proposals that went stale while they waited for a decision.
 
 When a task starts, the `updated_at` of every row it might touch is recorded. Each
-update/delete op carries that value as `base`; on accept an op is outdated if its
-target was edited or deleted since.
+update/delete op carries that value as `base`. On accept an op whose target was edited
+since is still applied (the user is warned it may overwrite those edits); one whose target
+was deleted can no longer be applied.
 """
 
 from collections.abc import Callable
+from enum import Enum
 from typing import Any
 
 from sqlalchemy import Select, select
@@ -34,6 +36,11 @@ _SELECTS: dict[str, Callable[[int], Select]] = {
 CHANGING_OPS = ("update", "delete")
 
 
+class Staleness(str, Enum):
+    CHANGED = "changed"
+    DELETED = "deleted"
+
+
 def _iso(value) -> str | None:
     return value.isoformat() if value is not None else None
 
@@ -55,15 +62,19 @@ def attach_bases(ops: list[dict[str, Any]], snapshot: Snapshot) -> list[dict[str
     ]
 
 
-def find_outdated(itinerary_id: int, ops: list[dict[str, Any]]) -> set[int]:
-    """Indexes of ops whose target has changed or disappeared since the task began."""
+def find_stale(itinerary_id: int, ops: list[dict[str, Any]]) -> dict[int, Staleness]:
+    """Op index -> how its target differs now from when the task began (untouched ops are absent)."""
     current = capture(itinerary_id)
-    return {
-        index
-        for index, op in enumerate(ops)
-        if op["op"] in CHANGING_OPS
-        and current.get(op["entity"], {}).get(op["id"]) != (op.get("base") or {}).get("updated_at")
-    }
+    stale: dict[int, Staleness] = {}
+    for index, op in enumerate(ops):
+        if op["op"] not in CHANGING_OPS:
+            continue
+        rows = current.get(op["entity"], {})
+        if op["id"] not in rows:
+            stale[index] = Staleness.DELETED
+        elif rows[op["id"]] != (op.get("base") or {}).get("updated_at"):
+            stale[index] = Staleness.CHANGED
+    return stale
 
 
 def strip_base(op: dict[str, Any]) -> dict[str, Any]:
