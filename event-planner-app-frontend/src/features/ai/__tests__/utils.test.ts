@@ -1,7 +1,12 @@
 import { describe, expect, it } from "vitest";
 import type { Event } from "../../events/types";
 import type { ChangeOp } from "../types";
-import { describeChangeOp, summariseApplied } from "../utils";
+import {
+  countOpsByKind,
+  describeChangeOp,
+  groupOpsByEntity,
+  summariseApplied,
+} from "../utils";
 
 const timezone = "Europe/Paris";
 
@@ -98,5 +103,36 @@ describe("summariseApplied", () => {
     expect(summariseApplied({ created: 0, updated: 0, deleted: 0 })).toBe(
       "No changes.",
     );
+  });
+});
+
+describe("groupOpsByEntity", () => {
+  const ops: ChangeOp[] = [
+    { op: "create", entity: "wishlist_item", data: {} },
+    { op: "update", entity: "event", id: 1, data: {} },
+    { op: "delete", entity: "packing_item", id: 2, data: {} },
+    { op: "create", entity: "event", data: {} },
+  ];
+
+  it("orders the areas and keeps each op's proposal index", () => {
+    const groups = groupOpsByEntity(ops);
+
+    expect(groups.map((group) => group.entity)).toEqual([
+      "event",
+      "packing_item",
+      "wishlist_item",
+    ]);
+    expect(groups[0].items.map((item) => item.index)).toEqual([1, 3]);
+  });
+
+  it("can be limited to one kind of change", () => {
+    const groups = groupOpsByEntity(ops, "create");
+
+    expect(groups.map((group) => group.entity)).toEqual(["event", "wishlist_item"]);
+    expect(groups[0].items.map((item) => item.index)).toEqual([3]);
+  });
+
+  it("counts the kinds of change", () => {
+    expect(countOpsByKind(ops)).toEqual({ create: 2, update: 1, delete: 1 });
   });
 });

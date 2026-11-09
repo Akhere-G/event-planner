@@ -119,34 +119,3 @@ def delete_packing_item(user_id: int | None, itinerary_id: int, packing_item_id:
     except Exception:
         db.session.rollback()
         raise
-
-
-def generate_and_add_packing_items(user_id: int | None, itinerary_id: int):
-    from .ai_services import generate_packing_list
-
-    try:
-        generated_items = generate_packing_list(itinerary_id)
-        for item in generated_items:
-            name = item.get("name")
-            category = item.get("category", "General")
-            is_shared = bool(item.get("is_shared", False))
-            if not item.get("owner_id"):
-                is_shared = True
-            if not name:
-                continue
-            new_item = PackingItem(
-                itinerary_id=itinerary_id,
-                owner_id=user_id if not is_shared else None,
-                name=name,
-                category=category,
-                is_shared=is_shared,
-                created_by_id=user_id,
-                updated_by_id=user_id,
-            )
-            db.session.add(new_item)
-
-        db.session.commit()
-        return get_packing_lists(user_id, itinerary_id)
-    except Exception:
-        db.session.rollback()
-        raise

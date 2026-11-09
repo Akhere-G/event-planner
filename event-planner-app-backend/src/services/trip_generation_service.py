@@ -6,18 +6,22 @@ from typing import Any
 
 from marshmallow import ValidationError
 
+from ..exceptions import AIResponseError
 from ..schemas.change_set_schema import MAX_OPS_PER_CHANGE_SET
 from ..utils import ai_output_validators
+from ..utils.db_utils import release_connection
 from ..utils.location_utils import get_place_details
+from ..utils.progress import ProgressCallback, no_progress
 from . import ai_services
 from .change_set_appliers import DEFAULT_WISHLIST_NAME
-from .change_set_service import build_event_create_ops
+from .change_set_service import build_event_create_ops, build_packing_create_op
 from .itineraries_service import get_itinerary
 from .trip_preferences_service import get_preferences
 
 logger = logging.getLogger(__name__)
 
 PLAN_SECTIONS = ("accommodations", "events", "packing_items", "wishlist_items")
+PLACE_SECTIONS = ("accommodations", "events", "wishlist_items")
 
 
 def _text(value: Any, limit: int) -> str | None:
@@ -175,16 +179,12 @@ def _packing_item_to_op(item: Any) -> dict | None:
     valid = ai_output_validators.validate_packing_items([item])
     if not valid:
         return None
-    return {
-        "op": "create",
-        "entity": "packing_item",
-        "data": {
-            "name": valid[0]["name"][:100],
-            "category": valid[0]["category"][:50],
-            "is_shared": valid[0]["is_shared"],
-        },
-        "reason": _text(item.get("reason"), 200),
-    }
+    return build_packing_create_op(
+        valid[0]["name"],
+        valid[0]["category"],
+        valid[0]["is_shared"],
+        item.get("reason"),
+    )
 
 
 def _wishlist_item_to_op(itinerary_id: int, item: Any) -> dict | None:
@@ -212,7 +212,9 @@ def _section(plan: dict, name: str, itinerary_id: int) -> list:
     return items
 
 
-def _convert_plan(itinerary, plan: dict, days: list[str]) -> list[dict]:
+def _convert_plan(
+    itinerary, plan: dict, days: list[str], progress: ProgressCallback
+) -> list[dict]:
     converters = {
         "accommodations": lambda item: _accommodation_to_op(itinerary, item),
         "events": lambda item: _event_to_op(itinerary, item, days),
@@ -221,41 +223,41 @@ def _convert_plan(itinerary, plan: dict, days: list[str]) -> list[dict]:
     }
     sections = {name: _section(plan, name, itinerary.id) for name in PLAN_SECTIONS}
     sections["accommodations"] = sections["accommodations"][:2]
+    places_total = sum(len(sections[name]) for name in PLACE_SECTIONS)
 
     ops = []
+    looked_up = 0
     for name in PLAN_SECTIONS:
-        converted = (converters[name](item) for item in sections[name])
-        ops.extend(op for op in converted if op is not None)
+        for item in sections[name]:
+            if name in PLACE_SECTIONS:
+                looked_up += 1
+                progress("Looking up places", looked_up, places_total)
+            op = converters[name](item)
+            if op is not None:
+                ops.append(op)
     return ops
 
 
-def _request_plan(itinerary_id: int, prompt: str) -> dict | None:
-    try:
-        plan = ai_services.format_json(ai_services.get_ai_response(prompt))
-    except (ValueError, RuntimeError):
-        logger.exception("Trip %s: AI plan request or parsing failed.", itinerary_id)
-        return None
+def _request_plan(prompt: str) -> dict:
+    plan = ai_services.format_json(ai_services.get_ai_response(prompt))
     if not isinstance(plan, dict):
-        logger.error(
-            "Trip %s: AI plan was %s, expected an object.",
-            itinerary_id,
-            type(plan).__name__,
-        )
-        return None
+        raise AIResponseError(f"AI plan was {type(plan).__name__}, expected an object.")
     return plan
 
 
-def generate_trip_plan(itinerary_id: int) -> list[dict]:
+def generate_trip_plan(
+    itinerary_id: int, progress: ProgressCallback = no_progress
+) -> list[dict]:
     """Propose a whole-trip plan as preview-only change-set ops. Saves nothing."""
     itinerary = get_itinerary(itinerary_id)
     days = _trip_days(itinerary)
     prompt = _build_prompt(itinerary, get_preferences(itinerary_id), days)
 
-    plan = _request_plan(itinerary_id, prompt)
-    if plan is None:
-        return []
+    release_connection()
+    progress("Asking the AI to plan your trip", None, None)
+    plan = _request_plan(prompt)
 
-    ops = _convert_plan(itinerary, plan, days)
+    ops = _convert_plan(itinerary, plan, days, progress)
     if len(ops) > MAX_OPS_PER_CHANGE_SET:
         logger.warning(
             "Trip %s: truncating %s generated ops to %s.",

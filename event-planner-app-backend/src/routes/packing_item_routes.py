@@ -1,7 +1,6 @@
 from flask import Blueprint, request
 
 from ..exceptions import BadRequestError, UserNotAuthorisedError
-from ..extensions import limiter
 from ..middleware.itinerary_access_required import (
     ItineraryAccess,
     itinerary_access_required,
@@ -10,7 +9,6 @@ from ..models import UserRole
 from ..schemas.packing_item_schema import PackingItemSchema
 from ..services import packing_item_service
 from ..utils.format_response import api_response
-from ..utils.rate_limit import get_user_or_ip
 
 packing_item_bp = Blueprint("packing", __name__)
 
@@ -55,23 +53,6 @@ def create_packing_item(itinerary_id: int, access: ItineraryAccess):
         success=True,
         data=schema.dump(new_packing_item),
         message="Created packing item.",
-    )
-
-
-@packing_item_bp.route("/generate", methods=["POST"])
-@itinerary_access_required(
-    allowed_roles=[UserRole.ADMIN, UserRole.EDITOR],
-)
-@limiter.limit("10 per minute", key_func=get_user_or_ip)
-def generate_packing_items_route(itinerary_id: int, access: ItineraryAccess):
-    schema = PackingItemSchema(many=True)
-    items = packing_item_service.generate_and_add_packing_items(
-        access.user_id, itinerary_id
-    )
-    return api_response(
-        success=True,
-        data=schema.dump(items),
-        message="Generated packing list.",
     )
 
 

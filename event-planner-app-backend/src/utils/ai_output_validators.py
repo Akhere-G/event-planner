@@ -1,12 +1,14 @@
-from datetime import datetime
+from dataclasses import dataclass
+from datetime import date, datetime, time
 from typing import Any
 
+from ..exceptions import AIResponseError
 from ..models import Event
 
 
 def validate_insights(insights: Any) -> list[dict[str, str]]:
     if not isinstance(insights, list):
-        raise ValueError("AI response must be a list.")
+        raise AIResponseError("AI response must be a list.")
 
     validated = []
 
@@ -65,61 +67,84 @@ def validate_event_suggestion(event: Any, requested_date: str) -> bool:
     return not end_at <= start_at
 
 
-def validate_optimised_events(
-    optimised_events: Any,
-    original_events: list[Event],
-    event_date: datetime,
-) -> list[dict[str, Any]]:
-    """
-    Validate AI-generated event optimisation results.
-    """
-    if not isinstance(optimised_events, list):
-        raise ValueError("AI response must be a list.")
+@dataclass(frozen=True)
+class OptimisationRules:
 
-    original_events_by_id = {event.id: event for event in original_events}
+    day: date
+    event_ids: frozenset[int]
+    locked_ids: frozenset[int] = frozenset()
+    allow_add_remove: bool = False
+    day_start: time | None = None
+    day_end: time | None = None
+
+    def allows_times(self, start: datetime, end: datetime) -> bool:
+        if start.date() != self.day or end.date() != self.day or end <= start:
+            return False
+        if self.day_start and start.time() < self.day_start:
+            return False
+        return not (self.day_end and end.time() > self.day_end)
+
+    def can_change(self, event_id: Any) -> bool:
+        return (
+            isinstance(event_id, int)
+            and event_id in self.event_ids
+            and event_id not in self.locked_ids
+        )
+
+
+def _parse_times(item: dict) -> tuple[datetime, datetime] | None:
+    try:
+        return (
+            datetime.fromisoformat(str(item["start_at"]).replace("Z", "+00:00")),
+            datetime.fromisoformat(str(item["end_at"]).replace("Z", "+00:00")),
+        )
+    except (KeyError, ValueError):
+        return None
+
+
+def validate_optimisation_ops(
+    raw_ops: Any, rules: OptimisationRules
+) -> list[dict[str, Any]]:
+    """Keep only the changes the rules allow. Anything else the AI proposed is dropped.
+
+    Returns dicts with an `action` of update, delete or create. Times stay as the
+    trip-local wall-clock values the AI was asked for.
+    """
+    if not isinstance(raw_ops, list):
+        raise AIResponseError("AI response must be a list.")
 
     validated = []
-
-    for event in optimised_events:
-        if not isinstance(event, dict):
+    for item in raw_ops:
+        if not isinstance(item, dict):
             continue
+        action = item.get("action", "update")
+        reason = item.get("reason")
 
-        event_id = event.get("id")
-        start_at = event.get("start_at")
-        end_at = event.get("end_at")
-
-        if not isinstance(event_id, int):
-            continue
-
-        if event_id not in original_events_by_id:
-            continue
-
-        if not isinstance(start_at, str) or not isinstance(end_at, str):
-            continue
-
-        try:
-            start = datetime.fromisoformat(start_at.replace("Z", "+00:00"))
-            end = datetime.fromisoformat(end_at.replace("Z", "+00:00"))
-        except ValueError:
-            continue
-
-        if start.date() != event_date.date():
-            continue
-
-        if end.date() != event_date.date():
-            continue
-
-        if end <= start:
-            continue
-
-        validated.append(
-            {
-                "id": event_id,
-                "start_at": start,
-                "end_at": end,
-                "reason": event.get("reason"),
-            }
-        )
+        if action == "update" and rules.can_change(item.get("id")):
+            times = _parse_times(item)
+            if times and rules.allows_times(*times):
+                validated.append(
+                    {
+                        "action": "update",
+                        "id": item["id"],
+                        "start_at": times[0],
+                        "end_at": times[1],
+                        "reason": reason,
+                    }
+                )
+        elif action == "delete" and rules.allow_add_remove:
+            if rules.can_change(item.get("id")):
+                validated.append(
+                    {"action": "delete", "id": item["id"], "reason": reason}
+                )
+        elif action == "create" and rules.allow_add_remove:
+            times = _parse_times(item)
+            if (
+                times
+                and rules.allows_times(*times)
+                and validate_event_suggestion(item, rules.day.isoformat())
+            ):
+                validated.append({**item, "action": "create"})
 
     return validated
 
@@ -128,7 +153,7 @@ def validate_packing_items(
     items: Any,
 ) -> list[dict[str, Any]]:
     if not isinstance(items, list):
-        raise ValueError("AI response must be a list.")
+        raise AIResponseError("AI response must be a list.")
 
     validated = []
 

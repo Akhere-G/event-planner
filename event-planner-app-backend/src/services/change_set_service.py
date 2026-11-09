@@ -95,3 +95,32 @@ def build_event_update_ops(updates: list[dict]) -> list[dict]:
         }
         for update in updates
     ]
+
+
+def build_event_delete_ops(removals: list[dict]) -> list[dict]:
+    ops = []
+    for removal in removals:
+        ops.append(
+            {
+                "op": "delete",
+                "entity": "event",
+                "id": removal["id"],
+                "data": {},
+                "reason": _clean_reason(removal.get("reason")),
+            }
+        )
+    return ops
+
+
+def build_packing_create_op(
+    name: str,
+    category: str,
+    is_shared: bool,
+    reason: str | None = None,
+) -> dict:
+    return {
+        "op": "create",
+        "entity": "packing_item",
+        "data": {"name": name[:100], "category": category[:50], "is_shared": is_shared},
+        "reason": _clean_reason(reason),
+    }

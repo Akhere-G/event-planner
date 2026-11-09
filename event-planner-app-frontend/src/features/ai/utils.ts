@@ -101,3 +101,42 @@ export const summariseApplied = (counts: {
   ].filter(Boolean);
   return parts.length ? `Changes applied: ${parts.join(", ")}.` : "No changes.";
 };
+
+export const CHANGE_ENTITY_ORDER: ChangeEntity[] = [
+  "event",
+  "packing_item",
+  "accommodation",
+  "wishlist_item",
+];
+
+export interface IndexedChangeOp {
+  op: ChangeOp;
+  /** Position in the proposal, which is what accepting refers to. */
+  index: number;
+}
+
+export const groupOpsByEntity = (
+  ops: ChangeOp[],
+  kind?: ChangeOp["op"],
+): { entity: ChangeEntity; items: IndexedChangeOp[] }[] => {
+  const groups: { entity: ChangeEntity; items: IndexedChangeOp[] }[] = [];
+  for (const entity of CHANGE_ENTITY_ORDER) {
+    const items: IndexedChangeOp[] = [];
+    for (let index = 0; index < ops.length; index++) {
+      const op = ops[index];
+      if (op.entity === entity && (!kind || op.op === kind)) {
+        items.push({ op, index });
+      }
+    }
+    if (items.length > 0) groups.push({ entity, items });
+  }
+  return groups;
+};
+
+export const countOpsByKind = (
+  ops: ChangeOp[],
+): Record<ChangeOp["op"], number> => ({
+  create: ops.filter((op) => op.op === "create").length,
+  update: ops.filter((op) => op.op === "update").length,
+  delete: ops.filter((op) => op.op === "delete").length,
+});

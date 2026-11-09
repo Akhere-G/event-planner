@@ -141,6 +141,7 @@ def initialise_realtime(app: Flask, testing: bool):
 def register_models():
     from .models import (
         Accommodation,
+        AiTask,
         Event,
         Flight,
         Expense,
@@ -166,15 +167,17 @@ def register_blueprints(app: Flask):
     from .routes import (
         accommodation_bp,
         ai_bp,
+        ai_task_bp,
         auth_bp,
-        change_set_bp,
         event_bp,
         flight_bp,
         expense_bp,
+        internal_task_bp,
         itinerary_bp,
         itinerary_invites_bp,
         notification_bp,
         packing_item_bp,
+        pending_ai_task_bp,
         preferences_bp,
         user_bp,
         user_invites_bp,
@@ -189,11 +192,6 @@ def register_blueprints(app: Flask):
     app.register_blueprint(
         itinerary_bp,
         url_prefix="/api/itineraries",
-    )
-
-    app.register_blueprint(
-        change_set_bp,
-        url_prefix="/api/itineraries/<int:itinerary_id>/changes",
     )
 
     app.register_blueprint(
@@ -234,6 +232,21 @@ def register_blueprints(app: Flask):
     app.register_blueprint(
         ai_bp,
         url_prefix="/api/ai",
+    )
+
+    app.register_blueprint(
+        ai_task_bp,
+        url_prefix="/api/itineraries/<int:itinerary_id>/ai-tasks",
+    )
+
+    app.register_blueprint(
+        internal_task_bp,
+        url_prefix="/api/internal",
+    )
+
+    app.register_blueprint(
+        pending_ai_task_bp,
+        url_prefix="/api/ai-tasks",
     )
 
     app.register_blueprint(
