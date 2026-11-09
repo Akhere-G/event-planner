@@ -20,7 +20,6 @@ import ProposalReviewModal from "./ProposalReviewModal";
 const errorMessage = (err: unknown, fallback: string) =>
   isApiError(err) ? err.data.message : fallback;
 
-/** What the current user has running, waiting for review or failed on this trip. */
 export default function TaskProgressCards({ tripId }: { tripId: number }) {
   const { tasks } = useTripAiTasks(tripId);
   const [reviewing, setReviewing] = useState<AiTask | null>(null);

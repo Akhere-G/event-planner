@@ -48,11 +48,9 @@ interface ProposalAreaSectionProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
   onToggle: (index: number) => void;
-  /** Selects or clears every applicable suggestion in this area. */
   onSelectAll: (indexes: number[], select: boolean) => void;
 }
 
-/** One collapsible area of a proposal with its own selection shortcut. */
 export default function ProposalAreaSection({
   entity,
   items,
@@ -66,12 +64,13 @@ export default function ProposalAreaSection({
   onSelectAll,
 }: ProposalAreaSectionProps) {
   const { title, subtitle, Icon } = AREAS[entity];
-  const applicable = items
-    .filter((item) => staleness.get(item.index) !== "deleted")
-    .map((item) => item.index);
-  const selectedCount = applicable.filter((index) =>
-    selected.has(index),
-  ).length;
+  const applicable: number[] = [];
+  let selectedCount = 0;
+  for (const { index } of items) {
+    if (staleness.get(index) === "deleted") continue;
+    applicable.push(index);
+    if (selected.has(index)) selectedCount++;
+  }
   const allSelected =
     applicable.length > 0 && selectedCount === applicable.length;
 

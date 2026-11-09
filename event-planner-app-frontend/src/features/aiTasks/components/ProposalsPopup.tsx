@@ -9,7 +9,6 @@ interface ProposalsPopupProps {
   onDecideLater: () => void;
 }
 
-/** Lists the AI proposals waiting for a decision, so none is missed on returning to the app. */
 export default function ProposalsPopup({
   proposals,
   onReview,

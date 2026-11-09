@@ -7,7 +7,6 @@ export const TASK_LABELS: Record<AiTaskType, string> = {
   generate_packing: "Smart packing list",
 };
 
-/** Present-tense wording for a task that is still working. */
 export const TASK_PROGRESS_LABELS: Record<AiTaskType, string> = {
   fill_day: "Filling in a day",
   optimise_day: "Optimising days",
@@ -28,7 +27,6 @@ export const taskDays = (task: AiTask): string[] => {
   return [];
 };
 
-/** The active task of this type that already covers the given day, if any. */
 export const activeTaskForDay = (
   tasks: AiTask[],
   type: AiTaskType,
@@ -57,7 +55,6 @@ export interface OptimiseRequestSummaryInput {
   allowAddRemove: boolean;
 }
 
-/** One line telling the user what they are about to ask for, e.g. "Optimising 2 days · Minimise travel". */
 export const describeOptimiseRequest = ({
   dayCount,
   goalLabels,

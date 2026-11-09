@@ -41,7 +41,6 @@ interface ProposalReviewModalProps {
   onClose: (decided: boolean) => void;
 }
 
-/** Opens a finished task's proposal so the user can accept some or all of it, or reject it. */
 export default function ProposalReviewModal({
   tripId,
   taskId,
@@ -99,22 +98,22 @@ function ProposalReview({
   const [acceptTask, { isLoading: isAccepting }] = useAcceptAiTaskMutation();
   const [rejectTask, { isLoading: isRejecting }] = useRejectAiTaskMutation();
 
-  const staleness = new Map<number, ChangeStaleness>([
-    ...task.changedOpIndexes.map((index) => [index, "changed"] as const),
-    ...task.unavailableOpIndexes.map((index) => [index, "deleted"] as const),
-  ]);
+  const staleness = new Map<number, ChangeStaleness>();
+  for (const index of task.changedOpIndexes) staleness.set(index, "changed");
+  for (const index of task.unavailableOpIndexes) {
+    staleness.set(index, "deleted");
+  }
   const unavailableCount = task.unavailableOpIndexes.length;
   const applicableCount = task.ops.length - unavailableCount;
 
   // An edited target can still be applied, so only deleted ones start unticked.
-  const [selected, setSelected] = useState<Set<number>>(
-    () =>
-      new Set(
-        task.ops.flatMap((_, index) =>
-          staleness.get(index) === "deleted" ? [] : [index],
-        ),
-      ),
-  );
+  const [selected, setSelected] = useState<Set<number>>(() => {
+    const applicable = new Set<number>();
+    for (let index = 0; index < task.ops.length; index++) {
+      if (staleness.get(index) !== "deleted") applicable.add(index);
+    }
+    return applicable;
+  });
   const [filter, setFilter] = useState<ProposalFilter>("all");
   const areas = groupOpsByEntity(task.ops).map((group) => group.entity);
   const [openAreas, setOpenAreas] = useState<Set<ChangeEntity>>(

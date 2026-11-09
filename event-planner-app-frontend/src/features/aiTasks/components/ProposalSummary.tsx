@@ -6,7 +6,6 @@ interface ProposalSummaryProps {
   areas: ChangeEntity[];
 }
 
-/** The trip, how big the proposal is, and how it splits into adds, changes and removals. */
 export default function ProposalSummary({
   tripName,
   ops,

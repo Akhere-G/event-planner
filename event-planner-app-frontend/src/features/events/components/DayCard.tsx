@@ -88,7 +88,6 @@ export default function DayCard({
   };
 
 
-  /** Starts the AI in the background; the result arrives as a proposal to review. */
   const queueTask = async <T extends AiTaskType>(
     type: T,
     params: AiTaskParams[T],
