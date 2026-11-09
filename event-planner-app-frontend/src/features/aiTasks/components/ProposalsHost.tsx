@@ -5,7 +5,6 @@ import type { AiTask } from "../types";
 import ProposalReviewModal from "./ProposalReviewModal";
 import ProposalsPopup from "./ProposalsPopup";
 
-/** Query parameter that notification links use to open one proposal. */
 export const REVIEW_PARAM = "aiTask";
 
 /**

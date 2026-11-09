@@ -102,7 +102,6 @@ export const summariseApplied = (counts: {
   return parts.length ? `Changes applied: ${parts.join(", ")}.` : "No changes.";
 };
 
-/** Areas in the order a proposal lists them. */
 export const CHANGE_ENTITY_ORDER: ChangeEntity[] = [
   "event",
   "packing_item",
@@ -116,20 +115,23 @@ export interface IndexedChangeOp {
   index: number;
 }
 
-/** Splits a proposal into its areas, skipping areas with nothing in them. */
 export const groupOpsByEntity = (
   ops: ChangeOp[],
   kind?: ChangeOp["op"],
-): { entity: ChangeEntity; items: IndexedChangeOp[] }[] =>
-  CHANGE_ENTITY_ORDER.map((entity) => ({
-    entity,
-    items: ops
-      .map((op, index) => ({ op, index }))
-      .filter(
-        (item) =>
-          item.op.entity === entity && (!kind || item.op.op === kind),
-      ),
-  })).filter((group) => group.items.length > 0);
+): { entity: ChangeEntity; items: IndexedChangeOp[] }[] => {
+  const groups: { entity: ChangeEntity; items: IndexedChangeOp[] }[] = [];
+  for (const entity of CHANGE_ENTITY_ORDER) {
+    const items: IndexedChangeOp[] = [];
+    for (let index = 0; index < ops.length; index++) {
+      const op = ops[index];
+      if (op.entity === entity && (!kind || op.op === kind)) {
+        items.push({ op, index });
+      }
+    }
+    if (items.length > 0) groups.push({ entity, items });
+  }
+  return groups;
+};
 
 export const countOpsByKind = (
   ops: ChangeOp[],

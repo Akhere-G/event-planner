@@ -10,7 +10,6 @@ const BADGE_CLASSES: Record<ChangeOp["op"], string> = {
   delete: "bg-error/15 text-error",
 };
 
-/** What happened to a change's target while the AI was working. */
 export type ChangeStaleness = "changed" | "deleted";
 
 const STALENESS_CHIP: Record<
@@ -40,12 +39,10 @@ interface ChangePreviewListProps {
   events: Event[];
   timezone: string;
   selected: ReadonlySet<number>;
-  /** Per proposal index: the target was edited (still applicable) or deleted (not). */
   staleness?: ReadonlyMap<number, ChangeStaleness>;
   onToggle: (index: number) => void;
 }
 
-/** Proposed changes with a checkbox each. Holds no state of its own. */
 export default function ChangePreviewList({
   items,
   events,

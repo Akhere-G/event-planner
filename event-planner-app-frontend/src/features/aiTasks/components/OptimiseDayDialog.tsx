@@ -12,7 +12,6 @@ type OptimiseDayDialogProps = {
   onOpenChange: (open: boolean) => void;
 } & Omit<React.ComponentProps<typeof OptimiseDayForm>, "onCancel">;
 
-/** The optimise form in a dialog: a bottom sheet on phones, centred from `sm` up. */
 export default function OptimiseDayDialog({
   open,
   onOpenChange,

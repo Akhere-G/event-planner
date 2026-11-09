@@ -24,10 +24,8 @@ const dayOf = (event: Event) => event.startAt.slice(0, 10);
 interface OptimiseDayFormProps {
   tripStart: string;
   tripEnd: string;
-  /** The day the form was opened from, ticked to begin with. */
   initialDate: string;
   events: Event[];
-  /** Used to disable days that already have an optimise task running. */
   tasks?: AiTask[];
   defaultPace?: string;
   isSubmitting?: boolean;
@@ -35,7 +33,6 @@ interface OptimiseDayFormProps {
   onSubmit: (params: OptimiseDayParams) => void;
 }
 
-/** The optimise options plus a footer that summarises the request. */
 export default function OptimiseDayForm({
   tripStart,
   tripEnd,
@@ -71,13 +68,13 @@ export default function OptimiseDayForm({
       }).map((day) => format(day, "yyyy-MM-dd")),
     [tripStart, tripEnd],
   );
-  const busyDays = useMemo(
-    () =>
-      new Set(
-        days.filter((day) => activeTaskForDay(tasks, "optimise_day", day)),
-      ),
-    [days, tasks],
-  );
+  const busyDays = useMemo(() => {
+    const busy = new Set<string>();
+    for (const day of days) {
+      if (activeTaskForDay(tasks, "optimise_day", day)) busy.add(day);
+    }
+    return busy;
+  }, [days, tasks]);
 
   const [dates, goals, lockedEventIds, instructions] = watch([
     "dates",
@@ -95,12 +92,12 @@ export default function OptimiseDayForm({
   const eventsOnChosenDays = events.filter((event) =>
     dates.includes(dayOf(event)),
   );
+  const chosenEventIds = new Set(eventsOnChosenDays.map((event) => event.id));
   const lockedOnChosenDays = lockedEventIds.filter((id) =>
-    eventsOnChosenDays.some((event) => event.id === id),
+    chosenEventIds.has(id),
   );
 
-  // Options tucked into "More options" that currently differ from the defaults.
-  const optionsSet = [
+  const optionsChangedFromDefault = [
     pace !== "",
     dayStart !== "" || dayEnd !== "",
     lockedOnChosenDays.length > 0,
@@ -108,11 +105,14 @@ export default function OptimiseDayForm({
     instructions.trim() !== "",
   ].filter(Boolean).length;
 
+  const goalLabels: string[] = [];
+  for (const goal of OPTIMISE_GOALS) {
+    if (goals.includes(goal.value)) goalLabels.push(goal.label);
+  }
+
   const summary = describeOptimiseRequest({
     dayCount: dates.length,
-    goalLabels: OPTIMISE_GOALS.filter((goal) => goals.includes(goal.value)).map(
-      (goal) => goal.label,
-    ),
+    goalLabels,
     pace,
     dayStart,
     dayEnd,
@@ -132,12 +132,7 @@ export default function OptimiseDayForm({
     <form
       className="form flex min-h-0 flex-1 flex-col"
       onSubmit={handleSubmit((values) =>
-        onSubmit(
-          optimiseParamsFromForm(
-            values,
-            new Set(eventsOnChosenDays.map((event) => event.id)),
-          ),
-        ),
+        onSubmit(optimiseParamsFromForm(values, chosenEventIds)),
       )}
     >
       <div className="relative flex min-h-0 flex-1 flex-col gap-6 overflow-y-auto p-5">
@@ -178,9 +173,9 @@ export default function OptimiseDayForm({
               </span>
             </span>
             <span className="flex items-center gap-2">
-              {optionsSet > 0 && (
+              {optionsChangedFromDefault > 0 && (
                 <span className="rounded-full bg-brand-primary/10 px-2.5 py-0.5 text-xs font-semibold text-brand-primary">
-                  {optionsSet} set
+                  {optionsChangedFromDefault} set
                 </span>
               )}
               <ChevronDown

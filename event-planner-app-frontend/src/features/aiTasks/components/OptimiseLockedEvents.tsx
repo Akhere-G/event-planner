@@ -5,7 +5,6 @@ import type { Event } from "../../events/types";
 const dayOf = (event: Event) => event.startAt.slice(0, 10);
 
 interface OptimiseLockedEventsProps {
-  /** Events on the chosen days. */
   events: Event[];
   /** Every day of the trip, to number the groups. */
   days: string[];
@@ -13,22 +12,21 @@ interface OptimiseLockedEventsProps {
   onToggle: (eventId: number) => void;
 }
 
-/** Events the AI must leave exactly as they are, grouped by day. */
 export default function OptimiseLockedEvents({
   events,
   days,
   locked,
   onToggle,
 }: OptimiseLockedEventsProps) {
-  const groups = days
-    .map((day, index) => ({
-      day,
-      number: index + 1,
-      events: events
-        .filter((event) => dayOf(event) === day)
-        .sort((a, b) => a.startAt.localeCompare(b.startAt)),
-    }))
-    .filter((group) => group.events.length > 0);
+  const groups: { day: string; number: number; events: Event[] }[] = [];
+  for (const [index, day] of days.entries()) {
+    const eventsOnDay = events
+      .filter((event) => dayOf(event) === day)
+      .sort((a, b) => a.startAt.localeCompare(b.startAt));
+    if (eventsOnDay.length > 0) {
+      groups.push({ day, number: index + 1, events: eventsOnDay });
+    }
+  }
 
   return (
     <fieldset className="flex flex-col gap-2">

@@ -3,12 +3,10 @@ import { format, parseISO } from "date-fns";
 interface OptimiseDayPickerProps {
   days: string[];
   selected: string[];
-  /** Days that already have an optimise task running. */
   busyDays: ReadonlySet<string>;
   onChange: (days: string[]) => void;
 }
 
-/** A grid of days to tick, with shortcuts to select or clear them all. */
 export default function OptimiseDayPicker({
   days,
   selected,

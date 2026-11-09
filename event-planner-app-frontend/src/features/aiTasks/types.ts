@@ -21,7 +21,6 @@ export interface AiTask {
   tripName: string;
   type: AiTaskType;
   status: AiTaskStatus;
-  /** Echo of what was asked for. Keys are camelCased by the API. */
   params: {
     date?: string;
     dates?: string[];
@@ -41,7 +40,6 @@ export interface AiTaskDetail extends AiTask {
   ops: ChangeOp[];
   /** Ops whose target was edited after the task started: still applicable, but may overwrite. */
   changedOpIndexes: number[];
-  /** Ops whose target was deleted after the task started: can no longer be applied. */
   unavailableOpIndexes: number[];
 }
 
@@ -73,7 +71,6 @@ export interface AiTaskParams {
   generate_packing: Record<string, never>;
 }
 
-/** What the server tells the browser over `ai_task:changed`. */
 export interface AiTaskChangedWire {
   task_id: number;
   trip_id: number;
