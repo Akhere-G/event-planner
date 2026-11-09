@@ -101,3 +101,40 @@ export const summariseApplied = (counts: {
   ].filter(Boolean);
   return parts.length ? `Changes applied: ${parts.join(", ")}.` : "No changes.";
 };
+
+/** Areas in the order a proposal lists them. */
+export const CHANGE_ENTITY_ORDER: ChangeEntity[] = [
+  "event",
+  "packing_item",
+  "accommodation",
+  "wishlist_item",
+];
+
+export interface IndexedChangeOp {
+  op: ChangeOp;
+  /** Position in the proposal, which is what accepting refers to. */
+  index: number;
+}
+
+/** Splits a proposal into its areas, skipping areas with nothing in them. */
+export const groupOpsByEntity = (
+  ops: ChangeOp[],
+  kind?: ChangeOp["op"],
+): { entity: ChangeEntity; items: IndexedChangeOp[] }[] =>
+  CHANGE_ENTITY_ORDER.map((entity) => ({
+    entity,
+    items: ops
+      .map((op, index) => ({ op, index }))
+      .filter(
+        (item) =>
+          item.op.entity === entity && (!kind || item.op.op === kind),
+      ),
+  })).filter((group) => group.items.length > 0);
+
+export const countOpsByKind = (
+  ops: ChangeOp[],
+): Record<ChangeOp["op"], number> => ({
+  create: ops.filter((op) => op.op === "create").length,
+  update: ops.filter((op) => op.op === "update").length,
+  delete: ops.filter((op) => op.op === "delete").length,
+});
