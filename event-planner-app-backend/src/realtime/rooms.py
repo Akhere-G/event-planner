@@ -1,6 +1,7 @@
 TRIP_CHANGED_EVENT = "trip:changed"
 USER_CHANGED_EVENT = "user:changed"
 PRESENCE_EVENT = "presence:update"
+AI_TASK_EVENT = "ai_task:changed"
 
 
 def trip_room(itinerary_id: int) -> str:

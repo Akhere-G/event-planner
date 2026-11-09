@@ -56,6 +56,7 @@ export const tagTypes = [
   "Preferences",
   "Expenses",
   "Settlements",
+  "AiTasks",
 ];
 export const apiSlice = createApi({
   reducerPath: "api",

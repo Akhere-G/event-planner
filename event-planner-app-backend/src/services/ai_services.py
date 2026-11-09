@@ -11,8 +11,11 @@ from google import genai
 from google.genai import types as genai_types
 from groq import Groq
 
+from ..exceptions import AIProviderError, AIResponseError
 from ..utils import ai_output_validators
+from ..utils.db_utils import release_connection
 from ..utils.location_utils import get_place_details
+from ..utils.progress import ProgressCallback, no_progress
 from .itineraries_service import get_itinerary
 
 logger = logging.getLogger(__name__)
@@ -25,7 +28,7 @@ def format_json(raw_json: str) -> Any:
     Handles normal JSON as well as JSON wrapped in markdown code fences.
     """
     if not isinstance(raw_json, str):
-        raise ValueError("AI response must be a string.")
+        raise AIResponseError("AI response must be a string.")
 
     clean_json = raw_json.strip()
 
@@ -52,14 +55,14 @@ def format_json(raw_json: str) -> Any:
         ]
 
         if not starts:
-            raise ValueError("No JSON object or array found in AI response.")
+            raise AIResponseError("No JSON object or array found in AI response.")
 
         clean_json = clean_json[min(starts) :]
 
     try:
         return json.loads(clean_json)
     except json.JSONDecodeError as exc:
-        raise ValueError("AI response contained invalid JSON.") from exc
+        raise AIResponseError("AI response contained invalid JSON.") from exc
 
 
 def _trip_zone(timezone_name: str | None) -> ZoneInfo:
@@ -95,7 +98,7 @@ def get_ai_response(prompt: str) -> str:
         try:
             client_gemini = genai.Client(
                 api_key=gemini_api_key,
-                http_options=genai_types.HttpOptions(timeout=10000),
+                http_options=genai_types.HttpOptions(timeout=100000),
             )
 
             response = client_gemini.models.generate_content(
@@ -123,7 +126,8 @@ def get_ai_response(prompt: str) -> str:
                         "content": (
                             "You are an encouraging travel assistant. "
                             "Use British English. "
-                            "Respond ONLY with valid JSON."
+                            "Respond ONLY with valid JSON. "
+                            "Never leave JSON incomplete."
                         ),
                     },
                     {
@@ -131,10 +135,21 @@ def get_ai_response(prompt: str) -> str:
                         "content": prompt,
                     },
                 ],
-                timeout=10.0,
+                max_completion_tokens=8192,
+                timeout=100.0,
             )
 
-            content = completion.choices[0].message.content
+            choice = completion.choices[0]
+            content = choice.message.content
+
+            logger.info(
+                "Groq response: finish_reason=%s, completion_tokens=%s",
+                choice.finish_reason,
+                completion.usage.completion_tokens,
+            )
+
+            if choice.finish_reason == "length":
+                raise RuntimeError("Groq response was truncated by the token limit.")
 
             if content:
                 return content
@@ -144,7 +159,7 @@ def get_ai_response(prompt: str) -> str:
         except Exception:
             logger.exception("Groq request failed.")
 
-    raise RuntimeError("All AI providers failed.")
+    raise AIProviderError("All AI providers failed.")
 
 
 def get_insights(itinerary_id: int):
@@ -189,6 +204,7 @@ def get_event_suggestions(
     companions: str = "couple",
     transport: str = "public_transport",
     interests: List[str] | None = None,
+    progress: ProgressCallback = no_progress,
 ):
     itinerary = get_itinerary(itinerary_id)
 
@@ -268,173 +284,48 @@ JSON FORMAT:
 ]
 """
 
-    try:
-        raw_response = get_ai_response(prompt)
-        suggestions = format_json(raw_response)
+    release_connection()
+    progress("Asking the AI for ideas", None, None)
+    suggestions = format_json(get_ai_response(prompt))
 
-        if not isinstance(suggestions, list):
-            return []
+    if not isinstance(suggestions, list):
+        raise AIResponseError("AI suggestions must be a list.")
 
-        valid_suggestions = [
-            event
-            for event in suggestions
-            if ai_output_validators.validate_event_suggestion(
-                event,
-                requested_date,
+    valid_suggestions = []
+    for event in suggestions:
+        if ai_output_validators.validate_event_suggestion(event, requested_date):
+            valid_suggestions.append(event)
+
+    geocoded_events = []
+
+    for index, event in enumerate(valid_suggestions, start=1):
+        progress("Looking up places", index, len(valid_suggestions))
+        try:
+            details = get_place_details(
+                name=event["name"],
+                address=event.get("address"),
             )
-        ]
 
-        if not valid_suggestions:
-            return []
-
-        geocoded_events = []
-
-        for event in valid_suggestions:
-            try:
-                details = get_place_details(
-                    name=event["name"],
-                    address=event.get("address"),
-                )
-
-                event_with_location = {
+            geocoded_events.append(
+                {
                     **event,
-                    "start_at": trip_local_to_utc(
-                        event["start_at"], timezone
-                    ).isoformat(),
+                    "start_at": trip_local_to_utc(event["start_at"], timezone).isoformat(),
                     "end_at": trip_local_to_utc(event["end_at"], timezone).isoformat(),
                     "latitude": details["latitude"],
                     "longitude": details["longitude"],
                     "address": details.get("formatted_address") or event.get("address"),
                 }
-
-                geocoded_events.append(event_with_location)
-
-            except Exception:
-                logger.exception(
-                    "Failed to geocode venue: %s",
-                    event.get("name"),
-                )
-        return geocoded_events
-
-    except (ValueError, RuntimeError) as exc:
-        logger.warning(
-            "Failed to generate event suggestions: %s",
-            exc,
-        )
-        return []
-
-
-def optimise_events(
-    itinerary_id: int,
-    event_date: datetime,
-):
-    itinerary = get_itinerary(itinerary_id)
-    timezone = itinerary.timezone
-
-    events = [
-        event
-        for event in itinerary.events
-        if to_trip_local(event.start_at, timezone).date() == event_date.date()
-    ]
-
-    if not events:
-        return []
-
-    event_details = "\n".join(
-        [
-            (
-                f"- id: {event.id}, "
-                f"name: {event.name}, "
-                f"start_at: {to_trip_local(event.start_at, timezone).isoformat()}, "
-                f"end_at: {to_trip_local(event.end_at, timezone).isoformat()}, "
-                f"address: {event.address}, "
-                f"category: {event.category}"
             )
-            for event in events
-        ]
-    )
 
-    prompt = f"""
-You are a professional travel coordinator and logistics expert.
+        except Exception:
+            logger.exception("Failed to geocode venue: %s", event.get("name"))
 
-Task:
-Reorder and adjust the timings of the provided events to create a
-seamless, non-overlapping itinerary.
-
-Constraints:
-
-1. NO OVERLAPS:
-   Ensure every event ends before the next event begins.
-
-2. TRAVEL BUFFER:
-   Allow a realistic 15-45 minute gap between consecutive events.
-
-3. GAP MINIMISATION:
-   Avoid idle gaps longer than 60 minutes unless appropriate for meals.
-
-4. DATE INTEGRITY:
-   Keep every event on {event_date.date()}.
-   Only modify hours and minutes.
-
-5. LOGICAL FLOW:
-   Consider the event addresses when determining the sequence.
-
-6. VALIDATION:
-   end_at must always be strictly after start_at.
-
-7. SAFETY:
-   If an event cannot be sensibly optimised, keep its original times.
-
-8. TIMEZONE:
-   start_at and end_at MUST be local wall-clock times in the {timezone} timezone,
-   formatted as YYYY-MM-DDTHH:MM:SS with no offset or "Z".
-
-Return ONLY a JSON array.
-
-Format:
-
-[
-  {{
-    "id": 123,
-    "start_at": "YYYY-MM-DDTHH:MM:SS",
-    "end_at": "YYYY-MM-DDTHH:MM:SS",
-    "reason": "One short sentence (max 120 characters) on why this timing helps"
-  }}
-]
-
-Events:
-
-{event_details}
-"""
-
-    try:
-        raw_response = get_ai_response(prompt)
-        optimised_events = format_json(raw_response)
-
-        validated = ai_output_validators.validate_optimised_events(
-            optimised_events,
-            events,
-            event_date,
-        )
-
-        return [
-            {
-                **event,
-                "start_at": trip_local_to_utc(event["start_at"], timezone),
-                "end_at": trip_local_to_utc(event["end_at"], timezone),
-            }
-            for event in validated
-        ]
-
-    except (ValueError, RuntimeError) as exc:
-        logger.warning(
-            "Failed to optimise events: %s",
-            exc,
-        )
-        return []
+    return geocoded_events
 
 
-def generate_packing_list(itinerary_id: int):
+def generate_packing_list(
+    itinerary_id: int, progress: ProgressCallback = no_progress
+):
     itinerary = get_itinerary(itinerary_id)
 
     duration = (itinerary.end_date - itinerary.start_date).days + 1
@@ -478,7 +369,7 @@ Instructions:
 
 6. Set "is_shared" to false for individual/personal items.
 
-Return ONLY a JSON array.
+Return ONLY a JSON array. Max 10 items.
 
 Schema:
 
@@ -491,19 +382,11 @@ Schema:
 ]
 """
 
-    try:
-        raw_response = get_ai_response(prompt)
-        items = format_json(raw_response)
-
-        return ai_output_validators.validate_packing_items(items)
-
-    except (ValueError, RuntimeError) as exc:
-        logger.warning(
-            "Failed to generate packing list: %s",
-            exc,
-        )
-        return []
-
+    release_connection()
+    progress("Asking the AI for a packing list", None, None)
+    return ai_output_validators.validate_packing_items(
+        format_json(get_ai_response(prompt))
+    )
 
 
 def __getattr__(name: str):

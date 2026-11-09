@@ -4,7 +4,8 @@ from marshmallow import pre_load
 from marshmallow_sqlalchemy import SQLAlchemyAutoSchema
 
 
-class BaseSchema(SQLAlchemyAutoSchema):
+class CamelToSnakeMixin:
+
     @pre_load
     def camel_to_snake(self, data, many, partial, **kwargs):
         if not data:
@@ -13,3 +14,7 @@ class BaseSchema(SQLAlchemyAutoSchema):
 
     def _to_snake(self, s):
         return re.sub(r"(?<!^)(?=[A-Z])", "_", s).lower()
+
+
+class BaseSchema(CamelToSnakeMixin, SQLAlchemyAutoSchema):
+    pass

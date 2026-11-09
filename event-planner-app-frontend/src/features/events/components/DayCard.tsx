@@ -1,4 +1,4 @@
-import type { AutofillConfig, Day } from "../types";
+import type { Day } from "../types";
 import { Accordion, ConfirmModal } from "../../../components";
 import { formatDateRelative } from "../../../utils/dateFormattors";
 import EventList from "./EventList";
@@ -11,12 +11,15 @@ import {
   Sparkles,
   Wand2,
 } from "lucide-react";
-import {
-  usePreviewEventSuggestionsMutation,
-  usePreviewOptimisedEventsMutation,
-} from "../../ai/services/aiApiSlice";
-import { ChangePreviewModal } from "../../ai/components";
-import type { ChangeOp } from "../../ai/types";
+import { useCreateAiTaskMutation } from "../../aiTasks/services/aiTaskApiSlice";
+import { useTripAiTasks } from "../../aiTasks/hooks";
+import { activeTaskForDay } from "../../aiTasks/utils";
+import OptimiseDayDialog from "../../aiTasks/components/OptimiseDayDialog";
+import type {
+  AiTaskParams,
+  AiTaskType,
+  OptimiseDayParams,
+} from "../../aiTasks/types";
 import { useParams } from "react-router";
 import { toast } from "sonner";
 import { useGetTripQuery } from "../../trips/services/tripsApiSlice";
@@ -56,7 +59,7 @@ export default function DayCard({
 }) {
   const tripId = Number(useParams()?.tripId);
   const { data: tripData } = useGetTripQuery(tripId);
-  const { events: tripEvents, isFetching } = useTripEvents(tripId);
+  const { events: tripEvents } = useTripEvents(tripId);
   const { data } = useGetAccommodationsQuery(tripId);
   const accommodations = data?.data ?? [];
   const { data: flightsData } = useGetFlightsQuery(tripId);
@@ -65,16 +68,13 @@ export default function DayCard({
   const dispatch = useDispatch();
   const posthog = usePostHog();
 
-  const [previewSuggestions, { isLoading: isSuggestLoading }] =
-    usePreviewEventSuggestionsMutation();
-  const [previewOptimised, { isLoading: isOptimiseLoading }] =
-    usePreviewOptimisedEventsMutation();
+  const [createAiTask, { isLoading: isQueueing }] = useCreateAiTaskMutation();
+  const { tasks: aiTasks } = useTripAiTasks(tripId, canEdit);
+  const activeFill = activeTaskForDay(aiTasks, "fill_day", day.date);
+  const activeOptimise = activeTaskForDay(aiTasks, "optimise_day", day.date);
 
   const [isFillMenuOpen, setIsFillMenuOpen] = useState(false);
-  const [preview, setPreview] = useState<{
-    kind: "fill" | "optimise";
-    ops: ChangeOp[];
-  } | null>(null);
+  const [isOptimiseOpen, setIsOptimiseOpen] = useState(false);
 
   const { data: preferencesData } = useGetPreferencesQuery(tripId, {
     skip: !canEdit,
@@ -87,59 +87,26 @@ export default function DayCard({
     setViewingDay(isOpen ? null : day.date);
   };
 
-  interface Autofill extends AutofillConfig {
-    date: string;
-  }
-  const getSuggestions = async (autoFillData: Autofill) => {
+
+  const queueTask = async <T extends AiTaskType>(
+    type: T,
+    params: AiTaskParams[T],
+    closeForm: () => void,
+  ) => {
     try {
-      const { data } = await previewSuggestions({
-        tripId,
-        body: autoFillData,
-      }).unwrap();
-      setIsFillMenuOpen(false);
-      if (!data.ops.length) {
-        toast.info("No suggestions found for this day. Try different options.");
-        return;
-      }
-      setPreview({ kind: "fill", ops: data.ops });
+      await createAiTask({ tripId, type, params }).unwrap();
+      closeForm();
+      toast.success(
+        "On it. You can keep using the app, and we'll let you know when it's ready.",
+      );
     } catch (err) {
       if (isApiError(err)) {
         toast.error(err.data.message);
       } else {
         posthog?.captureException(err);
-        toast.error("Could not get suggestions.");
+        toast.error("Could not start the AI task.");
       }
     }
-  };
-
-  const getOptimisedEvents = async () => {
-    try {
-      const { data } = await previewOptimised({
-        tripId,
-        date: day.date,
-      }).unwrap();
-      if (!data.ops.length) {
-        toast.info("There is nothing to optimise for this day.");
-        return;
-      }
-      setPreview({ kind: "optimise", ops: data.ops });
-    } catch (err) {
-      if (isApiError(err)) {
-        toast.error(err.data.message);
-      } else {
-        posthog?.captureException(err);
-        toast.error("Could not optimise events.");
-      }
-    }
-  };
-
-  const handlePreviewApplied = () => {
-    posthog?.capture(
-      preview?.kind === "fill"
-        ? "ai_fill_days_generated"
-        : "ai_optimise_events_used",
-      { trip_id: tripId },
-    );
   };
 
   const viewAllRoutes = () => {
@@ -177,8 +144,11 @@ export default function DayCard({
     posthog?.capture("day_routes_viewed", { trip_id: tripId });
   };
 
-  const isSuggestBtnDisabled = isSuggestLoading || isFetching;
-  const isOptimiseBtnDisabled = isOptimiseLoading || isFetching;
+  const runningLabel = activeFill
+    ? "Filling in…"
+    : activeOptimise
+      ? "Optimising…"
+      : null;
 
   return (
     <div className="relative">
@@ -195,6 +165,15 @@ export default function DayCard({
                 {formatDateRelative(day.date)}
               </h3>
               <DayViewers date={day.date} />
+              {runningLabel && (
+                <span
+                  role="status"
+                  className="mt-1 flex items-center gap-1 rounded-full bg-brand-primary/10 px-2 py-0.5 text-xs font-semibold text-brand-primary"
+                >
+                  <LoaderCircle className="animate-spin" size={12} />
+                  {runningLabel}
+                </span>
+              )}
             </div>
 
             <DropdownMenu>
@@ -220,26 +199,21 @@ export default function DayCard({
                         setIsFillMenuOpen(true);
                         e.stopPropagation();
                       }}
-                      disabled={isSuggestBtnDisabled}
+                      disabled={!!activeFill}
                       className="flex gap-2 items-center"
                     >
-                      {isSuggestBtnDisabled ? (
-                        <LoaderCircle className="animate-spin" size={18} />
-                      ) : (
-                        <Sparkles className="text-brand-primary" size={18} />
-                      )}
+                      <Sparkles className="text-brand-primary" size={18} />
                       Fill in day
                     </DropdownMenuItem>
                     <DropdownMenuItem
-                      onClick={getOptimisedEvents}
-                      disabled={isOptimiseBtnDisabled}
+                      onClick={(e) => {
+                        setIsOptimiseOpen(true);
+                        e.stopPropagation();
+                      }}
+                      disabled={!!activeOptimise}
                       className="flex gap-2 items-center"
                     >
-                      {isOptimiseBtnDisabled ? (
-                        <LoaderCircle className="animate-spin" size={18} />
-                      ) : (
-                        <Wand2 className="text-brand-primary" size={18} />
-                      )}
+                      <Wand2 className="text-brand-primary" size={18} />
                       Optimise day
                     </DropdownMenuItem>
                   </>
@@ -283,23 +257,6 @@ export default function DayCard({
         onOpenChange={handleToggleOpen}
       />
 
-      {preview && tripData?.data && (
-        <ChangePreviewModal
-          open
-          onOpenChange={(open) => !open && setPreview(null)}
-          tripId={tripId}
-          timezone={tripData.data.timezone}
-          ops={preview.ops}
-          events={tripEvents}
-          title={
-            preview.kind === "fill"
-              ? `Fill Day ${day.day}: review suggestions`
-              : `Optimise Day ${day.day}: review changes`
-          }
-          onApplied={handlePreviewApplied}
-        />
-      )}
-
       {isFillMenuOpen && (
         <ConfirmModal
           open={isFillMenuOpen}
@@ -311,18 +268,41 @@ export default function DayCard({
           confirmButtonProps={{
             type: "submit",
             form: "autofill-itinerary-form",
-            disabled: isSuggestLoading,
+            disabled: isQueueing,
           }}
         >
           <div className="p-4">
             <AutofillDayForm
               defaults={autofillDefaultsFromPreferences(preferencesData?.data)}
               onSubmit={(autoFillData) =>
-                getSuggestions({ ...autoFillData, date: day.date })
+                queueTask(
+                  "fill_day",
+                  { ...autoFillData, date: day.date },
+                  () => setIsFillMenuOpen(false),
+                )
               }
             />
           </div>
         </ConfirmModal>
+      )}
+
+      {isOptimiseOpen && tripData?.data && (
+        <OptimiseDayDialog
+          open={isOptimiseOpen}
+          onOpenChange={setIsOptimiseOpen}
+          tripStart={tripData.data.startDate}
+          tripEnd={tripData.data.endDate}
+          initialDate={day.date}
+          events={tripEvents}
+          tasks={aiTasks}
+          isSubmitting={isQueueing}
+          defaultPace={
+            autofillDefaultsFromPreferences(preferencesData?.data).pace
+          }
+          onSubmit={(params: OptimiseDayParams) =>
+            queueTask("optimise_day", params, () => setIsOptimiseOpen(false))
+          }
+        />
       )}
     </div>
   );

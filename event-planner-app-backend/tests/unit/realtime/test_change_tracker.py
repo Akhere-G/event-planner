@@ -29,7 +29,7 @@ def emitted(monkeypatch, itinerary, admin_user, admin_itinerary_user):
     db.session.commit()
     calls = []
     monkeypatch.setattr(
-        "src.realtime.change_tracker.socketio.emit",
+        "src.realtime.emit.socketio.emit",
         lambda event, payload, **kwargs: calls.append((event, payload, kwargs)),
     )
     return calls
@@ -203,7 +203,7 @@ def test_emit_failure_does_not_break_commit(monkeypatch, itinerary, admin_user, 
     def boom(*_args, **_kwargs):
         raise RuntimeError("redis down")
 
-    monkeypatch.setattr("src.realtime.change_tracker.socketio.emit", boom)
+    monkeypatch.setattr("src.realtime.emit.socketio.emit", boom)
     EventFactory(itinerary=itinerary, creator=admin_user)
 
     db.session.commit()

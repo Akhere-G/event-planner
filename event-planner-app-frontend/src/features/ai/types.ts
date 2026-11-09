@@ -16,10 +16,6 @@ export interface ChangeOp {
   reason?: string | null;
 }
 
-export interface ChangePreview {
-  ops: ChangeOp[];
-}
-
 export interface ApplyChangeSetResult {
   created: number;
   updated: number;

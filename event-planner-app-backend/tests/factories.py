@@ -4,6 +4,7 @@ from decimal import Decimal
 import factory
 from src.extensions import bcrypt, db
 from src.models import (
+    AiTask,
     Airport,
     Event,
     Expense,
@@ -251,3 +252,17 @@ class SettlementFactory(factory.alchemy.SQLAlchemyModelFactory):
     settled_on = date(2026, 8, 2)
     created_by_id = factory.LazyAttribute(lambda obj: obj.from_user.id)
     updated_by_id = factory.LazyAttribute(lambda obj: obj.from_user.id)
+
+
+class AiTaskFactory(factory.alchemy.SQLAlchemyModelFactory):
+    class Meta:
+        model = AiTask
+        sqlalchemy_session = db.session
+        sqlalchemy_session_persistence = "flush"
+
+    itinerary = factory.SubFactory(ItineraryFactory)
+    type = "optimise_day"
+    status = "queued"
+    params = factory.LazyFunction(dict)
+    attempts = 0
+    max_attempts = 3

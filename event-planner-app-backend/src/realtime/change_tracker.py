@@ -8,7 +8,7 @@ from flask import session as flask_session
 from sqlalchemy import event, select
 from sqlalchemy.orm import Session
 
-from ..extensions import socketio
+from .emit import safe_emit
 from .rooms import TRIP_CHANGED_EVENT, USER_CHANGED_EVENT, trip_room, user_room
 
 logger = logging.getLogger(__name__)
@@ -162,14 +162,6 @@ def collect_changes(session: Session, flush_context):
                 user_changes[user_id]["trip_ids"].add(itinerary_id)
 
 
-def _safe_emit(event_name: str, payload: dict, room: str):
-    try:
-        socketio.emit(event_name, payload, to=room)
-    except Exception:
-        # A broken queue must never fail a request whose commit already succeeded.
-        logger.exception("Failed to broadcast %s to %s", event_name, room)
-
-
 def emit_changes(session: Session):
     changes = session.info.pop(SESSION_INFO_KEY, None)
     user_changes = session.info.pop(USER_SESSION_INFO_KEY, None)
@@ -179,7 +171,7 @@ def emit_changes(session: Session):
     by_user_id = flask_session.get("user_id") if has_request_context() else None
 
     for itinerary_id, entities in (changes or {}).items():
-        _safe_emit(
+        safe_emit(
             TRIP_CHANGED_EVENT,
             {
                 "trip_id": itinerary_id,
@@ -192,7 +184,7 @@ def emit_changes(session: Session):
     for user_id, change in (user_changes or {}).items():
         if not change["entities"]:
             continue
-        _safe_emit(
+        safe_emit(
             USER_CHANGED_EVENT,
             {
                 "entities": sorted(change["entities"]),

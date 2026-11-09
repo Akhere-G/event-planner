@@ -4,10 +4,7 @@ import type { TripSchema } from "../features/trips/schemas/tripSchema";
 import type { PreferencesInput } from "../features/trips/schemas/preferencesSchema";
 import type { TripSubmitOptions } from "../features/trips/components/TripForm";
 import { useSavePreferencesMutation } from "../features/trips/services/preferencesApiSlice";
-import { usePreviewGeneratedTripMutation } from "../features/ai/services/aiApiSlice";
-import { ChangePreviewModal } from "../features/ai/components";
-import type { ChangeOp } from "../features/ai/types";
-import { useState } from "react";
+import { useCreateAiTaskMutation } from "../features/aiTasks/services/aiTaskApiSlice";
 import { useAddTripMutation } from "../features/trips/services/tripsApiSlice";
 import { usePostHog } from "@posthog/react";
 import { differenceInDays } from "date-fns";
@@ -26,33 +23,23 @@ export default function Addtrip() {
 
   const [savePreferences, { isLoading: isSavingPreferences }] =
     useSavePreferencesMutation();
-  const [previewGeneratedTrip, { isLoading: isGenerating }] =
-    usePreviewGeneratedTripMutation();
-  const [generated, setGenerated] = useState<{
-    tripId: number;
-    timezone: string;
-    ops: ChangeOp[];
-  } | null>(null);
+  const [createAiTask, { isLoading: isQueueingGeneration }] =
+    useCreateAiTaskMutation();
 
   const { anonTrip } = useLoadAnonTrip();
 
-  async function generatePlan(tripId: number, timezone: string) {
+  /** The plan is made in the background: go to the trip and watch it there. */
+  async function queueGeneration(tripId: number) {
     try {
-      const { data } = await previewGeneratedTrip({ tripId }).unwrap();
-      if (!data.ops.length) {
-        toast.info(
-          "The AI had no suggestions this time. You can add things yourself.",
-        );
-        navigate(`/trips/${tripId}`);
-        return;
-      }
-      setGenerated({ tripId, timezone, ops: data.ops });
+      await createAiTask({ tripId, type: "generate_trip" }).unwrap();
+      toast.success(
+        "Planning your trip. We'll let you know when it's ready to review.",
+      );
     } catch (err) {
       posthog?.captureException(err);
       toast.error(
-        isApiError(err) ? err.data.message : "Could not generate a plan.",
+        isApiError(err) ? err.data.message : "Could not start planning your trip.",
       );
-      navigate(`/trips/${tripId}`);
     }
   }
 
@@ -105,8 +92,7 @@ export default function Addtrip() {
       }
 
       if (generateWithAi) {
-        await generatePlan(tripId, newTrip.data.timezone);
-        return;
+        await queueGeneration(tripId);
       }
       navigate(`/trips/${tripId}`);
     } catch (err) {
@@ -144,27 +130,12 @@ export default function Addtrip() {
           submitAction={onSubmit}
           submitBtnText="Create"
           isLoading={
-            isLoading || isSavingPreferences || isGenerating || !!anonTrip
+            isLoading ||
+            isSavingPreferences ||
+            isQueueingGeneration ||
+            !!anonTrip
           }
         />
-        {generated && (
-          <ChangePreviewModal
-            open
-            onOpenChange={(open) => {
-              if (!open) navigate(`/trips/${generated.tripId}`);
-            }}
-            tripId={generated.tripId}
-            timezone={generated.timezone}
-            ops={generated.ops}
-            events={[]}
-            title="Review your AI trip plan"
-            onApplied={() =>
-              posthog?.capture("ai_trip_generated", {
-                trip_id: generated.tripId,
-              })
-            }
-          />
-        )}
       </div>
     </div>
   );

@@ -80,6 +80,12 @@ class Itinerary(Base, AuditMixin):
         cascade="all, delete-orphan",
         passive_deletes=True,
     )
+    ai_tasks: Mapped[List["AiTask"]] = relationship(  # type: ignore  # noqa: F821
+        "AiTask",
+        back_populates="itinerary",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
+    )
     creator: Mapped["User"] = relationship(  # type: ignore  # noqa: F821
         "User", foreign_keys="[Itinerary.created_by_id]"
     )
