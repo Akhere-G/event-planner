@@ -1,10 +1,19 @@
 import { useState } from "react";
+import { Info, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { usePostHog } from "@posthog/react";
-import { ConfirmModal, StateGate } from "../../../components";
-import { ChangePreviewList } from "../../ai/components";
-import { summariseApplied } from "../../ai/utils";
+import { StateGate } from "../../../components";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
+} from "../../../components/ui/dialog";
+import type { ChangeStaleness } from "../../ai/components/ChangePreviewList";
+import type { ChangeEntity } from "../../ai/types";
+import { groupOpsByEntity, summariseApplied } from "../../ai/utils";
 import { isApiError } from "../../api/utils";
+import type { Event } from "../../events/types";
 import useTripEvents from "../../events/hooks/useTripEvents";
 import { useGetTripQuery } from "../../trips/services/tripsApiSlice";
 import {
@@ -13,7 +22,10 @@ import {
   useRejectAiTaskMutation,
 } from "../services/aiTaskApiSlice";
 import type { AiTaskDetail, AiTaskType } from "../types";
-import { TASK_LABELS } from "../utils";
+import ProposalAreaSection from "./ProposalAreaSection";
+import ProposalFilterTabs, { type ProposalFilter } from "./ProposalFilterTabs";
+import ProposalFooter from "./ProposalFooter";
+import ProposalSummary from "./ProposalSummary";
 
 const ANALYTICS_EVENTS: Record<AiTaskType, string> = {
   fill_day: "ai_fill_days_generated",
@@ -42,32 +54,45 @@ export default function ProposalReviewModal({
   const timezone = trip.data?.data.timezone;
 
   return (
-    <ConfirmModal
-      open
-      onOpenChange={(open) => !open && onClose(false)}
-      title={detail ? `${TASK_LABELS[detail.type]}: review changes` : "Review changes"}
-      description={
-        detail
-          ? `Proposed for ${detail.tripName}. Nothing is saved until you apply them.`
-          : undefined
-      }
-      hideButtons
-    >
-      <StateGate
-        loadingStateProps={{ isLoading: task.isLoading || trip.isLoading }}
-        errorStateProps={{ isError: task.isError || trip.isError }}
-      >
-        {detail && timezone && (
-          <ProposalReview
-            key={detail.id}
-            task={detail}
-            events={events}
-            timezone={timezone}
-            onClose={onClose}
+    <Dialog open onOpenChange={(open) => !open && onClose(false)}>
+      <DialogContent className="flex max-h-[92vh] w-full flex-col gap-0 overflow-hidden p-0 max-sm:top-auto max-sm:bottom-0 max-sm:max-w-full! max-sm:translate-y-0 max-sm:rounded-b-none sm:w-[min(92vw,900px)]">
+        <header className="relative flex items-center gap-3 overflow-hidden bg-linear-to-br from-brand-primary to-brand-primary/80 p-5 pr-12 text-text-inverse">
+          <span
+            aria-hidden
+            className="pointer-events-none absolute -top-10 right-6 h-36 w-36 rounded-full border-[18px] border-text-inverse/10"
           />
-        )}
-      </StateGate>
-    </ConfirmModal>
+          <span className="relative flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-text-inverse/20">
+            <Sparkles size={22} />
+          </span>
+          <div className="relative flex flex-col gap-0.5">
+            <p className="text-[0.65rem] font-bold uppercase tracking-widest text-text-inverse/80">
+              AI suggestions ready
+            </p>
+            <DialogTitle className="text-xl font-bold">
+              Review proposed changes
+            </DialogTitle>
+            <DialogDescription className="text-text-inverse/85">
+              Nothing changes until you choose what to apply.
+            </DialogDescription>
+          </div>
+        </header>
+        <StateGate
+          loadingStateProps={{ isLoading: task.isLoading || trip.isLoading }}
+          errorStateProps={{ isError: task.isError || trip.isError }}
+          containerClasses="p-6"
+        >
+          {detail && timezone && (
+            <ProposalReview
+              key={detail.id}
+              task={detail}
+              events={events}
+              timezone={timezone}
+              onClose={onClose}
+            />
+          )}
+        </StateGate>
+      </DialogContent>
+    </Dialog>
   );
 }
 
@@ -78,7 +103,7 @@ function ProposalReview({
   onClose,
 }: {
   task: AiTaskDetail;
-  events: Parameters<typeof ChangePreviewList>[0]["events"];
+  events: Event[];
   timezone: string;
   onClose: (decided: boolean) => void;
 }) {
@@ -86,19 +111,33 @@ function ProposalReview({
   const [acceptTask, { isLoading: isAccepting }] = useAcceptAiTaskMutation();
   const [rejectTask, { isLoading: isRejecting }] = useRejectAiTaskMutation();
 
-  const outdated = new Set(task.outdatedOpIndexes);
+  const staleness = new Map<number, ChangeStaleness>([
+    ...task.changedOpIndexes.map((index) => [index, "changed"] as const),
+    ...task.unavailableOpIndexes.map((index) => [index, "deleted"] as const),
+  ]);
+  const unavailableCount = task.unavailableOpIndexes.length;
+  const applicableCount = task.ops.length - unavailableCount;
+
+  // An edited target can still be applied, so only deleted ones start unticked.
   const [selected, setSelected] = useState<Set<number>>(
     () =>
       new Set(
-        task.ops.flatMap((_, index) => (outdated.has(index) ? [] : [index])),
+        task.ops.flatMap((_, index) =>
+          staleness.get(index) === "deleted" ? [] : [index],
+        ),
       ),
+  );
+  const [filter, setFilter] = useState<ProposalFilter>("all");
+  const areas = groupOpsByEntity(task.ops).map((group) => group.entity);
+  const [openAreas, setOpenAreas] = useState<Set<ChangeEntity>>(
+    () => new Set(areas.slice(0, 1)),
   );
 
   const isBusy = isAccepting || isRejecting;
 
   if (task.status !== "ready") {
     return (
-      <div className="flex flex-col gap-4 p-4">
+      <div className="flex flex-col gap-4 p-6">
         <p className="text-text-secondary">
           {task.status === "expired"
             ? "This proposal has expired."
@@ -119,6 +158,23 @@ function ProposalReview({
       return next;
     });
 
+  const selectMany = (indexes: number[], select: boolean) =>
+    setSelected((current) => {
+      const next = new Set(current);
+      indexes.forEach((index) =>
+        select ? next.add(index) : next.delete(index),
+      );
+      return next;
+    });
+
+  const setAreaOpen = (entity: ChangeEntity, open: boolean) =>
+    setOpenAreas((current) => {
+      const next = new Set(current);
+      if (open) next.add(entity);
+      else next.delete(entity);
+      return next;
+    });
+
   const handleAccept = async () => {
     try {
       const { data } = await acceptTask({
@@ -126,8 +182,8 @@ function ProposalReview({
         taskId: task.id,
         opIndexes: [...selected].sort((a, b) => a - b),
       }).unwrap();
-      const skipped = data.skippedOutdated
-        ? ` ${data.skippedOutdated} skipped because they changed since.`
+      const skipped = data.skippedUnavailable
+        ? ` ${data.skippedUnavailable} skipped because what they change was deleted.`
         : "";
       toast.success(summariseApplied(data.applied) + skipped);
       posthog?.capture(ANALYTICS_EVENTS[task.type], { trip_id: task.tripId });
@@ -154,37 +210,51 @@ function ProposalReview({
     }
   };
 
+  const visibleGroups = groupOpsByEntity(
+    task.ops,
+    filter === "all" ? undefined : filter,
+  );
+
   return (
-    <>
-      <ChangePreviewList
-        ops={task.ops}
-        events={events}
-        timezone={timezone}
-        selected={selected}
-        outdated={outdated}
-        onToggle={toggle}
-      />
-      <div className="flex flex-wrap justify-end gap-2 border-t border-surface-border p-4">
-        <button
-          className="btn-secondary"
-          disabled={isBusy}
-          onClick={() => onClose(false)}
-        >
-          Decide later
-        </button>
-        <button className="btn-error" disabled={isBusy} onClick={handleReject}>
-          Reject
-        </button>
-        <button
-          className="btn-primary px-4"
-          disabled={isBusy || selected.size === 0}
-          onClick={handleAccept}
-        >
-          {selected.size === 0
-            ? "Select changes"
-            : `Apply ${selected.size} ${selected.size === 1 ? "change" : "changes"}`}
-        </button>
+    <div className="flex min-h-0 flex-1 flex-col">
+      <ProposalSummary tripName={task.tripName} ops={task.ops} areas={areas} />
+      <ProposalFilterTabs ops={task.ops} value={filter} onChange={setFilter} />
+      <div className="relative flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto bg-canvas p-5">
+        <p className="flex items-center gap-2 rounded-xl border border-surface-border bg-surface p-3 text-sm font-medium text-text-secondary">
+          <Info size={16} className="shrink-0" />
+          Select only the suggestions you want. Items changed while the AI was
+          working are flagged for a second look.
+        </p>
+        {visibleGroups.length === 0 && (
+          <p className="py-6 text-center text-text-secondary">
+            No suggestions of this kind.
+          </p>
+        )}
+        {visibleGroups.map(({ entity, items }) => (
+          <ProposalAreaSection
+            key={entity}
+            entity={entity}
+            items={items}
+            events={events}
+            timezone={timezone}
+            selected={selected}
+            staleness={staleness}
+            isOpen={openAreas.has(entity)}
+            onOpenChange={(open) => setAreaOpen(entity, open)}
+            onToggle={toggle}
+            onSelectAll={selectMany}
+          />
+        ))}
       </div>
-    </>
+      <ProposalFooter
+        selectedCount={selected.size}
+        skippedCount={applicableCount - selected.size}
+        unavailableCount={unavailableCount}
+        isBusy={isBusy}
+        onDecideLater={() => onClose(false)}
+        onReject={handleReject}
+        onApply={handleAccept}
+      />
+    </div>
   );
 }

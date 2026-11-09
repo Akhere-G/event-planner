@@ -1,4 +1,6 @@
+import { Ban, Check, Info } from "lucide-react";
 import type { Event } from "../../events/types";
+import type { IndexedChangeOp } from "../utils";
 import type { ChangeOp } from "../types";
 import { describeChangeOp, OP_LABELS } from "../utils";
 
@@ -8,67 +10,118 @@ const BADGE_CLASSES: Record<ChangeOp["op"], string> = {
   delete: "bg-error/15 text-error",
 };
 
+/** What happened to a change's target while the AI was working. */
+export type ChangeStaleness = "changed" | "deleted";
+
+const STALENESS_CHIP: Record<ChangeStaleness, { label: string; classes: string }> = {
+  changed: { label: "Changed since", classes: "bg-warning/15 text-warning" },
+  deleted: { label: "No longer available", classes: "bg-error/10 text-error" },
+};
+
+const STALENESS_NOTE: Record<ChangeStaleness, { text: string; classes: string }> = {
+  changed: {
+    text: "This item was edited after the AI started. Applying this suggestion may overwrite those edits.",
+    classes: "border-warning bg-warning/10 text-text-primary",
+  },
+  deleted: {
+    text: "This item was deleted while the AI was working, so this suggestion can't be applied.",
+    classes: "border-error bg-error/10 text-error",
+  },
+};
+
 interface ChangePreviewListProps {
-  ops: ChangeOp[];
+  items: IndexedChangeOp[];
   events: Event[];
   timezone: string;
   selected: ReadonlySet<number>;
-  /** Changes whose target was edited since the AI looked at it: they cannot be applied. */
-  outdated?: ReadonlySet<number>;
+  /** Per proposal index: the target was edited (still applicable) or deleted (not). */
+  staleness?: ReadonlyMap<number, ChangeStaleness>;
   onToggle: (index: number) => void;
 }
 
-/** The proposed changes with a checkbox each. Holds no state of its own. */
+/** Proposed changes with a checkbox each. Holds no state of its own. */
 export default function ChangePreviewList({
-  ops,
+  items,
   events,
   timezone,
   selected,
-  outdated = new Set(),
+  staleness = new Map(),
   onToggle,
 }: ChangePreviewListProps) {
   return (
-    <ul className="flex flex-col gap-2 p-4" aria-label="Proposed changes">
-      {ops.map((op, index) => {
+    <ul className="flex flex-col gap-2" aria-label="Proposed changes">
+      {items.map(({ op, index }) => {
         const summary = describeChangeOp(op, events, timezone);
-        const isOutdated = outdated.has(index);
+        const stale = staleness.get(index);
+        const isUnavailable = stale === "deleted";
+        const isSelected = selected.has(index);
         return (
           <li
             key={index}
-            className={`card p-3 ${isOutdated ? "opacity-60" : ""}`}
+            className={`relative overflow-hidden rounded-xl border ${
+              isUnavailable
+                ? "border-surface-border bg-surface-muted opacity-70"
+                : isSelected
+                  ? "border-brand-primary/40 bg-surface"
+                  : "border-surface-border bg-surface"
+            }`}
           >
+            {isSelected && (
+              <span
+                aria-hidden
+                className="absolute inset-y-0 left-0 w-1 bg-brand-primary"
+              />
+            )}
             <label
-              className={`flex gap-3 items-start ${isOutdated ? "cursor-not-allowed" : "cursor-pointer"}`}
+              className={`relative flex items-start gap-3 p-3 pl-4 ${
+                isUnavailable ? "cursor-not-allowed" : "cursor-pointer"
+              }`}
             >
               <input
                 type="checkbox"
-                className="mt-1 accent-brand-primary w-auto"
-                checked={selected.has(index)}
-                disabled={isOutdated}
+                className="peer sr-only"
+                checked={isSelected}
+                disabled={isUnavailable}
                 onChange={() => onToggle(index)}
                 aria-label={`${OP_LABELS[op.op]} ${summary.title}`}
               />
-              <div className="flex flex-col gap-1 min-w-0">
-                <div className="flex gap-2 items-center flex-wrap">
+              <span
+                aria-hidden
+                className={`mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-md border-2 peer-focus-visible:ring-2 peer-focus-visible:ring-brand-primary ${
+                  isUnavailable
+                    ? "border-dashed border-surface-border text-text-secondary"
+                    : isSelected
+                      ? "border-transparent bg-brand-primary text-text-inverse"
+                      : "border-surface-border bg-surface"
+                }`}
+              >
+                {isUnavailable ? <Ban size={14} /> : isSelected && <Check size={14} />}
+              </span>
+              <div className="flex min-w-0 flex-1 flex-col gap-1">
+                <div className="flex flex-wrap items-center gap-2">
                   <span
-                    className={`text-xs font-semibold px-2 py-0.5 rounded-full ${BADGE_CLASSES[op.op]}`}
+                    className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${BADGE_CLASSES[op.op]}`}
                   >
                     {OP_LABELS[op.op]}
                   </span>
                   <span className="font-semibold text-text-primary">
                     {summary.title}
                   </span>
-                  {isOutdated && (
-                    <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-warning/15 text-warning">
-                      Changed since
+                  {stale && (
+                    <span
+                      className={`ml-auto flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold ${STALENESS_CHIP[stale].classes}`}
+                    >
+                      <Info size={12} /> {STALENESS_CHIP[stale].label}
                     </span>
                   )}
                 </div>
                 {(summary.before || summary.detail) && (
-                  <p className="text-sm text-text-secondary">
+                  <p className="text-sm font-medium text-text-primary">
                     {summary.before && (
                       <>
-                        <span className="line-through">{summary.before}</span>
+                        <span className="text-text-secondary line-through">
+                          {summary.before}
+                        </span>
                         {" → "}
                       </>
                     )}
@@ -76,8 +129,13 @@ export default function ChangePreviewList({
                   </p>
                 )}
                 {op.reason && (
-                  <p className="text-sm italic text-text-secondary">
-                    {op.reason}
+                  <p className="text-sm text-text-secondary">{op.reason}</p>
+                )}
+                {stale && (
+                  <p
+                    className={`mt-1 border-l-2 px-3 py-1.5 text-xs font-semibold ${STALENESS_NOTE[stale].classes}`}
+                  >
+                    {STALENESS_NOTE[stale].text}
                   </p>
                 )}
               </div>

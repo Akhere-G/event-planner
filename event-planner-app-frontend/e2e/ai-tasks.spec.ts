@@ -57,7 +57,8 @@ detail.ops = [
     reason: "Close to your hotel.",
   },
 ];
-detail.outdatedOpIndexes = [];
+detail.changedOpIndexes = [];
+detail.unavailableOpIndexes = [];
 
 const json = (data: unknown, status = 200) => ({
   status,
@@ -100,7 +101,7 @@ test.describe("Background AI tasks", () => {
       return route.fulfill(
         json({
           applied: { created: 1, updated: 0, deleted: 0 },
-          skippedOutdated: 0,
+          skippedUnavailable: 0,
         }),
       );
     });
