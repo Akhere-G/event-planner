@@ -28,6 +28,7 @@ def get_events(itinerary_id: int):
         select(Event)
         .options(expense_loader(Event.expense))
         .where(Event.itinerary_id == itinerary_id)
+        .order_by(Event.start_at)
     )
 
     results = db.session.execute(stmt).scalars().all()
