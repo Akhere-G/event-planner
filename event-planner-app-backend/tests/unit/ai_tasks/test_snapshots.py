@@ -1,4 +1,10 @@
-from src.ai_tasks.snapshots import attach_bases, capture, find_outdated, strip_base
+from src.ai_tasks.snapshots import (
+    Staleness,
+    attach_bases,
+    capture,
+    find_stale,
+    strip_base,
+)
 from src.extensions import db
 from tests.factories import EventFactory
 
@@ -30,14 +36,14 @@ def test_only_update_and_delete_ops_get_a_base(itinerary):
     assert ops[1]["base"] == {"updated_at": stored_iso(event)}
 
 
-def test_untouched_targets_are_not_outdated(itinerary):
+def test_untouched_targets_are_not_stale(itinerary):
     event = EventFactory(itinerary=itinerary)
     ops = attach_bases([update_op(event)], capture(itinerary.id))
 
-    assert find_outdated(itinerary.id, ops) == set()
+    assert find_stale(itinerary.id, ops) == {}
 
 
-def test_edited_target_is_outdated(itinerary):
+def test_edited_target_is_changed(itinerary):
     event = EventFactory(itinerary=itinerary)
     ops = attach_bases([update_op(event)], capture(itinerary.id))
 
@@ -45,23 +51,23 @@ def test_edited_target_is_outdated(itinerary):
     event.updated_at = event.updated_at.replace(year=2030)
     db.session.flush()
 
-    assert find_outdated(itinerary.id, ops) == {0}
+    assert find_stale(itinerary.id, ops) == {0: Staleness.CHANGED}
 
 
-def test_deleted_target_is_outdated(itinerary):
+def test_deleted_target_is_deleted(itinerary):
     event = EventFactory(itinerary=itinerary)
     ops = attach_bases([update_op(event)], capture(itinerary.id))
 
     db.session.delete(event)
     db.session.flush()
 
-    assert find_outdated(itinerary.id, ops) == {0}
+    assert find_stale(itinerary.id, ops) == {0: Staleness.DELETED}
 
 
-def test_creates_are_never_outdated(itinerary):
+def test_creates_are_never_stale(itinerary):
     ops = [{"op": "create", "entity": "event", "data": {}}]
 
-    assert find_outdated(itinerary.id, ops) == set()
+    assert find_stale(itinerary.id, ops) == {}
 
 
 def test_strip_base_removes_only_the_snapshot():

@@ -6,6 +6,7 @@ from ..middleware.itinerary_access_required import (
     itinerary_access_required,
 )
 from ..middleware.login_required import login_required
+from ..ai_tasks.snapshots import Staleness
 from ..models import AiTaskStatus, UserRole
 from ..schemas.ai_task_schema import (
     AcceptAiTaskSchema,
@@ -25,12 +26,20 @@ _NEEDS_EDITOR = "You must be an admin or an editor to use AI tasks."
 
 
 def _detail(task):
-    outdated = (
-        sorted(ai_task_service.outdated_indexes(task))
+    stale = (
+        ai_task_service.stale_ops(task)
         if task.status == AiTaskStatus.READY.value
-        else []
+        else {}
     )
-    return {**AiTaskDetailSchema().dump(task), "outdated_op_indexes": outdated}
+
+    def indexes(kind: Staleness) -> list[int]:
+        return sorted(index for index, found in stale.items() if found == kind)
+
+    return {
+        **AiTaskDetailSchema().dump(task),
+        "changed_op_indexes": indexes(Staleness.CHANGED),
+        "unavailable_op_indexes": indexes(Staleness.DELETED),
+    }
 
 
 @ai_task_bp.route("/<string:task_type>", methods=["POST"])
