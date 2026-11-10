@@ -87,7 +87,7 @@ export default function FlightJourneyCard({
             onClick={() => setIsExpanded((expanded) => !expanded)}
             aria-expanded={isExpanded}
             aria-controls={detailsId}
-            className="flex items-center gap-2 text-sm text-text-secondary hover:text-text-primary"
+            className={`pl-0 pb-0  flex items-center gap-2 text-sm text-text-secondary hover:text-text-primary`}
           >
             {isExpanded ? "Hide" : "Show"} flight
             {journey.legs.length > 1 && " & layover"} details
