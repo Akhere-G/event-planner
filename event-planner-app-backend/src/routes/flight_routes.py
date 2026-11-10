@@ -7,7 +7,7 @@ from ..middleware.itinerary_access_required import (
 from ..extensions import limiter
 from ..schemas.flight_schema import (
     AirportSearchQuerySchema,
-    FlightOfferSchema,
+    FlightJourneySchema,
     FlightSaveSchema,
     FlightSchema,
     FlightSearchQuerySchema,
@@ -54,13 +54,13 @@ def get_flights_route(itinerary_id: int, access: ItineraryAccess):
 def search_flights_route(itinerary_id: int, access: ItineraryAccess):
     params = FlightSearchQuerySchema().load(request.args.to_dict())
 
-    offers = search_flights(
+    journeys = search_flights(
         params["origin"], params["destination"], params["departure_date"]
     )
 
     return api_response(
         success=True,
-        data=FlightOfferSchema(many=True).dump(offers),
+        data=FlightJourneySchema(many=True).dump(journeys),
         message="Fetched flights.",
         status_code=200,
     )
@@ -92,12 +92,12 @@ def search_airports_route(itinerary_id: int, access: ItineraryAccess):
 def create_flight_route(itinerary_id: int, access: ItineraryAccess):
     validated_data = FlightSaveSchema().load(request.json)
 
-    flight = create_flight(access.user_id, itinerary_id, validated_data)
+    flights = create_flight(access.user_id, itinerary_id, validated_data)
 
     return api_response(
         success=True,
-        data=FlightSchema().dump(flight),
-        message="Flight saved.",
+        data=FlightSchema(many=True).dump(flights),
+        message="Flights saved." if len(flights) > 1 else "Flight saved.",
         status_code=201,
     )
 
