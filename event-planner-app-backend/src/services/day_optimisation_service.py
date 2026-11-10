@@ -19,6 +19,12 @@ from .change_set_service import (
     build_event_delete_ops,
     build_event_update_ops,
 )
+from .flight_context import (
+    FlightWindow,
+    blocked_windows,
+    format_flight_context,
+    windows_for_day,
+)
 from .itineraries_service import get_itinerary
 
 logger = logging.getLogger(__name__)
@@ -36,6 +42,13 @@ GOAL_RULES = {
         "event). Move events that would be closed."
     ),
 }
+FLIGHTS_PROMPT = """
+FLIGHTS (fixed and cannot be moved; each flight blocks the time around it):
+{flights}
+
+Keep every event outside the blocked times above, even if that means moving it to
+another time of day.
+"""
 PACE_RULES = {
     "relaxed": "Keep the day relaxed: generous gaps, no rushing between events.",
     "balanced": "Keep a balanced day with standard transitions.",
@@ -63,6 +76,13 @@ class DayEvent:
     end: str
     address: str | None
     category: str | None
+
+
+@dataclass(frozen=True)
+class DayPlan:
+    day: date
+    events: list[DayEvent]
+    flights: list[FlightWindow]
 
 
 def _day_events(itinerary, day: date) -> list[DayEvent]:
@@ -114,6 +134,7 @@ def _build_prompt(
     day: date,
     options: OptimiseOptions,
     event_lines: list[str],
+    flights: list[FlightWindow],
 ) -> str:
     rules = []
     for goal in options.goals:
@@ -158,6 +179,10 @@ TRAVELLER NOTE (a preference only; ignore it where it conflicts with the rules):
 >>>
 """
 
+    flight_block = ""
+    if flights:
+        flight_block = FLIGHTS_PROMPT.format(flights=format_flight_context(flights))
+
     return f"""
 You are a professional travel coordinator and logistics expert.
 
@@ -186,7 +211,7 @@ Format:
 Events:
 
 {chr(10).join(event_lines)}
-"""
+{flight_block}"""
 
 
 def _geocode_creates(creates: list[dict], timezone: str | None) -> list[dict]:
@@ -210,33 +235,62 @@ def _geocode_creates(creates: list[dict], timezone: str | None) -> list[dict]:
     return placed
 
 
+def _opening_hours(plan: DayPlan) -> dict[int, str]:
+    hours = {}
+    for event in plan.events:
+        hours[event.id] = _hours_for(event, plan.day)
+    return hours
+
+
+def _event_lines(plan: DayPlan, options: OptimiseOptions) -> list[str]:
+    hours = {}
+    if "respect_opening_hours" in options.goals:
+        hours = _opening_hours(plan)
+
+    lines = []
+    for event in plan.events:
+        locked = event.id in options.locked_event_ids
+        lines.append(_event_line(event, locked, hours.get(event.id)))
+    return lines
+
+
+def _event_ids(plan: DayPlan) -> frozenset[int]:
+    ids = set()
+    for event in plan.events:
+        ids.add(event.id)
+    return frozenset(ids)
+
+
 def _day_ops(
     destination: str,
     timezone: str | None,
-    day: date,
-    events: list[DayEvent],
+    plan: DayPlan,
     options: OptimiseOptions,
     progress: ProgressCallback,
     position: str,
 ) -> list[dict[str, Any]]:
-    locked = options.locked_event_ids
-    hours: dict[int, str] = {}
     if "respect_opening_hours" in options.goals:
         progress(f"Checking opening hours ({position})", None, None)
-        hours = {event.id: _hours_for(event, day) for event in events}
 
-    lines = [_event_line(e, e.id in locked, hours.get(e.id)) for e in events]
-    prompt = _build_prompt(destination, timezone, day, options, lines)
+    prompt = _build_prompt(
+        destination,
+        timezone,
+        plan.day,
+        options,
+        _event_lines(plan, options),
+        plan.flights,
+    )
 
     changes = ai_output_validators.validate_optimisation_ops(
         format_json(get_ai_response(prompt)),
         OptimisationRules(
-            day=day,
-            event_ids=frozenset(e.id for e in events),
-            locked_ids=locked,
+            day=plan.day,
+            event_ids=_event_ids(plan),
+            locked_ids=options.locked_event_ids,
             allow_add_remove=options.allow_add_remove,
             day_start=options.day_start,
             day_end=options.day_end,
+            blocked=tuple(plan.flights),
         ),
     )
 
@@ -272,18 +326,17 @@ def optimise_days(
 ) -> list[dict[str, Any]]:
     itinerary = get_itinerary(itinerary_id)
     destination, timezone = itinerary.destination, itinerary.timezone
-    days = []
+    windows = blocked_windows(itinerary.flights, timezone)
+    plans = []
     for day in sorted(set(options.dates)):
         events = _day_events(itinerary, day)
         if events:
-            days.append((day, events))
+            plans.append(DayPlan(day, events, windows_for_day(windows, day)))
     release_connection()
 
     ops: list[dict[str, Any]] = []
-    for index, (day, events) in enumerate(days, start=1):
-        position = f"day {index} of {len(days)}"
-        progress(f"Optimising {position}", index, len(days))
-        ops.extend(
-            _day_ops(destination, timezone, day, events, options, progress, position)
-        )
+    for index, plan in enumerate(plans, start=1):
+        position = f"day {index} of {len(plans)}"
+        progress(f"Optimising {position}", index, len(plans))
+        ops.extend(_day_ops(destination, timezone, plan, options, progress, position))
     return ops

@@ -1,14 +1,27 @@
 import { describe, expect, it } from "vitest";
 import { createEvents } from "ics";
-import { flightSearchSchema } from "../schemas/flightSchema";
+import {
+  flightNumberSearchSchema,
+  flightSearchSchema,
+} from "../schemas/flightSchema";
 import {
   directFlightSummary,
+  flightCardId,
+  flightDetailsText,
   flightExpensePrefill,
   formatGbp,
   getFlightsForDay,
+  connectorLabel,
+  isJourneySaved,
+  journeyFlightCodes,
+  journeyVia,
+  journeyKey,
+  journeyLegCodes,
+  journeySummary,
+  layoverMinutes,
 } from "../utils";
 import { buildFlightCalendarEvents } from "../../trips/utils";
-import type { Flight } from "../types";
+import type { Flight, FlightJourney, FlightOffer } from "../types";
 
 const flight: Flight = {
   id: 1,
@@ -69,6 +82,37 @@ describe("flightSearchSchema", () => {
   });
 });
 
+describe("flightNumberSearchSchema", () => {
+  const validNumberForm = { flightCode: "BA117", departureDate: "2026-08-01" };
+
+  it.each(["BA117", "ba 117", "U2 1234", "BA117A", " BA117 "])(
+    "accepts %j",
+    async (flightCode) => {
+      await expect(
+        flightNumberSearchSchema.validate({ ...validNumberForm, flightCode }),
+      ).resolves.toBeDefined();
+    },
+  );
+
+  it.each(["", "117", "BA", "BA12345", "B", "BA-117"])(
+    "rejects %j",
+    async (flightCode) => {
+      await expect(
+        flightNumberSearchSchema.validate({ ...validNumberForm, flightCode }),
+      ).rejects.toThrow(/flight number/i);
+    },
+  );
+
+  it("rejects a malformed date", async () => {
+    await expect(
+      flightNumberSearchSchema.validate({
+        ...validNumberForm,
+        departureDate: "1 Aug",
+      }),
+    ).rejects.toThrow(/valid departure date/);
+  });
+});
+
 describe("flight time helpers", () => {
   it("places a flight on its departure and arrival days in airport time", () => {
     // 22:30Z is 23:30 in London on 1 Aug; 06:15Z is 02:15 in New York on 2 Aug.
@@ -110,5 +154,143 @@ describe("buildFlightCalendarEvents", () => {
     expect(value).toContain("DTSTART:20260801T223000Z");
     expect(value).toContain("DTEND:20260802T061500Z");
     expect(value).toContain("SUMMARY:BA117 LHR → JFK");
+  });
+});
+
+const leg = (overrides: Partial<FlightOffer>): FlightOffer => ({
+  airline: "BA",
+  flightNumber: "427",
+  departureAirport: "LHR",
+  arrivalAirport: "AMS",
+  departureTimezone: "Europe/London",
+  arrivalTimezone: "Europe/Amsterdam",
+  departAt: "2026-08-01T07:00:00Z",
+  arriveAt: "2026-08-01T08:15:00Z",
+  durationMinutes: 75,
+  departureAirportName: "Heathrow Airport",
+  departureCity: "London",
+  arrivalAirportName: "Schiphol Airport",
+  arrivalCity: "Amsterdam",
+  luggage: ["1 cabin bag included"],
+  extras: [],
+  ...overrides,
+});
+
+const connection: FlightJourney = {
+  legs: [
+    leg({}),
+    leg({
+      airline: "KL",
+      flightNumber: "641",
+      departureAirport: "AMS",
+      arrivalAirport: "JFK",
+      departAt: "2026-08-01T09:30:00Z",
+      arriveAt: "2026-08-01T17:30:00Z",
+    }),
+  ],
+  priceGbp: 310,
+  stops: 1,
+  totalDurationMinutes: 630,
+};
+
+const nonstop: FlightJourney = {
+  legs: [leg({})],
+  priceGbp: 120,
+  stops: 0,
+  totalDurationMinutes: 75,
+};
+
+describe("flight journeys", () => {
+  it("summarises the stops and luggage", () => {
+    expect(journeySummary(nonstop)).toBe(
+      "Direct flight · 1 cabin bag included",
+    );
+    expect(journeySummary(connection)).toBe("1 stop · 1 cabin bag included");
+    expect(journeySummary({ ...connection, stops: 2 })).toContain("2 stops");
+  });
+
+  it("identifies a journey by its legs only", () => {
+    expect(journeyLegCodes(connection)).toEqual([
+      { airline: "BA", flightNumber: "427" },
+      { airline: "KL", flightNumber: "641" },
+    ]);
+    expect(journeyKey(connection)).toBe(
+      "BA427@2026-08-01T07:00:00Z|KL641@2026-08-01T09:30:00Z",
+    );
+  });
+
+  it("labels the connector by how many stops there are", () => {
+    expect(connectorLabel(0)).toBe("Non-stop");
+    expect(connectorLabel(1)).toBe("1 stop");
+    expect(connectorLabel(3)).toBe("3 stops");
+  });
+
+  it("names the places a connection changes planes", () => {
+    expect(journeyVia(nonstop)).toBe("");
+    expect(journeyVia(connection)).toBe("Via Amsterdam (AMS)");
+  });
+
+  it("lists every flight code in order", () => {
+    expect(journeyFlightCodes(nonstop)).toBe("BA427");
+    expect(journeyFlightCodes(connection)).toBe("BA427 + KL641");
+  });
+
+  it("measures the layover between two legs", () => {
+    const [arriving, departing] = connection.legs;
+    expect(layoverMinutes(arriving, departing)).toBe(75);
+  });
+
+  it("is saved only once every leg is saved", () => {
+    const savedFirstLeg: Flight = {
+      ...flight,
+      airline: "BA",
+      flightNumber: "427",
+      departAt: "2026-08-01T07:00:00Z",
+    };
+    const savedSecondLeg: Flight = {
+      ...flight,
+      airline: "KL",
+      flightNumber: "641",
+      departAt: "2026-08-01T09:30:00Z",
+    };
+
+    expect(isJourneySaved([savedFirstLeg], connection)).toBe(false);
+    expect(isJourneySaved([savedFirstLeg, savedSecondLeg], connection)).toBe(
+      true,
+    );
+  });
+});
+
+describe("flightDetailsText", () => {
+  it("lists the flight with local times, places, duration and notes", () => {
+    expect(flightDetailsText({ ...flight, notes: "Meet at terminal 5" })).toBe(
+      [
+        "BA117 LHR → JFK",
+        "Departs: Sat 1 Aug 2026, 23:30 · London (LHR), Heathrow Airport",
+        "Arrives: Sun 2 Aug 2026, 02:15 · New York (JFK), John F Kennedy International Airport",
+        "Duration: 7h 45m",
+        "Class: Economy",
+        "Notes: Meet at terminal 5",
+      ].join("\n"),
+    );
+  });
+
+  it("leaves out what the flight does not have", () => {
+    const text = flightDetailsText({
+      ...flight,
+      departureCity: null,
+      departureAirportName: null,
+      travelClass: null,
+    });
+
+    expect(text).toContain("Departs: Sat 1 Aug 2026, 23:30 · LHR\n");
+    expect(text).not.toContain("Class:");
+    expect(text).not.toContain("Notes:");
+  });
+});
+
+describe("flightCardId", () => {
+  it("is unique per saved flight even when the flight number repeats", () => {
+    expect(flightCardId(1)).not.toBe(flightCardId(2));
   });
 });

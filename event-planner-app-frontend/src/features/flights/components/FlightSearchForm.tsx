@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { format } from "date-fns";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { FormInput } from "../../../components";
@@ -10,6 +9,7 @@ import {
   type FlightSearchSchema,
 } from "../schemas/flightSchema";
 import type { AirportPlace, FlightSearchParams } from "../types";
+import { defaultDepartureDate, todayDate } from "../utils";
 import AirportInput from "./AirportInput";
 
 /** An autofilled airport must be near the trip, so "Paris" doesn't become Paris, Texas. */
@@ -29,7 +29,7 @@ export default function FlightSearchForm({
   isSearching,
   onSearch,
 }: FlightSearchFormProps) {
-  const today = format(new Date(), "yyyy-MM-dd");
+  const today = todayDate();
   const [originLabel, setOriginLabel] = useState<string | null>(null);
   // `undefined` until the user picks or clears the arrival, so autofill applies.
   const [destinationChoice, setDestinationChoice] = useState<
@@ -47,7 +47,7 @@ export default function FlightSearchForm({
     defaultValues: {
       origin: [],
       destination: [],
-      departureDate: trip.startDate >= today ? trip.startDate : today,
+      departureDate: defaultDepartureDate(trip),
     },
   });
 

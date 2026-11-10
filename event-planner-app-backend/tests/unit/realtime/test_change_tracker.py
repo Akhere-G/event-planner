@@ -281,8 +281,7 @@ def test_flight_and_its_expense_are_announced_together(
             "origin": ["LHR"],
             "destination": ["JFK"],
             "departureDate": "2099-08-01",
-            "airline": "BA",
-            "flightNumber": "117",
+            "legs": [{"airline": "BA", "flightNumber": "117"}],
         },
     )
 

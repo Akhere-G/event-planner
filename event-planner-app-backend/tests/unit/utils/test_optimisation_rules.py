@@ -2,6 +2,7 @@ from datetime import date, datetime, time
 
 import pytest
 from src.exceptions import AIResponseError
+from src.services.flight_context import FlightWindow
 from src.utils.ai_output_validators import OptimisationRules, validate_optimisation_ops
 
 DAY = date(2026, 8, 2)
@@ -115,3 +116,33 @@ def test_junk_entries_are_skipped():
     assert (
         validate_optimisation_ops(["x", None, 5, {"action": "teleport"}], rules()) == []
     )
+
+
+FLIGHT = FlightWindow(
+    label="BA304 LHR → CDG",
+    departs=datetime(2026, 8, 2, 14),
+    arrives=datetime(2026, 8, 2, 15, 20),
+)  # blocks 11:00 to 17:20
+
+
+def test_updates_that_clash_with_a_flight_are_dropped():
+    flights = rules(blocked=(FLIGHT,))
+    ops = [update(1, "10:00", "11:30"), update(2, "13:00", "14:00")]
+
+    assert validate_optimisation_ops(ops, flights) == []
+
+
+def test_updates_clear_of_a_flight_are_kept():
+    flights = rules(blocked=(FLIGHT,))
+    ops = [update(1, "09:00", "11:00"), update(2, "17:20", "18:30")]
+
+    result = validate_optimisation_ops(ops, flights)
+
+    assert [change["id"] for change in result] == [1, 2]
+
+
+def test_created_events_cannot_land_inside_a_flight_window():
+    flights = rules(allow_add_remove=True, blocked=(FLIGHT,))
+
+    assert validate_optimisation_ops([CREATE], flights) == []
+    assert len(validate_optimisation_ops([CREATE], rules(allow_add_remove=True))) == 1

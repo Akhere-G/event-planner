@@ -48,8 +48,8 @@ export interface AirportPlace {
   distanceKm?: number | null;
 }
 
+/** One leg of a journey: a single nonstop flight we found. */
 export interface FlightOffer extends FlightDetails {
-  priceGbp?: number | null;
   airline: string;
   flightNumber: string;
   departureAirport: string;
@@ -59,6 +59,15 @@ export interface FlightOffer extends FlightDetails {
   departAt: string;
   arriveAt: string;
   durationMinutes: number;
+}
+
+/** A bookable trip: a nonstop flight, or several legs flown in order. */
+export interface FlightJourney {
+  legs: FlightOffer[];
+  priceGbp?: number | null;
+  purchaseUrl?: string | null;
+  stops: number;
+  totalDurationMinutes: number;
 }
 
 export interface FlightSearchParams {
@@ -71,6 +80,21 @@ export interface SearchFlightsPayload extends FlightSearchParams {
   tripId: number;
 }
 
+/** A flight number such as "BA117", and the day it departs. */
+export interface FlightNumberSearchParams {
+  flightCode: string;
+  departureDate: string;
+}
+
+export interface SearchByFlightNumberPayload extends FlightNumberSearchParams {
+  tripId: number;
+}
+
+export interface CreateFlightsByNumberPayload extends FlightNumberSearchParams {
+  tripId: number;
+  notes?: string | null;
+}
+
 export interface SearchAirportsPayload {
   tripId: number;
   q: string;
@@ -78,10 +102,14 @@ export interface SearchAirportsPayload {
   lng?: number;
 }
 
-export interface CreateFlightPayload extends FlightSearchParams {
-  tripId: number;
+export interface FlightLegCode {
   airline: string;
   flightNumber: string;
+}
+
+export interface CreateFlightPayload extends FlightSearchParams {
+  tripId: number;
+  legs: FlightLegCode[];
   notes?: string | null;
 }
 

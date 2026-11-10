@@ -2,11 +2,9 @@ import json
 import logging
 import os
 import re
-from datetime import datetime, timezone as dt_timezone
-from typing import Any, List
-from zoneinfo import ZoneInfo
+from datetime import datetime
+from typing import Any
 
-import googlemaps
 from google import genai
 from google.genai import types as genai_types
 from groq import Groq
@@ -16,6 +14,13 @@ from ..utils import ai_output_validators
 from ..utils.db_utils import release_connection
 from ..utils.location_utils import get_place_details
 from ..utils.progress import ProgressCallback, no_progress
+from ..utils.trip_time import to_trip_local, trip_local_to_utc
+from .flight_context import (
+    FlightWindow,
+    blocked_windows,
+    format_flight_context,
+    windows_for_day,
+)
 from .itineraries_service import get_itinerary
 
 logger = logging.getLogger(__name__)
@@ -63,28 +68,6 @@ def format_json(raw_json: str) -> Any:
         return json.loads(clean_json)
     except json.JSONDecodeError as exc:
         raise AIResponseError("AI response contained invalid JSON.") from exc
-
-
-def _trip_zone(timezone_name: str | None) -> ZoneInfo:
-    return ZoneInfo(timezone_name or "UTC")
-
-
-def to_trip_local(value: datetime, timezone_name: str | None) -> datetime:
-    """Convert a stored (UTC) datetime to naive wall-clock time in the trip's zone."""
-    if value.tzinfo is None:
-        value = value.replace(tzinfo=dt_timezone.utc)
-    return value.astimezone(_trip_zone(timezone_name)).replace(tzinfo=None)
-
-
-def trip_local_to_utc(value: str | datetime, timezone_name: str | None) -> datetime:
-    """Treat an AI-provided time as wall-clock time in the trip's zone and return UTC.
-
-    Any offset the model adds anyway is ignored, because the prompt asks for local time.
-    """
-    if isinstance(value, str):
-        value = datetime.fromisoformat(value.replace("Z", "+00:00"))
-    local = value.replace(tzinfo=_trip_zone(timezone_name))
-    return local.astimezone(dt_timezone.utc)
 
 
 def get_ai_response(prompt: str) -> str:
@@ -197,13 +180,39 @@ Output MUST be a JSON array only.
         return []
 
 
+FLIGHTS_PROMPT = """
+
+FLIGHTS (fixed; the traveller is travelling or getting to and from the airport):
+
+{flights}
+
+Do not suggest anything between the blocked times above. Fit only as many items as
+the free time allows, even if that is fewer than the pace suggests, and suggest none
+if the whole day is taken."""
+
+
+def _booked_events_text(itinerary) -> str:
+    lines = []
+    for event in itinerary.events:
+        start = to_trip_local(event.start_at, itinerary.timezone)
+        end = to_trip_local(event.end_at, itinerary.timezone)
+        lines.append(f"- {event.name}: {start:%Y-%m-%dT%H:%M} - {end:%Y-%m-%dT%H:%M}")
+    return "\n".join(lines)
+
+
+def _flights_prompt(day_flights: list[FlightWindow]) -> str:
+    if not day_flights:
+        return ""
+    return FLIGHTS_PROMPT.format(flights=format_flight_context(day_flights))
+
+
 def get_event_suggestions(
     itinerary_id: int,
     date: datetime,
     pace: str = "balanced",
     companions: str = "couple",
     transport: str = "public_transport",
-    interests: List[str] | None = None,
+    interests: list[str] | None = None,
     progress: ProgressCallback = no_progress,
 ):
     itinerary = get_itinerary(itinerary_id)
@@ -212,19 +221,13 @@ def get_event_suggestions(
         ", ".join(interests) if interests else "General sightseeing and food"
     )
 
-    booked_events = "\n".join(
-        [
-            (
-                f"- {event.name}: "
-                f"{to_trip_local(event.start_at, itinerary.timezone):%Y-%m-%dT%H:%M} - "
-                f"{to_trip_local(event.end_at, itinerary.timezone):%Y-%m-%dT%H:%M}"
-            )
-            for event in itinerary.events
-        ]
-    )
+    booked_events = _booked_events_text(itinerary)
 
     requested_date = date.strftime("%Y-%m-%d")
     timezone = itinerary.timezone
+    day = datetime.strptime(requested_date, "%Y-%m-%d").date()
+    day_flights = windows_for_day(blocked_windows(itinerary.flights, timezone), day)
+    flights_prompt = _flights_prompt(day_flights)
 
     prompt = f"""
 You are an expert travel planner API.
@@ -254,7 +257,7 @@ CONTEXT:
 The user already has the following events scheduled.
 Do not suggest these events and do not create timing conflicts:
 
-{booked_events if booked_events else "No existing events."}
+{booked_events if booked_events else "No existing events."}{flights_prompt}
 
 REQUIREMENTS:
 
@@ -293,7 +296,9 @@ JSON FORMAT:
 
     valid_suggestions = []
     for event in suggestions:
-        if ai_output_validators.validate_event_suggestion(event, requested_date):
+        if ai_output_validators.validate_event_suggestion(
+            event, requested_date, blocked=day_flights
+        ):
             valid_suggestions.append(event)
 
     geocoded_events = []
@@ -306,11 +311,13 @@ JSON FORMAT:
                 address=event.get("address"),
             )
 
+            start_at = trip_local_to_utc(event["start_at"], timezone)
+            end_at = trip_local_to_utc(event["end_at"], timezone)
             geocoded_events.append(
                 {
                     **event,
-                    "start_at": trip_local_to_utc(event["start_at"], timezone).isoformat(),
-                    "end_at": trip_local_to_utc(event["end_at"], timezone).isoformat(),
+                    "start_at": start_at.isoformat(),
+                    "end_at": end_at.isoformat(),
                     "latitude": details["latitude"],
                     "longitude": details["longitude"],
                     "address": details.get("formatted_address") or event.get("address"),

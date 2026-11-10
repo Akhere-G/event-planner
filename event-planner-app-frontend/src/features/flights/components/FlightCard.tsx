@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { MoreVertical, Trash2 } from "lucide-react";
+import { Copy, MoreVertical, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { ConfirmModal } from "../../../components";
 import {
@@ -15,6 +15,8 @@ import { useDeleteFlightMutation } from "../flightApiSlice";
 import type { Flight } from "../types";
 import {
   directFlightSummary,
+  flightCardId,
+  flightDetailsText,
   flightDurationMinutes,
   flightExpensePrefill,
 } from "../utils";
@@ -25,11 +27,26 @@ interface FlightCardProps {
   flight: Flight;
   trip: Trip;
   canEdit: boolean;
+  isHighlighted?: boolean;
 }
 
-export default function FlightCard({ flight, trip, canEdit }: FlightCardProps) {
+export default function FlightCard({
+  flight,
+  trip,
+  canEdit,
+  isHighlighted = false,
+}: FlightCardProps) {
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [deleteFlight] = useDeleteFlightMutation();
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(flightDetailsText(flight));
+      toast.success("Flight details copied.");
+    } catch {
+      toast.error("Could not copy flight details.");
+    }
+  };
 
   const handleDelete = async () => {
     try {
@@ -37,7 +54,6 @@ export default function FlightCard({ flight, trip, canEdit }: FlightCardProps) {
       setIsDeleteOpen(false);
       toast.success("Flight deleted.");
     } catch (err) {
-      console.error("Failed to delete flight:", err);
       if (isApiError(err)) return toast.error(err.data.message);
       toast.error("Could not delete flight.");
     }
@@ -46,21 +62,30 @@ export default function FlightCard({ flight, trip, canEdit }: FlightCardProps) {
   return (
     <>
       <FlightSummary
+        id={flightCardId(flight.id)}
         testId="flight-card"
+        isHighlighted={isHighlighted}
         flightCode={`${flight.airline}${flight.flightNumber}`}
         airlineLogo={flight.airlineLogo}
         travelClass={flight.travelClass}
         headerEnd={
           <div className="flex items-center gap-3">
-            {canEdit && (
-              <DropdownMenu>
-                <DropdownMenuTrigger
-                  aria-label="Flight actions"
-                  className="rounded p-1 text-text-secondary transition-colors hover:bg-surface-muted"
+            <DropdownMenu>
+              <DropdownMenuTrigger
+                aria-label="Flight actions"
+                className="rounded p-1 text-text-secondary transition-colors hover:bg-surface-muted"
+              >
+                <MoreVertical size={20} />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem
+                  onClick={handleCopy}
+                  className="flex items-center gap-2"
                 >
-                  <MoreVertical size={20} />
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
+                  <Copy size={16} />
+                  Copy details
+                </DropdownMenuItem>
+                {canEdit && (
                   <DropdownMenuItem
                     onClick={() => setIsDeleteOpen(true)}
                     className="flex items-center gap-2 text-error"
@@ -68,9 +93,9 @@ export default function FlightCard({ flight, trip, canEdit }: FlightCardProps) {
                     <Trash2 size={16} />
                     Delete
                   </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            )}
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         }
         departure={{
