@@ -269,9 +269,13 @@ def test_update_flight_from_other_itinerary_not_found(admin_client, itinerary, a
 
 
 def test_delete_flight_admin(admin_client, itinerary, flight):
-    response = admin_client.delete(url(itinerary, f"/{flight.id}"))
+    flight_id = flight.id
+
+    response = admin_client.delete(url(itinerary, f"/{flight_id}"))
+
     assert response.status_code == 200
-    assert db.session.get(Flight, flight.id) is None
+    assert response.get_json()["data"] == {"deletedId": flight_id}
+    assert db.session.get(Flight, flight_id) is None
 
 
 def test_delete_flight_viewer_forbidden(viewer_client, itinerary, flight):
