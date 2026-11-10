@@ -68,8 +68,38 @@ const offer = {
   luggage: ["1 cabin bag included"],
   extras: ["Average legroom (31 in)", "Carbon emissions estimate: 63 kg"],
   purchaseUrl: "https://www.google.com/travel/flights",
-  priceGbp: 120,
   airlineLogo: null,
+};
+
+const journey = {
+  legs: [offer],
+  priceGbp: 120,
+  purchaseUrl: "https://www.google.com/travel/flights",
+  stops: 0,
+  totalDurationMinutes: 80,
+};
+
+const connectionJourney = {
+  legs: [
+    {
+      ...offer,
+      flightNumber: "427",
+      arrivalAirport: "AMS",
+      arrivalCity: "Amsterdam",
+    },
+    {
+      ...offer,
+      flightNumber: "641",
+      departureAirport: "AMS",
+      departureCity: "Amsterdam",
+      departAt: "2026-08-01T11:00:00Z",
+      arriveAt: "2026-08-01T12:20:00Z",
+    },
+  ],
+  priceGbp: 90,
+  purchaseUrl: "https://www.google.com/travel/flights",
+  stops: 1,
+  totalDurationMinutes: 200,
 };
 
 const savedFlight = {
@@ -118,6 +148,7 @@ const savedFlight = {
 async function mockTripAndFlights(
   page: Page,
   initialFlights: MockFlight[] = [],
+  searchResults: unknown[] = [journey],
 ) {
   const flights = initialFlights.map((flight) => structuredClone(flight));
   const created: unknown[] = [];
@@ -139,7 +170,7 @@ async function mockTripAndFlights(
     if (route.request().method() === "POST") {
       created.push(route.request().postDataJSON());
       flights.push(structuredClone(savedFlight));
-      await route.fulfill(json(savedFlight, 201));
+      await route.fulfill(json([savedFlight], 201));
       return;
     }
     await route.fulfill(json(flights));
@@ -178,7 +209,7 @@ async function mockTripAndFlights(
   });
   await page.route("**/api/itineraries/1/flights/search*", (route) => {
     searches.push(new URL(route.request().url()).search);
-    return route.fulfill(json([offer]));
+    return route.fulfill(json(searchResults));
   });
 
   return { created, searches };
@@ -202,7 +233,7 @@ test.describe("Flights", () => {
     await page.getByRole("option", { name: /London, GB/ }).click();
     await form.getByRole("button", { name: "Search flights" }).click();
 
-    const result = page.getByTestId("flight-offer-card");
+    const result = page.getByTestId("flight-journey-card");
     await expect(result).toContainText("BA304");
     await expect(result).toContainText("£120");
     expect(searches).toHaveLength(1);
@@ -216,8 +247,7 @@ test.describe("Flights", () => {
     expect(created[0]).toMatchObject({
       origin: ["LHR"],
       destination: ["CDG", "ORY"],
-      airline: "BA",
-      flightNumber: "304",
+      legs: [{ airline: "BA", flightNumber: "304" }],
     });
 
     await expect(page.getByTestId("flight-card")).toContainText("BA304");
@@ -230,6 +260,37 @@ test.describe("Flights", () => {
     await expect(
       page.getByRole("list", { name: "Flights" }).first(),
     ).toContainText("BA304 LHR → CDG");
+  });
+
+  test("shows a connection with its layover and saves every leg", async ({
+    page,
+  }) => {
+    await mockAuthCheck(page, true);
+    const { created } = await mockTripAndFlights(page, [], [connectionJourney]);
+
+    await page.goto("/trips/1");
+    await page.getByRole("button", { name: "Flights" }).click();
+    await page.getByRole("button", { name: "Search for a flight" }).click();
+
+    const form = page.getByRole("form", { name: "Search flights" });
+    await form.getByLabel("Departing from").fill("lon");
+    await page.getByRole("option", { name: /London, GB/ }).click();
+    await form.getByRole("button", { name: "Search flights" }).click();
+
+    const result = page.getByTestId("flight-journey-card");
+    await expect(result).toContainText("BA427");
+    await expect(result).toContainText("KL641");
+    await expect(result).toContainText("Layover · 2h 40m in Amsterdam (AMS)");
+    await expect(result).toContainText("1 stop");
+
+    await result.getByRole("button", { name: "Save 2 flights" }).click();
+    await expect(page.getByText("Flights saved.")).toBeVisible();
+    expect(created[0]).toMatchObject({
+      legs: [
+        { airline: "BA", flightNumber: "427" },
+        { airline: "BA", flightNumber: "641" },
+      ],
+    });
   });
 
   test("lists saved flights first and keeps the search closed until asked", async ({

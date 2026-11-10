@@ -1,6 +1,12 @@
+import { differenceInMinutes } from "date-fns";
 import { formatInTimeZone } from "date-fns-tz";
 import type { ExpensePrefill } from "../expenses/types";
-import type { Flight } from "./types";
+import type {
+  Flight,
+  FlightJourney,
+  FlightLegCode,
+  FlightOffer,
+} from "./types";
 
 export const flightDepartureDate = (flight: Flight) =>
   formatInTimeZone(flight.departAt, flight.departureTimezone, "yyyy-MM-dd");
@@ -47,6 +53,39 @@ export const formatGbp = (amount: number) =>
     maximumFractionDigits: 0,
   }).format(amount);
 
-/** Every flight we show is nonstop; luggage notes follow when Google lists any. */
+/** Every saved flight is a single nonstop leg; luggage notes follow when listed. */
 export const directFlightSummary = (luggage: string[]) =>
   ["Direct flight", ...luggage].join(" · ");
+
+const stopsLabel = (stops: number) => {
+  if (stops === 0) return "Direct flight";
+  return stops === 1 ? "1 stop" : `${stops} stops`;
+};
+
+export const journeySummary = (journey: FlightJourney) =>
+  [stopsLabel(journey.stops), ...journey.legs[0].luggage].join(" · ");
+
+export const journeyLegCodes = (journey: FlightJourney): FlightLegCode[] =>
+  journey.legs.map(({ airline, flightNumber }) => ({ airline, flightNumber }));
+
+export const journeyKey = (journey: FlightJourney) =>
+  journey.legs
+    .map((leg) => `${leg.airline}${leg.flightNumber}@${leg.departAt}`)
+    .join("|");
+
+export const layoverMinutes = (arriving: FlightOffer, departing: FlightOffer) =>
+  differenceInMinutes(
+    new Date(departing.departAt),
+    new Date(arriving.arriveAt),
+  );
+
+export const isLegSaved = (flights: Flight[], leg: FlightOffer) =>
+  flights.some(
+    (flight) =>
+      flight.airline === leg.airline &&
+      flight.flightNumber === leg.flightNumber &&
+      new Date(flight.departAt).getTime() === new Date(leg.departAt).getTime(),
+  );
+
+export const isJourneySaved = (flights: Flight[], journey: FlightJourney) =>
+  journey.legs.every((leg) => isLegSaved(flights, leg));
