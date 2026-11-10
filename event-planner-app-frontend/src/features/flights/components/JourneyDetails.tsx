@@ -81,7 +81,7 @@ export default function JourneyDetails({
   journey: FlightJourney;
 }) {
   return (
-    <div className="space-y-3" data-testid="journey-details">
+    <div className="space-y-3 mt-2" data-testid="journey-details">
       {journey.legs.map((leg, index) => (
         <Fragment key={`${leg.airline}${leg.flightNumber}${leg.departAt}`}>
           {index > 0 && (
