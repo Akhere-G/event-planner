@@ -7,7 +7,9 @@ from ..middleware.itinerary_access_required import (
 from ..extensions import limiter
 from ..schemas.flight_schema import (
     AirportSearchQuerySchema,
-    FlightOfferSchema,
+    FlightJourneySchema,
+    FlightNumberQuerySchema,
+    FlightNumberSaveSchema,
     FlightSaveSchema,
     FlightSchema,
     FlightSearchQuerySchema,
@@ -17,9 +19,11 @@ from ..schemas.itinerary_schema import UserRole
 from ..services.airport_directory import search_places
 from ..services.flight_service import (
     create_flight,
+    create_flights_by_number,
     delete_flight,
     get_flight,
     get_flights,
+    lookup_flights_by_number,
     search_flights,
     update_flight,
 )
@@ -54,13 +58,34 @@ def get_flights_route(itinerary_id: int, access: ItineraryAccess):
 def search_flights_route(itinerary_id: int, access: ItineraryAccess):
     params = FlightSearchQuerySchema().load(request.args.to_dict())
 
-    offers = search_flights(
+    journeys = search_flights(
         params["origin"], params["destination"], params["departure_date"]
     )
 
     return api_response(
         success=True,
-        data=FlightOfferSchema(many=True).dump(offers),
+        data=FlightJourneySchema(many=True).dump(journeys),
+        message="Fetched flights.",
+        status_code=200,
+    )
+
+
+@flight_bp.route("/by-number", methods=["GET"])
+@itinerary_access_required(
+    allowed_roles=[UserRole.ADMIN, UserRole.EDITOR],
+    message="You must be an admin or an editor to search for flights.",
+)
+@limiter.limit("10 per minute;100 per day", key_func=get_user_or_ip)
+def search_flights_by_number_route(itinerary_id: int, access: ItineraryAccess):
+    params = FlightNumberQuerySchema().load(request.args.to_dict())
+
+    journeys = lookup_flights_by_number(
+        params["airline"], params["flight_number"], params["departure_date"]
+    )
+
+    return api_response(
+        success=True,
+        data=FlightJourneySchema(many=True).dump(journeys),
         message="Fetched flights.",
         status_code=200,
     )
@@ -92,12 +117,30 @@ def search_airports_route(itinerary_id: int, access: ItineraryAccess):
 def create_flight_route(itinerary_id: int, access: ItineraryAccess):
     validated_data = FlightSaveSchema().load(request.json)
 
-    flight = create_flight(access.user_id, itinerary_id, validated_data)
+    flights = create_flight(access.user_id, itinerary_id, validated_data)
 
     return api_response(
         success=True,
-        data=FlightSchema().dump(flight),
-        message="Flight saved.",
+        data=FlightSchema(many=True).dump(flights),
+        message="Flights saved." if len(flights) > 1 else "Flight saved.",
+        status_code=201,
+    )
+
+
+@flight_bp.route("/by-number", methods=["POST"])
+@itinerary_access_required(
+    allowed_roles=[UserRole.ADMIN, UserRole.EDITOR],
+    message="You must be an admin or an editor to add flights.",
+)
+def create_flights_by_number_route(itinerary_id: int, access: ItineraryAccess):
+    validated_data = FlightNumberSaveSchema().load(request.json)
+
+    flights = create_flights_by_number(access.user_id, itinerary_id, validated_data)
+
+    return api_response(
+        success=True,
+        data=FlightSchema(many=True).dump(flights),
+        message="Flights saved." if len(flights) > 1 else "Flight saved.",
         status_code=201,
     )
 

@@ -7,7 +7,7 @@ from src.ai_tasks.context import TaskContext
 from src.ai_tasks.registry import get_handler
 from src.exceptions import AIProviderError
 from marshmallow import ValidationError
-from tests.factories import EventFactory
+from tests.factories import EventFactory, FlightFactory
 
 
 def paris(day, hour):
@@ -273,3 +273,97 @@ def test_each_day_is_its_own_conflict_scope():
 
     assert one.isdisjoint(two)
     assert not one.isdisjoint(three)
+
+
+def fly(itinerary, departs, arrives):
+    return FlightFactory(itinerary=itinerary, depart_at=departs, arrive_at=arrives)
+
+
+def test_the_prompt_has_no_flight_section_without_flights(itinerary):
+    make_events(itinerary)
+
+    _, prompts, _, _ = run(itinerary, {"dates": ["2026-08-02"]}, [[]])
+
+    assert "FLIGHTS" not in prompts[0]
+
+
+def test_a_flight_that_day_is_shown_as_fixed_and_blocked(itinerary):
+    make_events(itinerary)
+    fly(itinerary, paris(2, 16), paris(2, 17))
+
+    _, prompts, _, _ = run(itinerary, {"dates": ["2026-08-02"]}, [[]])
+
+    assert "FLIGHTS (fixed and cannot be moved" in prompts[0]
+    assert "LHR → CDG: flies 2026-08-02T16:00 to 2026-08-02T17:00" in prompts[0]
+    assert "blocked 2026-08-02T13:00 to 2026-08-02T19:00" in prompts[0]
+
+
+def test_flights_on_other_days_stay_out_of_the_prompt(itinerary):
+    make_events(itinerary)
+    fly(itinerary, paris(3, 16), paris(3, 17))
+
+    _, prompts, _, _ = run(itinerary, {"dates": ["2026-08-02"]}, [[]])
+
+    assert "FLIGHTS" not in prompts[0]
+
+
+def test_a_flight_just_after_midnight_blocks_the_evening_before(itinerary):
+    make_events(itinerary)
+    fly(  # Paris 01:00 to 03:00 on the 3rd, so blocked from 22:00 on the 2nd
+        itinerary,
+        datetime(2026, 8, 2, 23, tzinfo=UTC),
+        datetime(2026, 8, 3, 1, tzinfo=UTC),
+    )
+
+    _, prompts, _, _ = run(itinerary, {"dates": ["2026-08-02"]}, [[]])
+
+    assert "blocked 2026-08-02T22:00" in prompts[0]
+
+
+def test_a_new_time_inside_the_flight_window_is_dropped(itinerary):
+    events = make_events(itinerary)
+    fly(itinerary, paris(2, 16), paris(2, 17))  # blocked 13:00 to 19:00
+
+    ops, _, _, _ = run(
+        itinerary,
+        {"dates": ["2026-08-02"]},
+        [[update_reply(events["lunch"], "13:30", "14:30")]],
+    )
+
+    assert ops == []
+
+
+def test_a_new_time_clear_of_the_flight_is_kept(itinerary):
+    events = make_events(itinerary)
+    fly(itinerary, paris(2, 16), paris(2, 17))
+
+    ops, _, _, _ = run(
+        itinerary,
+        {"dates": ["2026-08-02"]},
+        [[update_reply(events["lunch"], "11:30", "12:30")]],
+    )
+
+    assert [op["id"] for op in ops] == [events["lunch"].id]
+
+
+def test_an_added_event_cannot_land_in_the_flight_window(itinerary):
+    make_events(itinerary)
+    fly(itinerary, paris(2, 16), paris(2, 17))
+    create = {
+        "action": "create",
+        "name": "Cafe",
+        "description": "Coffee",
+        "address": "1 Rue, Paris",
+        "start_at": "2026-08-02T15:00:00",
+        "end_at": "2026-08-02T16:00:00",
+        "category": "Cafe",
+        "reason": "Snack.",
+    }
+
+    ops, _, _, _ = run(
+        itinerary,
+        {"dates": ["2026-08-02"], "allowAddRemove": True},
+        [[create]],
+    )
+
+    assert ops == []

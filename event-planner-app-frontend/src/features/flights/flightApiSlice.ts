@@ -3,10 +3,12 @@ import type { ApiResponse } from "../api/types";
 import type {
   AirportPlace,
   CreateFlightPayload,
+  CreateFlightsByNumberPayload,
   DeleteFlightPayload,
   Flight,
-  FlightOffer,
+  FlightJourney,
   SearchAirportsPayload,
+  SearchByFlightNumberPayload,
   SearchFlightsPayload,
 } from "./types";
 
@@ -19,7 +21,7 @@ export const flightApiSlice = apiSlice.injectEndpoints({
       ],
     }),
     searchFlights: builder.query<
-      ApiResponse<FlightOffer[]>,
+      ApiResponse<FlightJourney[]>,
       SearchFlightsPayload
     >({
       query: ({ tripId, origin, destination, departureDate }) => ({
@@ -31,6 +33,15 @@ export const flightApiSlice = apiSlice.injectEndpoints({
         },
       }),
     }),
+    searchByFlightNumber: builder.query<
+      ApiResponse<FlightJourney[]>,
+      SearchByFlightNumberPayload
+    >({
+      query: ({ tripId, flightCode, departureDate }) => ({
+        url: `/itineraries/${tripId}/flights/by-number`,
+        params: { flightCode, departureDate },
+      }),
+    }),
     searchAirports: builder.query<
       ApiResponse<AirportPlace[]>,
       SearchAirportsPayload
@@ -40,16 +51,29 @@ export const flightApiSlice = apiSlice.injectEndpoints({
         params,
       }),
     }),
-    createFlight: builder.mutation<ApiResponse<Flight>, CreateFlightPayload>({
+    createFlight: builder.mutation<ApiResponse<Flight[]>, CreateFlightPayload>({
       query: ({ tripId, ...flightData }) => ({
         url: `/itineraries/${tripId}/flights`,
         method: "POST",
         body: flightData,
       }),
-      // A new flight gets an expense, and deleting one unlinks its expense.
+      // A new journey gets an expense, and deleting a flight unlinks its expense.
       invalidatesTags: (_result, _error, { tripId }) => [
         { type: "Flights", id: tripId },
         { type: "Expenses", id: tripId },
+      ],
+    }),
+    createFlightsByNumber: builder.mutation<
+      ApiResponse<Flight[]>,
+      CreateFlightsByNumberPayload
+    >({
+      query: ({ tripId, ...flightData }) => ({
+        url: `/itineraries/${tripId}/flights/by-number`,
+        method: "POST",
+        body: flightData,
+      }),
+      invalidatesTags: (_result, _error, { tripId }) => [
+        { type: "Flights", id: tripId },
       ],
     }),
     deleteFlight: builder.mutation<
@@ -73,7 +97,9 @@ export const {
   useGetFlightsQuery,
   useLazyGetFlightsQuery,
   useLazySearchFlightsQuery,
+  useLazySearchByFlightNumberQuery,
   useSearchAirportsQuery,
   useCreateFlightMutation,
+  useCreateFlightsByNumberMutation,
   useDeleteFlightMutation,
 } = flightApiSlice;

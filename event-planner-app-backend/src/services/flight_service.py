@@ -15,7 +15,12 @@ from ..extensions import cache, db
 from ..models import Airport, Flight
 from . import expense_service
 from .airport_directory import get_airport_info
-from .flight_providers import FlightOffer, FlightProviderFactory
+from .flight_providers import (
+    FlightJourney,
+    FlightNumberProviderFactory,
+    FlightOffer,
+    FlightProviderFactory,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -53,31 +58,65 @@ def get_flight(itinerary_id: int, flight_id: int):
     return db.session.execute(stmt).scalar_one_or_none()
 
 
-def search_flights(
-    origin_codes: list[str], destination_codes: list[str], departure_date: date
-) -> list[FlightOffer]:
-    origins = sorted({code.upper() for code in origin_codes})
-    destinations = sorted({code.upper() for code in destination_codes})
-    cache_key = (
-        f"flight_search:v2:{','.join(origins)}:{','.join(destinations)}:"
-        f"{departure_date.isoformat()}"
-    )
+def _normalise_codes(codes: list[str]) -> list[str]:
+    unique_codes = set()
+    for code in codes:
+        unique_codes.add(code.upper())
+    return sorted(unique_codes)
 
+
+def _search_with_providers(create_providers, cache_key, search):
+    """Return the first provider answer, remembering it for a day.
+
+    Providers that fail are skipped. When none can answer, the search is
+    unavailable.
+    """
     cached = cache.get(cache_key)
     if cached is not None:
         return cached
 
-    for provider in FlightProviderFactory.create_all():
+    for provider in create_providers():
         try:
-            offers = provider.search(origins, destinations, departure_date)
+            results = search(provider)
         except FlightProviderError:
             logger.exception("%s flight search failed.", provider.name)
             continue
 
-        cache.set(cache_key, offers, timeout=FLIGHT_SEARCH_CACHE_SECONDS)
-        return offers
+        cache.set(cache_key, results, timeout=FLIGHT_SEARCH_CACHE_SECONDS)
+        return results
 
     raise FlightSearchUnavailableError()
+
+
+def search_flights(
+    origin_codes: list[str], destination_codes: list[str], departure_date: date
+) -> list[FlightJourney]:
+    origins = _normalise_codes(origin_codes)
+    destinations = _normalise_codes(destination_codes)
+    cache_key = (
+        f"flight_search:v3:{','.join(origins)}:{','.join(destinations)}:"
+        f"{departure_date.isoformat()}"
+    )
+
+    return _search_with_providers(
+        FlightProviderFactory.create_all,
+        cache_key,
+        lambda provider: provider.search(origins, destinations, departure_date),
+    )
+
+
+def lookup_flights_by_number(
+    airline: str, flight_number: str, departure_date: date
+) -> list[FlightJourney]:
+    cache_key = (
+        f"flight_number:v1:{airline}{flight_number}:{departure_date.isoformat()}"
+    )
+
+    return _search_with_providers(
+        FlightNumberProviderFactory.create_all,
+        cache_key,
+        lambda provider: provider.lookup(airline, flight_number, departure_date),
+    )
 
 
 def get_or_create_airport(code: str) -> Airport:
@@ -116,111 +155,201 @@ def _local_departure_date(flight: Flight, airport: Airport) -> date:
     return departs_at.astimezone(zone).date()
 
 
-def flight_expense_data(
-    flight: Flight, price_gbp: int, departure: Airport, arrival: Airport
-) -> dict:
+def journey_description(journey: FlightJourney) -> str:
+    codes = []
+    for leg in journey.legs:
+        codes.append(f"{leg.airline}{leg.flight_number}")
+    origin = journey.first_leg.departure_airport
+    destination = journey.last_leg.arrival_airport
+    return f"{' + '.join(codes)} · {origin} → {destination}"
+
+
+def journey_expense_data(first_flight: Flight, journey: FlightJourney) -> dict:
     return {
-        "description": (
-            f"{flight.airline}{flight.flight_number} · {departure.code} → {arrival.code}"
-        ),
+        "description": journey_description(journey),
         "category": "transport",
-        "amount": price_gbp,
-        "spent_on": _local_departure_date(flight, departure),
-        "flight_id": flight.id,
+        "amount": journey.price_gbp,
+        "spent_on": _local_departure_date(first_flight, first_flight.departure_airport),
+        "flight_id": first_flight.id,
     }
 
 
-def stage_flight_expense(
-    user_id: int | None,
-    flight: Flight,
-    price_gbp: int | None,
-    departure: Airport,
-    arrival: Airport,
+def stage_journey_expense(
+    user_id: int | None, first_flight: Flight, journey: FlightJourney
 ):
-    """Give a new flight its expense, in the same transaction as the flight.
+    """Give a new journey its expense, in the same transaction as its flights.
 
-    A flight with no price, or one saved without a signed-in user (anonymous
-    trips have no expenses), starts without an expense.
+    The expense belongs to the first leg. A journey with no price, or one saved
+    without a signed-in user (anonymous trips have no expenses), starts without one.
     """
-    if price_gbp is None or user_id is None:
+    if journey.price_gbp is None or user_id is None:
         return None
     return expense_service.stage_create_expense(
         user_id,
-        flight.itinerary_id,
-        flight_expense_data(flight, price_gbp, departure, arrival),
+        first_flight.itinerary_id,
+        journey_expense_data(first_flight, journey),
     )
 
 
-def create_flight(user_id: int | None, itinerary_id: int, flight_data: dict):
-    try:
-        airline = flight_data["airline"].upper()
-        flight_number = flight_data["flight_number"].upper()
+def find_journey(
+    journeys: list[FlightJourney], leg_codes: tuple[tuple[str, str], ...]
+) -> FlightJourney | None:
+    for journey in journeys:
+        if journey.leg_codes == leg_codes:
+            return journey
+    return None
 
-        offers = search_flights(
+
+def _requested_leg_codes(legs: list[dict]) -> tuple[tuple[str, str], ...]:
+    codes = []
+    for leg in legs:
+        codes.append((leg["airline"].upper(), leg["flight_number"].upper()))
+    return tuple(codes)
+
+
+def _find_saved_flight(itinerary_id: int, offer: FlightOffer) -> Flight | None:
+    stmt = select(Flight).where(
+        Flight.itinerary_id == itinerary_id,
+        Flight.airline == offer.airline,
+        Flight.flight_number == offer.flight_number,
+        Flight.depart_at == offer.depart_at,
+    )
+    return db.session.execute(stmt).scalar_one_or_none()
+
+
+def _apply_offer(
+    flight: Flight,
+    offer: FlightOffer,
+    departure: Airport,
+    arrival: Airport,
+    notes: str | None,
+) -> None:
+    flight.airline = offer.airline
+    flight.flight_number = offer.flight_number
+    flight.departure_airport = departure
+    flight.arrival_airport = arrival
+    flight.depart_at = offer.depart_at
+    flight.arrive_at = offer.arrive_at
+    flight.travel_class = offer.travel_class
+    flight.luggage = list(offer.luggage)
+    flight.extras = list(offer.extras)
+    flight.purchase_url = offer.purchase_url
+    flight.airline_logo = offer.airline_logo
+    flight.notes = notes
+
+
+def _save_offer(
+    user_id: int | None, itinerary_id: int, offer: FlightOffer, notes: str | None
+) -> tuple[Flight, bool]:
+    """Add the offer to the itinerary, or refresh it if already saved.
+
+    Does not commit; the caller owns the transaction.
+    """
+    # Look airports up first: the query would flush a half-filled new flight.
+    departure = get_or_create_airport(offer.departure_airport)
+    arrival = get_or_create_airport(offer.arrival_airport)
+
+    flight = _find_saved_flight(itinerary_id, offer)
+    is_new = flight is None
+
+    if flight is None:
+        flight = Flight(
+            itinerary_id=itinerary_id,
+            created_by_id=user_id,
+            updated_by_id=user_id,
+        )
+        db.session.add(flight)
+    else:
+        flight.updated_by_id = user_id
+
+    _apply_offer(flight, offer, departure, arrival, notes)
+    db.session.flush()
+    return flight, is_new
+
+
+def _save_journey(
+    user_id: int | None,
+    itinerary_id: int,
+    journey: FlightJourney,
+    notes: str | None,
+) -> list[Flight]:
+    """Save every leg of the journey. Does not commit."""
+    flights = []
+    first_leg_is_new = False
+
+    for index, leg in enumerate(journey.legs):
+        is_first_leg = index == 0
+        flight, is_new = _save_offer(
+            user_id, itinerary_id, leg, notes if is_first_leg else None
+        )
+        flights.append(flight)
+        if is_first_leg:
+            first_leg_is_new = is_new
+
+    # Saving a journey again only refreshes it; a deleted expense stays deleted.
+    if first_leg_is_new:
+        stage_journey_expense(user_id, flights[0], journey)
+
+    return flights
+
+
+def create_flight(
+    user_id: int | None, itinerary_id: int, flight_data: dict
+) -> list[Flight]:
+    """Save the searched journey whose legs match `flight_data["legs"]`.
+
+    The journey is looked up again rather than trusted from the client.
+    """
+    try:
+        journeys = search_flights(
             flight_data["origin"],
             flight_data["destination"],
             flight_data["departure_date"],
         )
-        offer = next(
-            (
-                offer
-                for offer in offers
-                if offer.airline == airline and offer.flight_number == flight_number
-            ),
-            None,
-        )
-        if offer is None:
+        journey = find_journey(journeys, _requested_leg_codes(flight_data["legs"]))
+        if journey is None:
             raise NotFoundError("That flight is no longer available for this search.")
 
-        dep_airport = get_or_create_airport(offer.departure_airport)
-        arr_airport = get_or_create_airport(offer.arrival_airport)
-
-        stmt = select(Flight).where(
-            Flight.itinerary_id == itinerary_id,
-            Flight.airline == offer.airline,
-            Flight.flight_number == offer.flight_number,
-            Flight.depart_at == offer.depart_at,
+        flights = _save_journey(
+            user_id, itinerary_id, journey, flight_data.get("notes")
         )
-        flight = db.session.execute(stmt).scalar_one_or_none()
-        is_new = flight is None
-
-        if flight:
-            flight.updated_by_id = user_id
-        else:
-            flight = Flight(
-                itinerary_id=itinerary_id,
-                created_by_id=user_id,
-                updated_by_id=user_id,
-            )
-            db.session.add(flight)
-
-        flight.airline = offer.airline
-        flight.flight_number = offer.flight_number
-        flight.departure_airport_id = dep_airport.id
-        flight.arrival_airport_id = arr_airport.id
-        flight.depart_at = offer.depart_at
-        flight.arrive_at = offer.arrive_at
-        flight.travel_class = offer.travel_class
-        flight.luggage = list(offer.luggage)
-        flight.extras = list(offer.extras)
-        flight.purchase_url = offer.purchase_url
-        flight.airline_logo = offer.airline_logo
-        flight.notes = flight_data.get("notes")
-
-        # Saving a flight again only refreshes it; a deleted expense stays deleted.
-        if is_new:
-            db.session.flush()
-            stage_flight_expense(
-                user_id, flight, offer.price_gbp, dep_airport, arr_airport
-            )
-
         db.session.commit()
 
     except Exception:
         db.session.rollback()
         raise
 
-    return flight
+    return flights
+
+
+def create_flights_by_number(
+    user_id: int | None, itinerary_id: int, flight_data: dict
+) -> list[Flight]:
+    """Save every leg the flight number flies on the date.
+
+    The legs are looked up again rather than trusted from the client.
+    """
+    try:
+        journeys = lookup_flights_by_number(
+            flight_data["airline"],
+            flight_data["flight_number"],
+            flight_data["departure_date"],
+        )
+        if not journeys:
+            raise NotFoundError(
+                "No flights were found for that flight number and date."
+            )
+
+        flights = _save_journey(
+            user_id, itinerary_id, journeys[0], flight_data.get("notes")
+        )
+        db.session.commit()
+
+    except Exception:
+        db.session.rollback()
+        raise
+
+    return flights
 
 
 def update_flight(

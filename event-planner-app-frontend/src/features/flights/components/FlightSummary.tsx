@@ -1,7 +1,7 @@
 import { useState, type ReactNode } from "react";
 import { Plane } from "lucide-react";
 import { formatInTimeZone } from "date-fns-tz";
-import { formatDuration, formatFlightTime } from "../utils";
+import { connectorLabel, formatDuration, formatFlightTime } from "../utils";
 
 export interface FlightEndpoint {
   code: string;
@@ -20,8 +20,14 @@ interface FlightSummaryProps {
   departure: FlightEndpoint;
   arrival: FlightEndpoint;
   durationMinutes: number;
+  /** Stops between departure and arrival; 0 for a nonstop flight. */
+  stops?: number;
+  /** Where a journey with stops changes planes, e.g. "Via Beijing (PEK)". */
+  via?: string;
   footer?: ReactNode;
+  id?: string;
   testId?: string;
+  isHighlighted?: boolean;
 }
 
 function AirlineLogo({ src }: { src?: string | null }) {
@@ -73,7 +79,13 @@ function Endpoint({
   );
 }
 
-function Connector({ durationMinutes }: { durationMinutes: number }) {
+function Connector({
+  durationMinutes,
+  stops,
+}: {
+  durationMinutes: number;
+  stops: number;
+}) {
   return (
     <div className="flex min-w-16 flex-col items-center gap-1">
       <span className="text-sm text-text-secondary">
@@ -88,7 +100,15 @@ function Connector({ durationMinutes }: { durationMinutes: number }) {
         <span className="h-px flex-1 bg-surface-border" />
         <span className="size-1.5 shrink-0 rounded-full border border-surface-border" />
       </div>
-      <span className="text-xs text-text-secondary">Non-stop</span>
+      <span
+        className={
+          stops > 0
+            ? "text-xs font-semibold text-brand-primary"
+            : "text-xs text-text-secondary"
+        }
+      >
+        {connectorLabel(stops)}
+      </span>
     </div>
   );
 }
@@ -101,11 +121,19 @@ export default function FlightSummary({
   departure,
   arrival,
   durationMinutes,
+  stops = 0,
+  via,
   footer,
+  id,
   testId,
+  isHighlighted = false,
 }: FlightSummaryProps) {
   return (
-    <div className="card overflow-hidden p-0  " data-testid={testId}>
+    <div
+      id={id}
+      className={`card overflow-hidden p-0 transition-shadow ${isHighlighted ? "ring-2 ring-brand-primary" : ""}`}
+      data-testid={testId}
+    >
       <div className="space-y-6 p-5 sm:p-6">
         <div className="flex items-center justify-between gap-3">
           <div className="flex min-w-0 items-center gap-4">
@@ -124,9 +152,10 @@ export default function FlightSummary({
 
         <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3 sm:gap-6">
           <Endpoint endpoint={departure} align="left" />
-          <Connector durationMinutes={durationMinutes} />
+          <Connector durationMinutes={durationMinutes} stops={stops} />
           <Endpoint endpoint={arrival} align="right" />
         </div>
+        {via && <p className="text-sm text-text-secondary">{via}</p>}
       </div>
 
       {footer && (
