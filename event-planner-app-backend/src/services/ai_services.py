@@ -70,6 +70,9 @@ def format_json(raw_json: str) -> Any:
         raise AIResponseError("AI response contained invalid JSON.") from exc
 
 
+GROQ_MAX_COMPLETION_TOKENS = 8192000
+
+
 def get_ai_response(prompt: str) -> str:
     """
     Get an AI response, falling back from Gemini to Groq.
@@ -118,7 +121,7 @@ def get_ai_response(prompt: str) -> str:
                         "content": prompt,
                     },
                 ],
-                max_completion_tokens=8192,
+                max_completion_tokens=GROQ_MAX_COMPLETION_TOKENS,
                 timeout=100.0,
             )
 
@@ -330,9 +333,7 @@ JSON FORMAT:
     return geocoded_events
 
 
-def generate_packing_list(
-    itinerary_id: int, progress: ProgressCallback = no_progress
-):
+def generate_packing_list(itinerary_id: int, progress: ProgressCallback = no_progress):
     itinerary = get_itinerary(itinerary_id)
 
     duration = (itinerary.end_date - itinerary.start_date).days + 1
