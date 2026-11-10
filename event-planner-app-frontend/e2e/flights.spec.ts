@@ -293,10 +293,15 @@ test.describe("Flights", () => {
     await form.getByRole("button", { name: "Search flights" }).click();
 
     const result = page.getByTestId("flight-journey-card");
-    await expect(result).toContainText("BA427");
-    await expect(result).toContainText("KL641");
-    await expect(result).toContainText("Layover · 2h 40m in Amsterdam (AMS)");
+    await expect(result).toContainText("BA427 + BA641");
+    await expect(result).toContainText("Via Amsterdam (AMS)");
     await expect(result).toContainText("1 stop");
+    await expect(result).not.toContainText("layover ·");
+
+    await result
+      .getByRole("button", { name: "Show flight & layover details" })
+      .click();
+    await expect(result).toContainText("0h 40m layover · Amsterdam (AMS)");
 
     await result.getByRole("button", { name: "Save 2 flights" }).click();
     await expect(page.getByText("Flights saved.")).toBeVisible();
@@ -333,7 +338,7 @@ test.describe("Flights", () => {
 
     const result = page.getByTestId("flight-journey-card");
     await expect(result).toContainText("BA427");
-    await expect(result).toContainText("KL641");
+    await expect(result).toContainText("BA427 + BA641");
     expect(numberSearches).toHaveLength(1);
     expect(numberSearches[0]).toContain("flightCode=ba+427");
     expect(numberSearches[0]).toContain("departureDate=2026-08-01");

@@ -119,6 +119,23 @@ const stopsLabel = (stops: number) => {
   return stops === 1 ? "1 stop" : `${stops} stops`;
 };
 
+export const connectorLabel = (stops: number) =>
+  stops === 0 ? "Non-stop" : stopsLabel(stops);
+
+/** Where the plane changes, e.g. "Via Beijing (PEK)"; empty for a nonstop flight. */
+export const journeyVia = (journey: FlightJourney) => {
+  const stopovers = journey.legs
+    .slice(0, -1)
+    .map(
+      (leg) =>
+        `${leg.arrivalCity ?? leg.arrivalAirport} (${leg.arrivalAirport})`,
+    );
+  return stopovers.length > 0 ? `Via ${stopovers.join(", ")}` : "";
+};
+
+export const journeyFlightCodes = (journey: FlightJourney) =>
+  journey.legs.map((leg) => `${leg.airline}${leg.flightNumber}`).join(" + ");
+
 export const journeySummary = (journey: FlightJourney) =>
   [stopsLabel(journey.stops), ...journey.legs[0].luggage].join(" · ");
 

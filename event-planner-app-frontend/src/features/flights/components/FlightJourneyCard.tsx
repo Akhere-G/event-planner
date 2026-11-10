@@ -1,14 +1,15 @@
-import { Fragment, useState } from "react";
+import { useId, useState } from "react";
+import { ChevronDown } from "lucide-react";
+import type { Flight, FlightJourney } from "../types";
 import {
-  formatDuration,
   formatGbp,
   isJourneySaved,
+  journeyFlightCodes,
   journeySummary,
-  layoverMinutes,
+  journeyVia,
 } from "../utils";
-import type { Flight, FlightJourney, FlightOffer } from "../types";
-import FlightExtras from "./FlightExtras";
 import FlightSummary from "./FlightSummary";
+import JourneyDetails from "./JourneyDetails";
 
 interface FlightJourneyCardProps {
   journey: FlightJourney;
@@ -28,31 +29,17 @@ const saveLabel = (
     : "Save flight";
 };
 
-function Layover({
-  arriving,
-  departing,
-}: {
-  arriving: FlightOffer;
-  departing: FlightOffer;
-}) {
-  const place = arriving.arrivalCity ?? arriving.arrivalAirport;
-
-  return (
-    <p className="text-center text-sm text-text-secondary">
-      Layover · {formatDuration(layoverMinutes(arriving, departing))} in {place}{" "}
-      ({arriving.arrivalAirport})
-    </p>
-  );
-}
-
 export default function FlightJourneyCard({
   journey,
   savedFlights,
   onSave,
 }: FlightJourneyCardProps) {
   const [isSaving, setIsSaving] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
+  const detailsId = useId();
   const isSaved = isJourneySaved(savedFlights, journey);
-  const lastIndex = journey.legs.length - 1;
+  const first = journey.legs[0];
+  const last = journey.legs[journey.legs.length - 1];
 
   const handleSave = async () => {
     setIsSaving(true);
@@ -64,64 +51,71 @@ export default function FlightJourneyCard({
   };
 
   return (
-    <div className="space-y-2" data-testid="flight-journey-card">
-      {journey.legs.map((leg, index) => (
-        <Fragment key={`${leg.airline}${leg.flightNumber}${leg.departAt}`}>
-          {index > 0 && (
-            <Layover arriving={journey.legs[index - 1]} departing={leg} />
-          )}
-          <FlightSummary
-            flightCode={`${leg.airline}${leg.flightNumber}`}
-            airlineLogo={leg.airlineLogo}
-            travelClass={leg.travelClass}
-            headerEnd={
-              index === 0 &&
-              journey.priceGbp != null && (
-                <span className="text-lg font-bold text-text-main">
-                  {formatGbp(journey.priceGbp)}
-                </span>
-              )
-            }
-            departure={{
-              code: leg.departureAirport,
-              city: leg.departureCity,
-              airportName: leg.departureAirportName,
-              time: leg.departAt,
-              timezone: leg.departureTimezone,
-            }}
-            arrival={{
-              code: leg.arrivalAirport,
-              city: leg.arrivalCity,
-              airportName: leg.arrivalAirportName,
-              time: leg.arriveAt,
-              timezone: leg.arrivalTimezone,
-            }}
-            durationMinutes={leg.durationMinutes}
-            footer={
-              index === lastIndex && (
-                <div className="space-y-3">
-                  <div className="flex flex-wrap items-center justify-between gap-4">
-                    <p className="text-sm text-text-secondary">
-                      {journeySummary(journey)}
-                    </p>
-                    <div className="flex w-full flex-col items-start gap-4">
-                      <FlightExtras extras={leg.extras} />
-                      <button
-                        type="button"
-                        onClick={handleSave}
-                        disabled={isSaved || isSaving}
-                        className="btn-primary self-end rounded-xl px-6 py-3 text-lg font-bold disabled:opacity-60"
-                      >
-                        {saveLabel(journey, isSaved, isSaving)}
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              )
-            }
-          />
-        </Fragment>
-      ))}
-    </div>
+    <FlightSummary
+      testId="flight-journey-card"
+      flightCode={journeyFlightCodes(journey)}
+      airlineLogo={first.airlineLogo}
+      travelClass={first.travelClass}
+      headerEnd={
+        journey.priceGbp != null && (
+          <span className="text-lg font-bold text-text-main">
+            {formatGbp(journey.priceGbp)}
+          </span>
+        )
+      }
+      departure={{
+        code: first.departureAirport,
+        city: first.departureCity,
+        airportName: first.departureAirportName,
+        time: first.departAt,
+        timezone: first.departureTimezone,
+      }}
+      arrival={{
+        code: last.arrivalAirport,
+        city: last.arrivalCity,
+        airportName: last.arrivalAirportName,
+        time: last.arriveAt,
+        timezone: last.arrivalTimezone,
+      }}
+      durationMinutes={journey.totalDurationMinutes}
+      stops={journey.stops}
+      via={journeyVia(journey)}
+      footer={
+        <div className="space-y-4">
+          <button
+            type="button"
+            onClick={() => setIsExpanded((expanded) => !expanded)}
+            aria-expanded={isExpanded}
+            aria-controls={detailsId}
+            className="flex items-center gap-2 text-sm text-text-secondary hover:text-text-primary"
+          >
+            {isExpanded ? "Hide" : "Show"} flight
+            {journey.legs.length > 1 && " & layover"} details
+            <ChevronDown
+              size={16}
+              className={`transition-transform ${isExpanded ? "rotate-180" : ""}`}
+            />
+          </button>
+
+          <div id={detailsId} hidden={!isExpanded}>
+            {isExpanded && <JourneyDetails journey={journey} />}
+          </div>
+
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <p className="text-sm text-text-secondary">
+              {journeySummary(journey)}
+            </p>
+            <button
+              type="button"
+              onClick={handleSave}
+              disabled={isSaved || isSaving}
+              className="btn-primary rounded-xl px-6 py-3 text-lg font-bold disabled:opacity-60"
+            >
+              {saveLabel(journey, isSaved, isSaving)}
+            </button>
+          </div>
+        </div>
+      }
+    />
   );
 }
