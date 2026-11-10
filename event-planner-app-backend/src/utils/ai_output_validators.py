@@ -1,9 +1,10 @@
+from collections.abc import Sequence
 from dataclasses import dataclass
 from datetime import date, datetime, time
 from typing import Any
 
 from ..exceptions import AIResponseError
-from ..models import Event
+from ..services.flight_context import FlightWindow, overlaps_any
 
 
 def validate_insights(insights: Any) -> list[dict[str, str]]:
@@ -32,10 +33,19 @@ def validate_insights(insights: Any) -> list[dict[str, str]]:
     return validated
 
 
-def validate_event_suggestion(event: Any, requested_date: str) -> bool:
+def _clashes_with_flight(
+    blocked: Sequence[FlightWindow], start: datetime, end: datetime
+) -> bool:
+    # Any offset the model added is ignored, as it is when the time is saved.
+    return overlaps_any(blocked, start.replace(tzinfo=None), end.replace(tzinfo=None))
+
+
+def validate_event_suggestion(
+    event: Any, requested_date: str, blocked: Sequence[FlightWindow] = ()
+) -> bool:
     """
     Validate the basic structure and temporal constraints of an
-    AI-generated event suggestion.
+    AI-generated event suggestion, including staying clear of `blocked` flights.
     """
     if not isinstance(event, dict):
         return False
@@ -49,8 +59,9 @@ def validate_event_suggestion(event: Any, requested_date: str) -> bool:
         "category",
     ]
 
-    if any(not isinstance(event.get(field), str) for field in required_fields):
-        return False
+    for field in required_fields:
+        if not isinstance(event.get(field), str):
+            return False
 
     try:
         start_at = datetime.fromisoformat(event["start_at"].replace("Z", "+00:00"))
@@ -64,25 +75,30 @@ def validate_event_suggestion(event: Any, requested_date: str) -> bool:
     if end_at.date().isoformat() != requested_date:
         return False
 
-    return not end_at <= start_at
+    if end_at <= start_at:
+        return False
+
+    return not _clashes_with_flight(blocked, start_at, end_at)
 
 
 @dataclass(frozen=True)
 class OptimisationRules:
-
     day: date
     event_ids: frozenset[int]
     locked_ids: frozenset[int] = frozenset()
     allow_add_remove: bool = False
     day_start: time | None = None
     day_end: time | None = None
+    blocked: tuple[FlightWindow, ...] = ()
 
     def allows_times(self, start: datetime, end: datetime) -> bool:
         if start.date() != self.day or end.date() != self.day or end <= start:
             return False
         if self.day_start and start.time() < self.day_start:
             return False
-        return not (self.day_end and end.time() > self.day_end)
+        if self.day_end and end.time() > self.day_end:
+            return False
+        return not _clashes_with_flight(self.blocked, start, end)
 
     def can_change(self, event_id: Any) -> bool:
         return (
