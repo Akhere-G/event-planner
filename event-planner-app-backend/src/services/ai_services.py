@@ -2,9 +2,8 @@ import json
 import logging
 import os
 import re
-from datetime import datetime, timezone as dt_timezone
+from datetime import datetime
 from typing import Any, List
-from zoneinfo import ZoneInfo
 
 import googlemaps
 from google import genai
@@ -16,6 +15,7 @@ from ..utils import ai_output_validators
 from ..utils.db_utils import release_connection
 from ..utils.location_utils import get_place_details
 from ..utils.progress import ProgressCallback, no_progress
+from ..utils.trip_time import to_trip_local, trip_local_to_utc
 from .itineraries_service import get_itinerary
 
 logger = logging.getLogger(__name__)
@@ -63,28 +63,6 @@ def format_json(raw_json: str) -> Any:
         return json.loads(clean_json)
     except json.JSONDecodeError as exc:
         raise AIResponseError("AI response contained invalid JSON.") from exc
-
-
-def _trip_zone(timezone_name: str | None) -> ZoneInfo:
-    return ZoneInfo(timezone_name or "UTC")
-
-
-def to_trip_local(value: datetime, timezone_name: str | None) -> datetime:
-    """Convert a stored (UTC) datetime to naive wall-clock time in the trip's zone."""
-    if value.tzinfo is None:
-        value = value.replace(tzinfo=dt_timezone.utc)
-    return value.astimezone(_trip_zone(timezone_name)).replace(tzinfo=None)
-
-
-def trip_local_to_utc(value: str | datetime, timezone_name: str | None) -> datetime:
-    """Treat an AI-provided time as wall-clock time in the trip's zone and return UTC.
-
-    Any offset the model adds anyway is ignored, because the prompt asks for local time.
-    """
-    if isinstance(value, str):
-        value = datetime.fromisoformat(value.replace("Z", "+00:00"))
-    local = value.replace(tzinfo=_trip_zone(timezone_name))
-    return local.astimezone(dt_timezone.utc)
 
 
 def get_ai_response(prompt: str) -> str:
