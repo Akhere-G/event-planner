@@ -15,7 +15,12 @@ from ..extensions import cache, db
 from ..models import Airport, Flight
 from . import expense_service
 from .airport_directory import get_airport_info
-from .flight_providers import FlightJourney, FlightOffer, FlightProviderFactory
+from .flight_providers import (
+    FlightJourney,
+    FlightNumberProviderFactory,
+    FlightOffer,
+    FlightProviderFactory,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -97,6 +102,20 @@ def search_flights(
         FlightProviderFactory.create_all,
         cache_key,
         lambda provider: provider.search(origins, destinations, departure_date),
+    )
+
+
+def lookup_flights_by_number(
+    airline: str, flight_number: str, departure_date: date
+) -> list[FlightJourney]:
+    cache_key = (
+        f"flight_number:v1:{airline}{flight_number}:{departure_date.isoformat()}"
+    )
+
+    return _search_with_providers(
+        FlightNumberProviderFactory.create_all,
+        cache_key,
+        lambda provider: provider.lookup(airline, flight_number, departure_date),
     )
 
 
@@ -293,6 +312,36 @@ def create_flight(
 
         flights = _save_journey(
             user_id, itinerary_id, journey, flight_data.get("notes")
+        )
+        db.session.commit()
+
+    except Exception:
+        db.session.rollback()
+        raise
+
+    return flights
+
+
+def create_flights_by_number(
+    user_id: int | None, itinerary_id: int, flight_data: dict
+) -> list[Flight]:
+    """Save every leg the flight number flies on the date.
+
+    The legs are looked up again rather than trusted from the client.
+    """
+    try:
+        journeys = lookup_flights_by_number(
+            flight_data["airline"],
+            flight_data["flight_number"],
+            flight_data["departure_date"],
+        )
+        if not journeys:
+            raise NotFoundError(
+                "No flights were found for that flight number and date."
+            )
+
+        flights = _save_journey(
+            user_id, itinerary_id, journeys[0], flight_data.get("notes")
         )
         db.session.commit()
 

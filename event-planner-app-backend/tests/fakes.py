@@ -5,6 +5,7 @@ from src.exceptions import FlightProviderError
 from src.services.flight_providers import (
     FlightApiProvider,
     FlightJourney,
+    FlightNumberProvider,
     FlightOffer,
 )
 
@@ -59,6 +60,13 @@ AMS_TO_JFK = replace(
 )
 CONNECTION = FlightJourney(legs=(LHR_TO_AMS, AMS_TO_JFK), price_gbp=310)
 
+KL1000_JOURNEY = FlightJourney(
+    legs=(
+        replace(LHR_TO_AMS, airline="KL", flight_number="1000"),
+        replace(AMS_TO_JFK, airline="KL", flight_number="1000"),
+    )
+)
+
 
 class FakeFlightProvider(FlightApiProvider):
     name = "fake"
@@ -74,6 +82,25 @@ class FakeFlightProvider(FlightApiProvider):
 
     def search(self, origin_codes, destination_codes, departure_date):
         self.searches.append((origin_codes, destination_codes, departure_date))
+        if self.error:
+            raise FlightProviderError(self.error)
+        return self.journeys
+
+
+class FakeFlightNumberProvider(FlightNumberProvider):
+    name = "fake-number"
+
+    def __init__(self, journeys=None, configured=True, error=None):
+        self.journeys = [KL1000_JOURNEY] if journeys is None else journeys
+        self.configured = configured
+        self.error = error
+        self.lookups = []
+
+    def is_configured(self) -> bool:
+        return self.configured
+
+    def lookup(self, airline, flight_number, departure_date):
+        self.lookups.append((airline, flight_number, departure_date))
         if self.error:
             raise FlightProviderError(self.error)
         return self.journeys

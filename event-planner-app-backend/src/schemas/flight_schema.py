@@ -1,6 +1,7 @@
+import re
 from datetime import UTC, date, datetime
 
-from marshmallow import Schema, fields, validate, ValidationError
+from marshmallow import Schema, ValidationError, fields, post_load, validate
 from marshmallow_sqlalchemy import auto_field
 
 from ..models import Flight
@@ -11,6 +12,10 @@ AIRPORT_CODE = validate.Regexp(r"^[A-Za-z]{3}$", error="Use 3-letter airport cod
 AIRLINE_CODE = validate.Regexp(r"^[A-Za-z0-9]{2,3}$")
 FLIGHT_NUMBER = validate.Regexp(r"^\d{1,4}[A-Za-z]?$")
 MAX_JOURNEY_LEGS = 6
+# An IATA airline code has two characters, at least one of them a letter.
+FLIGHT_CODE_PATTERN = re.compile(
+    r"^((?=[A-Za-z0-9]?[A-Za-z])[A-Za-z0-9]{2})\s?(\d{1,4}[A-Za-z]?)$"
+)
 
 
 def _utc_iso(value: datetime) -> str:
@@ -28,6 +33,18 @@ def _city(airport) -> str | None:
 def _not_in_past(value: date):
     if value < date.today():
         raise ValidationError("Departure date cannot be in the past.")
+
+
+def split_flight_code(value: str) -> tuple[str, str]:
+    """Split a code like "BA117" or "ba 117" into its airline and flight number."""
+    match = FLIGHT_CODE_PATTERN.match(value.strip())
+    if match is None:
+        raise ValidationError("Enter a flight number like BA117.")
+    return match.group(1).upper(), match.group(2).upper()
+
+
+def _check_flight_code(value: str) -> None:
+    split_flight_code(value)
 
 
 class AirportCodeList(fields.List):
@@ -161,6 +178,24 @@ class FlightSaveSchema(FlightSearchQuerySchema):
         validate=validate.Length(min=1, max=MAX_JOURNEY_LEGS),
         error_messages={"required": "At least one flight is required."},
     )
+    notes = fields.String(allow_none=True, validate=validate.Length(max=1000))
+
+
+class FlightNumberQuerySchema(BaseSchema):
+    flight_code = fields.String(
+        required=True,
+        validate=_check_flight_code,
+        error_messages={"required": "Flight number is required."},
+    )
+    departure_date = fields.Date(required=True, validate=_not_in_past)
+
+    @post_load
+    def split_code(self, data, **kwargs):
+        airline, flight_number = split_flight_code(data.pop("flight_code"))
+        return {**data, "airline": airline, "flight_number": flight_number}
+
+
+class FlightNumberSaveSchema(FlightNumberQuerySchema):
     notes = fields.String(allow_none=True, validate=validate.Length(max=1000))
 
 
