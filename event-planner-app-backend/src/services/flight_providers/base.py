@@ -82,3 +82,23 @@ class FlightApiProvider(ABC):
 
         Raises `FlightProviderError` when the provider cannot answer.
         """
+
+
+class FlightNumberProvider(ABC):
+    """Adapter between a third-party flight schedule API and our `FlightJourney`s."""
+
+    name: str
+
+    @abstractmethod
+    def is_configured(self) -> bool:
+        """Whether the provider has the credentials it needs to run."""
+
+    @abstractmethod
+    def lookup(
+        self, airline: str, flight_number: str, departure_date: date
+    ) -> list[FlightJourney]:
+        """Return the journey made of every leg the flight number flies that day.
+
+        The list is empty when the flight does not operate on that date.
+        Raises `FlightProviderError` when the provider cannot answer.
+        """

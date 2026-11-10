@@ -6,7 +6,8 @@ from zoneinfo import ZoneInfo
 import requests
 
 from ...exceptions import FlightProviderError
-from ..airport_directory import AirportInfo, get_airport_info
+from ..airport_directory import AirportInfo
+from .airports import require_airport
 from .base import FlightApiProvider, FlightJourney, FlightOffer
 
 API_URL = "https://serpapi.com/search"
@@ -130,10 +131,7 @@ class SerpApiFlightProvider(FlightApiProvider):
 
     @staticmethod
     def _to_utc(local_time: str, airport_code: str) -> tuple[datetime, AirportInfo]:
-        airport = get_airport_info(airport_code)
-        if airport is None:
-            raise ValueError(f"Unknown airport {airport_code}.")
-
+        airport = require_airport(airport_code)
         local = datetime.strptime(local_time, "%Y-%m-%d %H:%M")
         zone = ZoneInfo(airport.timezone)
         return local.replace(tzinfo=zone).astimezone(UTC), airport
