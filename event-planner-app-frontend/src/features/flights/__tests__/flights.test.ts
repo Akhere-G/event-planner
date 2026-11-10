@@ -6,6 +6,8 @@ import {
 } from "../schemas/flightSchema";
 import {
   directFlightSummary,
+  flightCardId,
+  flightDetailsText,
   flightExpensePrefill,
   formatGbp,
   getFlightsForDay,
@@ -237,5 +239,39 @@ describe("flight journeys", () => {
     expect(isJourneySaved([savedFirstLeg, savedSecondLeg], connection)).toBe(
       true,
     );
+  });
+});
+
+describe("flightDetailsText", () => {
+  it("lists the flight with local times, places, duration and notes", () => {
+    expect(flightDetailsText({ ...flight, notes: "Meet at terminal 5" })).toBe(
+      [
+        "BA117 LHR → JFK",
+        "Departs: Sat 1 Aug 2026, 23:30 · London (LHR), Heathrow Airport",
+        "Arrives: Sun 2 Aug 2026, 02:15 · New York (JFK), John F Kennedy International Airport",
+        "Duration: 7h 45m",
+        "Class: Economy",
+        "Notes: Meet at terminal 5",
+      ].join("\n"),
+    );
+  });
+
+  it("leaves out what the flight does not have", () => {
+    const text = flightDetailsText({
+      ...flight,
+      departureCity: null,
+      departureAirportName: null,
+      travelClass: null,
+    });
+
+    expect(text).toContain("Departs: Sat 1 Aug 2026, 23:30 · LHR\n");
+    expect(text).not.toContain("Class:");
+    expect(text).not.toContain("Notes:");
+  });
+});
+
+describe("flightCardId", () => {
+  it("is unique per saved flight even when the flight number repeats", () => {
+    expect(flightCardId(1)).not.toBe(flightCardId(2));
   });
 });

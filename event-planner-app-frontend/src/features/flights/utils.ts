@@ -27,6 +27,56 @@ export const formatFlightTime = (utc: string, timeZone: string) =>
 export const flightTitle = (flight: Flight) =>
   `${flight.airline}${flight.flightNumber} ${flight.departureAirport} → ${flight.arrivalAirport}`;
 
+export const flightCardId = (flightId: number) => `flight-card-${flightId}`;
+
+const placeLabel = (
+  code: string,
+  city?: string | null,
+  name?: string | null,
+) => {
+  const place = city ? `${city} (${code})` : code;
+  return name ? `${place}, ${name}` : place;
+};
+
+const endpointLine = (
+  label: string,
+  utc: string,
+  timeZone: string,
+  place: string,
+) =>
+  `${label}: ${formatInTimeZone(utc, timeZone, "EEE d MMM yyyy, HH:mm")} · ${place}`;
+
+/** Plain text a user can paste into a message to share the flight. */
+export const flightDetailsText = (flight: Flight) => {
+  const lines = [
+    flightTitle(flight),
+    endpointLine(
+      "Departs",
+      flight.departAt,
+      flight.departureTimezone,
+      placeLabel(
+        flight.departureAirport,
+        flight.departureCity,
+        flight.departureAirportName,
+      ),
+    ),
+    endpointLine(
+      "Arrives",
+      flight.arriveAt,
+      flight.arrivalTimezone,
+      placeLabel(
+        flight.arrivalAirport,
+        flight.arrivalCity,
+        flight.arrivalAirportName,
+      ),
+    ),
+    `Duration: ${formatDuration(flightDurationMinutes(flight))}`,
+  ];
+  if (flight.travelClass) lines.push(`Class: ${flight.travelClass}`);
+  if (flight.notes) lines.push(`Notes: ${flight.notes}`);
+  return lines.join("\n");
+};
+
 /** What the Add expense form starts with for a flight that has no expense. */
 export const flightExpensePrefill = (flight: Flight): ExpensePrefill => ({
   flightId: flight.id,

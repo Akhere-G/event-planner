@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Hash, Route, X } from "lucide-react";
 import { ToggleButton } from "../../../components";
 import type { Trip } from "../../trips/types";
+import type { Flight } from "../types";
 import { useGetFlightsQuery } from "../flightApiSlice";
 import FlightNumberSearch from "./FlightNumberSearch";
 import RouteSearch from "./RouteSearch";
@@ -11,11 +12,13 @@ type SearchMode = "route" | "number";
 interface FlightSearchSectionProps {
   trip: Trip;
   onClose: () => void;
+  onSaved: (flights: Flight[]) => void;
 }
 
 export default function FlightSearchSection({
   trip,
   onClose,
+  onSaved,
 }: FlightSearchSectionProps) {
   const [mode, setMode] = useState<SearchMode>("route");
   const { data: savedData } = useGetFlightsQuery(trip.id);
@@ -53,9 +56,17 @@ export default function FlightSearchSection({
       </div>
 
       {mode === "route" ? (
-        <RouteSearch trip={trip} savedFlights={savedFlights} />
+        <RouteSearch
+          trip={trip}
+          savedFlights={savedFlights}
+          onSaved={onSaved}
+        />
       ) : (
-        <FlightNumberSearch trip={trip} savedFlights={savedFlights} />
+        <FlightNumberSearch
+          trip={trip}
+          savedFlights={savedFlights}
+          onSaved={onSaved}
+        />
       )}
     </div>
   );
