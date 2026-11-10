@@ -34,17 +34,20 @@ SERPAPI_RESPONSE = {
         {
             "flights": [
                 {
-                    "flight_number": "AA 1",
-                    "departure_airport": {},
-                    "arrival_airport": {},
+                    "departure_airport": {"id": "LHR", "time": "2026-08-01 07:00"},
+                    "arrival_airport": {"id": "AMS", "time": "2026-08-01 09:15"},
+                    "duration": 75,
+                    "flight_number": "BA 427",
                 },
                 {
-                    "flight_number": "AA 2",
-                    "departure_airport": {},
-                    "arrival_airport": {},
+                    "departure_airport": {"id": "AMS", "time": "2026-08-01 10:30"},
+                    "arrival_airport": {"id": "JFK", "time": "2026-08-01 13:30"},
+                    "duration": 480,
+                    "flight_number": "KL 641",
                 },
             ],
-            "price": 300,
+            "extensions": ["Checked baggage included"],
+            "price": 310,
         },
     ]
 }
@@ -68,7 +71,7 @@ def search(provider=None):
     return provider.search(["LHR", "LGW"], ["JFK"], date(2026, 8, 1))
 
 
-def test_serpapi_maps_nonstop_offers_to_utc(monkeypatch):
+def test_serpapi_maps_a_nonstop_journey_to_utc(monkeypatch):
     calls = []
 
     def fake_get(url, params, timeout):
@@ -77,15 +80,17 @@ def test_serpapi_maps_nonstop_offers_to_utc(monkeypatch):
 
     monkeypatch.setattr(requests, "get", fake_get)
 
-    [offer] = search()
+    nonstop, _ = search()
 
+    assert nonstop.price_gbp == 520
+    assert nonstop.stops == 0
+    [offer] = nonstop.legs
     assert offer.airline == "BA"
     assert offer.flight_number == "117"
     assert offer.depart_at == datetime(2026, 8, 1, 7, 0, tzinfo=UTC)
     assert offer.arrive_at == datetime(2026, 8, 1, 15, 0, tzinfo=UTC)
     assert offer.departure_timezone == "Europe/London"
     assert offer.arrival_timezone == "America/New_York"
-    assert offer.price_gbp == 520
     assert offer.departure_airport_name == "London Heathrow Airport"
     assert offer.departure_city == "London"
     assert offer.arrival_city == "New York"
@@ -96,9 +101,27 @@ def test_serpapi_maps_nonstop_offers_to_utc(monkeypatch):
     assert offer.airline_logo == "https://logo/ba.png"
     assert calls[0]["departure_id"] == "LHR,LGW"
     assert calls[0]["arrival_id"] == "JFK"
-    assert calls[0]["stops"] == 1
+    assert "stops" not in calls[0]
     assert calls[0]["type"] == 2
     assert calls[0]["currency"] == "GBP"
+
+
+def test_serpapi_maps_every_leg_of_a_connection(monkeypatch):
+    monkeypatch.setattr(
+        requests, "get", lambda *a, **kw: FakeResponse(SERPAPI_RESPONSE)
+    )
+
+    _, connection = search()
+
+    assert connection.stops == 1
+    assert connection.price_gbp == 310
+    assert connection.leg_codes == (("BA", "427"), ("KL", "641"))
+    assert connection.first_leg.arrival_airport == "AMS"
+    assert connection.last_leg.departure_airport == "AMS"
+    assert connection.total_duration_minutes == 690
+    assert connection.first_leg.luggage == ("Checked baggage included",)
+    assert connection.last_leg.luggage == ("Checked baggage included",)
+    assert connection.purchase_url == "https://www.google.com/travel/flights?q=x"
 
 
 def test_serpapi_missing_optional_details_default_to_empty(monkeypatch):
@@ -118,9 +141,10 @@ def test_serpapi_missing_optional_details_default_to_empty(monkeypatch):
     }
     monkeypatch.setattr(requests, "get", lambda *a, **kw: FakeResponse(payload))
 
-    [offer] = search()
+    [journey] = search()
 
-    assert offer.price_gbp is None
+    [offer] = journey.legs
+    assert journey.price_gbp is None
     assert offer.travel_class is None
     assert offer.luggage == ()
     assert offer.extras == ()
@@ -139,6 +163,7 @@ def test_serpapi_no_results_is_empty(monkeypatch):
         FakeResponse({"error": "Invalid API key."}),
         FakeResponse({}, status=500),
         FakeResponse({"best_flights": [{"flights": [{}]}]}),
+        FakeResponse({"best_flights": [{"flights": []}]}),
     ],
 )
 def test_serpapi_failures_raise_provider_error(monkeypatch, response):

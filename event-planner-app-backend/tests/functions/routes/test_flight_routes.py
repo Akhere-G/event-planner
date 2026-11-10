@@ -7,7 +7,12 @@ from src.models import Airport, Expense, Flight
 from src.services import expense_service, flight_service
 
 from tests.factories import FlightFactory, ItineraryFactory
-from tests.fakes import BA117, FakeFlightProvider
+from tests.fakes import (
+    BA117,
+    BA117_JOURNEY,
+    CONNECTION,
+    FakeFlightProvider,
+)
 
 DEPARTURE_DATE = (date.today() + timedelta(days=30)).isoformat()
 
@@ -16,13 +21,16 @@ def url(itinerary, suffix=""):
     return f"/api/itineraries/{itinerary.id}/flights{suffix}"
 
 
+def leg(airline="BA", flight_number="117"):
+    return {"airline": airline, "flightNumber": flight_number}
+
+
 def payload(**overrides):
     data = {
         "origin": ["LHR", "LGW"],
         "destination": ["JFK"],
         "departureDate": DEPARTURE_DATE,
-        "airline": "BA",
-        "flightNumber": "117",
+        "legs": [leg()],
         "notes": "Window",
     }
     data.update(overrides)
@@ -66,7 +74,7 @@ def test_list_flights_non_member(non_member_client, itinerary):
 def test_create_flight_admin(admin_client, itinerary):
     response = admin_client.post(url(itinerary), json=payload())
     assert response.status_code == 201
-    data = response.get_json()["data"]
+    [data] = response.get_json()["data"]
     assert data["departAt"] == "2026-08-01T10:00:00Z"
     assert data["departureAirport"] == "LHR"
     assert data["arrivalAirport"] == "JFK"
@@ -99,7 +107,9 @@ def test_create_flight_creates_missing_airports_once(admin_client, itinerary):
 
 
 def test_create_flight_unknown_offer(admin_client, itinerary):
-    response = admin_client.post(url(itinerary), json=payload(flightNumber="999"))
+    response = admin_client.post(
+        url(itinerary), json=payload(legs=[leg(flight_number="999")])
+    )
     assert response.status_code == 404
     assert db.session.query(Flight).filter_by(itinerary_id=itinerary.id).count() == 0
 
@@ -115,7 +125,7 @@ def test_create_flight_reuses_cached_search(admin_client, itinerary, flight_prov
 def test_create_flight_editor_sets_audit(editor_client, editor_user, itinerary):
     response = editor_client.post(url(itinerary), json=payload())
     assert response.status_code == 201
-    flight = db.session.get(Flight, response.get_json()["data"]["id"])
+    flight = db.session.get(Flight, response.get_json()["data"][0]["id"])
     assert flight.created_by_id == editor_user.id
     assert flight.updated_by_id == editor_user.id
 
@@ -136,8 +146,10 @@ def test_create_flight_non_member(non_member_client, itinerary):
 @pytest.mark.parametrize(
     "overrides",
     [
-        {"airline": "British Airways"},
-        {"flightNumber": "!!"},
+        {"legs": [leg(airline="British Airways")]},
+        {"legs": [leg(flight_number="!!")]},
+        {"legs": []},
+        {"legs": [leg()] * 7},
         {"departureDate": "invalid"},
         {"departureDate": "2020-01-01"},
         {"origin": ["LONDON"]},
@@ -168,7 +180,12 @@ def search_url(itinerary, **params):
 def test_search_flights_editor(editor_client, itinerary, flight_provider):
     response = editor_client.get(search_url(itinerary))
     assert response.status_code == 200
-    [offer] = response.get_json()["data"]
+    [journey] = response.get_json()["data"]
+    assert journey["priceGbp"] == 520
+    assert journey["stops"] == 0
+    assert journey["totalDurationMinutes"] == 480
+    assert journey["purchaseUrl"].startswith("https://www.google.com/travel/flights")
+    [offer] = journey["legs"]
     assert offer["airline"] == "BA"
     assert offer["flightNumber"] == "117"
     assert offer["departAt"] == "2026-08-01T10:00:00Z"
@@ -177,7 +194,6 @@ def test_search_flights_editor(editor_client, itinerary, flight_provider):
     assert offer["arrivalTimezone"] == "America/New_York"
     assert offer["departureAirportName"] == "London Heathrow Airport"
     assert offer["arrivalCity"] == "New York"
-    assert offer["priceGbp"] == 520
     assert offer["travelClass"] == "Economy"
     assert offer["luggage"] == ["1 cabin bag included"]
     assert offer["purchaseUrl"].startswith("https://www.google.com/travel/flights")
@@ -291,7 +307,7 @@ def test_anonymous_access_code(client, admin_user):
 
     response = client.post(url(itinerary), json=payload(), headers=headers)
     assert response.status_code == 201
-    assert response.get_json()["data"]["createdById"] is None
+    assert response.get_json()["data"][0]["createdById"] is None
 
     assert client.get(url(itinerary), headers=headers).status_code == 200
     bad = client.get(url(itinerary), headers={"X-Itinerary-Access-Code": "nope"})
@@ -305,7 +321,7 @@ def flight_expenses(itinerary):
 def test_create_flight_also_creates_its_expense(admin_client, itinerary, admin_user):
     response = admin_client.post(url(itinerary), json=payload())
 
-    flight_id = response.get_json()["data"]["id"]
+    flight_id = response.get_json()["data"][0]["id"]
     [expense] = flight_expenses(itinerary)
     assert expense.flight_id == flight_id
     assert expense.description == "BA117 · LHR → JFK"
@@ -322,7 +338,7 @@ def test_expense_date_is_the_departure_airports_local_date(
     admin_client, itinerary, flight_provider
 ):
     late = replace(BA117, depart_at=BA117.depart_at.replace(day=1, hour=23))
-    flight_provider.offers = [late]
+    flight_provider.journeys = [replace(BA117_JOURNEY, legs=(late,))]
 
     admin_client.post(url(itinerary), json=payload())
 
@@ -330,7 +346,7 @@ def test_expense_date_is_the_departure_airports_local_date(
 
 
 def test_flight_without_a_price_gets_no_expense(admin_client, itinerary, flight_provider):
-    flight_provider.offers = [replace(BA117, price_gbp=None)]
+    flight_provider.journeys = [replace(BA117_JOURNEY, price_gbp=None)]
 
     response = admin_client.post(url(itinerary), json=payload())
 
@@ -356,7 +372,8 @@ def test_a_deleted_flight_expense_is_not_recreated_on_resave(admin_client, itine
 
 
 def test_deleting_the_expense_keeps_the_flight(admin_client, itinerary):
-    flight_id = admin_client.post(url(itinerary), json=payload()).get_json()["data"]["id"]
+    saved = admin_client.post(url(itinerary), json=payload()).get_json()["data"]
+    flight_id = saved[0]["id"]
     expense_id = flight_expenses(itinerary)[0].id
 
     admin_client.delete(f"/api/itineraries/{itinerary.id}/expenses/{expense_id}")
@@ -365,7 +382,8 @@ def test_deleting_the_expense_keeps_the_flight(admin_client, itinerary):
 
 
 def test_deleting_the_flight_keeps_its_expense_unlinked(admin_client, itinerary):
-    flight_id = admin_client.post(url(itinerary), json=payload()).get_json()["data"]["id"]
+    saved = admin_client.post(url(itinerary), json=payload()).get_json()["data"]
+    flight_id = saved[0]["id"]
 
     assert admin_client.delete(url(itinerary, f"/{flight_id}")).status_code == 200
 
@@ -390,8 +408,115 @@ def test_flight_and_expense_are_saved_in_one_transaction(
 
 def test_no_expense_without_a_signed_in_user(flight):
     assert (
-        flight_service.stage_flight_expense(
-            None, flight, 520, flight.departure_airport, flight.arrival_airport
-        )
-        is None
+        flight_service.stage_journey_expense(None, flight, BA117_JOURNEY) is None
     )
+
+
+def test_search_flights_returns_journeys_with_stops(
+    editor_client, itinerary, flight_provider
+):
+    flight_provider.journeys = [BA117_JOURNEY, CONNECTION]
+
+    response = editor_client.get(search_url(itinerary))
+
+    [_, connection] = response.get_json()["data"]
+    assert connection["stops"] == 1
+    assert connection["priceGbp"] == 310
+    assert connection["totalDurationMinutes"] == 630
+    assert values_of(connection["legs"], "flightNumber") == ["427", "641"]
+
+
+def values_of(items, key):
+    values = []
+    for item in items:
+        values.append(item[key])
+    return values
+
+
+def connection_payload(**overrides):
+    legs = [leg("BA", "427"), leg("KL", "641")]
+    return payload(destination=["JFK"], legs=legs, **overrides)
+
+
+def saved_flights(itinerary):
+    return (
+        db.session.query(Flight)
+        .filter_by(itinerary_id=itinerary.id)
+        .order_by(Flight.depart_at)
+        .all()
+    )
+
+
+@pytest.fixture
+def connection_provider(flight_provider):
+    flight_provider.journeys = [BA117_JOURNEY, CONNECTION]
+    return flight_provider
+
+
+def test_create_connection_saves_every_leg(
+    admin_client, itinerary, connection_provider
+):
+    response = admin_client.post(url(itinerary), json=connection_payload())
+
+    assert response.status_code == 201
+    data = response.get_json()["data"]
+    assert values_of(data, "flightNumber") == ["427", "641"]
+    assert values_of(data, "arrivalAirport") == ["AMS", "JFK"]
+    assert len(saved_flights(itinerary)) == 2
+
+
+def test_create_connection_puts_the_notes_on_the_first_leg_only(
+    admin_client, itinerary, connection_provider
+):
+    admin_client.post(url(itinerary), json=connection_payload(notes="Window"))
+
+    first, second = saved_flights(itinerary)
+    assert first.notes == "Window"
+    assert second.notes is None
+
+
+def test_create_connection_adds_one_expense_on_the_first_leg(
+    admin_client, itinerary, connection_provider
+):
+    admin_client.post(url(itinerary), json=connection_payload())
+
+    first, _ = saved_flights(itinerary)
+    [expense] = flight_expenses(itinerary)
+    assert expense.flight_id == first.id
+    assert expense.description == "BA427 + KL641 · LHR → JFK"
+    assert expense.amount_gbp == 310
+
+
+def test_saving_a_connection_again_adds_no_flights_or_expenses(
+    admin_client, itinerary, connection_provider
+):
+    admin_client.post(url(itinerary), json=connection_payload())
+    admin_client.post(url(itinerary), json=connection_payload(notes="Aisle"))
+
+    assert len(saved_flights(itinerary)) == 2
+    assert len(flight_expenses(itinerary)) == 1
+
+
+def test_only_part_of_a_connection_is_not_a_match(
+    admin_client, itinerary, connection_provider
+):
+    response = admin_client.post(
+        url(itinerary), json=payload(legs=[leg("BA", "427")])
+    )
+
+    assert response.status_code == 404
+    assert saved_flights(itinerary) == []
+
+
+def test_a_connection_is_saved_in_one_transaction(
+    admin_client, itinerary, connection_provider, monkeypatch
+):
+    def fail(*args, **kwargs):
+        raise RuntimeError("boom")
+
+    monkeypatch.setattr(flight_service, "stage_journey_expense", fail)
+
+    with pytest.raises(RuntimeError):
+        admin_client.post(url(itinerary), json=connection_payload())
+
+    assert saved_flights(itinerary) == []

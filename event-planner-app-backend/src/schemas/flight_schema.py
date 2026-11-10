@@ -1,4 +1,4 @@
-from datetime import date, datetime, timezone
+from datetime import UTC, date, datetime
 
 from marshmallow import Schema, fields, validate, ValidationError
 from marshmallow_sqlalchemy import auto_field
@@ -8,13 +8,16 @@ from .base_schema import BaseSchema
 from .expense_schema import ExpenseSchema
 
 AIRPORT_CODE = validate.Regexp(r"^[A-Za-z]{3}$", error="Use 3-letter airport codes.")
+AIRLINE_CODE = validate.Regexp(r"^[A-Za-z0-9]{2,3}$")
+FLIGHT_NUMBER = validate.Regexp(r"^\d{1,4}[A-Za-z]?$")
+MAX_JOURNEY_LEGS = 6
 
 
 def _utc_iso(value: datetime) -> str:
     # Databases like MySQL hand back naive datetimes; they are always stored as UTC.
     if value.tzinfo is None:
-        value = value.replace(tzinfo=timezone.utc)
-    return value.astimezone(timezone.utc).isoformat().replace("+00:00", "Z")
+        value = value.replace(tzinfo=UTC)
+    return value.astimezone(UTC).isoformat().replace("+00:00", "Z")
 
 
 def _city(airport) -> str | None:
@@ -138,16 +141,25 @@ class FlightSearchQuerySchema(BaseSchema):
     departure_date = fields.Date(required=True, validate=_not_in_past)
 
 
-class FlightSaveSchema(FlightSearchQuerySchema):
+class FlightLegCodeSchema(BaseSchema):
     airline = fields.String(
         required=True,
-        validate=validate.Regexp(r"^[A-Za-z0-9]{2,3}$"),
+        validate=AIRLINE_CODE,
         error_messages={"required": "Airline code is required."},
     )
     flight_number = fields.String(
         required=True,
-        validate=validate.Regexp(r"^\d{1,4}[A-Za-z]?$"),
+        validate=FLIGHT_NUMBER,
         error_messages={"required": "Flight number is required."},
+    )
+
+
+class FlightSaveSchema(FlightSearchQuerySchema):
+    legs = fields.List(
+        fields.Nested(FlightLegCodeSchema),
+        required=True,
+        validate=validate.Length(min=1, max=MAX_JOURNEY_LEGS),
+        error_messages={"required": "At least one flight is required."},
     )
     notes = fields.String(allow_none=True, validate=validate.Length(max=1000))
 
@@ -166,12 +178,19 @@ class FlightOfferSchema(Schema):
     depart_at = fields.Function(lambda offer: _utc_iso(offer.depart_at))
     arrive_at = fields.Function(lambda offer: _utc_iso(offer.arrive_at))
     duration_minutes = fields.Integer()
-    price_gbp = fields.Integer(allow_none=True)
     airline_logo = fields.String(allow_none=True)
     travel_class = fields.String(allow_none=True)
     luggage = fields.List(fields.String())
     extras = fields.List(fields.String())
     purchase_url = fields.String(allow_none=True)
+
+
+class FlightJourneySchema(Schema):
+    legs = fields.List(fields.Nested(FlightOfferSchema))
+    price_gbp = fields.Integer(allow_none=True)
+    purchase_url = fields.String(allow_none=True)
+    stops = fields.Integer()
+    total_duration_minutes = fields.Integer()
 
 
 class AirportSchema(Schema):

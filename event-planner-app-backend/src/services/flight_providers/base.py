@@ -18,7 +18,6 @@ class FlightOffer:
     depart_at: datetime
     arrive_at: datetime
     duration_minutes: int
-    price_gbp: int | None = None
     airline_logo: str | None = None
     travel_class: str | None = None
     luggage: tuple[str, ...] = ()
@@ -26,8 +25,45 @@ class FlightOffer:
     purchase_url: str | None = None
 
 
+@dataclass(frozen=True)
+class FlightJourney:
+    """One bookable trip: a nonstop flight, or several legs flown in order."""
+
+    legs: tuple[FlightOffer, ...]
+    price_gbp: int | None = None
+
+    @property
+    def first_leg(self) -> FlightOffer:
+        return self.legs[0]
+
+    @property
+    def last_leg(self) -> FlightOffer:
+        return self.legs[-1]
+
+    @property
+    def stops(self) -> int:
+        return len(self.legs) - 1
+
+    @property
+    def purchase_url(self) -> str | None:
+        return self.first_leg.purchase_url
+
+    @property
+    def total_duration_minutes(self) -> int:
+        elapsed = self.last_leg.arrive_at - self.first_leg.depart_at
+        return int(elapsed.total_seconds() // 60)
+
+    @property
+    def leg_codes(self) -> tuple[tuple[str, str], ...]:
+        """The (airline, flight number) of every leg, which identifies the journey."""
+        codes = []
+        for leg in self.legs:
+            codes.append((leg.airline, leg.flight_number))
+        return tuple(codes)
+
+
 class FlightApiProvider(ABC):
-    """Adapter between a third-party flight search API and our `FlightOffer`s."""
+    """Adapter between a third-party flight search API and our `FlightJourney`s."""
 
     name: str
 
@@ -41,8 +77,8 @@ class FlightApiProvider(ABC):
         origin_codes: list[str],
         destination_codes: list[str],
         departure_date: date,
-    ) -> list[FlightOffer]:
-        """Return the best nonstop one-way flights for the route and date.
+    ) -> list[FlightJourney]:
+        """Return the best one-way journeys, with or without stops, for the route.
 
         Raises `FlightProviderError` when the provider cannot answer.
         """
