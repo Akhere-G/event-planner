@@ -6,9 +6,14 @@ import {
   flightExpensePrefill,
   formatGbp,
   getFlightsForDay,
+  isJourneySaved,
+  journeyKey,
+  journeyLegCodes,
+  journeySummary,
+  layoverMinutes,
 } from "../utils";
 import { buildFlightCalendarEvents } from "../../trips/utils";
-import type { Flight } from "../types";
+import type { Flight, FlightJourney, FlightOffer } from "../types";
 
 const flight: Flight = {
   id: 1,
@@ -110,5 +115,93 @@ describe("buildFlightCalendarEvents", () => {
     expect(value).toContain("DTSTART:20260801T223000Z");
     expect(value).toContain("DTEND:20260802T061500Z");
     expect(value).toContain("SUMMARY:BA117 LHR → JFK");
+  });
+});
+
+const leg = (overrides: Partial<FlightOffer>): FlightOffer => ({
+  airline: "BA",
+  flightNumber: "427",
+  departureAirport: "LHR",
+  arrivalAirport: "AMS",
+  departureTimezone: "Europe/London",
+  arrivalTimezone: "Europe/Amsterdam",
+  departAt: "2026-08-01T07:00:00Z",
+  arriveAt: "2026-08-01T08:15:00Z",
+  durationMinutes: 75,
+  departureAirportName: "Heathrow Airport",
+  departureCity: "London",
+  arrivalAirportName: "Schiphol Airport",
+  arrivalCity: "Amsterdam",
+  luggage: ["1 cabin bag included"],
+  extras: [],
+  ...overrides,
+});
+
+const connection: FlightJourney = {
+  legs: [
+    leg({}),
+    leg({
+      airline: "KL",
+      flightNumber: "641",
+      departureAirport: "AMS",
+      arrivalAirport: "JFK",
+      departAt: "2026-08-01T09:30:00Z",
+      arriveAt: "2026-08-01T17:30:00Z",
+    }),
+  ],
+  priceGbp: 310,
+  stops: 1,
+  totalDurationMinutes: 630,
+};
+
+const nonstop: FlightJourney = {
+  legs: [leg({})],
+  priceGbp: 120,
+  stops: 0,
+  totalDurationMinutes: 75,
+};
+
+describe("flight journeys", () => {
+  it("summarises the stops and luggage", () => {
+    expect(journeySummary(nonstop)).toBe(
+      "Direct flight · 1 cabin bag included",
+    );
+    expect(journeySummary(connection)).toBe("1 stop · 1 cabin bag included");
+    expect(journeySummary({ ...connection, stops: 2 })).toContain("2 stops");
+  });
+
+  it("identifies a journey by its legs only", () => {
+    expect(journeyLegCodes(connection)).toEqual([
+      { airline: "BA", flightNumber: "427" },
+      { airline: "KL", flightNumber: "641" },
+    ]);
+    expect(journeyKey(connection)).toBe(
+      "BA427@2026-08-01T07:00:00Z|KL641@2026-08-01T09:30:00Z",
+    );
+  });
+
+  it("measures the layover between two legs", () => {
+    const [arriving, departing] = connection.legs;
+    expect(layoverMinutes(arriving, departing)).toBe(75);
+  });
+
+  it("is saved only once every leg is saved", () => {
+    const savedFirstLeg: Flight = {
+      ...flight,
+      airline: "BA",
+      flightNumber: "427",
+      departAt: "2026-08-01T07:00:00Z",
+    };
+    const savedSecondLeg: Flight = {
+      ...flight,
+      airline: "KL",
+      flightNumber: "641",
+      departAt: "2026-08-01T09:30:00Z",
+    };
+
+    expect(isJourneySaved([savedFirstLeg], connection)).toBe(false);
+    expect(isJourneySaved([savedFirstLeg, savedSecondLeg], connection)).toBe(
+      true,
+    );
   });
 });

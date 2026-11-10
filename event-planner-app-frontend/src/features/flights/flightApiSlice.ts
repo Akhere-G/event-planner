@@ -5,7 +5,7 @@ import type {
   CreateFlightPayload,
   DeleteFlightPayload,
   Flight,
-  FlightOffer,
+  FlightJourney,
   SearchAirportsPayload,
   SearchFlightsPayload,
 } from "./types";
@@ -19,7 +19,7 @@ export const flightApiSlice = apiSlice.injectEndpoints({
       ],
     }),
     searchFlights: builder.query<
-      ApiResponse<FlightOffer[]>,
+      ApiResponse<FlightJourney[]>,
       SearchFlightsPayload
     >({
       query: ({ tripId, origin, destination, departureDate }) => ({
@@ -40,13 +40,13 @@ export const flightApiSlice = apiSlice.injectEndpoints({
         params,
       }),
     }),
-    createFlight: builder.mutation<ApiResponse<Flight>, CreateFlightPayload>({
+    createFlight: builder.mutation<ApiResponse<Flight[]>, CreateFlightPayload>({
       query: ({ tripId, ...flightData }) => ({
         url: `/itineraries/${tripId}/flights`,
         method: "POST",
         body: flightData,
       }),
-      // A new flight gets an expense, and deleting one unlinks its expense.
+      // A new journey gets an expense, and deleting a flight unlinks its expense.
       invalidatesTags: (_result, _error, { tripId }) => [
         { type: "Flights", id: tripId },
         { type: "Expenses", id: tripId },
