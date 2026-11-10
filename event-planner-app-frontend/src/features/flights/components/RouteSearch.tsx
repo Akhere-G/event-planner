@@ -13,9 +13,14 @@ import type { Trip } from "../../trips/types";
 interface RouteSearchProps {
   trip: Trip;
   savedFlights: Flight[];
+  onSaved: (flights: Flight[]) => void;
 }
 
-export default function RouteSearch({ trip, savedFlights }: RouteSearchProps) {
+export default function RouteSearch({
+  trip,
+  savedFlights,
+  onSaved,
+}: RouteSearchProps) {
   const [searchFlights, result] = useLazySearchFlightsQuery();
   const [createFlight] = useCreateFlightMutation();
   const [lastSearch, setLastSearch] = useState<FlightSearchParams | null>(null);
@@ -28,12 +33,14 @@ export default function RouteSearch({ trip, savedFlights }: RouteSearchProps) {
   const handleSave = async (journey: FlightJourney) => {
     if (!lastSearch) return;
 
-    await saveJourneyWithToast(() =>
-      createFlight({
-        tripId: trip.id,
-        ...lastSearch,
-        legs: journeyLegCodes(journey),
-      }).unwrap(),
+    await saveJourneyWithToast(
+      () =>
+        createFlight({
+          tripId: trip.id,
+          ...lastSearch,
+          legs: journeyLegCodes(journey),
+        }).unwrap(),
+      onSaved,
     );
   };
 

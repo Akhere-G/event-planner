@@ -12,11 +12,13 @@ import FlightNumberSearchForm from "./FlightNumberSearchForm";
 interface FlightNumberSearchProps {
   trip: Trip;
   savedFlights: Flight[];
+  onSaved: (flights: Flight[]) => void;
 }
 
 export default function FlightNumberSearch({
   trip,
   savedFlights,
+  onSaved,
 }: FlightNumberSearchProps) {
   const [searchByFlightNumber, result] = useLazySearchByFlightNumberQuery();
   const [createFlightsByNumber] = useCreateFlightsByNumberMutation();
@@ -32,8 +34,9 @@ export default function FlightNumberSearch({
   const handleSave = async () => {
     if (!lastSearch) return;
 
-    await saveJourneyWithToast(() =>
-      createFlightsByNumber({ tripId: trip.id, ...lastSearch }).unwrap(),
+    await saveJourneyWithToast(
+      () => createFlightsByNumber({ tripId: trip.id, ...lastSearch }).unwrap(),
+      onSaved,
     );
   };
 

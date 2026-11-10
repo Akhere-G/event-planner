@@ -21,7 +21,9 @@ interface FlightSummaryProps {
   arrival: FlightEndpoint;
   durationMinutes: number;
   footer?: ReactNode;
+  id?: string;
   testId?: string;
+  isHighlighted?: boolean;
 }
 
 function AirlineLogo({ src }: { src?: string | null }) {
@@ -102,10 +104,16 @@ export default function FlightSummary({
   arrival,
   durationMinutes,
   footer,
+  id,
   testId,
+  isHighlighted = false,
 }: FlightSummaryProps) {
   return (
-    <div className="card overflow-hidden p-0  " data-testid={testId}>
+    <div
+      id={id}
+      className={`card overflow-hidden p-0 transition-shadow ${isHighlighted ? "ring-2 ring-brand-primary" : ""}`}
+      data-testid={testId}
+    >
       <div className="space-y-6 p-5 sm:p-6">
         <div className="flex items-center justify-between gap-3">
           <div className="flex min-w-0 items-center gap-4">

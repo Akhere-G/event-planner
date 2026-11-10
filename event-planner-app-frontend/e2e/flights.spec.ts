@@ -264,6 +264,8 @@ test.describe("Flights", () => {
     });
 
     await expect(page.getByTestId("flight-card")).toContainText("BA304");
+    await expect(page.getByTestId("flight-card")).toBeInViewport();
+    await expect(page.getByTestId("flight-card")).toHaveClass(/ring-2/);
     await expect(
       page.getByRole("link", { name: "Book flight" }),
     ).toHaveAttribute("href", "https://www.google.com/travel/flights");
@@ -362,6 +364,25 @@ test.describe("Flights", () => {
     await expect(
       page.getByText("That flight does not operate on this date"),
     ).toBeVisible();
+  });
+
+  test("copies a saved flight's details to the clipboard", async ({
+    page,
+    context,
+  }) => {
+    await context.grantPermissions(["clipboard-read", "clipboard-write"]);
+    await mockAuthCheck(page, true);
+    await mockTripAndFlights(page, [savedFlight]);
+
+    await page.goto("/trips/1");
+    await page.getByRole("button", { name: "Flights" }).click();
+    await page.getByRole("button", { name: "Flight actions" }).click();
+    await page.getByRole("menuitem", { name: "Copy details" }).click();
+
+    await expect(page.getByText("Flight details copied.")).toBeVisible();
+    const copied = await page.evaluate(() => navigator.clipboard.readText());
+    expect(copied).toContain("BA304 LHR → CDG");
+    expect(copied).toContain("Departs: Sat 1 Aug 2026, 10:00 · London (LHR)");
   });
 
   test("lists saved flights first and keeps the search closed until asked", async ({
