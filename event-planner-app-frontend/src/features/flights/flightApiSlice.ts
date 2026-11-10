@@ -3,10 +3,12 @@ import type { ApiResponse } from "../api/types";
 import type {
   AirportPlace,
   CreateFlightPayload,
+  CreateFlightsByNumberPayload,
   DeleteFlightPayload,
   Flight,
   FlightJourney,
   SearchAirportsPayload,
+  SearchByFlightNumberPayload,
   SearchFlightsPayload,
 } from "./types";
 
@@ -31,6 +33,15 @@ export const flightApiSlice = apiSlice.injectEndpoints({
         },
       }),
     }),
+    searchByFlightNumber: builder.query<
+      ApiResponse<FlightJourney[]>,
+      SearchByFlightNumberPayload
+    >({
+      query: ({ tripId, flightCode, departureDate }) => ({
+        url: `/itineraries/${tripId}/flights/by-number`,
+        params: { flightCode, departureDate },
+      }),
+    }),
     searchAirports: builder.query<
       ApiResponse<AirportPlace[]>,
       SearchAirportsPayload
@@ -50,6 +61,19 @@ export const flightApiSlice = apiSlice.injectEndpoints({
       invalidatesTags: (_result, _error, { tripId }) => [
         { type: "Flights", id: tripId },
         { type: "Expenses", id: tripId },
+      ],
+    }),
+    createFlightsByNumber: builder.mutation<
+      ApiResponse<Flight[]>,
+      CreateFlightsByNumberPayload
+    >({
+      query: ({ tripId, ...flightData }) => ({
+        url: `/itineraries/${tripId}/flights/by-number`,
+        method: "POST",
+        body: flightData,
+      }),
+      invalidatesTags: (_result, _error, { tripId }) => [
+        { type: "Flights", id: tripId },
       ],
     }),
     deleteFlight: builder.mutation<
@@ -73,7 +97,9 @@ export const {
   useGetFlightsQuery,
   useLazyGetFlightsQuery,
   useLazySearchFlightsQuery,
+  useLazySearchByFlightNumberQuery,
   useSearchAirportsQuery,
   useCreateFlightMutation,
+  useCreateFlightsByNumberMutation,
   useDeleteFlightMutation,
 } = flightApiSlice;

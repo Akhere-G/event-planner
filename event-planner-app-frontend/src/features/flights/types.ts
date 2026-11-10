@@ -80,6 +80,21 @@ export interface SearchFlightsPayload extends FlightSearchParams {
   tripId: number;
 }
 
+/** A flight number such as "BA117", and the day it departs. */
+export interface FlightNumberSearchParams {
+  flightCode: string;
+  departureDate: string;
+}
+
+export interface SearchByFlightNumberPayload extends FlightNumberSearchParams {
+  tripId: number;
+}
+
+export interface CreateFlightsByNumberPayload extends FlightNumberSearchParams {
+  tripId: number;
+  notes?: string | null;
+}
+
 export interface SearchAirportsPayload {
   tripId: number;
   q: string;
