@@ -11,7 +11,10 @@ import {
   flightExpensePrefill,
   formatGbp,
   getFlightsForDay,
+  connectorLabel,
   isJourneySaved,
+  journeyFlightCodes,
+  journeyVia,
   journeyKey,
   journeyLegCodes,
   journeySummary,
@@ -214,6 +217,22 @@ describe("flight journeys", () => {
     expect(journeyKey(connection)).toBe(
       "BA427@2026-08-01T07:00:00Z|KL641@2026-08-01T09:30:00Z",
     );
+  });
+
+  it("labels the connector by how many stops there are", () => {
+    expect(connectorLabel(0)).toBe("Non-stop");
+    expect(connectorLabel(1)).toBe("1 stop");
+    expect(connectorLabel(3)).toBe("3 stops");
+  });
+
+  it("names the places a connection changes planes", () => {
+    expect(journeyVia(nonstop)).toBe("");
+    expect(journeyVia(connection)).toBe("Via Amsterdam (AMS)");
+  });
+
+  it("lists every flight code in order", () => {
+    expect(journeyFlightCodes(nonstop)).toBe("BA427");
+    expect(journeyFlightCodes(connection)).toBe("BA427 + KL641");
   });
 
   it("measures the layover between two legs", () => {
