@@ -95,6 +95,19 @@ def upgrade():
         WHERE wishlist_id IS NULL
     """)
 
+    # Drop the existing category_id foreign key before dropping its index.
+    # MySQL requires indexes used by foreign keys to remain in place.
+    inspector = sa.inspect(op.get_bind())
+    foreign_keys = inspector.get_foreign_keys("wishlist_items")
+
+    for foreign_key in foreign_keys:
+        if "category_id" in (foreign_key.get("constrained_columns") or []):
+            op.drop_constraint(
+                foreign_key["name"],
+                "wishlist_items",
+                type_="foreignkey",
+            )
+
     with op.batch_alter_table("wishlist_items") as batch_op:
         batch_op.alter_column(
             "wishlist_id",
@@ -135,8 +148,27 @@ def upgrade():
 
 
 def downgrade():
+    # ----------------------------
+    # wishlist_items
+    # ----------------------------
+
+    # Restore category_id as nullable initially so existing rows can be populated.
     with op.batch_alter_table("wishlist_items") as batch_op:
-        batch_op.add_column(sa.Column("category_id", sa.INTEGER(), nullable=False))
+        batch_op.add_column(sa.Column("category_id", sa.INTEGER(), nullable=True))
+
+    # Restore the original category references.
+    op.execute("""
+        UPDATE wishlist_items
+        SET category_id = wishlist_id
+        WHERE category_id IS NULL
+    """)
+
+    with op.batch_alter_table("wishlist_items") as batch_op:
+        batch_op.alter_column(
+            "category_id",
+            existing_type=sa.INTEGER(),
+            nullable=False,
+        )
 
         batch_op.drop_constraint(
             "fk_wishlist_items_wishlist_id_wishlist_categories",
@@ -149,7 +181,7 @@ def downgrade():
         )
 
         batch_op.create_foreign_key(
-            None,
+            "fk_wishlist_items_category_id_wishlist_categories",
             "wishlist_categories",
             ["category_id"],
             ["id"],
@@ -174,6 +206,9 @@ def downgrade():
         batch_op.drop_column("updated_at")
         batch_op.drop_column("wishlist_id")
 
+    # ----------------------------
+    # wishlist_categories
+    # ----------------------------
     with op.batch_alter_table("wishlist_categories") as batch_op:
         batch_op.drop_constraint(
             "fk_wishlist_categories_updated_by_id_users",

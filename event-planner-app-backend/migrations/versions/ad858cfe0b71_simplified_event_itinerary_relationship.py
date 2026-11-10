@@ -9,7 +9,6 @@ from alembic import op
 import sqlalchemy as sa
 
 
-# revision identifiers, used by Alembic.
 revision = "ad858cfe0b71"
 down_revision = "99565612f051"
 branch_labels = None
@@ -37,6 +36,7 @@ def upgrade():
     orphaned = conn.execute(
         sa.text("SELECT COUNT(*) FROM events WHERE itinerary_id IS NULL")
     ).scalar()
+
     if orphaned:
         raise RuntimeError(
             f"{orphaned} event(s) have no associated itinerary and would "
@@ -45,7 +45,11 @@ def upgrade():
         )
 
     with op.batch_alter_table("events", schema=None) as batch_op:
-        batch_op.alter_column("itinerary_id", nullable=False)
+        batch_op.alter_column(
+            "itinerary_id",
+            existing_type=sa.Integer(),
+            nullable=False,
+        )
         batch_op.create_index(
             batch_op.f("ix_events_itinerary_id"), ["itinerary_id"], unique=False
         )
