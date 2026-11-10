@@ -149,10 +149,13 @@ async function mockTripAndFlights(
   page: Page,
   initialFlights: MockFlight[] = [],
   searchResults: unknown[] = [journey],
+  numberResults: unknown[] = [journey],
 ) {
   const flights = initialFlights.map((flight) => structuredClone(flight));
   const created: unknown[] = [];
   const searches: string[] = [];
+  const numberSearches: string[] = [];
+  const numberCreated: unknown[] = [];
 
   const json = (data: unknown, status = 200) => ({
     status,
@@ -211,8 +214,18 @@ async function mockTripAndFlights(
     searches.push(new URL(route.request().url()).search);
     return route.fulfill(json(searchResults));
   });
+  await page.route("**/api/itineraries/1/flights/by-number*", async (route) => {
+    if (route.request().method() === "POST") {
+      numberCreated.push(route.request().postDataJSON());
+      flights.push(structuredClone(savedFlight));
+      await route.fulfill(json([savedFlight], 201));
+      return;
+    }
+    numberSearches.push(new URL(route.request().url()).search);
+    await route.fulfill(json(numberResults));
+  });
 
-  return { created, searches };
+  return { created, searches, numberSearches, numberCreated };
 }
 
 test.describe("Flights", () => {
@@ -291,6 +304,64 @@ test.describe("Flights", () => {
         { airline: "BA", flightNumber: "641" },
       ],
     });
+  });
+
+  test("looks up a flight by its number and saves the legs it flies", async ({
+    page,
+  }) => {
+    await mockAuthCheck(page, true);
+    const { numberSearches, numberCreated } = await mockTripAndFlights(
+      page,
+      [],
+      [],
+      [connectionJourney],
+    );
+
+    await page.goto("/trips/1");
+    await page.getByRole("button", { name: "Flights" }).click();
+    await page.getByRole("button", { name: "Search for a flight" }).click();
+    await page.getByRole("button", { name: "By flight number" }).click();
+
+    const form = page.getByRole("form", { name: "Search by flight number" });
+    await form.getByRole("button", { name: "Search flight number" }).click();
+    await expect(form.getByText("Flight number is required.")).toBeVisible();
+
+    await form.getByLabel("Flight number").fill("ba 427");
+    await form.getByRole("button", { name: "Search flight number" }).click();
+
+    const result = page.getByTestId("flight-journey-card");
+    await expect(result).toContainText("BA427");
+    await expect(result).toContainText("KL641");
+    expect(numberSearches).toHaveLength(1);
+    expect(numberSearches[0]).toContain("flightCode=ba+427");
+    expect(numberSearches[0]).toContain("departureDate=2026-08-01");
+
+    await result.getByRole("button", { name: "Save 2 flights" }).click();
+    await expect(page.getByText("Flights saved.")).toBeVisible();
+    expect(numberCreated[0]).toMatchObject({
+      flightCode: "ba 427",
+      departureDate: "2026-08-01",
+    });
+  });
+
+  test("tells the user when a flight number does not fly that day", async ({
+    page,
+  }) => {
+    await mockAuthCheck(page, true);
+    await mockTripAndFlights(page, [], [], []);
+
+    await page.goto("/trips/1");
+    await page.getByRole("button", { name: "Flights" }).click();
+    await page.getByRole("button", { name: "Search for a flight" }).click();
+    await page.getByRole("button", { name: "By flight number" }).click();
+
+    const form = page.getByRole("form", { name: "Search by flight number" });
+    await form.getByLabel("Flight number").fill("BA999");
+    await form.getByRole("button", { name: "Search flight number" }).click();
+
+    await expect(
+      page.getByText("That flight does not operate on this date"),
+    ).toBeVisible();
   });
 
   test("lists saved flights first and keeps the search closed until asked", async ({

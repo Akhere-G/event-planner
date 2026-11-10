@@ -1,12 +1,19 @@
-import { differenceInMinutes } from "date-fns";
+import { differenceInMinutes, format } from "date-fns";
 import { formatInTimeZone } from "date-fns-tz";
 import type { ExpensePrefill } from "../expenses/types";
+import type { Trip } from "../trips/types";
 import type {
   Flight,
   FlightJourney,
   FlightLegCode,
   FlightOffer,
 } from "./types";
+
+export const todayDate = () => format(new Date(), "yyyy-MM-dd");
+
+/** Searches start on the trip's first day, or today once the trip has begun. */
+export const defaultDepartureDate = (trip: Trip) =>
+  trip.startDate >= todayDate() ? trip.startDate : todayDate();
 
 export const flightDepartureDate = (flight: Flight) =>
   formatInTimeZone(flight.departAt, flight.departureTimezone, "yyyy-MM-dd");

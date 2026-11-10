@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 import { createEvents } from "ics";
-import { flightSearchSchema } from "../schemas/flightSchema";
+import {
+  flightNumberSearchSchema,
+  flightSearchSchema,
+} from "../schemas/flightSchema";
 import {
   directFlightSummary,
   flightExpensePrefill,
@@ -70,6 +73,37 @@ describe("flightSearchSchema", () => {
   it("rejects a malformed date", async () => {
     await expect(
       flightSearchSchema.validate({ ...validForm, departureDate: "1 Aug" }),
+    ).rejects.toThrow(/valid departure date/);
+  });
+});
+
+describe("flightNumberSearchSchema", () => {
+  const validNumberForm = { flightCode: "BA117", departureDate: "2026-08-01" };
+
+  it.each(["BA117", "ba 117", "U2 1234", "BA117A", " BA117 "])(
+    "accepts %j",
+    async (flightCode) => {
+      await expect(
+        flightNumberSearchSchema.validate({ ...validNumberForm, flightCode }),
+      ).resolves.toBeDefined();
+    },
+  );
+
+  it.each(["", "117", "BA", "BA12345", "B", "BA-117"])(
+    "rejects %j",
+    async (flightCode) => {
+      await expect(
+        flightNumberSearchSchema.validate({ ...validNumberForm, flightCode }),
+      ).rejects.toThrow(/flight number/i);
+    },
+  );
+
+  it("rejects a malformed date", async () => {
+    await expect(
+      flightNumberSearchSchema.validate({
+        ...validNumberForm,
+        departureDate: "1 Aug",
+      }),
     ).rejects.toThrow(/valid departure date/);
   });
 });
