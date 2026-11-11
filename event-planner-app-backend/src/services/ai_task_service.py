@@ -2,7 +2,7 @@ import logging
 from datetime import timedelta
 from typing import Any
 
-from sqlalchemy import and_, delete, exists, func, select, update
+from sqlalchemy import and_, delete, func, select, update
 
 from ..ai_tasks import snapshots
 from ..ai_tasks.dispatchers.factory import get_dispatcher
@@ -23,8 +23,6 @@ from ..models import (
     AiTask,
     AiTaskStatus,
     Itinerary,
-    ItineraryUser,
-    UserRole,
 )
 from ..utils.clock import utcnow
 from .change_set_service import apply_change_set
@@ -36,7 +34,6 @@ MAX_ACTIVE_TASKS = 3
 FINISHED_RETENTION = timedelta(days=30)
 
 _ACTIVE = [status.value for status in ACTIVE_STATUSES]
-_EDIT_ROLES = [UserRole.ADMIN.value, UserRole.EDITOR.value]
 
 
 def _notifier() -> TaskNotifier:
@@ -114,22 +111,11 @@ def list_trip_tasks(itinerary_id: int, user_id: int | None) -> list[AiTask]:
     return list(db.session.execute(stmt).scalars())
 
 
-def list_pending_proposals(user_id: int) -> list[AiTask]:
+def list_pending_proposals(itinerary_id: int, user_id: int | None) -> list[AiTask]:
     _housekeeping()
-    can_edit = exists().where(
-        and_(
-            ItineraryUser.itinerary_id == AiTask.itinerary_id,
-            ItineraryUser.user_id == user_id,
-            ItineraryUser.role.in_(_EDIT_ROLES),
-        )
-    )
     stmt = (
-        select(AiTask)
-        .where(
-            AiTask.created_by_id == user_id,
-            AiTask.status == AiTaskStatus.READY.value,
-            can_edit,
-        )
+        _own_tasks(itinerary_id, user_id)
+        .where(AiTask.status == AiTaskStatus.READY.value)
         .order_by(AiTask.finished_at)
     )
     return list(db.session.execute(stmt).scalars())
