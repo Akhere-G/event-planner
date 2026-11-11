@@ -92,3 +92,17 @@ class EditTripRequestSchema(CamelToSnakeMixin, Schema):
         load_default=list,
         validate=validate.Length(max=MAX_CHAT_HISTORY),
     )
+
+
+MAX_TRIP_PROMPT_LENGTH = 1000
+
+
+class TripPromptRequestSchema(CamelToSnakeMixin, Schema):
+    prompt = fields.String(
+        required=True,
+        validate=validate.Length(
+            min=1,
+            max=MAX_TRIP_PROMPT_LENGTH,
+            error="Describe your trip in {max} characters or fewer.",
+        ),
+    )
