@@ -52,7 +52,13 @@ class EntityEditor(ABC):
 
     @abstractmethod
     def describe_items(self, itinerary: Itinerary) -> dict[int, str]:
-        """Item id -> one prompt line describing it."""
+        """Item id -> one prompt line describing it.
+
+        The first " | " part is the item's short name, shown when it is reviewed.
+        """
+
+    def label(self, item_id: int) -> str:
+        return self.descriptions[item_id].split(" | ", 1)[0]
 
     def allowed_fields(self, kind: str) -> tuple[str, ...]:
         if kind == "create":

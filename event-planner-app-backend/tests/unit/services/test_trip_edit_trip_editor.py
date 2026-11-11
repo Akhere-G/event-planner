@@ -23,8 +23,8 @@ def test_the_trip_is_described_by_its_dates_and_budget(itinerary, admin_user):
     lines = trip_editor(itinerary, admin_user).lines()
 
     assert lines == [
-        f"- id={itinerary.id} | start_date 2026-08-01 | end_date 2026-08-03 | "
-        "budget_amount_gbp 1200.00"
+        f"- id={itinerary.id} | Trip dates and budget | start_date 2026-08-01 | "
+        "end_date 2026-08-03 | budget_amount_gbp 1200.00"
     ]
 
 

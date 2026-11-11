@@ -27,8 +27,11 @@ class MemberEditor(EntityEditor):
     def _is_member(self, user_id: Any) -> bool:
         return type(user_id) is int and user_id in self.members
 
+    def _name(self, user_id: int) -> str:
+        return self.members.get(user_id, "Someone")
+
     def _person(self, user_id: int) -> str:
-        return f"{user_id} ({self.members.get(user_id, 'unknown')})"
+        return f"{user_id} ({self._name(user_id)})"
 
     def _may_change(self, created_by_id: int | None) -> bool:
         return self.is_admin or created_by_id == self.user_id
@@ -131,9 +134,11 @@ class SettlementEditor(MemberEditor):
                 settlement.to_user_id,
             )
             descriptions[settlement.id] = (
-                f"from_user_id {self._person(settlement.from_user_id)} paid "
+                f"{self._name(settlement.from_user_id)} paid "
+                f"{self._name(settlement.to_user_id)} £{settlement.amount_gbp} | "
+                f"from_user_id {self._person(settlement.from_user_id)} | "
                 f"to_user_id {self._person(settlement.to_user_id)} | "
-                f"£{settlement.amount_gbp} | {settlement.settled_on}"
+                f"{settlement.settled_on}"
             )
         return descriptions
 
