@@ -1,16 +1,37 @@
 import logging
 from collections.abc import Iterable
-from typing import TypedDict
+from dataclasses import dataclass
 
 from ..utils.location_utils import get_place_details
+from .json_types import JsonObject
 
 logger = logging.getLogger(__name__)
 
 
-class Place(TypedDict):
+@dataclass(frozen=True)
+class Place:
     latitude: float
     longitude: float
     address: str
+
+    def as_data(self) -> JsonObject:
+        return {
+            "latitude": self.latitude,
+            "longitude": self.longitude,
+            "address": self.address,
+        }
+
+    @classmethod
+    def from_values(cls, values: JsonObject) -> "Place | None":
+        latitude, longitude = values.get("latitude"), values.get("longitude")
+        address = values.get("address")
+        if (
+            isinstance(latitude, int | float)
+            and isinstance(longitude, int | float)
+            and isinstance(address, str)
+        ):
+            return cls(float(latitude), float(longitude), address)
+        return None
 
 
 class PlaceResolver:
@@ -19,7 +40,7 @@ class PlaceResolver:
     def __init__(self, saved: Iterable[Place] = ()) -> None:
         self._saved: dict[str, Place] = {}
         for place in saved:
-            self._saved[self._key(place["address"])] = place
+            self._saved[self._key(place.address)] = place
 
     @staticmethod
     def _key(address: str) -> str:
