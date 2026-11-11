@@ -32,6 +32,7 @@ class EntityEditor(ABC):
     create_only_fields: ClassVar[tuple[str, ...]] = ()
     kinds: ClassVar[tuple[str, ...]] = ("create", "update", "delete")
     create_required: ClassVar[tuple[str, ...]] = ("name",)
+    uses_members: ClassVar[bool] = False
     hint: ClassVar[str]
     notes: ClassVar[str] = ""
 
