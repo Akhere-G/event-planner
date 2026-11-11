@@ -70,6 +70,15 @@ export const tripsApi = apiSlice.injectEndpoints({
 
       invalidatesTags: [{ type: "Trips", id: "LIST" }],
     }),
+    addTripFromPrompt: builder.mutation<ApiResponse<Trip>, string>({
+      query: (prompt) => ({
+        url: "/itineraries/from-prompt",
+        body: { prompt },
+        method: "POST",
+      }),
+
+      invalidatesTags: [{ type: "Trips", id: "LIST" }],
+    }),
     editTrip: builder.mutation<
       ApiResponse<Trip>,
       { tripId: number; updatedTrip: Partial<TripSchema> }
@@ -107,6 +116,7 @@ export const {
   useGetTripsQuery,
   useGetTripQuery,
   useAddTripMutation,
+  useAddTripFromPromptMutation,
   useEditTripMutation,
   useDeleteTripMutation,
   useSaveTripMutation,
