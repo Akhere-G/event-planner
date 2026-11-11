@@ -17,24 +17,8 @@ import {
   Palette,
 } from "lucide-react";
 import { TrackedLink } from "./components/TrackedLink";
+import { Logo } from "./components/Logo";
 
-function Logo({
-  light = false,
-  size = 20,
-}: {
-  light?: boolean;
-  size?: number;
-}) {
-  return (
-    <span
-      className="font-outfit font-bold tracking-tight"
-      style={{ fontSize: size, lineHeight: 1 }}
-    >
-      <span className={light ? "text-white" : "text-[#1C1410]"}>Trip</span>
-      <span className="text-brand-primary">Track</span>
-    </span>
-  );
-}
 const url = process.env.NEXT_PUBLIC_BASE_URL || "https://app.triptrack.uk";
 function HeroMockup() {
   return (
@@ -131,6 +115,10 @@ const featureCards = [
       "Personalise each trip with colourful, location-based themes for a distinctive feel.",
   },
 ];
+const NAV_LINKS = [
+  { label: "Destinations", href: "/destinations" },
+  { label: "Travel guides", href: "/blog" },
+];
 const scrolled = true;
 const menuOpen = false;
 
@@ -147,17 +135,17 @@ function Navbar() {
         <div className="max-w-7xl mx-auto h-16 flex items-center gap-10">
           <Logo light={!scrolled} />
           <div className="hidden md:flex gap-8 flex-1">
-            {[].map((l) => (
+            {NAV_LINKS.map((link) => (
               <Link
-                key={l}
-                href="#"
+                key={link.href}
+                href={link.href}
                 className={`text-sm font-medium transition-colors ${
                   scrolled
                     ? "text-slate-600 hover:text-slate-900"
                     : "text-white/80 hover:text-white"
                 }`}
               >
-                {l}
+                {link.label}
               </Link>
             ))}
           </div>
@@ -486,6 +474,15 @@ export default function HomePage() {
               <span className="text-xs text-white/40">
                 © 2026 TripTrack. Built for travellers.
               </span>
+              {NAV_LINKS.map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className="text-xs text-white/45 hover:text-white/70 transition-colors"
+                >
+                  {link.label}
+                </Link>
+              ))}
               <TrackedLink
                 href={`${url}/privacy`}
                 event="privacy_page_visited"
