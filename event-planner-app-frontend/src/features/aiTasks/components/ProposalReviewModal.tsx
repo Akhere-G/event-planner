@@ -32,6 +32,7 @@ const ANALYTICS_EVENTS: Record<AiTaskType, string> = {
   optimise_day: "ai_optimise_events_used",
   generate_trip: "ai_trip_generated",
   generate_packing: "packing_items_generated",
+  edit_trip: "ai_trip_edited",
 };
 
 interface ProposalReviewModalProps {

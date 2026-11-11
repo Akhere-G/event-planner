@@ -1,0 +1,2 @@
+export const MAX_EDIT_MESSAGE_LENGTH = 500;
+export const MAX_EDIT_HISTORY_MESSAGES = 10;
