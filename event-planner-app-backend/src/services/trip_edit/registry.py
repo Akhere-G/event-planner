@@ -1,4 +1,5 @@
 from .editor_base import EditContext, EntityEditor
+from .money_editors import ExpenseEditor, SettlementEditor
 from .trip_editor import TripEditor
 from .wishlist_editor import WishlistEditor
 from .entity_editors import (
@@ -15,6 +16,8 @@ EDITORS: dict[str, type[EntityEditor]] = {
     PackingItemEditor.entity: PackingItemEditor,
     WishlistEditor.entity: WishlistEditor,
     WishlistItemEditor.entity: WishlistItemEditor,
+    ExpenseEditor.entity: ExpenseEditor,
+    SettlementEditor.entity: SettlementEditor,
 }
 
 

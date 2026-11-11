@@ -20,7 +20,7 @@ class HiddenEditor(EntityEditor):
 
 
 def test_every_available_editor_is_built_for_the_user(itinerary):
-    editors = build_editors(edit_context(itinerary, role="admin"))
+    editors = build_editors(edit_context(itinerary, user_id=1, role="admin"))
 
     assert list(editors) == list(EDITORS)
 

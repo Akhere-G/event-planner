@@ -65,3 +65,20 @@ def test_an_editors_notes_are_added_to_the_prompt(itinerary):
 
     assert "NOTES ON SPECIFIC ITEMS:" in prompt
     assert "- wishlist: removing a list removes its items too" in prompt
+
+
+def test_the_people_are_listed_for_editors_that_name_them(
+    itinerary, admin_user, editor_user
+):
+    members = {admin_user.id: admin_user.username, editor_user.id: editor_user.username}
+    context = edit_context(itinerary, admin_user.id, "admin", members=members)
+
+    prompt = build_edit_prompt(itinerary, build_editors(context), [], "Add lunch", [])
+
+    assert f"- id={editor_user.id} | {editor_user.username}" in prompt
+    assert f"The requester is person {admin_user.id}" in prompt
+    assert "The requester is an admin." in prompt
+
+
+def test_the_people_are_left_out_when_no_editor_needs_them(itinerary):
+    assert "PEOPLE ON THIS TRIP" not in build(itinerary)
