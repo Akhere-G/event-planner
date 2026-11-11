@@ -229,7 +229,7 @@ def get_event_suggestions(
     requested_date = date.strftime("%Y-%m-%d")
     timezone = itinerary.timezone
     day = datetime.strptime(requested_date, "%Y-%m-%d").date()
-    day_flights = windows_for_day(blocked_windows(itinerary.flights, timezone), day)
+    day_flights = windows_for_day(blocked_windows(itinerary.id, timezone), day)
     flights_prompt = _flights_prompt(day_flights)
 
     prompt = f"""

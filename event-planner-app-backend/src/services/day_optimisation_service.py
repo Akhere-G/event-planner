@@ -326,7 +326,7 @@ def optimise_days(
 ) -> list[dict[str, Any]]:
     itinerary = get_itinerary(itinerary_id)
     destination, timezone = itinerary.destination, itinerary.timezone
-    windows = blocked_windows(itinerary.flights, timezone)
+    windows = blocked_windows(itinerary.id, timezone)
     plans = []
     for day in sorted(set(options.dates)):
         events = _day_events(itinerary, day)

@@ -7,9 +7,12 @@ user can accept or reject them like any other AI proposal.
 from dataclasses import dataclass
 from typing import Any
 
+from sqlalchemy import select
+
 from ..ai_tasks import snapshots
 from ..exceptions import AIResponseError
-from ..models import AiTask, Itinerary
+from ..extensions import db
+from ..models import AiTask, ItineraryUser, User
 from ..utils.db_utils import release_connection
 from .ai_services import format_json, get_ai_response
 from .ai_task_service import create_proposal
@@ -33,10 +36,15 @@ class TripEditResult:
     task: AiTask | None
 
 
-def _member_names(itinerary: Itinerary) -> dict[int, str]:
+def _member_names(itinerary_id: int) -> dict[int, str]:
+    stmt = (
+        select(User.id, User.username)
+        .join(ItineraryUser, ItineraryUser.user_id == User.id)
+        .where(ItineraryUser.itinerary_id == itinerary_id)
+    )
     names = {}
-    for membership in itinerary.user_memberships:
-        names[membership.user_id] = membership.user.username
+    for user_id, username in db.session.execute(stmt):
+        names[user_id] = username
     return names
 
 
@@ -55,8 +63,9 @@ def edit_trip_with_ai(
     history: list[ChatTurn],
 ) -> TripEditResult:
     itinerary = get_itinerary(itinerary_id)
-    flights = blocked_windows(itinerary.flights, itinerary.timezone)
-    context = EditContext(itinerary, user_id, role, flights, _member_names(itinerary))
+    flights = blocked_windows(itinerary_id, itinerary.timezone)
+    members = _member_names(itinerary_id)
+    context = EditContext(itinerary, user_id, role, flights, members)
     editors = build_editors(context)
     prompt = build_edit_prompt(itinerary, editors, flights, message, history)
     # Taken before the slow AI call, so edits made while it runs show up as stale.

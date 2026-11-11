@@ -32,7 +32,7 @@ def test_a_flight_blocks_three_hours_before_departure_to_two_after_arrival():
 def test_blocked_windows_are_in_trip_local_time(itinerary):
     FlightFactory(itinerary=itinerary, depart_at=utc(1, 10), arrive_at=utc(1, 12, 20))
 
-    [flight] = blocked_windows(itinerary.flights, itinerary.timezone)
+    [flight] = blocked_windows(itinerary.id, itinerary.timezone)
 
     assert flight.label.endswith(" LHR → CDG")
     assert flight.departs == local(1, 12)  # Paris is UTC+2 in August
@@ -40,7 +40,7 @@ def test_blocked_windows_are_in_trip_local_time(itinerary):
 
 
 def test_no_flights_means_no_windows(itinerary):
-    assert blocked_windows(itinerary.flights, itinerary.timezone) == []
+    assert blocked_windows(itinerary.id, itinerary.timezone) == []
 
 
 def test_an_overnight_flight_blocks_both_days_it_spans():
