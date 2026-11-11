@@ -137,10 +137,7 @@ def build_edit_ops(
     proposed: list[dict[str, Any]],
     role: str | None = None,
 ) -> list[dict[str, Any]]:
-    """Validate proposed ops with their entity schemas and shape them for preview.
-
-    Ops that fail validation are dropped. Nothing is saved.
-    """
+    """Ops that fail their entity schema are dropped. Nothing is saved."""
     ops = []
     for op in proposed:
         applier = ChangeSetApplierFactory.create(

@@ -15,8 +15,6 @@ def _parse_date(value: Any) -> date | None:
 
 
 class TripEditor(EntityEditor):
-    """The trip's own start date, end date and budget. Admin-only, like the PATCH."""
-
     entity = "trip"
     title = "TRIP"
     fields = ("start_date", "end_date", "budget_amount_gbp")

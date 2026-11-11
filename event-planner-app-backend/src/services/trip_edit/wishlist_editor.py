@@ -5,8 +5,6 @@ from .editor_base import EntityEditor
 
 
 class WishlistEditor(EntityEditor):
-    """Whole wishlists: add an empty list, rename one, or remove one with its items."""
-
     entity = "wishlist"
     title = "WISHLISTS"
     fields = ("name",)

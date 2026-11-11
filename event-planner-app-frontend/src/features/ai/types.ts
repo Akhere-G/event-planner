@@ -24,7 +24,6 @@ export interface ChangeOp {
   id?: number | null;
   data: Record<string, unknown>;
   reason?: string | null;
-  /** Name of the item an update or delete refers to. */
   label?: string | null;
 }
 
@@ -45,7 +44,6 @@ export interface EditTripResult {
 }
 
 export interface EditMessage extends ChatMessage {
-  /** The proposal this reply produced, when it suggests changes. */
   taskId?: number;
   opCount?: number;
 }

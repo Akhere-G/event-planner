@@ -1,5 +1,3 @@
-"""What the model may see and change for each entity on a trip."""
-
 from datetime import datetime
 from typing import Any
 

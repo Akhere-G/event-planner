@@ -22,7 +22,6 @@ EDITORS: dict[str, type[EntityEditor]] = {
 
 
 def build_editors(context: EditContext) -> dict[str, EntityEditor]:
-    """The editors this user may use, keyed by entity."""
     editors = {}
     for entity, editor_class in EDITORS.items():
         if editor_class.is_available(context):

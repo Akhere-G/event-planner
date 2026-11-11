@@ -1,8 +1,4 @@
-"""Natural-language trip editing: a chat request becomes a proposal to review.
-
-Nothing is written to the trip. The proposed ops are stored as a ready AI task so the
-user can accept or reject them like any other AI proposal.
-"""
+"""A chat request becomes a ready AI task to review; nothing is saved to the trip."""
 
 from dataclasses import dataclass
 from typing import Any

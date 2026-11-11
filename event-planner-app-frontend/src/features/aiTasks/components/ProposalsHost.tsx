@@ -11,7 +11,6 @@ import ProposalsPopup from "./ProposalsPopup";
 
 export const REVIEW_PARAM = "aiTask";
 
-/** Opens the popup of a trip's finished AI proposals, unless they were dismissed. */
 export default function ProposalsHost({ tripId }: { tripId: number }) {
   const proposals = usePendingProposals(tripId);
   const [searchParams, setSearchParams] = useSearchParams();
