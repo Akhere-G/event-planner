@@ -18,6 +18,7 @@ const make = (category: Expense["category"], amountGbp: number): Expense => ({
   amount: amountGbp,
   currency: "GBP",
   amountGbp,
+  fxRate: 1,
   spentOn: "2026-08-01",
   paidById: 1,
   splitType: "even_all",

@@ -1,6 +1,7 @@
 from marshmallow import Schema, fields, pre_load, validate
 
 from ..models import ExpenseCategory, SplitType
+from ..utils.currency import BASE_CURRENCY, Currency
 from .base_schema import BaseSchema
 
 
@@ -49,8 +50,10 @@ class ExpenseSchema(_CamelToSnake):
     )
     amount = _positive_amount("Amount")
     currency = fields.Str(
-        validate=validate.Equal("GBP", error="Only GBP is supported for now."),
-        load_default="GBP",
+        validate=validate.OneOf(
+            tuple(Currency), error="That currency is not supported."
+        ),
+        load_default=BASE_CURRENCY.value,
     )
     amount_gbp = fields.Float(dump_only=True)
     fx_rate = fields.Float(dump_only=True)

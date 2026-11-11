@@ -19,6 +19,8 @@ from ..models import (
     User,
     UserRole,
 )
+from ..utils.currency import BASE_CURRENCY
+from . import fx_service
 
 CENT = Decimal("0.01")
 
@@ -161,15 +163,37 @@ def _validate_links(itinerary_id: int, links: dict, expense_id: int | None = Non
             raise BadRequestError(f"That {label} already has an expense.")
 
 
-def _money_fields(amount) -> dict:
-    """An amount with its GBP value. Only GBP is accepted today, so the rate is 1."""
+def _rate_to_base(currency: str, spent_on) -> Decimal:
+    return fx_service.get_rate(currency, BASE_CURRENCY.value, spent_on)
+
+
+def _money_fields(amount, currency: str, rate: Decimal) -> dict:
+    """What was paid, and its GBP value at ``rate`` (GBP per one ``currency``)."""
     amount = to_money(amount)
     return {
         "amount": amount,
-        "currency": "GBP",
-        "amount_gbp": amount,
-        "fx_rate": Decimal("1"),
+        "currency": currency,
+        "amount_gbp": to_money(amount * rate),
+        "fx_rate": rate,
     }
+
+
+def _update_money(expense: Expense, data: dict):
+    """Redo the GBP value when the amount, currency or date changes.
+
+    The rate is fixed at the spend date, so it is only looked up again when the
+    currency or the date changed.
+    """
+    if not {"amount", "currency", "spent_on"} & data.keys():
+        return
+    currency = data.get("currency", expense.currency)
+    spent_on = data.get("spent_on", expense.spent_on)
+    rate = expense.fx_rate
+    if currency != expense.currency or spent_on != expense.spent_on:
+        rate = _rate_to_base(currency, spent_on)
+    fields = _money_fields(data.get("amount", expense.amount), currency, rate)
+    for field, value in fields.items():
+        setattr(expense, field, value)
 
 
 def _participants(itinerary_id: int, split_type: str, payer_id: int, data: dict):
@@ -236,11 +260,13 @@ def stage_create_expense(
     _require_members(itinerary_id, [payer_id])
     links = _resolve_links({}, data)
     _validate_links(itinerary_id, links)
+    currency = data.get("currency", BASE_CURRENCY.value)
+    rate = _rate_to_base(currency, data["spent_on"])
     expense = Expense(
         itinerary_id=itinerary_id,
         description=data["description"],
         category=data.get("category", "other"),
-        **_money_fields(data["amount"]),
+        **_money_fields(data["amount"], currency, rate),
         spent_on=data["spent_on"],
         paid_by_id=payer_id,
         **links,
@@ -299,12 +325,10 @@ def update_expense(
         for field, value in links.items():
             setattr(expense, field, value)
 
+        _update_money(expense, data)
         for field in ("description", "category", "spent_on"):
             if field in data:
                 setattr(expense, field, data[field])
-        if "amount" in data:
-            for field, value in _money_fields(data["amount"]).items():
-                setattr(expense, field, value)
         if "paid_by_id" in data:
             if data["paid_by_id"] != expense.paid_by_id:
                 _require_self_unless_admin(
