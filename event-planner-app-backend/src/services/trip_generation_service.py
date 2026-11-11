@@ -30,7 +30,7 @@ def _text(value: Any, limit: int) -> str | None:
     return None
 
 
-def _trip_days(itinerary) -> list[str]:
+def trip_days(itinerary) -> list[str]:
     day_count = (itinerary.end_date - itinerary.start_date).days + 1
     return [
         (itinerary.start_date + timedelta(days=offset)).isoformat()
@@ -38,7 +38,7 @@ def _trip_days(itinerary) -> list[str]:
     ]
 
 
-def _geocode(itinerary_id: int, name: str, address: str | None) -> dict | None:
+def geocode(itinerary_id: int, name: str, address: str | None) -> dict | None:
     """Look up a place; returns None (and logs) when it cannot be found."""
     try:
         details = get_place_details(name=name, address=address)
@@ -116,7 +116,7 @@ def _event_to_op(itinerary, event: Any, days: list[str]) -> dict | None:
     ):
         logger.warning("Trip %s: dropped invalid event %r.", itinerary.id, event)
         return None
-    place = _geocode(itinerary.id, event["name"], event.get("address"))
+    place = geocode(itinerary.id, event["name"], event.get("address"))
     if place is None:
         return None
 
@@ -158,7 +158,7 @@ def _accommodation_to_op(itinerary, item: Any) -> dict | None:
     if end < start:
         return None
 
-    place = _geocode(itinerary.id, item["name"], item.get("address"))
+    place = geocode(itinerary.id, item["name"], item.get("address"))
     if place is None:
         return None
     return {
@@ -190,7 +190,7 @@ def _packing_item_to_op(item: Any) -> dict | None:
 def _wishlist_item_to_op(itinerary_id: int, item: Any) -> dict | None:
     if not isinstance(item, dict) or not _text(item.get("name"), 255):
         return None
-    place = _geocode(itinerary_id, item["name"], item.get("address")) or {}
+    place = geocode(itinerary_id, item["name"], item.get("address")) or {}
     return {
         "op": "create",
         "entity": "wishlist_item",
@@ -250,7 +250,7 @@ def generate_trip_plan(
 ) -> list[dict]:
     """Propose a whole-trip plan as preview-only change-set ops. Saves nothing."""
     itinerary = get_itinerary(itinerary_id)
-    days = _trip_days(itinerary)
+    days = trip_days(itinerary)
     prompt = _build_prompt(itinerary, get_preferences(itinerary_id), days)
 
     release_connection()
