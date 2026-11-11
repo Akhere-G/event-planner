@@ -4,6 +4,7 @@ import { budgetSchema, expenseSchema, settlementSchema } from "../schema";
 const valid = {
   description: "Dinner",
   amount: 30,
+  currency: "GBP",
   category: "food",
   spentOn: "2026-08-01",
   paidById: 1,
@@ -14,6 +15,27 @@ const valid = {
 describe("expenseSchema", () => {
   it("accepts a valid expense", async () => {
     await expect(expenseSchema.isValid(valid)).resolves.toBe(true);
+  });
+
+  it("accepts a foreign currency", async () => {
+    await expect(
+      expenseSchema.validate({ ...valid, currency: "EUR" }),
+    ).resolves.toMatchObject({ currency: "EUR" });
+  });
+
+  it.each(["XXX", "BGN", "eur"])(
+    "rejects the currency %j",
+    async (currency) => {
+      await expect(
+        expenseSchema.validate({ ...valid, currency }),
+      ).rejects.toThrow("Choose a supported currency.");
+    },
+  );
+
+  it("requires a currency", async () => {
+    await expect(
+      expenseSchema.validate({ ...valid, currency: undefined }),
+    ).rejects.toThrow("Choose a currency.");
   });
 
   it("rejects zero or negative amounts", async () => {

@@ -8,6 +8,10 @@ import { FormInput, FormSelect } from "../../../components";
 import type { RootState } from "../../../store";
 import { isApiError } from "../../api/utils";
 import { useGetAccommodationsQuery } from "../../accommodations/accomodationApiSlice";
+import { BASE_CURRENCY, currencyOptions } from "../../currency/constants";
+import { getLastCurrency, saveLastCurrency } from "../../currency/lastCurrency";
+import { useGetRatesQuery } from "../../currency/services/currencyApiSlice";
+import { convertToGbp } from "../../currency/utils";
 import useTripEvents from "../../events/hooks/useTripEvents";
 import { useGetFlightsQuery } from "../../flights/flightApiSlice";
 import type { Trip } from "../../trips/types";
@@ -18,7 +22,7 @@ import {
 } from "../services/expenseApiSlice";
 import useDeleteExpense from "../hooks/useDeleteExpense";
 import { expenseCategories, type Expense, type ExpensePrefill } from "../types";
-import { canChangeExpense, payerOptions } from "../utils";
+import { canChangeExpense, formatGbp, payerOptions } from "../utils";
 
 const splitOptions = [
   { name: "Split evenly between everyone", value: "even_all" },
@@ -68,6 +72,7 @@ export default function ExpenseForm({
       defaultValues: {
         description: expense?.description ?? prefill?.description ?? "",
         amount: expense?.amount,
+        currency: expense?.currency ?? getLastCurrency(),
         category: expense?.category ?? prefill?.category ?? "other",
         spentOn:
           expense?.spentOn ??
@@ -90,6 +95,13 @@ export default function ExpenseForm({
     });
 
   const link = watch("link");
+  const currency = watch("currency");
+  const amount = Number(watch("amount"));
+  const { data: ratesData } = useGetRatesQuery(undefined, {
+    skip: currency === BASE_CURRENCY,
+  });
+  const estimateGbp =
+    amount > 0 ? convertToGbp(amount, currency, ratesData?.data.rates) : null;
   const splitType = watch("splitType");
   const participantIds = watch("participantIds") ?? [];
   const isLoading = isAdding || isUpdating || isDeleting;
@@ -133,6 +145,7 @@ export default function ExpenseForm({
         await addExpense({ tripId: trip.id, expense: body }).unwrap();
         toast.success("Expense added.");
       }
+      saveLastCurrency(values.currency);
       onSuccess();
     } catch (err) {
       toast.error(
@@ -154,8 +167,15 @@ export default function ExpenseForm({
         errorMessage={formState.errors.description?.message}
       />
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <FormSelect
+          label="Currency"
+          {...register("currency")}
+          value={currency}
+          options={currencyOptions}
+          errorMessage={formState.errors.currency?.message}
+        />
         <FormInput
-          label="Amount (£)"
+          label={`Amount (${currency})`}
           type="number"
           step="0.01"
           min="0"
@@ -163,6 +183,16 @@ export default function ExpenseForm({
           {...register("amount")}
           errorMessage={formState.errors.amount?.message}
         />
+        {currency !== BASE_CURRENCY && (
+          <p
+            className="sm:col-span-2 text-sm text-text-secondary"
+            role="status"
+          >
+            {estimateGbp === null
+              ? "Splits and balances are in GBP, converted at the rate on the expense date."
+              : `≈ ${formatGbp(estimateGbp)} at today's rate. The final amount uses the rate on the expense date.`}
+          </p>
+        )}
         <FormInput
           label="Date"
           type="date"
