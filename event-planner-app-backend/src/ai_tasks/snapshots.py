@@ -13,11 +13,21 @@ from typing import Any
 from sqlalchemy import Select, select
 
 from ..extensions import db
-from ..models import Accommodation, Event, PackingItem, Wishlist, WishlistItem
+from ..models import (
+    Accommodation,
+    Event,
+    Itinerary,
+    PackingItem,
+    Wishlist,
+    WishlistItem,
+)
 
 Snapshot = dict[str, dict[int, str | None]]
 
 _SELECTS: dict[str, Callable[[int], Select]] = {
+    "trip": lambda trip: select(Itinerary.id, Itinerary.updated_at).where(
+        Itinerary.id == trip
+    ),
     "event": lambda trip: select(Event.id, Event.updated_at).where(
         Event.itinerary_id == trip
     ),

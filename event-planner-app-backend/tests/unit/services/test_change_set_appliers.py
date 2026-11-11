@@ -1,10 +1,14 @@
 import pytest
+from datetime import date
+
 from marshmallow import ValidationError
+from src.exceptions import BadRequestError, UserNotAuthorisedError
 from src.services.change_set_appliers import (
     AccommodationChangeSetApplier,
     ChangeSetApplierFactory,
     EventChangeSetApplier,
     PackingItemChangeSetApplier,
+    TripChangeSetApplier,
     WishlistItemChangeSetApplier,
 )
 
@@ -16,6 +20,7 @@ from src.services.change_set_appliers import (
         ("accommodation", AccommodationChangeSetApplier),
         ("packing_item", PackingItemChangeSetApplier),
         ("wishlist_item", WishlistItemChangeSetApplier),
+        ("trip", TripChangeSetApplier),
     ],
 )
 def test_factory_builds_the_applier_for_each_entity(entity, expected):
@@ -103,3 +108,65 @@ def test_other_entity_previews_have_no_wishlist_name():
     applier = ChangeSetApplierFactory.create("packing_item", 1, 2)
     prepared = applier.prepare({"op": "create", "data": {"name": "Passport"}})
     assert "wishlist_name" not in applier.preview(prepared)
+
+
+def trip_applier(itinerary, admin_user, role="admin"):
+    return ChangeSetApplierFactory.create("trip", itinerary.id, admin_user.id, role)
+
+
+def test_a_trip_op_only_accepts_dates_and_budget(itinerary, admin_user):
+    applier = trip_applier(itinerary, admin_user)
+
+    prepared = applier.prepare(
+        {
+            "op": "update",
+            "id": itinerary.id,
+            "data": {"start_date": "2026-09-01", "budget_amount_gbp": 900},
+        }
+    )
+    assert prepared.data == {"start_date": date(2026, 9, 1), "budget_amount_gbp": 900}
+    with pytest.raises(ValidationError):
+        applier.prepare(
+            {"op": "update", "id": itinerary.id, "data": {"destination": "Rome"}}
+        )
+
+
+def test_a_trip_preview_shows_the_changed_fields(itinerary, admin_user):
+    applier = trip_applier(itinerary, admin_user)
+    prepared = applier.prepare(
+        {"op": "update", "id": itinerary.id, "data": {"end_date": "2026-09-09"}}
+    )
+
+    assert applier.preview(prepared) == {"end_date": "2026-09-09"}
+
+
+def test_an_admin_can_apply_a_trip_update(itinerary, admin_user):
+    applier = trip_applier(itinerary, admin_user)
+    prepared = applier.prepare(
+        {"op": "update", "id": itinerary.id, "data": {"budget_amount_gbp": 750}}
+    )
+
+    applier.apply(prepared)
+
+    assert itinerary.budget_amount_gbp == 750
+    assert itinerary.updated_by_id == admin_user.id
+
+
+@pytest.mark.parametrize("role", ["editor", "viewer", None])
+def test_only_an_admin_can_apply_a_trip_update(itinerary, admin_user, role):
+    applier = trip_applier(itinerary, admin_user, role)
+    prepared = applier.prepare(
+        {"op": "update", "id": itinerary.id, "data": {"budget_amount_gbp": 750}}
+    )
+
+    with pytest.raises(UserNotAuthorisedError):
+        applier.apply(prepared)
+
+
+def test_a_trip_cannot_be_added_or_removed(itinerary, admin_user):
+    applier = trip_applier(itinerary, admin_user)
+
+    with pytest.raises(BadRequestError):
+        applier.apply(applier.prepare({"op": "delete", "id": itinerary.id}))
+    with pytest.raises(BadRequestError):
+        applier.create({}, {})

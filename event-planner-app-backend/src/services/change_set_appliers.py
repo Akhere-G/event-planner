@@ -5,12 +5,16 @@ from typing import Any, ClassVar
 from marshmallow import Schema
 
 from ..schemas.accommodation_schema import AccommodationSchema
+from ..exceptions import BadRequestError, UserNotAuthorisedError
+from ..models import UserRole
 from ..schemas.event_schema import EventSchema
+from ..schemas.itinerary_schema import ItinerarySchema
 from ..schemas.packing_item_schema import PackingItemSchema
 from ..schemas.wishlist_schema import WishlistItemSchema
 from . import (
     accommodation_service,
     events_service,
+    itineraries_service,
     packing_item_service,
     wishlist_service,
 )
@@ -56,13 +60,16 @@ class ChangeSetApplier(ABC):
         if kind == "create":
             data = {**self.create_defaults, **data}
 
-        schema = self.schema_class(partial=(kind == "update"))
+        schema = self.schema(partial=(kind == "update"))
         return PreparedOp(
             kind=kind,
             entity_id=op.get("id"),
             data=schema.load(data),
             context=context,
         )
+
+    def schema(self, partial: bool) -> Schema:
+        return self.schema_class(partial=partial)
 
     def extract_context(self, data: dict) -> tuple[dict, dict]:
         """Split non-schema fields out of the op data. Most entities have none."""
@@ -72,7 +79,7 @@ class ChangeSetApplier(ABC):
         """The op's data as the API shows it, without saving anything."""
         if op.kind == "delete":
             return {}
-        return self.schema_class(partial=op.kind == "update").dump(op.data)
+        return self.schema(partial=op.kind == "update").dump(op.data)
 
     def apply(self, op: PreparedOp) -> None:
         if op.kind == "create":
@@ -82,14 +89,34 @@ class ChangeSetApplier(ABC):
         else:
             self.delete(op.entity_id)
 
-    @abstractmethod
-    def create(self, data: dict, context: dict) -> None: ...
+    def create(self, data: dict, context: dict) -> None:
+        raise BadRequestError(f"A {self.entity} can't be added this way.")
 
     @abstractmethod
     def update(self, entity_id: int, data: dict) -> None: ...
 
-    @abstractmethod
-    def delete(self, entity_id: int) -> None: ...
+    def delete(self, entity_id: int) -> None:
+        raise BadRequestError(f"A {self.entity} can't be removed this way.")
+
+
+class TripChangeSetApplier(ChangeSetApplier):
+    """Edits the trip's own dates and budget. Like the trip's PATCH, admin-only."""
+
+    entity = "trip"
+    schema_class = ItinerarySchema
+    editable_fields = ("start_date", "end_date", "budget_amount_gbp")
+
+    def schema(self, partial: bool) -> Schema:
+        return ItinerarySchema(partial=partial, only=self.editable_fields)
+
+    def update(self, entity_id, data):
+        if self.role != UserRole.ADMIN.value:
+            raise UserNotAuthorisedError(
+                "You must be an admin to update this itinerary."
+            )
+        itineraries_service.stage_update_itinerary(
+            entity_id, {**data, "updated_by_id": self.user_id}
+        )
 
 
 class EventChangeSetApplier(ChangeSetApplier):
@@ -187,6 +214,7 @@ class WishlistItemChangeSetApplier(ChangeSetApplier):
 _APPLIER_CLASSES: dict[str, type[ChangeSetApplier]] = {
     applier.entity: applier
     for applier in (
+        TripChangeSetApplier,
         EventChangeSetApplier,
         AccommodationChangeSetApplier,
         PackingItemChangeSetApplier,

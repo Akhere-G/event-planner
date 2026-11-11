@@ -26,6 +26,12 @@ def test_capture_records_updated_at_for_the_trips_events(itinerary):
     assert snapshot["event"][event.id] == stored_iso(event)
 
 
+def test_capture_records_the_trip_itself(itinerary):
+    snapshot = capture(itinerary.id)
+
+    assert snapshot["trip"] == {itinerary.id: stored_iso(itinerary)}
+
+
 def test_only_update_and_delete_ops_get_a_base(itinerary):
     event = EventFactory(itinerary=itinerary)
     create = {"op": "create", "entity": "event", "data": {}}
