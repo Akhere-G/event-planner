@@ -8,7 +8,7 @@ from ..ai_tasks import snapshots
 from ..ai_tasks.dispatchers.factory import get_dispatcher
 from ..ai_tasks.notifier import TaskNotifier
 from ..ai_tasks.registry import get_handler
-from ..ai_tasks.runner import LEASE
+from ..ai_tasks.runner import LEASE, PROPOSAL_LIFETIME
 from ..exceptions import (
     ActiveAiTaskConflictError,
     AiTaskNotFoundError,
@@ -198,6 +198,33 @@ def enqueue(
     db.session.commit()
     _notifier().status_changed(task)
     return _dispatch(task.id)
+
+
+def create_proposal(
+    itinerary_id: int,
+    task_type: str,
+    params: dict[str, Any],
+    ops: list[dict[str, Any]],
+    user_id: int | None,
+) -> AiTask:
+    """Store ops that were produced inside the request as a proposal awaiting a
+    decision, so they are accepted, rejected and expired like a background task's."""
+    now = utcnow()
+    task = AiTask(
+        itinerary_id=itinerary_id,
+        type=task_type,
+        status=AiTaskStatus.READY.value,
+        params=params,
+        result_ops=ops,
+        started_at=now,
+        finished_at=now,
+        expires_at=now + PROPOSAL_LIFETIME,
+        created_by_id=user_id,
+        updated_by_id=user_id,
+    )
+    db.session.add(task)
+    db.session.commit()
+    return task
 
 
 def _dispatch(task_id: int) -> AiTask:
