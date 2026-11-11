@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import { usePostHog } from "@posthog/react";
-import { Sparkles } from "lucide-react";
+import { TASK_ICONS } from "../../aiTasks/utils";
 import { toast } from "sonner";
 import { ChatThread } from "../../../components";
 import {
@@ -99,7 +99,7 @@ export default function EditTripDrawer({ trip }: { trip: Trip }) {
         className="btn-secondary inline-flex items-center gap-2"
         onClick={() => setIsOpen(true)}
       >
-        <Sparkles className="size-4" />
+        <TASK_ICONS.edit_trip className="size-4" />
         Ask AI to edit
       </button>
       {/* Hidden while reviewing, so the review dialog is not stacked on top of it. */}

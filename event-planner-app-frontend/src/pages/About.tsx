@@ -1,7 +1,6 @@
 import React from "react";
-import {
+import { TASK_ICONS } from "../features/aiTasks/utils";import {
   Map,
-  Sparkles,
   Users,
   Search,
   Brain,
@@ -25,7 +24,7 @@ export default function AboutPage() {
         "Stuck for ideas? Our AI instantly fills your day with smart suggestions, taking the guesswork out of planning your itinerary.",
     },
     {
-      icon: <Sparkles className="text-brand-primary" size={28} />,
+      icon: <TASK_ICONS.optimise_day className="text-brand-primary" size={28} />,
       title: "AI Optimise Day",
       description:
         "Our AI reorders your events to fix timing clashes and group nearby spots together, so you spend less time travelling and more time exploring.",

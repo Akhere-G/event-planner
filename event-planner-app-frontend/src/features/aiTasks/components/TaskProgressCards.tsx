@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { AlertTriangle, LoaderCircle, Sparkles } from "lucide-react";
+import { AlertTriangle, LoaderCircle } from "lucide-react";
 import { toast } from "sonner";
 import { isApiError } from "../../api/utils";
 import { useTripAiTasks } from "../hooks";
@@ -12,6 +12,7 @@ import type { AiTask } from "../types";
 import {
   isActive,
   progressFraction,
+  TASK_ICONS,
   TASK_LABELS,
   TASK_PROGRESS_LABELS,
 } from "../utils";
@@ -110,9 +111,10 @@ function ReadyCard({
   task: AiTask;
   onReview: () => void;
 }) {
+  const TaskIcon = TASK_ICONS[task.type];
   return (
     <div className="card p-3 flex items-center gap-3">
-      <Sparkles className="text-brand-primary shrink-0" size={18} />
+      <TaskIcon className="text-brand-primary shrink-0" size={18} />
       <div className="flex flex-col min-w-0 flex-1">
         <span className="font-semibold text-text-primary">
           {TASK_LABELS[task.type]} is ready
