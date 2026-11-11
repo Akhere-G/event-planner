@@ -340,3 +340,14 @@ def test_a_packing_item_gets_the_applier_defaults_and_trimmed_values():
     checked = packing.validate_create({"name": "n" * 150, "is_shared": False})
 
     assert checked == {"name": "n" * 100, "is_shared": False, "category": "General"}
+
+
+def test_an_edit_may_only_change_the_times_it_is_given_and_keeps_to_the_window():
+    rules = TimeRules(frozenset({date(2026, 8, 2)}), time(9), time(20))
+    events = validator("event", existing=described(3, address="X"), time_rules=rules)
+    inside = {"start_at": "2026-08-02T10:00:00", "end_at": "2026-08-02T11:00:00"}
+    too_late = {"start_at": "2026-08-02T19:00:00", "end_at": "2026-08-02T21:00:00"}
+
+    assert events.validate_edit(3, inside)
+    assert events.validate_edit(3, too_late) is None
+    assert events.validate_edit(4, inside) is None

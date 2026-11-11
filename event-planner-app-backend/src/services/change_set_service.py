@@ -92,16 +92,19 @@ def build_event_create_ops(suggestions: list[dict]) -> list[dict]:
 def build_event_update_ops(updates: list[dict]) -> list[dict]:
     """Turn AI-optimised event times into preview-only update ops."""
     schema = EventSchema(only=("start_at", "end_at"))
-    return [
-        {
-            "op": "update",
-            "entity": "event",
-            "id": update["id"],
-            "data": schema.dump(update),
-            "reason": clean_reason(update.get("reason")),
-        }
-        for update in updates
-    ]
+    ops = []
+    for update in updates:
+        times = {"start_at": update["start_at"], "end_at": update["end_at"]}
+        ops.append(
+            {
+                "op": "update",
+                "entity": "event",
+                "id": update["id"],
+                "data": schema.dump(schema.load(times)),
+                "reason": clean_reason(update.get("reason")),
+            }
+        )
+    return ops
 
 
 def build_event_delete_ops(removals: list[dict]) -> list[dict]:
