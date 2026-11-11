@@ -5,6 +5,7 @@ from .auth_routes import auth_bp
 from .event_routes import event_bp
 from .expense_routes import expense_bp
 from .flight_routes import flight_bp
+from .fx_routes import fx_bp
 from .internal_task_routes import internal_task_bp
 from .invite_routes import itinerary_invites_bp
 from .itinerary_routes import itinerary_bp
@@ -24,6 +25,7 @@ __all__ = [
     "event_bp",
     "expense_bp",
     "flight_bp",
+    "fx_bp",
     "internal_task_bp",
     "itinerary_bp",
     "itinerary_invites_bp",

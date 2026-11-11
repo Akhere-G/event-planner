@@ -172,6 +172,7 @@ def register_blueprints(app: Flask):
         auth_bp,
         event_bp,
         flight_bp,
+        fx_bp,
         expense_bp,
         internal_task_bp,
         itinerary_bp,
@@ -228,6 +229,11 @@ def register_blueprints(app: Flask):
     app.register_blueprint(
         flight_bp,
         url_prefix="/api/itineraries/<int:itinerary_id>/flights",
+    )
+
+    app.register_blueprint(
+        fx_bp,
+        url_prefix="/api/fx",
     )
 
     app.register_blueprint(
