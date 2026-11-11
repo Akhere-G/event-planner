@@ -3,6 +3,7 @@ from typing import Any
 
 from marshmallow import ValidationError
 
+from ..ai_entities.json_types import JsonObject, JsonValue
 from ..extensions import db
 from ..schemas.event_schema import EventSchema
 from .change_set_appliers import (
@@ -118,16 +119,13 @@ def build_event_delete_ops(removals: list[dict]) -> list[dict]:
     return ops
 
 
-def build_packing_create_op(
-    name: str,
-    category: str,
-    is_shared: bool,
-    reason: str | None = None,
-) -> dict:
+def build_create_op(
+    entity: str, data: JsonObject, reason: JsonValue = None
+) -> ChangeOp:
     return {
         "op": "create",
-        "entity": "packing_item",
-        "data": {"name": name[:100], "category": category[:50], "is_shared": is_shared},
+        "entity": entity,
+        "data": data,
         "reason": clean_reason(reason),
     }
 

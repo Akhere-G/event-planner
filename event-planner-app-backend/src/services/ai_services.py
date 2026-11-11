@@ -376,8 +376,11 @@ Schema:
 
     release_connection()
     progress("Asking the AI for a packing list", None, None)
-    return ai_output_validators.validate_packing_items(
-        format_json(get_ai_response(prompt))
+    validator = EntityValidatorFactory.create(
+        "packing_item", ValidationContext(itinerary.timezone)
+    )
+    return ai_output_validators.validate_creates(
+        format_json(get_ai_response(prompt)), validator
     )
 
 

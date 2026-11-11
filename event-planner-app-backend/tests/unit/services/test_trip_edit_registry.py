@@ -53,6 +53,7 @@ def test_the_places_the_trip_already_holds_are_not_looked_up_again(itinerary, ev
     events = build_editable_entities(itinerary, editor, [])["event"].validator
     raw = {
         "name": "Again",
+        "category": "Museum",
         "address": event.address,
         "start_at": "2026-08-02T10:00:00",
         "end_at": "2026-08-02T12:00:00",

@@ -6,16 +6,19 @@ from typing import Any
 
 from marshmallow import ValidationError
 
+from ..ai_entities.context import TimeRules, ValidationContext
+from ..ai_entities.json_types import JsonObject
+from ..ai_entities.parsing import parse_date
+from ..ai_entities.validators.base import EntityValidator
+from ..ai_entities.validators.factory import EntityValidatorFactory
 from ..exceptions import AIResponseError
 from ..schemas.change_set_schema import MAX_OPS_PER_CHANGE_SET
-from ..utils import ai_output_validators
 from ..utils.db_utils import release_connection
-from ..utils.location_utils import get_place_details
 from ..utils.progress import ProgressCallback, no_progress
-from ..utils.trip_time import trip_local_to_utc
 from . import ai_services
 from .change_set_appliers import DEFAULT_WISHLIST_NAME
-from .change_set_service import build_event_create_ops, build_packing_create_op
+from .change_set_service import build_create_op, build_event_create_ops
+from .change_set_types import ChangeOp
 from .itineraries_service import get_itinerary
 from .trip_preferences_service import get_preferences
 
@@ -25,34 +28,18 @@ PLAN_SECTIONS = ("accommodations", "events", "packing_items", "wishlist_items")
 PLACE_SECTIONS = ("accommodations", "events", "wishlist_items")
 
 
-def _text(value: Any, limit: int) -> str | None:
-    if isinstance(value, str) and value.strip():
-        return value.strip()[:limit]
-    return None
+def trip_dates(itinerary) -> list[date]:
+    dates = []
+    for offset in range((itinerary.end_date - itinerary.start_date).days + 1):
+        dates.append(itinerary.start_date + timedelta(days=offset))
+    return dates
 
 
 def trip_days(itinerary) -> list[str]:
-    day_count = (itinerary.end_date - itinerary.start_date).days + 1
-    return [
-        (itinerary.start_date + timedelta(days=offset)).isoformat()
-        for offset in range(day_count)
-    ]
-
-
-def geocode(itinerary_id: int, name: str, address: str | None) -> dict | None:
-    """Look up a place; returns None (and logs) when it cannot be found."""
-    try:
-        details = get_place_details(name=name, address=address)
-    except Exception:
-        logger.exception(
-            "Trip %s: could not geocode %r (address %r).", itinerary_id, name, address
-        )
-        return None
-    return {
-        "latitude": details["latitude"],
-        "longitude": details["longitude"],
-        "address": details.get("formatted_address") or address,
-    }
+    days = []
+    for day in trip_dates(itinerary):
+        days.append(day.isoformat())
+    return days
 
 
 def _build_prompt(itinerary, preferences, days: list[str]) -> str:
@@ -108,99 +95,66 @@ JSON FORMAT:
 """
 
 
-def _event_to_op(itinerary, event: Any, days: list[str]) -> dict | None:
-    if not isinstance(event, dict):
-        return None
-    day = str(event.get("start_at", ""))[:10]
-    if day not in days or not ai_output_validators.validate_event_suggestion(
-        event, day
-    ):
-        logger.warning("Trip %s: dropped invalid event %r.", itinerary.id, event)
-        return None
-    place = geocode(itinerary.id, event["name"], event.get("address"))
-    if place is None:
-        return None
+def _valid_data(
+    itinerary_id: int, validator: EntityValidator, item: Any
+) -> JsonObject | None:
+    data = validator.validate_create(item)
+    if data is None:
+        logger.warning(
+            "Trip %s: dropped invalid %s %r.", itinerary_id, validator.entity, item
+        )
+    return data
 
-    suggestion = {
-        "name": event["name"][:100],
-        "description": _text(event.get("description"), 100),
-        "category": event["category"][:10],
-        "start_at": trip_local_to_utc(
-            event["start_at"], itinerary.timezone
-        ).isoformat(),
-        "end_at": trip_local_to_utc(event["end_at"], itinerary.timezone).isoformat(),
-        "reason": event.get("reason"),
-        **place,
-    }
+
+def _event_to_op(
+    itinerary_id: int, validator: EntityValidator, item: Any
+) -> ChangeOp | None:
+    data = _valid_data(itinerary_id, validator, item)
+    if data is None:
+        return None
     try:
-        return build_event_create_ops([suggestion])[0]
+        return build_event_create_ops([{**data, "reason": item.get("reason")}])[0]
     except ValidationError as err:
         logger.warning(
             "Trip %s: event %r failed validation: %s",
-            itinerary.id,
-            event["name"],
+            itinerary_id,
+            data["name"],
             err.messages,
         )
         return None
 
 
-def _accommodation_to_op(itinerary, item: Any) -> dict | None:
-    if not isinstance(item, dict) or not _text(item.get("name"), 255):
-        logger.warning("Trip %s: dropped invalid accommodation %r.", itinerary.id, item)
+def _accommodation_to_op(
+    itinerary, validator: EntityValidator, item: Any
+) -> ChangeOp | None:
+    data = _valid_data(itinerary.id, validator, item)
+    if data is None:
         return None
-    try:
-        start = date.fromisoformat(str(item.get("start_date")))
-        end = date.fromisoformat(str(item.get("end_date")))
-    except ValueError:
-        logger.warning("Trip %s: bad accommodation dates in %r.", itinerary.id, item)
-        return None
-    if end < start:
-        return None
-
-    place = geocode(itinerary.id, item["name"], item.get("address"))
-    if place is None:
-        return None
-    return {
-        "op": "create",
-        "entity": "accommodation",
-        "data": {
-            "name": item["name"].strip()[:255],
-            "description": _text(item.get("description"), 255),
-            "start_date": max(start, itinerary.start_date).isoformat(),
-            "end_date": min(end, itinerary.end_date).isoformat(),
-            **place,
-        },
-        "reason": _text(item.get("reason"), 200),
+    start, end = parse_date(data["start_date"]), parse_date(data["end_date"])
+    dates = {
+        "start_date": max(start, itinerary.start_date).isoformat(),
+        "end_date": min(end, itinerary.end_date).isoformat(),
     }
+    return build_create_op("accommodation", {**data, **dates}, item.get("reason"))
 
 
-def _packing_item_to_op(item: Any) -> dict | None:
-    valid = ai_output_validators.validate_packing_items([item])
-    if not valid:
+def _packing_item_to_op(
+    itinerary_id: int, validator: EntityValidator, item: Any
+) -> ChangeOp | None:
+    data = _valid_data(itinerary_id, validator, item)
+    if data is None:
         return None
-    return build_packing_create_op(
-        valid[0]["name"],
-        valid[0]["category"],
-        valid[0]["is_shared"],
-        item.get("reason"),
-    )
+    return build_create_op("packing_item", data, item.get("reason"))
 
 
-def _wishlist_item_to_op(itinerary_id: int, item: Any) -> dict | None:
-    if not isinstance(item, dict) or not _text(item.get("name"), 255):
+def _wishlist_item_to_op(
+    itinerary_id: int, validator: EntityValidator, item: Any
+) -> ChangeOp | None:
+    data = _valid_data(itinerary_id, validator, item)
+    if data is None:
         return None
-    place = geocode(itinerary_id, item["name"], item.get("address")) or {}
-    return {
-        "op": "create",
-        "entity": "wishlist_item",
-        "data": {
-            "name": item["name"].strip()[:255],
-            "description": _text(item.get("description"), 255),
-            "wishlist_name": DEFAULT_WISHLIST_NAME,
-            **place,
-        },
-        "reason": _text(item.get("reason"), 200),
-    }
+    data = {**data, "wishlist_name": DEFAULT_WISHLIST_NAME}
+    return build_create_op("wishlist_item", data, item.get("reason"))
 
 
 def _section(plan: dict, name: str, itinerary_id: int) -> list:
@@ -211,18 +165,38 @@ def _section(plan: dict, name: str, itinerary_id: int) -> list:
     return items
 
 
-def _convert_plan(
-    itinerary, plan: dict, days: list[str], progress: ProgressCallback
-) -> list[dict]:
+def _validators(itinerary) -> dict[str, EntityValidator]:
+    context = ValidationContext(
+        itinerary.timezone,
+        time_rules=TimeRules(days=frozenset(trip_dates(itinerary))),
+    )
+    validators = {}
+    for entity in ("accommodation", "event", "packing_item", "wishlist_item"):
+        validators[entity] = EntityValidatorFactory.create(entity, context)
+    return validators
+
+
+def _convert_plan(itinerary, plan: dict, progress: ProgressCallback) -> list[ChangeOp]:
+    validators = _validators(itinerary)
     converters = {
-        "accommodations": lambda item: _accommodation_to_op(itinerary, item),
-        "events": lambda item: _event_to_op(itinerary, item, days),
-        "packing_items": _packing_item_to_op,
-        "wishlist_items": lambda item: _wishlist_item_to_op(itinerary.id, item),
+        "accommodations": lambda item: _accommodation_to_op(
+            itinerary, validators["accommodation"], item
+        ),
+        "events": lambda item: _event_to_op(itinerary.id, validators["event"], item),
+        "packing_items": lambda item: _packing_item_to_op(
+            itinerary.id, validators["packing_item"], item
+        ),
+        "wishlist_items": lambda item: _wishlist_item_to_op(
+            itinerary.id, validators["wishlist_item"], item
+        ),
     }
-    sections = {name: _section(plan, name, itinerary.id) for name in PLAN_SECTIONS}
+    sections = {}
+    for name in PLAN_SECTIONS:
+        sections[name] = _section(plan, name, itinerary.id)
     sections["accommodations"] = sections["accommodations"][:2]
-    places_total = sum(len(sections[name]) for name in PLACE_SECTIONS)
+    places_total = 0
+    for name in PLACE_SECTIONS:
+        places_total += len(sections[name])
 
     ops = []
     looked_up = 0
@@ -256,7 +230,7 @@ def generate_trip_plan(
     progress("Asking the AI to plan your trip", None, None)
     plan = _request_plan(prompt)
 
-    ops = _convert_plan(itinerary, plan, days, progress)
+    ops = _convert_plan(itinerary, plan, progress)
     if len(ops) > MAX_OPS_PER_CHANGE_SET:
         logger.warning(
             "Trip %s: truncating %s generated ops to %s.",

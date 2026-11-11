@@ -2,7 +2,7 @@ from typing import Any
 
 from ...schemas.ai_schema import NoParamsSchema
 from ...services.ai_services import generate_packing_list
-from ...services.change_set_service import build_packing_create_op
+from ...services.change_set_service import build_create_op
 from ..context import TaskContext
 from ..registry import register
 from ..handler import AiTaskHandler
@@ -21,6 +21,6 @@ class GeneratePackingHandler(AiTaskHandler):
         for item in items:
             is_shared = item["is_shared"] or ctx.user_id is None
             ops.append(
-                build_packing_create_op(item["name"], item["category"], is_shared)
+                build_create_op("packing_item", {**item, "is_shared": is_shared})
             )
         return ops
