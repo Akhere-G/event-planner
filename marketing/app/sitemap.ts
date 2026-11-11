@@ -1,7 +1,18 @@
 import type { MetadataRoute } from "next";
+import { blogPosts } from "./blog/posts";
+import { postPath, SITE_URL } from "./lib/urls";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = "https://triptrack.uk";
+  const baseUrl = SITE_URL;
+  const postEntries: MetadataRoute.Sitemap = [];
+  for (const post of blogPosts) {
+    postEntries.push({
+      url: `${baseUrl}${postPath(post.slug)}`,
+      lastModified: new Date(post.publishedAt),
+      changeFrequency: "monthly",
+      priority: 0.6,
+    });
+  }
 
   return [
     {
@@ -40,5 +51,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "weekly",
       priority: 0.7,
     },
+    ...postEntries,
   ];
 }
