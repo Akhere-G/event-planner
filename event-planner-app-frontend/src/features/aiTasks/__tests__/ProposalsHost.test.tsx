@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 import { screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { renderWithProviders } from "../../../test-utils/renderWithProviders";
@@ -13,19 +13,19 @@ const READY = [
     type: "generate_packing",
     status: "ready",
     opCount: 8,
-    tripName: "Rome",
-    tripId: 6,
   }),
 ];
 
+beforeEach(() => sessionStorage.clear());
+
 function setup(pending = READY) {
   mockApi({
-    "GET /ai-tasks/pending": ok(pending),
+    "GET /itineraries/5/ai-tasks/pending": ok(pending),
     "GET /itineraries/5/ai-tasks/1": ok(aiTaskDetail()),
     "GET /itineraries/5": ok(TRIP),
     "GET /itineraries/5/events": ok({ events: [EVENT] }),
   });
-  return renderWithProviders(<ProposalsHost />);
+  return renderWithProviders(<ProposalsHost tripId={5} />);
 }
 
 describe("ProposalsHost", () => {
@@ -37,7 +37,7 @@ describe("ProposalsHost", () => {
     });
     expect(within(list).getByText("Optimise days")).toBeInTheDocument();
     expect(within(list).getByText("Smart packing list")).toBeInTheDocument();
-    expect(within(list).getByText(/Rome · 8 changes/)).toBeInTheDocument();
+    expect(within(list).getByText(/8 changes/)).toBeInTheDocument();
   });
 
   it("shows nothing when there is nothing to decide", async () => {
@@ -66,9 +66,9 @@ describe("ProposalsHost", () => {
     expect(screen.queryByText("Optimise days")).not.toBeInTheDocument();
   });
 
-  it("decide later hides all of them until the app is opened again", async () => {
+  it("decide later hides all of them, and stays hidden for the session", async () => {
     const user = userEvent.setup();
-    setup();
+    const { unmount } = setup();
 
     await user.click(await screen.findByRole("button", { name: "Decide later" }));
 
@@ -77,17 +77,36 @@ describe("ProposalsHost", () => {
         screen.queryByRole("list", { name: "Pending AI suggestions" }),
       ).not.toBeInTheDocument(),
     );
+
+    unmount();
+    setup();
+
+    await waitFor(() =>
+      expect(
+        screen.queryByRole("list", { name: "Pending AI suggestions" }),
+      ).not.toBeInTheDocument(),
+    );
+  });
+
+  it("only hides the proposals that were dismissed", async () => {
+    sessionStorage.setItem("dismissed_ai_proposals", "[1]");
+    setup();
+
+    expect(await screen.findByText("Smart packing list")).toBeInTheDocument();
+    expect(screen.queryByText("Optimise days")).not.toBeInTheDocument();
   });
 
   it("opens the proposal named in the link straight away", async () => {
     mockApi({
-      "GET /ai-tasks/pending": ok(READY),
+      "GET /itineraries/5/ai-tasks/pending": ok(READY),
       "GET /itineraries/5/ai-tasks/1": ok(aiTaskDetail()),
       "GET /itineraries/5": ok(TRIP),
       "GET /itineraries/5/events": ok({ events: [EVENT] }),
     });
 
-    renderWithProviders(<ProposalsHost />, { route: "/trips/5?aiTask=1" });
+    renderWithProviders(<ProposalsHost tripId={5} />, {
+      route: "/trips/5?aiTask=1",
+    });
 
     expect(await screen.findByText("Dinner")).toBeInTheDocument();
   });
