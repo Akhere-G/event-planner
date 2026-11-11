@@ -299,7 +299,9 @@ def retry(task: AiTask, user_id: int | None) -> AiTask:
     return new_task
 
 
-def accept(task: AiTask, op_indexes: list[int], user_id: int | None) -> dict[str, Any]:
+def accept(
+    task: AiTask, op_indexes: list[int], user_id: int | None, role: str | None = None
+) -> dict[str, Any]:
     if task.status == AiTaskStatus.EXPIRED.value:
         raise InvalidAiTaskStateError("This proposal has expired.")
     if task.status != AiTaskStatus.READY.value:
@@ -340,6 +342,7 @@ def accept(task: AiTask, op_indexes: list[int], user_id: int | None) -> dict[str
             task.itinerary_id,
             [snapshots.strip_base(ops[i]) for i in applicable],
             user_id,
+            role,
         )
     except Exception:
         db.session.rollback()

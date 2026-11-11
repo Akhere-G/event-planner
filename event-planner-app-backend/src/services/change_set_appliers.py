@@ -39,9 +39,12 @@ class ChangeSetApplier(ABC):
     schema_class: ClassVar[type[Schema]]
     create_defaults: ClassVar[dict[str, Any]] = {}
 
-    def __init__(self, itinerary_id: int, user_id: int | None):
+    def __init__(
+        self, itinerary_id: int, user_id: int | None, role: str | None = None
+    ):
         self.itinerary_id = itinerary_id
         self.user_id = user_id
+        self.role = role
 
     def prepare(self, op: dict) -> PreparedOp:
         """Validate an op's data with the entity's existing schema."""
@@ -195,10 +198,10 @@ _APPLIER_CLASSES: dict[str, type[ChangeSetApplier]] = {
 class ChangeSetApplierFactory:
     @staticmethod
     def create(
-        entity: str, itinerary_id: int, user_id: int | None
+        entity: str, itinerary_id: int, user_id: int | None, role: str | None = None
     ) -> ChangeSetApplier:
         try:
             applier_class = _APPLIER_CLASSES[entity]
         except KeyError:
             raise ValueError(f"Unsupported change set entity: {entity}") from None
-        return applier_class(itinerary_id, user_id)
+        return applier_class(itinerary_id, user_id, role)

@@ -28,12 +28,14 @@ _COUNT_KEYS = {"create": "created", "update": "updated", "delete": "deleted"}
 
 
 def validate_ops(
-    itinerary_id: int, ops: list[dict], user_id: int | None
+    itinerary_id: int, ops: list[dict], user_id: int | None, role: str | None = None
 ) -> list[tuple[ChangeSetApplier, PreparedOp]]:
     """Validate every op up front, collecting all errors by op index."""
     prepared, errors = [], {}
     for index, op in enumerate(ops):
-        applier = ChangeSetApplierFactory.create(op["entity"], itinerary_id, user_id)
+        applier = ChangeSetApplierFactory.create(
+            op["entity"], itinerary_id, user_id, role
+        )
         try:
             prepared.append((applier, applier.prepare(op)))
         except ValidationError as err:
@@ -44,10 +46,10 @@ def validate_ops(
 
 
 def apply_change_set(
-    itinerary_id: int, ops: list[dict], user_id: int | None
+    itinerary_id: int, ops: list[dict], user_id: int | None, role: str | None = None
 ) -> dict[str, int]:
     """Validate every op, then apply them all in one transaction (all or nothing)."""
-    prepared = validate_ops(itinerary_id, ops, user_id)
+    prepared = validate_ops(itinerary_id, ops, user_id, role)
     counts = {key: 0 for key in _COUNT_KEYS.values()}
 
     try:
@@ -130,7 +132,10 @@ def build_packing_create_op(
 
 
 def build_edit_ops(
-    itinerary_id: int, user_id: int | None, proposed: list[dict[str, Any]]
+    itinerary_id: int,
+    user_id: int | None,
+    proposed: list[dict[str, Any]],
+    role: str | None = None,
 ) -> list[dict[str, Any]]:
     """Validate proposed ops with their entity schemas and shape them for preview.
 
@@ -138,7 +143,9 @@ def build_edit_ops(
     """
     ops = []
     for op in proposed:
-        applier = ChangeSetApplierFactory.create(op["entity"], itinerary_id, user_id)
+        applier = ChangeSetApplierFactory.create(
+            op["entity"], itinerary_id, user_id, role
+        )
         try:
             prepared = applier.prepare(op)
         except ValidationError as err:
