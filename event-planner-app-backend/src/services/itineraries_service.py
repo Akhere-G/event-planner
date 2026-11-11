@@ -226,28 +226,31 @@ def is_authorised(
         raise UserNotAuthorisedError(message)
 
 
+UPDATABLE_ITINERARY_FIELDS = (
+    "name",
+    "destination",
+    "latitude",
+    "longitude",
+    "description",
+    "start_date",
+    "end_date",
+    "budget_amount_gbp",
+    "updated_by_id",
+)
+
+
+def stage_update_itinerary(itinerary_id: int, data: dict) -> Itinerary:
+    itinerary = get_itinerary(itinerary_id)
+    for field in UPDATABLE_ITINERARY_FIELDS:
+        if field in data:
+            setattr(itinerary, field, data[field])
+    db.session.flush()
+    return itinerary
+
+
 def update_itinerary(itinerary_id: int, data: dict):
     try:
-        stmt = select(Itinerary).where(Itinerary.id == itinerary_id)
-        itinerary = db.session.execute(stmt).scalar_one_or_none()
-
-        if not itinerary:
-            raise ItineraryDoesNotExistError()
-
-        for k, v in data.items():
-            if k in [
-                "name",
-                "destination",
-                "latitude",
-                "longitude",
-                "description",
-                "start_date",
-                "end_date",
-                "budget_amount_gbp",
-                "updated_by_id",
-            ]:
-                setattr(itinerary, k, v)
-
+        itinerary = stage_update_itinerary(itinerary_id, data)
         db.session.commit()
         return itinerary
     except Exception:

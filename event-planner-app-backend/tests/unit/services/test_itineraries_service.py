@@ -14,6 +14,7 @@ from src.services.itineraries_service import (
     get_membership_by_email,
     is_authorised,
     is_user_in_itinerary,
+    stage_update_itinerary,
     update_itinerary,
 )
 from tests.factories import ItineraryUserFactory
@@ -146,6 +147,15 @@ def test_update_itinerary_success(itinerary):
     )
     assert updated.name == "Updated Name"
     assert updated.destination == "Kyoto"
+
+
+def test_staging_an_update_sets_only_the_trip_fields(itinerary):
+    staged = stage_update_itinerary(
+        itinerary.id, {"budget_amount_gbp": 250, "viewer_code": "stolen"}
+    )
+
+    assert staged.budget_amount_gbp == 250
+    assert staged.viewer_code != "stolen"
 
 
 def test_update_itinerary_not_found(app):
