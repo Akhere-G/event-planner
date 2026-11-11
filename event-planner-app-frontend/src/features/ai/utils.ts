@@ -1,5 +1,6 @@
 import { formatTimeInTripTimezone } from "../../utils/dateFormattors";
 import type { Event } from "../events/types";
+import { formatCurrency } from "../expenses/utils";
 import type { ChangeEntity, ChangeOp } from "./types";
 
 export interface ChangeOpSummary {
@@ -12,7 +13,11 @@ const ENTITY_LABELS: Record<ChangeEntity, string> = {
   event: "Event",
   accommodation: "Accommodation",
   packing_item: "Packing item",
+  wishlist: "Wishlist",
   wishlist_item: "Wishlist item",
+  trip: "Trip",
+  expense: "Expense",
+  settlement: "Payment",
 };
 
 export const OP_LABELS: Record<ChangeOp["op"], string> = {
@@ -29,6 +34,23 @@ const text = (data: Record<string, unknown>, key: string) => {
 // Events in the trip cache already hold trip-local "yyyy-MM-dd HH:mm" strings.
 const localTimeRange = (event: Event) =>
   `${event.startAt.slice(11, 16)}–${event.endAt.slice(11, 16)}`;
+
+const amount = (data: Record<string, unknown>, key: string) => {
+  const value = data[key];
+  return typeof value === "number" ? value : undefined;
+};
+
+const joinDetails = (parts: (string | undefined)[]) =>
+  parts.filter(Boolean).join(" · ");
+
+const dateRange = (data: Record<string, unknown>) => {
+  const start = text(data, "startDate");
+  const end = text(data, "endDate");
+  if (start && end) return `${start} → ${end}`;
+  if (start) return `Starts ${start}`;
+  if (end) return `Ends ${end}`;
+  return undefined;
+};
 
 const utcTimeRange = (
   data: Record<string, unknown>,
@@ -51,6 +73,8 @@ export const describeChangeOp = (
       : undefined;
   const title =
     text(op.data, "name") ??
+    text(op.data, "description") ??
+    op.label ??
     existing?.name ??
     `${ENTITY_LABELS[op.entity]}${op.id != null ? ` #${op.id}` : ""}`;
 
@@ -86,6 +110,47 @@ export const describeChangeOp = (
       return { title, detail: text(op.data, "category") ?? "" };
     case "wishlist_item":
       return { title, detail: text(op.data, "wishlistName") ?? "AI ideas" };
+    case "wishlist":
+      return {
+        title,
+        detail:
+          op.op === "update" && op.label
+            ? `Renamed from ${op.label}`
+            : "New wishlist",
+      };
+    case "trip": {
+      const budget = amount(op.data, "budgetAmountGbp");
+      return {
+        title,
+        detail: joinDetails([
+          dateRange(op.data),
+          budget === undefined ? undefined : `Budget ${formatCurrency(budget)}`,
+        ]),
+      };
+    }
+    case "expense": {
+      const total = amount(op.data, "amount");
+      return {
+        title,
+        detail: joinDetails([
+          total === undefined
+            ? undefined
+            : formatCurrency(total, text(op.data, "currency")),
+          text(op.data, "spentOn"),
+          text(op.data, "category"),
+        ]),
+      };
+    }
+    case "settlement": {
+      const paid = amount(op.data, "amountGbp");
+      return {
+        title,
+        detail: joinDetails([
+          paid === undefined ? undefined : formatCurrency(paid),
+          text(op.data, "settledOn"),
+        ]),
+      };
+    }
   }
 };
 
@@ -106,7 +171,11 @@ export const CHANGE_ENTITY_ORDER: ChangeEntity[] = [
   "event",
   "packing_item",
   "accommodation",
+  "wishlist",
   "wishlist_item",
+  "trip",
+  "expense",
+  "settlement",
 ];
 
 export interface IndexedChangeOp {

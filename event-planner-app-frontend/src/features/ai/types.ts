@@ -9,7 +9,14 @@ export interface TripInsight {
 export type ChangeOpKind = "create" | "update" | "delete";
 
 export type ChangeEntity =
-  "event" | "accommodation" | "packing_item" | "wishlist_item";
+  | "event"
+  | "accommodation"
+  | "packing_item"
+  | "wishlist"
+  | "wishlist_item"
+  | "trip"
+  | "expense"
+  | "settlement";
 
 export interface ChangeOp {
   op: ChangeOpKind;
@@ -17,6 +24,8 @@ export interface ChangeOp {
   id?: number | null;
   data: Record<string, unknown>;
   reason?: string | null;
+  /** Name of the item an update or delete refers to. */
+  label?: string | null;
 }
 
 export interface ApplyChangeSetResult {

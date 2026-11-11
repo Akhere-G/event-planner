@@ -78,6 +78,87 @@ describe("describeChangeOp", () => {
     expect(describeChangeOp(op, [], timezone).title).toBe("Packing item #3");
   });
 
+  it("titles an update or delete with the item's label", () => {
+    const op: ChangeOp = {
+      op: "delete",
+      entity: "settlement",
+      id: 4,
+      data: {},
+      label: "Sam paid Alex",
+    };
+
+    expect(describeChangeOp(op, [], timezone)).toEqual({
+      title: "Sam paid Alex",
+      detail: "Will be removed",
+    });
+  });
+
+  it("describes a trip's new dates and budget", () => {
+    const op: ChangeOp = {
+      op: "update",
+      entity: "trip",
+      id: 1,
+      label: "Paris",
+      data: {
+        startDate: "2026-12-01",
+        endDate: "2026-12-05",
+        budgetAmountGbp: 500,
+      },
+    };
+
+    expect(describeChangeOp(op, [], timezone)).toEqual({
+      title: "Paris",
+      detail: "2026-12-01 → 2026-12-05 · Budget £500.00",
+    });
+  });
+
+  it("describes a renamed wishlist", () => {
+    const op: ChangeOp = {
+      op: "update",
+      entity: "wishlist",
+      id: 2,
+      label: "Food",
+      data: { name: "Restaurants" },
+    };
+
+    expect(describeChangeOp(op, [], timezone)).toEqual({
+      title: "Restaurants",
+      detail: "Renamed from Food",
+    });
+  });
+
+  it("describes an expense in its own currency", () => {
+    const op: ChangeOp = {
+      op: "create",
+      entity: "expense",
+      data: {
+        description: "Dinner",
+        amount: 40,
+        currency: "EUR",
+        spentOn: "2026-12-02",
+        category: "food",
+      },
+    };
+
+    expect(describeChangeOp(op, [], timezone)).toEqual({
+      title: "Dinner",
+      detail: "€40.00 · 2026-12-02 · food",
+    });
+  });
+
+  it("describes a settlement", () => {
+    const op: ChangeOp = {
+      op: "create",
+      entity: "settlement",
+      data: { amountGbp: 12.5, settledOn: "2026-12-03" },
+    };
+
+    expect(describeChangeOp(op, [], timezone)).toEqual({
+      title: "Payment",
+      detail: "£12.50 · 2026-12-03",
+    });
+  });
+
   it("describes wishlist items with their wishlist", () => {
     const op: ChangeOp = {
       op: "create",
