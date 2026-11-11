@@ -3,6 +3,7 @@ from flask.testing import FlaskClient
 from sqlalchemy import event as sa_event
 from src import create_app
 from src.extensions import cache, db
+from src.services import fx_service
 from src.services.flight_providers import (
     FlightNumberProviderFactory,
     FlightProviderFactory,
@@ -20,7 +21,7 @@ from src.models import (
     WishlistItemVote,
 )
 
-from .fakes import FakeFlightNumberProvider, FakeFlightProvider
+from .fakes import FakeFlightNumberProvider, FakeFlightProvider, FakeRateProvider
 from .factories import (
     EventFactory,
     FlightFactory,
@@ -79,6 +80,16 @@ def flight_number_provider(monkeypatch, app) -> FakeFlightNumberProvider:
     """Swap the flight-number providers for one fake and start with a cold cache."""
     provider = FakeFlightNumberProvider()
     monkeypatch.setattr(FlightNumberProviderFactory, "PROVIDERS", [lambda: provider])
+    cache.clear()
+    yield provider
+    cache.clear()
+
+
+@pytest.fixture
+def rate_provider(monkeypatch, app) -> FakeRateProvider:
+    """Swap the exchange rate provider for a fake and start with a cold cache."""
+    provider = FakeRateProvider()
+    monkeypatch.setattr(fx_service, "_provider", provider)
     cache.clear()
     yield provider
     cache.clear()
