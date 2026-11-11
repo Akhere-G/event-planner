@@ -198,7 +198,7 @@ class CreateOnlyEditor(EntityEditor):
     create_required = ("text",)
     hint = "text"
 
-    def describe_items(self, itinerary):
+    def describe_entities(self, itinerary):
         return {7: "a note"}
 
 

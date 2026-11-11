@@ -43,18 +43,18 @@ class EntityEditor(ABC):
         self.user_id = context.user_id
         self.is_admin = context.is_admin
         self.members = context.members
-        self.descriptions = self.describe_items(context.itinerary)
+        self.descriptions = self.describe_entities(context.itinerary)
 
     @classmethod
     def is_available(cls, context: EditContext) -> bool:
-        """Whether this user may be offered the chance to edit this kind of item."""
+        """Whether this user may be offered the chance to edit this entity."""
         return True
 
     @abstractmethod
-    def describe_items(self, itinerary: Itinerary) -> dict[int, str]:
-        """Item id -> one prompt line describing it.
+    def describe_entities(self, itinerary: Itinerary) -> dict[int, str]:
+        """Entity id -> one prompt line describing it.
 
-        The first " | " part is the item's short name, shown when it is reviewed.
+        The first " | " part is the entity's short name, shown when it is reviewed.
         """
 
     def label(self, item_id: int) -> str:

@@ -1,4 +1,4 @@
-"""What the model may see and change for each kind of item on a trip."""
+"""What the model may see and change for each entity on a trip."""
 
 from datetime import datetime
 from typing import Any
@@ -31,7 +31,7 @@ class EventEditor(EntityEditor):
         "address (full street address, only when creating)"
     )
 
-    def describe_items(self, itinerary: Itinerary) -> dict[int, str]:
+    def describe_entities(self, itinerary: Itinerary) -> dict[int, str]:
         descriptions = {}
         for event in sorted(itinerary.events, key=lambda event: event.start_at):
             start = to_trip_local(event.start_at, self.timezone)
@@ -79,11 +79,12 @@ class AccommodationEditor(EntityEditor):
     fields = ("name", "address", "description", "start_date", "end_date")
     hint = "name, address, description, start_date, end_date (YYYY-MM-DD)"
 
-    def describe_items(self, itinerary: Itinerary) -> dict[int, str]:
+    def describe_entities(self, itinerary: Itinerary) -> dict[int, str]:
         descriptions = {}
-        for stay in itinerary.accommodations:
-            descriptions[stay.id] = (
-                f"{stay.name} | {stay.start_date} to {stay.end_date} | {stay.address}"
+        for accommodation in itinerary.accommodations:
+            descriptions[accommodation.id] = (
+                f"{accommodation.name} | {accommodation.start_date} to "
+                f"{accommodation.end_date} | {accommodation.address}"
             )
         return descriptions
 
@@ -94,12 +95,12 @@ class PackingItemEditor(EntityEditor):
     fields = ("name", "category", "is_shared", "is_checked")
     hint = "name, category, is_shared (true or false), is_checked (true or false)"
 
-    def describe_items(self, itinerary: Itinerary) -> dict[int, str]:
+    def describe_entities(self, itinerary: Itinerary) -> dict[int, str]:
         descriptions = {}
         for item in itinerary.packing_items:
             if item.is_shared or item.owner_id == self.user_id:
-                kind = "shared" if item.is_shared else "personal"
-                descriptions[item.id] = f"{item.name} | {item.category} | {kind}"
+                sharing = "shared" if item.is_shared else "personal"
+                descriptions[item.id] = f"{item.name} | {item.category} | {sharing}"
         return descriptions
 
 
@@ -113,7 +114,7 @@ class WishlistItemEditor(EntityEditor):
         "only when creating"
     )
 
-    def describe_items(self, itinerary: Itinerary) -> dict[int, str]:
+    def describe_entities(self, itinerary: Itinerary) -> dict[int, str]:
         descriptions = {}
         for wishlist in itinerary.wishlists:
             for item in wishlist.items:

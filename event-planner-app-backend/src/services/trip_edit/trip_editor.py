@@ -30,7 +30,7 @@ class TripEditor(EntityEditor):
     def is_available(cls, context: EditContext) -> bool:
         return context.is_admin
 
-    def describe_items(self, itinerary: Itinerary) -> dict[int, str]:
+    def describe_entities(self, itinerary: Itinerary) -> dict[int, str]:
         self.start_date = itinerary.start_date
         self.end_date = itinerary.end_date
         budget = itinerary.budget_amount_gbp
