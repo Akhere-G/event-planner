@@ -27,6 +27,7 @@ const expense: Expense = {
   amount: 45,
   currency: "GBP",
   amountGbp: 45,
+  fxRate: 1,
   spentOn: "2026-08-01",
   paidById: 5,
   splitType: "even_all",

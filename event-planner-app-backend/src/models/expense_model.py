@@ -7,6 +7,7 @@ from sqlalchemy import Date, ForeignKey, Integer, Numeric, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from ..extensions import Base
+from ..utils.currency import BASE_CURRENCY
 from .audit_mixins import AuditMixin
 from .itinerary_model import Itinerary
 
@@ -36,7 +37,7 @@ class Expense(Base, AuditMixin):
     description: Mapped[str] = mapped_column(String(255))
     category: Mapped[str] = mapped_column(String(32), default="other")
     amount: Mapped[Decimal] = mapped_column(Numeric(12, 2))
-    currency: Mapped[str] = mapped_column(String(3), default="GBP")
+    currency: Mapped[str] = mapped_column(String(3), default=BASE_CURRENCY.value)
     amount_gbp: Mapped[Decimal] = mapped_column(Numeric(12, 2))
     fx_rate: Mapped[Decimal] = mapped_column(Numeric(18, 8), default=Decimal("1"))
     spent_on: Mapped[date] = mapped_column(Date, index=True)

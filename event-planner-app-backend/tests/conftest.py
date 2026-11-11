@@ -1,13 +1,17 @@
 import pytest
 from flask.testing import FlaskClient
+from sqlalchemy import delete
+from sqlalchemy import event as sa_event
 from src import create_app
 from src.extensions import cache, db
+from src.services import fx_service
 from src.services.flight_providers import (
     FlightNumberProviderFactory,
     FlightProviderFactory,
 )
 from src.models import (
     Event,
+    ExchangeRate,
     Flight,
     Invite,
     Itinerary,
@@ -19,7 +23,7 @@ from src.models import (
     WishlistItemVote,
 )
 
-from .fakes import FakeFlightNumberProvider, FakeFlightProvider
+from .fakes import FakeFlightNumberProvider, FakeFlightProvider, FakeRateProvider
 from .factories import (
     EventFactory,
     FlightFactory,
@@ -33,11 +37,27 @@ from .factories import (
 )
 
 
+def _let_sqlite_savepoints_roll_back(engine):
+    """pysqlite starts transactions lazily, so a SAVEPOINT would commit the test's
+    outer transaction. Begin explicitly so the per-test rollback still undoes it."""
+
+    @sa_event.listens_for(engine, "connect")
+    def _take_over_transactions(dbapi_connection, _record):
+        dbapi_connection.isolation_level = None
+
+    @sa_event.listens_for(engine, "begin")
+    def _begin(connection):
+        # In-memory SQLite shares one DBAPI connection between every checkout.
+        if not connection.connection.dbapi_connection.in_transaction:
+            connection.exec_driver_sql("BEGIN")
+
+
 @pytest.fixture(scope="session")
 def _db_setup():
     app = create_app(testing=True)
 
     with app.app_context():
+        _let_sqlite_savepoints_roll_back(db.engine)
         db.create_all()
         db.session.execute(db.text("PRAGMA foreign_keys=ON"))
 
@@ -65,6 +85,23 @@ def flight_number_provider(monkeypatch, app) -> FakeFlightNumberProvider:
     cache.clear()
     yield provider
     cache.clear()
+
+
+def _clear_rates():
+    """Cached rates are committed by the services, which outlives a test's rollback."""
+    cache.clear()
+    db.session.execute(delete(ExchangeRate))
+    db.session.commit()
+
+
+@pytest.fixture
+def rate_provider(monkeypatch, app) -> FakeRateProvider:
+    """Swap the exchange rate provider for a fake and start with a cold cache."""
+    provider = FakeRateProvider()
+    monkeypatch.setattr(fx_service, "_provider", provider)
+    _clear_rates()
+    yield provider
+    _clear_rates()
 
 
 @pytest.fixture

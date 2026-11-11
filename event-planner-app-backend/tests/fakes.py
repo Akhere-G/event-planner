@@ -1,7 +1,9 @@
 from dataclasses import replace
 from datetime import UTC, datetime
+from decimal import Decimal
 
-from src.exceptions import FlightProviderError
+from src.exceptions import FlightProviderError, FxUnavailableError
+from src.services.fx_provider import PublishedRate, RateProvider
 from src.services.flight_providers import (
     FlightApiProvider,
     FlightJourney,
@@ -104,3 +106,27 @@ class FakeFlightNumberProvider(FlightNumberProvider):
         if self.error:
             raise FlightProviderError(self.error)
         return self.journeys
+
+
+class FakeRateProvider(RateProvider):
+    """Answers every pair with one rate; set ``published_on`` to mimic a weekend."""
+
+    def __init__(self, rate="0.85", published_on=None, latest=None, down=False):
+        self.rate = Decimal(rate)
+        self.published_on = published_on
+        self.latest = latest or {"GBP": Decimal(1), "EUR": Decimal("1.17")}
+        self.down = down
+        self.lookups = []
+        self.latest_requests = []
+
+    def get_rate(self, base, quote, on):
+        self.lookups.append((base, quote, on))
+        if self.down:
+            raise FxUnavailableError
+        return PublishedRate(on=self.published_on or on, rate=self.rate)
+
+    def get_latest(self, base):
+        self.latest_requests.append(base)
+        if self.down:
+            raise FxUnavailableError
+        return self.latest
