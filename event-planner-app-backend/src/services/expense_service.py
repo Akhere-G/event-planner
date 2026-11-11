@@ -281,7 +281,7 @@ def stage_create_expense(
 
 
 def stage_create_expense_as_member(
-    user_id: int | None, role: str, itinerary_id: int, data: dict
+    user_id: int | None, role: str | None, itinerary_id: int, data: dict
 ) -> Expense:
     """Like ``stage_create_expense``, but only an admin may name someone else payer."""
     if data.get("paid_by_id") is not None:
@@ -304,13 +304,15 @@ def create_expense(
 
 
 def _require_self_unless_admin(
-    user_id: int | None, role: str, person_id: int, message: str
+    user_id: int | None, role: str | None, person_id: int, message: str
 ):
     if role != UserRole.ADMIN.value and person_id != user_id:
         raise UserNotAuthorisedError(message)
 
 
-def _require_owner_or_admin(user_id: int | None, role: str, expense: Expense):
+def _require_owner_or_admin(
+    user_id: int | None, role: str | None, expense: Expense
+):
     if role != UserRole.ADMIN.value and expense.created_by_id != user_id:
         raise UserNotAuthorisedError(
             "Only the person who added an expense or an admin can change it."
@@ -318,7 +320,11 @@ def _require_owner_or_admin(user_id: int | None, role: str, expense: Expense):
 
 
 def stage_update_expense(
-    user_id: int | None, role: str, itinerary_id: int, expense_id: int, data: dict
+    user_id: int | None,
+    role: str | None,
+    itinerary_id: int,
+    expense_id: int,
+    data: dict,
 ) -> Expense:
     user_id = _require_user(user_id)
     expense = get_expense(itinerary_id, expense_id)
@@ -369,7 +375,7 @@ def update_expense(
 
 
 def stage_delete_expense(
-    user_id: int | None, role: str, itinerary_id: int, expense_id: int
+    user_id: int | None, role: str | None, itinerary_id: int, expense_id: int
 ) -> None:
     expense = get_expense(itinerary_id, expense_id)
     _require_owner_or_admin(user_id, role, expense)
@@ -409,7 +415,7 @@ def get_settlement(itinerary_id: int, settlement_id: int) -> Settlement:
 
 
 def stage_create_settlement(
-    user_id: int | None, role: str, itinerary_id: int, data: dict
+    user_id: int | None, role: str | None, itinerary_id: int, data: dict
 ) -> Settlement:
     user_id = _require_user(user_id)
     _require_self_unless_admin(
@@ -446,7 +452,7 @@ def create_settlement(
 
 def stage_update_settlement(
     user_id: int | None,
-    role: str,
+    role: str | None,
     itinerary_id: int,
     settlement_id: int,
     data: dict,
@@ -486,7 +492,7 @@ def update_settlement(
 
 
 def stage_delete_settlement(
-    user_id: int | None, role: str, itinerary_id: int, settlement_id: int
+    user_id: int | None, role: str | None, itinerary_id: int, settlement_id: int
 ) -> None:
     settlement = get_settlement(itinerary_id, settlement_id)
     _require_owner_or_admin(user_id, role, settlement)  # type: ignore[arg-type]
