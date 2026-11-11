@@ -3,6 +3,7 @@ from datetime import UTC, datetime
 from decimal import Decimal
 
 from src.exceptions import FlightProviderError, FxUnavailableError
+from src.services.ai_providers.base import AiProvider
 from src.services.fx_provider import PublishedRate, RateProvider
 from src.services.flight_providers import (
     FlightApiProvider,
@@ -68,6 +69,24 @@ KL1000_JOURNEY = FlightJourney(
         replace(AMS_TO_JFK, airline="KL", flight_number="1000"),
     )
 )
+
+
+class FakeAiProvider(AiProvider):
+    def __init__(self, name, text="", available=True, error=None):
+        self.name = name
+        self.text = text
+        self.available = available
+        self.error = error
+        self.prompts = []
+
+    def is_available(self) -> bool:
+        return self.available
+
+    def generate(self, prompt: str) -> str:
+        self.prompts.append(prompt)
+        if self.error:
+            raise self.error
+        return self.text
 
 
 class FakeFlightProvider(FlightApiProvider):
