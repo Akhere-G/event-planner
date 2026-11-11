@@ -56,5 +56,12 @@ def test_flights_are_only_mentioned_when_there_are_some(itinerary):
 def test_the_format_names_every_entity_and_its_fields(itinerary):
     prompt = build(itinerary)
 
-    assert "event | accommodation | packing_item | wishlist_item" in prompt
+    assert "event | accommodation | packing_item | wishlist | wishlist_item" in prompt
     assert "- wishlist_item: name, description; address and wishlist_name" in prompt
+
+
+def test_an_editors_notes_are_added_to_the_prompt(itinerary):
+    prompt = build(itinerary)
+
+    assert "NOTES ON SPECIFIC ITEMS:" in prompt
+    assert "- wishlist: removing a list removes its items too" in prompt

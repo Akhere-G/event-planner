@@ -33,6 +33,7 @@ class EntityEditor(ABC):
     kinds: ClassVar[tuple[str, ...]] = ("create", "update", "delete")
     create_required: ClassVar[tuple[str, ...]] = ("name",)
     hint: ClassVar[str]
+    notes: ClassVar[str] = ""
 
     def __init__(self, context: EditContext) -> None:
         self.itinerary_id = context.itinerary.id
