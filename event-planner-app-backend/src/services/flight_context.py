@@ -1,6 +1,11 @@
 from dataclasses import dataclass
 from datetime import date, datetime, time, timedelta
 
+from sqlalchemy import select
+from sqlalchemy.orm import selectinload
+
+from ..extensions import db
+from ..models import Flight
 from ..utils.trip_time import to_trip_local
 
 PRE_DEPARTURE_BUFFER = timedelta(hours=3)
@@ -45,10 +50,19 @@ def _label(flight) -> str:
     )
 
 
-def blocked_windows(flights, timezone_name: str | None) -> list[FlightWindow]:
+def blocked_windows(itinerary_id: int, timezone_name: str | None) -> list[FlightWindow]:
     """Plain-data windows for a trip's flights, safe to use after the DB is released."""
+    stmt = (
+        select(Flight)
+        .options(
+            selectinload(Flight.departure_airport),
+            selectinload(Flight.arrival_airport),
+        )
+        .where(Flight.itinerary_id == itinerary_id)
+        .order_by(Flight.depart_at)
+    )
     windows = []
-    for flight in flights:
+    for flight in db.session.execute(stmt).scalars():
         windows.append(
             FlightWindow(
                 label=_label(flight),
