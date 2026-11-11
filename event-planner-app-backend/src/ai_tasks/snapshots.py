@@ -37,6 +37,9 @@ _SELECTS: dict[str, Callable[[int], Select]] = {
     "packing_item": lambda trip: select(PackingItem.id, PackingItem.updated_at).where(
         PackingItem.itinerary_id == trip
     ),
+    "wishlist": lambda trip: select(Wishlist.id, Wishlist.updated_at).where(
+        Wishlist.itinerary_id == trip
+    ),
     "wishlist_item": lambda trip: (
         select(WishlistItem.id, WishlistItem.updated_at)
         .join(Wishlist, Wishlist.id == WishlistItem.wishlist_id)

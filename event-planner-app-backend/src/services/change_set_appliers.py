@@ -10,7 +10,7 @@ from ..models import UserRole
 from ..schemas.event_schema import EventSchema
 from ..schemas.itinerary_schema import ItinerarySchema
 from ..schemas.packing_item_schema import PackingItemSchema
-from ..schemas.wishlist_schema import WishlistItemSchema
+from ..schemas.wishlist_schema import WishlistItemSchema, WishlistSchema
 from . import (
     accommodation_service,
     events_service,
@@ -177,6 +177,27 @@ class PackingItemChangeSetApplier(ChangeSetApplier):
         )
 
 
+class WishlistChangeSetApplier(ChangeSetApplier):
+    entity = "wishlist"
+    schema_class = WishlistSchema
+
+    def schema(self, partial: bool) -> Schema:
+        return WishlistSchema(partial=partial, only=("name",))
+
+    def create(self, data, context):
+        wishlist_service.stage_create_wishlist(
+            self.user_id, self.itinerary_id, data["name"]
+        )
+
+    def update(self, entity_id, data):
+        wishlist_service.stage_update_wishlist(
+            self.itinerary_id, entity_id, self.user_id, data["name"]
+        )
+
+    def delete(self, entity_id):
+        wishlist_service.stage_delete_wishlist(self.itinerary_id, entity_id)
+
+
 class WishlistItemChangeSetApplier(ChangeSetApplier):
     entity = "wishlist_item"
     schema_class = WishlistItemSchema
@@ -218,6 +239,7 @@ _APPLIER_CLASSES: dict[str, type[ChangeSetApplier]] = {
         EventChangeSetApplier,
         AccommodationChangeSetApplier,
         PackingItemChangeSetApplier,
+        WishlistChangeSetApplier,
         WishlistItemChangeSetApplier,
     )
 }

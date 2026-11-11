@@ -1,14 +1,18 @@
 import pytest
+from sqlalchemy import select
 from datetime import date
 
 from marshmallow import ValidationError
 from src.exceptions import BadRequestError, UserNotAuthorisedError
+from src.extensions import db
+from src.models import Wishlist
 from src.services.change_set_appliers import (
     AccommodationChangeSetApplier,
     ChangeSetApplierFactory,
     EventChangeSetApplier,
     PackingItemChangeSetApplier,
     TripChangeSetApplier,
+    WishlistChangeSetApplier,
     WishlistItemChangeSetApplier,
 )
 
@@ -21,6 +25,7 @@ from src.services.change_set_appliers import (
         ("packing_item", PackingItemChangeSetApplier),
         ("wishlist_item", WishlistItemChangeSetApplier),
         ("trip", TripChangeSetApplier),
+        ("wishlist", WishlistChangeSetApplier),
     ],
 )
 def test_factory_builds_the_applier_for_each_entity(entity, expected):
@@ -170,3 +175,36 @@ def test_a_trip_cannot_be_added_or_removed(itinerary, admin_user):
         applier.apply(applier.prepare({"op": "delete", "id": itinerary.id}))
     with pytest.raises(BadRequestError):
         applier.create({}, {})
+
+
+def wishlist_applier(wishlist, admin_user):
+    return ChangeSetApplierFactory.create(
+        "wishlist", wishlist.itinerary_id, admin_user.id, "admin"
+    )
+
+
+def test_a_wishlist_can_be_added_renamed_and_removed(wishlist, admin_user):
+    applier = wishlist_applier(wishlist, admin_user)
+
+    applier.apply(applier.prepare({"op": "create", "data": {"name": "Cafes"}}))
+    applier.apply(
+        applier.prepare(
+            {"op": "update", "id": wishlist.id, "data": {"name": "Museums"}}
+        )
+    )
+    applier.apply(applier.prepare({"op": "delete", "id": wishlist.id}))
+
+    names = []
+    for saved in db.session.scalars(
+        select(Wishlist).where(Wishlist.itinerary_id == wishlist.itinerary_id)
+    ):
+        names.append(saved.name)
+    assert "Cafes" in names
+    assert "Museums" not in names
+
+
+def test_a_wishlist_needs_a_name(wishlist, admin_user):
+    with pytest.raises(ValidationError):
+        wishlist_applier(wishlist, admin_user).prepare(
+            {"op": "create", "data": {"name": None}}
+        )
