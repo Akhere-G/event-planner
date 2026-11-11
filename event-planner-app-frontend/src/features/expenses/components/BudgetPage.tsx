@@ -18,7 +18,7 @@ export default function BudgetPage({ trip }: { trip: Trip }) {
     <StateGate loadingStateProps={{ isLoading }} errorStateProps={{ isError }}>
       <div className="flex flex-col gap-6">
         <BudgetSummary trip={trip} expenses={expenses} />
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 gap-6">
           <div className="card lg:col-span-2 flex flex-col gap-2">
             <div className="flex items-center justify-between gap-2">
               <h3 className="text-lg font-semibold text-text-primary">
