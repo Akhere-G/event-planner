@@ -7,12 +7,13 @@ import { useSavePreferencesMutation } from "../features/trips/services/preferenc
 import { useCreateAiTaskMutation } from "../features/aiTasks/services/aiTaskApiSlice";
 import { useAddTripMutation } from "../features/trips/services/tripsApiSlice";
 import { usePostHog } from "@posthog/react";
-import { differenceInDays } from "date-fns";
 import { isApiError, isValidationError } from "../features/api/utils";
 import { toast } from "sonner";
-import { anonymousAccessCodeStorageKey } from "../features/api/apiSlice";
-
 import useLoadAnonTrip from "../features/trips/hooks/useLoadAnonTrip";
+import useRememberCreatedTrip from "../features/trips/hooks/useRememberCreatedTrip";
+import TripPromptForm from "../features/tripBuilder/components/TripPromptForm";
+import { PLANNING_STARTED_MESSAGE } from "../features/tripBuilder/constants";
+import { LabelledDivider } from "../components";
 import { Alert, AlertDescription, AlertTitle } from "../components/ui/alert";
 import { InfoIcon } from "lucide-react";
 
@@ -27,14 +28,13 @@ export default function Addtrip() {
     useCreateAiTaskMutation();
 
   const { anonTrip } = useLoadAnonTrip();
+  const rememberCreatedTrip = useRememberCreatedTrip();
 
   /** The plan is made in the background: go to the trip and watch it there. */
   async function queueGeneration(tripId: number) {
     try {
       await createAiTask({ tripId, type: "generate_trip" }).unwrap();
-      toast.success(
-        "Planning your trip. We'll let you know when it's ready to review.",
-      );
+      toast.success(PLANNING_STARTED_MESSAGE);
     } catch (err) {
       posthog?.captureException(err);
       toast.error(
@@ -56,28 +56,8 @@ export default function Addtrip() {
     }
     try {
       const newTrip = await addTrip(trip).unwrap();
-      posthog?.capture("trip_created", {
-        trip_id: newTrip.data.id,
-        name: trip.name,
-        startDate: trip.startDate,
-        endDate: trip.endDate,
-        destination: trip.destination,
-        duration_days: differenceInDays(
-          new Date(trip.endDate),
-          new Date(trip.startDate),
-        ),
-      });
+      rememberCreatedTrip(newTrip.data, "form");
       const tripId = newTrip.data.id;
-      const anonymousAccessCode = newTrip.data.anonymousAccessCode;
-      if (anonymousAccessCode) {
-        localStorage.setItem(
-          anonymousAccessCodeStorageKey,
-          JSON.stringify({
-            anonymousAccessCode,
-            tripId,
-          }),
-        );
-      }
       toast.success("Trip created.");
 
       try {
@@ -126,6 +106,8 @@ export default function Addtrip() {
             </AlertDescription>
           </Alert>
         )}
+        <TripPromptForm disabled={!!anonTrip} />
+        <LabelledDivider label="or add manually" />
         <TripForm
           submitAction={onSubmit}
           submitBtnText="Create"

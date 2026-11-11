@@ -37,7 +37,7 @@ export function mockApi(routes: Record<string, Handler>) {
       return respond({ success: false, message: `No mock for ${key}` }, 404);
     }
     const body = typeof handler === "function" ? await handler(input) : handler;
-    return respond(body);
+    return body instanceof Response ? body : respond(body);
   });
 
   vi.stubGlobal("fetch", fetchMock);
