@@ -9,14 +9,14 @@ from src.services.trip_edit.entity_editors import (
     WishlistItemEditor,
 )
 from src.extensions import db
-from tests.factories import WishlistItemFactory
+from tests.factories import WishlistItemFactory, edit_context
 
 PLACE = {"latitude": 48.86, "longitude": 2.33, "address": "Rue de Rivoli, Paris"}
 GEOCODE = "src.services.trip_edit.entity_editors.geocode"
 
 
 def event_editor(itinerary, flights=()):
-    return EventEditor(itinerary, None, list(flights))
+    return EventEditor(edit_context(itinerary, flights=flights))
 
 
 def test_event_lines_show_the_id_and_trip_local_times(itinerary, event):
@@ -32,7 +32,7 @@ def test_event_lines_show_the_id_and_trip_local_times(itinerary, event):
 def test_an_update_converts_local_times_to_utc(itinerary):
     data = {"start_at": "2026-08-02T19:00:00", "end_at": "2026-08-02T21:00:00"}
 
-    result = event_editor(itinerary).normalise("update", data)
+    result = event_editor(itinerary).normalise("update", None, data)
 
     assert result == {
         "start_at": "2026-08-02T17:00:00+00:00",
@@ -43,13 +43,13 @@ def test_an_update_converts_local_times_to_utc(itinerary):
 def test_an_offset_the_model_adds_is_ignored(itinerary):
     data = {"start_at": "2026-08-02T19:00:00Z", "end_at": "2026-08-02T21:00:00Z"}
 
-    result = event_editor(itinerary).normalise("update", data)
+    result = event_editor(itinerary).normalise("update", None, data)
 
     assert result["start_at"] == "2026-08-02T17:00:00+00:00"
 
 
 def test_an_update_without_times_is_left_alone(itinerary):
-    assert event_editor(itinerary).normalise("update", {"name": "Brunch"}) == {
+    assert event_editor(itinerary).normalise("update", None, {"name": "Brunch"}) == {
         "name": "Brunch"
     }
 
@@ -62,7 +62,7 @@ def test_bad_times_are_rejected(itinerary):
     numbers = {"start_at": 19, "end_at": 21}
 
     for data in (one_sided, backwards, garbage, numbers):
-        assert editor.normalise("update", data) is None
+        assert editor.normalise("update", None, data) is None
 
 
 def test_a_time_inside_a_flight_window_is_rejected(itinerary):
@@ -71,7 +71,7 @@ def test_a_time_inside_a_flight_window_is_rejected(itinerary):
     )
     data = {"start_at": "2026-08-02T19:00:00", "end_at": "2026-08-02T21:00:00"}
 
-    assert event_editor(itinerary, [flight]).normalise("update", data) is None
+    assert event_editor(itinerary, [flight]).normalise("update", None, data) is None
 
 
 def test_a_created_event_gets_its_coordinates_and_utc_times(itinerary):
@@ -82,7 +82,7 @@ def test_a_created_event_gets_its_coordinates_and_utc_times(itinerary):
     }
 
     with patch(GEOCODE, return_value=PLACE) as geocode:
-        result = event_editor(itinerary).normalise("create", data)
+        result = event_editor(itinerary).normalise("create", None, data)
 
     geocode.assert_called_once_with(itinerary.id, "Louvre", None)
     assert result["latitude"] == 48.86
@@ -98,12 +98,14 @@ def test_a_created_event_that_cannot_be_placed_is_rejected(itinerary):
     }
 
     with patch(GEOCODE, return_value=None):
-        assert event_editor(itinerary).normalise("create", data) is None
+        assert event_editor(itinerary).normalise("create", None, data) is None
 
 
 def test_a_created_event_needs_both_times(itinerary):
     with patch(GEOCODE, return_value=PLACE):
-        assert event_editor(itinerary).normalise("create", {"name": "Louvre"}) is None
+        result = event_editor(itinerary).normalise("create", None, {"name": "Louvre"})
+
+    assert result is None
 
 
 def test_the_address_can_only_be_set_when_creating(itinerary):
@@ -138,7 +140,7 @@ def test_packing_items_hide_other_peoples_personal_items(
         itinerary.packing_items.append(item)
     db.session.flush()
 
-    editor = PackingItemEditor(itinerary, editor_user.id, [])
+    editor = PackingItemEditor(edit_context(itinerary, user_id=editor_user.id))
 
     assert editor.ids() == {shared.id, mine.id}
 
@@ -146,7 +148,7 @@ def test_packing_items_hide_other_peoples_personal_items(
 def test_wishlist_items_are_described_with_their_list(itinerary, wishlist):
     item = WishlistItemFactory(wishlist=wishlist, name="Orsay")
 
-    editor = WishlistItemEditor(itinerary, None, [])
+    editor = WishlistItemEditor(edit_context(itinerary))
 
     assert editor.lines() == [f"- id={item.id} | Orsay | list: {wishlist.name}"]
     assert "wishlist_name" in editor.allowed_fields("create")
@@ -154,17 +156,17 @@ def test_wishlist_items_are_described_with_their_list(itinerary, wishlist):
 
 
 def test_a_created_wishlist_item_with_an_address_is_geocoded(itinerary):
-    editor = WishlistItemEditor(itinerary, None, [])
+    editor = WishlistItemEditor(edit_context(itinerary))
 
     with patch(GEOCODE, return_value=PLACE):
-        result = editor.normalise("create", {"name": "Orsay", "address": "Paris"})
+        result = editor.normalise("create", None, {"name": "Orsay", "address": "Paris"})
 
     assert result["latitude"] == 48.86
 
 
 def test_a_wishlist_item_that_cannot_be_placed_is_kept_without_coordinates(itinerary):
-    editor = WishlistItemEditor(itinerary, None, [])
+    editor = WishlistItemEditor(edit_context(itinerary))
     data = {"name": "Orsay", "address": "Paris"}
 
     with patch(GEOCODE, return_value=None):
-        assert editor.normalise("create", data) == data
+        assert editor.normalise("create", None, data) == data

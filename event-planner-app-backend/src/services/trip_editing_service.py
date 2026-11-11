@@ -14,10 +14,11 @@ from ..utils.db_utils import release_connection
 from .ai_services import format_json, get_ai_response
 from .ai_task_service import create_proposal
 from .change_set_service import build_edit_ops
-from .flight_context import FlightWindow, blocked_windows
+from .flight_context import blocked_windows
 from .itineraries_service import get_itinerary
-from .trip_edit.entity_editors import EDITORS, EntityEditor
+from .trip_edit.editor_base import EditContext
 from .trip_edit.prompt import ChatTurn, build_edit_prompt
+from .trip_edit.registry import build_editors
 from .trip_edit.sanitiser import sanitise_edit_ops
 
 EDIT_TRIP_TASK_TYPE = "edit_trip"
@@ -32,13 +33,11 @@ class TripEditResult:
     task: AiTask | None
 
 
-def _build_editors(
-    itinerary: Itinerary, user_id: int | None, flights: list[FlightWindow]
-) -> dict[str, EntityEditor]:
-    editors = {}
-    for entity, editor_class in EDITORS.items():
-        editors[entity] = editor_class(itinerary, user_id, flights)
-    return editors
+def _member_names(itinerary: Itinerary) -> dict[int, str]:
+    names = {}
+    for membership in itinerary.user_memberships:
+        names[membership.user_id] = membership.user.username
+    return names
 
 
 def _reply(result: dict[str, Any], has_ops: bool) -> str:
@@ -51,12 +50,14 @@ def _reply(result: dict[str, Any], has_ops: bool) -> str:
 def edit_trip_with_ai(
     itinerary_id: int,
     user_id: int | None,
+    role: str | None,
     message: str,
     history: list[ChatTurn],
 ) -> TripEditResult:
     itinerary = get_itinerary(itinerary_id)
     flights = blocked_windows(itinerary.flights, itinerary.timezone)
-    editors = _build_editors(itinerary, user_id, flights)
+    context = EditContext(itinerary, user_id, role, flights, _member_names(itinerary))
+    editors = build_editors(context)
     prompt = build_edit_prompt(itinerary, editors, flights, message, history)
     # Taken before the slow AI call, so edits made while it runs show up as stale.
     snapshot = snapshots.capture(itinerary_id)
@@ -68,7 +69,7 @@ def edit_trip_with_ai(
 
     proposed = sanitise_edit_ops(result.get("ops") or [], editors)
     ops = snapshots.attach_bases(
-        build_edit_ops(itinerary_id, user_id, proposed), snapshot
+        build_edit_ops(itinerary_id, user_id, proposed, role), snapshot
     )
     task = None
     if ops:

@@ -1,14 +1,13 @@
 from datetime import datetime
 
 from src.services.flight_context import FlightWindow
-from src.services.trip_edit.entity_editors import EDITORS
+from src.services.trip_edit.registry import build_editors
 from src.services.trip_edit.prompt import MAX_HISTORY_MESSAGES, build_edit_prompt
+from tests.factories import edit_context
 
 
 def build(itinerary, message="Move dinner", history=(), flights=()):
-    editors = {}
-    for entity, editor_class in EDITORS.items():
-        editors[entity] = editor_class(itinerary, None, list(flights))
+    editors = build_editors(edit_context(itinerary, flights=flights))
     return build_edit_prompt(itinerary, editors, list(flights), message, list(history))
 
 

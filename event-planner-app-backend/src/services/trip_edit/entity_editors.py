@@ -1,59 +1,15 @@
-"""What the model may see and change for each kind of trip item.
+"""What the model may see and change for each kind of item on a trip."""
 
-An editor reads everything it needs from the trip when it is built, so it can be used
-after the database connection has been released.
-"""
-
-from abc import ABC, abstractmethod
 from datetime import datetime
-from typing import Any, ClassVar
+from typing import Any
 
 from ...models import Itinerary
 from ...utils.trip_time import to_trip_local, trip_local_to_utc
-from ..flight_context import FlightWindow, overlaps_any
+from ..flight_context import overlaps_any
 from ..trip_generation_service import geocode
+from .editor_base import EntityEditor
 
 _MINUTES = "%Y-%m-%dT%H:%M"
-
-
-class EntityEditor(ABC):
-    entity: ClassVar[str]
-    title: ClassVar[str]
-    fields: ClassVar[tuple[str, ...]]
-    create_only_fields: ClassVar[tuple[str, ...]] = ()
-    hint: ClassVar[str]
-
-    def __init__(
-        self, itinerary: Itinerary, user_id: int | None, flights: list[FlightWindow]
-    ) -> None:
-        self.itinerary_id = itinerary.id
-        self.timezone = itinerary.timezone
-        self.flights = flights
-        self.descriptions = self.describe_items(itinerary, user_id)
-
-    @abstractmethod
-    def describe_items(
-        self, itinerary: Itinerary, user_id: int | None
-    ) -> dict[int, str]:
-        """Item id -> one prompt line describing it."""
-
-    def allowed_fields(self, kind: str) -> tuple[str, ...]:
-        if kind == "create":
-            return self.fields + self.create_only_fields
-        return self.fields
-
-    def ids(self) -> frozenset[int]:
-        return frozenset(self.descriptions)
-
-    def lines(self) -> list[str]:
-        lines = []
-        for item_id, description in self.descriptions.items():
-            lines.append(f"- id={item_id} | {description}")
-        return lines
-
-    def normalise(self, kind: str, data: dict[str, Any]) -> dict[str, Any] | None:
-        """Make the op's data ready to validate, or None when it cannot be used."""
-        return data
 
 
 def _parse_local(value: Any) -> datetime | None:
@@ -75,9 +31,7 @@ class EventEditor(EntityEditor):
         "address (full street address, only when creating)"
     )
 
-    def describe_items(
-        self, itinerary: Itinerary, user_id: int | None
-    ) -> dict[int, str]:
+    def describe_items(self, itinerary: Itinerary) -> dict[int, str]:
         descriptions = {}
         for event in sorted(itinerary.events, key=lambda event: event.start_at):
             start = to_trip_local(event.start_at, self.timezone)
@@ -88,7 +42,9 @@ class EventEditor(EntityEditor):
             )
         return descriptions
 
-    def normalise(self, kind: str, data: dict[str, Any]) -> dict[str, Any] | None:
+    def normalise(
+        self, kind: str, item_id: int | None, data: dict[str, Any]
+    ) -> dict[str, Any] | None:
         if kind == "create" or "start_at" in data or "end_at" in data:
             data = self._with_utc_times(data)
             if data is None:
@@ -123,9 +79,7 @@ class AccommodationEditor(EntityEditor):
     fields = ("name", "address", "description", "start_date", "end_date")
     hint = "name, address, description, start_date, end_date (YYYY-MM-DD)"
 
-    def describe_items(
-        self, itinerary: Itinerary, user_id: int | None
-    ) -> dict[int, str]:
+    def describe_items(self, itinerary: Itinerary) -> dict[int, str]:
         descriptions = {}
         for stay in itinerary.accommodations:
             descriptions[stay.id] = (
@@ -140,12 +94,10 @@ class PackingItemEditor(EntityEditor):
     fields = ("name", "category", "is_shared", "is_checked")
     hint = "name, category, is_shared (true or false), is_checked (true or false)"
 
-    def describe_items(
-        self, itinerary: Itinerary, user_id: int | None
-    ) -> dict[int, str]:
+    def describe_items(self, itinerary: Itinerary) -> dict[int, str]:
         descriptions = {}
         for item in itinerary.packing_items:
-            if item.is_shared or item.owner_id == user_id:
+            if item.is_shared or item.owner_id == self.user_id:
                 kind = "shared" if item.is_shared else "personal"
                 descriptions[item.id] = f"{item.name} | {item.category} | {kind}"
         return descriptions
@@ -161,25 +113,17 @@ class WishlistItemEditor(EntityEditor):
         "only when creating"
     )
 
-    def describe_items(
-        self, itinerary: Itinerary, user_id: int | None
-    ) -> dict[int, str]:
+    def describe_items(self, itinerary: Itinerary) -> dict[int, str]:
         descriptions = {}
         for wishlist in itinerary.wishlists:
             for item in wishlist.items:
                 descriptions[item.id] = f"{item.name} | list: {wishlist.name}"
         return descriptions
 
-    def normalise(self, kind: str, data: dict[str, Any]) -> dict[str, Any] | None:
+    def normalise(
+        self, kind: str, item_id: int | None, data: dict[str, Any]
+    ) -> dict[str, Any] | None:
         if kind == "create" and data.get("address"):
             place = geocode(self.itinerary_id, data["name"], data["address"])
             return {**data, **(place or {})}
         return data
-
-
-EDITORS: dict[str, type[EntityEditor]] = {
-    EventEditor.entity: EventEditor,
-    AccommodationEditor.entity: AccommodationEditor,
-    PackingItemEditor.entity: PackingItemEditor,
-    WishlistItemEditor.entity: WishlistItemEditor,
-}

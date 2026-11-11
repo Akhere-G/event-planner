@@ -37,6 +37,7 @@ def edit_trip_route(itinerary_id: int, access: ItineraryAccess):
     result = edit_trip_with_ai(
         itinerary_id,
         access.user_id,
+        access.role,
         request_data["message"],
         request_data["history"],
     )
