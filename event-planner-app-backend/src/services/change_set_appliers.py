@@ -65,6 +65,12 @@ class ChangeSetApplier(ABC):
         """Split non-schema fields out of the op data. Most entities have none."""
         return data, {}
 
+    def preview(self, op: PreparedOp) -> dict[str, Any]:
+        """The op's data as the API shows it, without saving anything."""
+        if op.kind == "delete":
+            return {}
+        return self.schema_class(partial=op.kind == "update").dump(op.data)
+
     def apply(self, op: PreparedOp) -> None:
         if op.kind == "create":
             self.create(op.data, op.context)
@@ -148,6 +154,12 @@ class WishlistItemChangeSetApplier(ChangeSetApplier):
     def extract_context(self, data):
         name = data.pop("wishlist_name", None) or data.pop("wishlistName", None)
         return data, {"wishlist_name": name or DEFAULT_WISHLIST_NAME}
+
+    def preview(self, op: PreparedOp) -> dict[str, Any]:
+        data = super().preview(op)
+        if op.kind == "create":
+            data["wishlist_name"] = op.context["wishlist_name"]
+        return data
 
     def create(self, data, context):
         wishlist_name = context.get("wishlist_name", DEFAULT_WISHLIST_NAME)
