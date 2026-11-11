@@ -1,5 +1,6 @@
 import pytest
 from flask.testing import FlaskClient
+from sqlalchemy import event as sa_event
 from src import create_app
 from src.extensions import cache, db
 from src.services.flight_providers import (
@@ -33,11 +34,27 @@ from .factories import (
 )
 
 
+def _let_sqlite_savepoints_roll_back(engine):
+    """pysqlite starts transactions lazily, so a SAVEPOINT would commit the test's
+    outer transaction. Begin explicitly so the per-test rollback still undoes it."""
+
+    @sa_event.listens_for(engine, "connect")
+    def _take_over_transactions(dbapi_connection, _record):
+        dbapi_connection.isolation_level = None
+
+    @sa_event.listens_for(engine, "begin")
+    def _begin(connection):
+        # In-memory SQLite shares one DBAPI connection between every checkout.
+        if not connection.connection.dbapi_connection.in_transaction:
+            connection.exec_driver_sql("BEGIN")
+
+
 @pytest.fixture(scope="session")
 def _db_setup():
     app = create_app(testing=True)
 
     with app.app_context():
+        _let_sqlite_savepoints_roll_back(db.engine)
         db.create_all()
         db.session.execute(db.text("PRAGMA foreign_keys=ON"))
 
