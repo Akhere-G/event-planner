@@ -59,7 +59,7 @@ def edit_trip_with_ai(
     history: list[ChatTurn],
 ) -> TripEditResult:
     itinerary = get_itinerary(itinerary_id)
-    flights = blocked_windows(itinerary_id, itinerary.timezone)
+    flights = blocked_windows(itinerary_id, itinerary.timezone, labelled=True)
     members = _member_names(itinerary_id)
     context = EditContext(itinerary, user_id, role, flights, members)
     editors = build_editors(context)
