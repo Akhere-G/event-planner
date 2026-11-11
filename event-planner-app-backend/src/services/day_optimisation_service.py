@@ -8,12 +8,8 @@ from ..utils.ai_output_validators import OptimisationRules
 from ..utils.db_utils import release_connection
 from ..utils.location_utils import get_place_details, get_weekly_opening_hours
 from ..utils.progress import ProgressCallback, no_progress
-from .ai_services import (
-    format_json,
-    get_ai_response,
-    to_trip_local,
-    trip_local_to_utc,
-)
+from ..utils.trip_time import to_trip_local, trip_local_to_utc
+from .ai_services import format_json, get_ai_response
 from .change_set_service import (
     build_event_create_ops,
     build_event_delete_ops,
