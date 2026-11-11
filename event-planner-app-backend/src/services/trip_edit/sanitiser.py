@@ -55,7 +55,7 @@ def _clean_op(raw: Any, editors: dict[str, EntityEditor]) -> dict[str, Any] | No
             return _dropped("not an item of this trip", raw)
         op["label"] = editor.label(op["id"])
     if kind != "delete":
-        data = _allowed_data(raw, editor, kind)
+        data = editor.tidy(kind, _allowed_data(raw, editor, kind))
         if not data or (kind == "create" and not _has_required(data, editor)):
             return _dropped("no usable data", raw)
         op["data"] = editor.normalise(kind, op.get("id"), data)

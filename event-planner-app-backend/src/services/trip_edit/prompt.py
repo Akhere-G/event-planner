@@ -2,6 +2,7 @@ from datetime import date
 from typing import Literal, TypedDict
 
 from ...models import Itinerary
+from ...utils.clock import utcnow
 from ..flight_context import FlightWindow, format_flight_context
 from ..trip_generation_service import trip_days
 from .editor_base import EntityEditor
@@ -16,7 +17,7 @@ class ChatTurn(TypedDict):
 
 INTRO = """
 You edit the itinerary of a trip to {destination} ({start} to {end}). Times are local
-to the {timezone} timezone.
+to the {timezone} timezone. Today is {today}.
 
 DAYS:
 {days}
@@ -155,6 +156,7 @@ def build_edit_prompt(
         start=itinerary.start_date,
         end=itinerary.end_date,
         timezone=timezone,
+        today=utcnow().date(),
         days=_days(itinerary),
     )
     prompt += TRIP_SECTION.format(sections=_sections(editors))

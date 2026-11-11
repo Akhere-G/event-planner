@@ -74,6 +74,10 @@ class EntityEditor(ABC):
             lines.append(f"- id={item_id} | {description}")
         return lines
 
+    def tidy(self, kind: str, data: dict[str, Any]) -> dict[str, Any]:
+        """Fix a model's usual slips before the required fields are checked."""
+        return data
+
     def normalise(
         self, kind: str, item_id: int | None, data: dict[str, Any]
     ) -> dict[str, Any] | None:
