@@ -15,7 +15,7 @@ class HiddenEditor(EntityEditor):
     def is_available(cls, context):
         return False
 
-    def describe_items(self, itinerary):
+    def describe_entities(self, itinerary):
         return {}
 
 

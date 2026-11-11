@@ -63,7 +63,7 @@ def test_the_format_names_every_entity_and_its_fields(itinerary):
 def test_an_editors_notes_are_added_to_the_prompt(itinerary):
     prompt = build(itinerary)
 
-    assert "NOTES ON SPECIFIC ITEMS:" in prompt
+    assert "NOTES ON SPECIFIC ENTITIES:" in prompt
     assert "- wishlist: removing a list removes its items too" in prompt
 
 

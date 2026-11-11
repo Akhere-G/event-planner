@@ -95,7 +95,7 @@ class ExpenseEditor(MemberEditor):
             tidied.pop("participant_ids", None)
         return tidied
 
-    def describe_items(self, itinerary: Itinerary) -> dict[int, str]:
+    def describe_entities(self, itinerary: Itinerary) -> dict[int, str]:
         self.payer_ids: dict[int, int] = {}
         descriptions = {}
         for expense in expense_service.get_expenses(itinerary.id):
@@ -151,7 +151,7 @@ class SettlementEditor(MemberEditor):
     def tidy(self, kind: str, data: dict[str, Any]) -> dict[str, Any]:
         return self._tidy_common(kind, data, "settled_on")
 
-    def describe_items(self, itinerary: Itinerary) -> dict[int, str]:
+    def describe_entities(self, itinerary: Itinerary) -> dict[int, str]:
         self.parties: dict[int, tuple[int, int]] = {}
         descriptions = {}
         for settlement in expense_service.get_settlements(itinerary.id):

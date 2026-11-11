@@ -15,8 +15,8 @@ def _dropped(reason: str, raw: Any) -> None:
     logger.warning("Dropped an AI edit (%s): %r", reason, raw)
 
 
-def _own_item_id(raw: dict[str, Any], editor: EntityEditor) -> int | None:
-    """The id of an item of this trip, or None when it is missing or foreign."""
+def _own_entity_id(raw: dict[str, Any], editor: EntityEditor) -> int | None:
+    """The id of an entity of this trip, or None when it is missing or foreign."""
     item_id = raw.get("id")
     if type(item_id) is int and item_id in editor.ids():
         return item_id
@@ -50,9 +50,9 @@ def _clean_op(raw: Any, editors: dict[str, EntityEditor]) -> dict[str, Any] | No
 
     op: dict[str, Any] = {"op": kind, "entity": entity, "data": {}}
     if kind != "create":
-        op["id"] = _own_item_id(raw, editor)
+        op["id"] = _own_entity_id(raw, editor)
         if op["id"] is None:
-            return _dropped("not an item of this trip", raw)
+            return _dropped("not an entity of this trip", raw)
         op["label"] = editor.label(op["id"])
     if kind != "delete":
         data = editor.tidy(kind, _allowed_data(raw, editor, kind))
@@ -68,10 +68,10 @@ def _clean_op(raw: Any, editors: dict[str, EntityEditor]) -> dict[str, Any] | No
 def sanitise_edit_ops(
     raw_ops: Any, editors: dict[str, EntityEditor]
 ) -> list[dict[str, Any]]:
-    """Keep only the ops that edit this trip's own items in ways the editors allow.
+    """Keep only the ops that edit this trip's own entities in ways the editors allow.
 
     Anything else the model proposed is dropped, and only the first op on any one
-    item is kept so the set can be applied in one go.
+    entity is kept so the set can be applied in one go.
     """
     if not isinstance(raw_ops, list):
         raise AIResponseError("AI response must contain a list of ops.")
@@ -85,7 +85,7 @@ def sanitise_edit_ops(
         if "id" in op:
             target = (op["entity"], op["id"])
             if target in edited:
-                _dropped("second op on one item", raw)
+                _dropped("second op on one entity", raw)
                 continue
             edited.add(target)
         ops.append(op)

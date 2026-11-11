@@ -17,7 +17,7 @@ class WishlistEditor(EntityEditor):
         "the item with a wishlist_name instead of creating the list."
     )
 
-    def describe_items(self, itinerary: Itinerary) -> dict[int, str]:
+    def describe_entities(self, itinerary: Itinerary) -> dict[int, str]:
         self.names: dict[int, str] = {}
         descriptions = {}
         for wishlist in itinerary.wishlists:
