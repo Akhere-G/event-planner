@@ -139,9 +139,9 @@ def test_a_settlement_is_described_by_who_paid_whom(
     lines = settlement_editor(itinerary, admin_user, "admin", members).lines()
 
     assert lines == [
-        f"- id={settlement.id} | from_user_id {admin_user.id} ({admin_user.username}) "
-        f"paid to_user_id {editor_user.id} ({editor_user.username}) | £7.50 | "
-        "2026-08-03"
+        f"- id={settlement.id} | {admin_user.username} paid {editor_user.username} "
+        f"£7.50 | from_user_id {admin_user.id} ({admin_user.username}) | "
+        f"to_user_id {editor_user.id} ({editor_user.username}) | 2026-08-03"
     ]
 
 

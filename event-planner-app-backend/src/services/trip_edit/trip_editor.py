@@ -36,7 +36,8 @@ class TripEditor(EntityEditor):
         budget = itinerary.budget_amount_gbp
         return {
             itinerary.id: (
-                f"start_date {self.start_date} | end_date {self.end_date} | "
+                f"Trip dates and budget | start_date {self.start_date} | "
+                f"end_date {self.end_date} | "
                 f"budget_amount_gbp {'none' if budget is None else budget}"
             )
         }

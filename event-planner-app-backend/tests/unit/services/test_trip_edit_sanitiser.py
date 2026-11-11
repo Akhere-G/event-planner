@@ -39,6 +39,7 @@ def test_a_valid_update_keeps_only_allowed_fields(itinerary, event):
             "op": "update",
             "entity": "event",
             "id": event.id,
+            "label": event.name,
             "data": {"name": "Brunch"},
             "reason": "Earlier",
         }
@@ -51,7 +52,14 @@ def test_a_delete_keeps_no_data(itinerary, event):
     ops = sanitise_edit_ops(raw, editors_for(itinerary))
 
     assert ops == [
-        {"op": "delete", "entity": "event", "id": event.id, "data": {}, "reason": None}
+        {
+            "op": "delete",
+            "entity": "event",
+            "id": event.id,
+            "label": event.name,
+            "data": {},
+            "reason": None,
+        }
     ]
 
 
@@ -215,3 +223,15 @@ def test_a_create_needs_the_fields_the_editor_requires(itinerary):
     ops = sanitise_edit_ops([without, with_text], editors)
 
     assert [op["data"] for op in ops] == [{"text": "Hi"}]
+
+
+def test_an_item_is_labelled_with_its_name_but_a_create_has_none(itinerary, event):
+    raw = [
+        {"op": "delete", "entity": "event", "id": event.id},
+        {"op": "create", "entity": "packing_item", "data": {"name": "Hat"}},
+    ]
+
+    ops = sanitise_edit_ops(raw, editors_for(itinerary))
+
+    assert ops[0]["label"] == event.name
+    assert "label" not in ops[1]
