@@ -2,7 +2,6 @@ import hashlib
 import logging
 import os
 from functools import lru_cache
-from typing import Optional
 
 import googlemaps
 from marshmallow import ValidationError
@@ -23,7 +22,7 @@ def _gmaps() -> googlemaps.Client:
     return _client(os.getenv("GOOGLE_MAPS_API_KEY"))
 
 
-def _find_place_id(name: str, address: Optional[str], place_type: str) -> str:
+def _find_place_id(name: str, address: str | None, place_type: str | None) -> str:
     places_result = _gmaps().places(
         query=f"{name}, {address or ''}",
         type=place_type,
@@ -37,8 +36,8 @@ def _find_place_id(name: str, address: Optional[str], place_type: str) -> str:
 
 def get_place_details(
     name: str,
-    address: Optional[str] = None,
-    place_type: str = "establishment",
+    address: str | None = None,
+    place_type: str | None = "establishment",
 ) -> dict[str, str | float]:
     place_id = _find_place_id(name, address, place_type)
 
@@ -62,9 +61,7 @@ def get_place_details(
     }
 
 
-def get_weekly_opening_hours(
-    name: str, address: Optional[str] = None
-) -> list[str] | None:
+def get_weekly_opening_hours(name: str, address: str | None = None) -> list[str] | None:
     """The place's opening hours as seven lines, Monday first, or None if unknown.
 
     Cached for a day: opening hours are a billed Places field and rarely change.
