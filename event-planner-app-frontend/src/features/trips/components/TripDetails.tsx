@@ -1,7 +1,7 @@
-import { isAdmin } from "../../users/utils";
+import { canUserEdit, isAdmin } from "../../users/utils";
 import type { Trip } from "../types";
 import TripSummary from "./TripSummary";
-import { TripInsights } from "../../ai/components";
+import { EditTripDrawer, TripInsights } from "../../ai/components";
 import TripActivities from "./TripActivities";
 import AccommodationPage from "../../accommodations/components/AccommodationPage";
 import { getCityBounds } from "../../maps/utils";
@@ -54,6 +54,11 @@ export default function TripDetails(trip: Trip) {
       <div className="card">
         <TripSummary trip={trip} showActions={isAdmin(trip.role)} />
       </div>
+      {canUserEdit(trip.role) && (
+        <div className="flex justify-end">
+          <EditTripDrawer trip={trip} />
+        </div>
+      )}
       <TaskProgressCards tripId={trip.id} />
       {/* Signed-in users get theirs from the app-wide host. */}
       {anonTrip?.tripId === trip.id && (
