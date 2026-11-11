@@ -3,6 +3,9 @@ from dataclasses import dataclass
 from datetime import date, datetime, time
 from typing import Any
 
+from ..ai_entities.json_types import JsonObject, JsonValue
+from ..ai_entities.parsing import as_list
+from ..ai_entities.validators.base import EntityValidator
 from ..exceptions import AIResponseError
 from ..services.flight_context import FlightWindow, overlaps_any
 
@@ -165,37 +168,16 @@ def validate_optimisation_ops(
     return validated
 
 
-def validate_packing_items(
-    items: Any,
-) -> list[dict[str, Any]]:
-    if not isinstance(items, list):
+def validate_creates(
+    raw_items: JsonValue, validator: EntityValidator
+) -> list[JsonObject]:
+    items = as_list(raw_items)
+    if items is None:
         raise AIResponseError("AI response must be a list.")
 
-    validated = []
-
+    valid = []
     for item in items:
-        if not isinstance(item, dict):
-            continue
-
-        name = item.get("name")
-        category = item.get("category")
-        is_shared = item.get("is_shared")
-
-        if not isinstance(name, str):
-            continue
-
-        if not isinstance(category, str):
-            continue
-
-        if not isinstance(is_shared, bool):
-            continue
-
-        validated.append(
-            {
-                "name": name,
-                "category": category,
-                "is_shared": is_shared,
-            }
-        )
-
-    return validated
+        data = validator.validate_create(item)
+        if data is not None:
+            valid.append(data)
+    return valid

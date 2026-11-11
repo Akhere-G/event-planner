@@ -66,7 +66,7 @@ def test_only_the_allowed_fields_survive_and_non_objects_are_dropped():
         {"name": " Socks ", "owner_id": 9, "category": "Clothes"}
     )
 
-    assert checked == {"name": "Socks", "category": "Clothes"}
+    assert checked == {"name": "Socks", "category": "Clothes", "is_shared": True}
     assert packing.validate_create("socks") is None
     assert packing.validate_create({"category": "x"}) is None
 
@@ -332,3 +332,11 @@ class TestSettlement:
 
         assert settlements.validate_edit(3, {"amount_gbp": 9})
         assert settlements.validate_edit(3, {"to_user_id": 1}) is None
+
+
+def test_a_packing_item_gets_the_applier_defaults_and_trimmed_values():
+    packing = validator("packing_item")
+
+    checked = packing.validate_create({"name": "n" * 150, "is_shared": False})
+
+    assert checked == {"name": "n" * 100, "is_shared": False, "category": "General"}

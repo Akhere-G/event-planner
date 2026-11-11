@@ -4,7 +4,7 @@ from ...ai_entities.json_types import JsonObject, JsonValue
 from ...ai_entities.parsing import as_int, as_list, as_object
 from ...exceptions import AIResponseError
 from ...schemas.change_set_schema import MAX_OPS_PER_CHANGE_SET
-from ..change_set_service import clean_reason
+from ..change_set_service import build_create_op, clean_reason
 from ..change_set_types import ChangeOp
 from .registry import EditableEntity
 
@@ -72,9 +72,7 @@ def _create_op(
     editable: EditableEntity, entity: str, fields: JsonObject, reason: str | None
 ) -> ChangeOp | None:
     data = editable.validator.validate_create(fields.get("data"))
-    if data is None:
-        return None
-    return {"op": "create", "entity": entity, "data": data, "reason": reason}
+    return None if data is None else build_create_op(entity, data, reason)
 
 
 def _update_op(

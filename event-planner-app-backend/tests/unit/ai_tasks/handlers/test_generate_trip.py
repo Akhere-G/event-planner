@@ -86,7 +86,7 @@ def run_handler(itinerary, user_id=None, ai_reply=None, ai_error=None):
     with (
         reply,
         patch(
-            "src.services.trip_generation_service.get_place_details",
+            "src.ai_entities.places.get_place_details",
             return_value=PLACE,
         ),
     ):
