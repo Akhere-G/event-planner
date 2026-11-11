@@ -23,8 +23,8 @@ export const aiTaskApiSlice = apiSlice.injectEndpoints({
         })),
       ],
     }),
-    getPendingAiTasks: builder.query<ApiResponse<AiTask[]>, void>({
-      query: () => "/ai-tasks/pending",
+    getPendingAiTasks: builder.query<ApiResponse<AiTask[]>, number>({
+      query: (tripId) => `${tripTasksUrl(tripId)}/pending`,
       providesTags: [{ type: "AiTasks", id: "LIST" }],
     }),
     getAiTask: builder.query<
