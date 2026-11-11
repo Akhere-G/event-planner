@@ -30,7 +30,7 @@ class TimeRules:
 @dataclass(frozen=True)
 class ValidationContext:
     timezone: str | None
-    requester: Requester | None = None
+    requester: Requester = field(default_factory=lambda: Requester(None, None, {}))
     flights: Sequence[FlightWindow] = ()
     places: PlaceResolver = field(default_factory=PlaceResolver)
     time_rules: TimeRules = field(default_factory=TimeRules)
