@@ -23,6 +23,7 @@ from ..models import (
     Wishlist,
     WishlistItem,
 )
+from ..services.change_set_types import ChangeOp
 
 Snapshot = dict[str, dict[int, str | None]]
 
@@ -76,7 +77,7 @@ def capture(itinerary_id: int) -> Snapshot:
     return snapshot
 
 
-def attach_bases(ops: list[dict[str, Any]], snapshot: Snapshot) -> list[dict[str, Any]]:
+def attach_bases(ops: list[ChangeOp], snapshot: Snapshot) -> list[ChangeOp]:
     with_bases = []
     for op in ops:
         if op["op"] in CHANGING_OPS:
