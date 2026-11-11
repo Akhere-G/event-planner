@@ -4,11 +4,12 @@ import { format, parseISO } from "date-fns";
 import { useSelector } from "react-redux";
 import { ConfirmModal } from "../../../components";
 import type { RootState } from "../../../store";
+import { BASE_CURRENCY } from "../../currency/constants";
 import useTripEvents from "../../events/hooks/useTripEvents";
 import type { Trip } from "../../trips/types";
 import useDeleteExpense from "../hooks/useDeleteExpense";
 import type { Expense } from "../types";
-import { canChangeExpense, formatGbp } from "../utils";
+import { canChangeExpense, formatCurrency, formatGbp } from "../utils";
 import ExpenseModal from "./ExpenseModal";
 
 export default function ExpenseList({
@@ -55,9 +56,16 @@ export default function ExpenseList({
               </p>
             </div>
             <div className="flex items-center gap-2 shrink-0">
-              <span className="font-semibold text-text-primary">
-                {formatGbp(expense.amountGbp)}
-              </span>
+              <div className="text-right">
+                <span className="font-semibold text-text-primary">
+                  {formatCurrency(expense.amount, expense.currency)}
+                </span>
+                {expense.currency !== BASE_CURRENCY && (
+                  <p className="text-xs text-text-secondary">
+                    {formatGbp(expense.amountGbp)}
+                  </p>
+                )}
+              </div>
               {canChange(expense) && (
                 <>
                   <button
