@@ -16,3 +16,4 @@ export { default as ToggleButton } from "./ToggleButton";
 export { default as Stepper } from "./Stepper";
 export { default as ChatThread } from "./ChatThread";
 export type { ChatMessage } from "./ChatThread";
+export { default as LabelledDivider } from "./LabelledDivider";
