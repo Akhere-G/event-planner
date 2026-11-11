@@ -59,6 +59,30 @@ def create_wishlist(user_id: int | None, itinerary_id: int, name: str):
         raise
 
 
+def get_wishlist(itinerary_id: int, wishlist_id: int) -> Wishlist:
+    stmt = select(Wishlist).where(
+        Wishlist.itinerary_id == itinerary_id,
+        Wishlist.id == wishlist_id,
+    )
+    wishlist = db.session.execute(stmt).scalar_one_or_none()
+    if not wishlist:
+        raise BadRequestError("Wishlist not found.")
+    return wishlist
+
+
+def stage_update_wishlist(
+    itinerary_id: int, wishlist_id: int, user_id: int | None, name: str
+) -> Wishlist:
+    wishlist = get_wishlist(itinerary_id, wishlist_id)
+    if get_wishlist_by_name(itinerary_id, name):
+        raise BadRequestError(f"Wishlist with the name '{name}' already exists.")
+
+    wishlist.name = name
+    wishlist.updated_by_id = user_id
+    db.session.flush()
+    return wishlist
+
+
 def update_wishlist(
     itinerary_id: int,
     wishlist_id: int,
@@ -66,30 +90,8 @@ def update_wishlist(
     name: str,
 ):
     try:
-        stmt = select(Wishlist).where(
-            Wishlist.itinerary_id == itinerary_id,
-            Wishlist.id == wishlist_id,
-        )
-
-        wishlist = db.session.execute(stmt).scalar_one_or_none()
-
-        if not wishlist:
-            raise BadRequestError("Wishlist not found.")
-
-        exisiting_wishlist = db.session.execute(
-            select(Wishlist).where(
-                Wishlist.itinerary_id == itinerary_id, Wishlist.name == name
-            )
-        ).scalar_one_or_none()
-
-        if exisiting_wishlist:
-            raise BadRequestError(f"Wishlist with the name '{name}' already exists.")
-
-        wishlist.name = name
-        wishlist.updated_by_id = user_id
-
+        wishlist = stage_update_wishlist(itinerary_id, wishlist_id, user_id, name)
         db.session.commit()
-
         return wishlist
 
     except Exception:
@@ -97,21 +99,15 @@ def update_wishlist(
         raise
 
 
+def stage_delete_wishlist(itinerary_id: int, wishlist_id: int) -> None:
+    db.session.delete(get_wishlist(itinerary_id, wishlist_id))
+    db.session.flush()
+
+
 def delete_wishlist(itinerary_id: int, wishlist_id: int):
     try:
-        stmt = select(Wishlist).where(
-            Wishlist.itinerary_id == itinerary_id,
-            Wishlist.id == wishlist_id,
-        )
-
-        wishlist = db.session.execute(stmt).scalar_one_or_none()
-
-        if not wishlist:
-            raise BadRequestError("Wishlist not found.")
-
-        db.session.delete(wishlist)
+        stage_delete_wishlist(itinerary_id, wishlist_id)
         db.session.commit()
-
         return wishlist_id
 
     except Exception:

@@ -13,6 +13,8 @@ from src.services.wishlist_service import (
     get_wishlists,
     itinerary_contains_wishlist_item,
     promote_wishlist_item,
+    stage_delete_wishlist,
+    stage_update_wishlist,
     update_wishlist,
     update_wishlist_item,
     vote_for_wishlist_item,
@@ -286,3 +288,25 @@ def test_vote_for_wishlist_item_remove_vote(admin_user, wishlist_item):
     vote = db.session.execute(stmt).scalar_one_or_none()
 
     assert vote is None
+
+
+def test_staging_a_wishlist_rename(wishlist, admin_user):
+    stage_update_wishlist(wishlist.itinerary_id, wishlist.id, admin_user.id, "Cafes")
+
+    assert wishlist.name == "Cafes"
+    assert wishlist.updated_by_id == admin_user.id
+
+
+def test_staging_a_rename_to_a_taken_name_is_rejected(wishlist, admin_user):
+    other = WishlistFactory(itinerary=wishlist.itinerary, name="Cafes")
+
+    with pytest.raises(BadRequestError):
+        stage_update_wishlist(
+            wishlist.itinerary_id, wishlist.id, admin_user.id, other.name
+        )
+
+
+def test_staging_a_wishlist_delete_removes_it_from_the_session(wishlist):
+    stage_delete_wishlist(wishlist.itinerary_id, wishlist.id)
+
+    assert wishlist not in db.session
