@@ -8,12 +8,14 @@ from ..schemas.accommodation_schema import AccommodationSchema
 from ..exceptions import BadRequestError, UserNotAuthorisedError
 from ..models import UserRole
 from ..schemas.event_schema import EventSchema
+from ..schemas.expense_schema import ExpenseSchema, SettlementSchema
 from ..schemas.itinerary_schema import ItinerarySchema
 from ..schemas.packing_item_schema import PackingItemSchema
 from ..schemas.wishlist_schema import WishlistItemSchema, WishlistSchema
 from . import (
     accommodation_service,
     events_service,
+    expense_service,
     itineraries_service,
     packing_item_service,
     wishlist_service,
@@ -43,9 +45,7 @@ class ChangeSetApplier(ABC):
     schema_class: ClassVar[type[Schema]]
     create_defaults: ClassVar[dict[str, Any]] = {}
 
-    def __init__(
-        self, itinerary_id: int, user_id: int | None, role: str | None = None
-    ):
+    def __init__(self, itinerary_id: int, user_id: int | None, role: str | None = None):
         self.itinerary_id = itinerary_id
         self.user_id = user_id
         self.role = role
@@ -116,6 +116,52 @@ class TripChangeSetApplier(ChangeSetApplier):
             )
         itineraries_service.stage_update_itinerary(
             entity_id, {**data, "updated_by_id": self.user_id}
+        )
+
+
+class ExpenseChangeSetApplier(ChangeSetApplier):
+    entity = "expense"
+    schema_class = ExpenseSchema
+
+    def preview(self, op: PreparedOp) -> dict[str, Any]:
+        data = super().preview(op)
+        if "participant_ids" in op.data:
+            data["participant_ids"] = op.data["participant_ids"]
+        return data
+
+    def create(self, data, context):
+        expense_service.stage_create_expense_as_member(
+            self.user_id, self.role, self.itinerary_id, data
+        )
+
+    def update(self, entity_id, data):
+        expense_service.stage_update_expense(
+            self.user_id, self.role, self.itinerary_id, entity_id, data
+        )
+
+    def delete(self, entity_id):
+        expense_service.stage_delete_expense(
+            self.user_id, self.role, self.itinerary_id, entity_id
+        )
+
+
+class SettlementChangeSetApplier(ChangeSetApplier):
+    entity = "settlement"
+    schema_class = SettlementSchema
+
+    def create(self, data, context):
+        expense_service.stage_create_settlement(
+            self.user_id, self.role, self.itinerary_id, data
+        )
+
+    def update(self, entity_id, data):
+        expense_service.stage_update_settlement(
+            self.user_id, self.role, self.itinerary_id, entity_id, data
+        )
+
+    def delete(self, entity_id):
+        expense_service.stage_delete_settlement(
+            self.user_id, self.role, self.itinerary_id, entity_id
         )
 
 
@@ -241,6 +287,8 @@ _APPLIER_CLASSES: dict[str, type[ChangeSetApplier]] = {
         PackingItemChangeSetApplier,
         WishlistChangeSetApplier,
         WishlistItemChangeSetApplier,
+        ExpenseChangeSetApplier,
+        SettlementChangeSetApplier,
     )
 }
 

@@ -16,8 +16,10 @@ from ..extensions import db
 from ..models import (
     Accommodation,
     Event,
+    Expense,
     Itinerary,
     PackingItem,
+    Settlement,
     Wishlist,
     WishlistItem,
 )
@@ -36,6 +38,12 @@ _SELECTS: dict[str, Callable[[int], Select]] = {
     ).where(Accommodation.itinerary_id == trip),
     "packing_item": lambda trip: select(PackingItem.id, PackingItem.updated_at).where(
         PackingItem.itinerary_id == trip
+    ),
+    "expense": lambda trip: select(Expense.id, Expense.updated_at).where(
+        Expense.itinerary_id == trip
+    ),
+    "settlement": lambda trip: select(Settlement.id, Settlement.updated_at).where(
+        Settlement.itinerary_id == trip
     ),
     "wishlist": lambda trip: select(Wishlist.id, Wishlist.updated_at).where(
         Wishlist.itinerary_id == trip

@@ -3,14 +3,17 @@ from sqlalchemy import select
 from datetime import date
 
 from marshmallow import ValidationError
+from tests.factories import ExpenseFactory
 from src.exceptions import BadRequestError, UserNotAuthorisedError
 from src.extensions import db
-from src.models import Wishlist
+from src.models import Expense, Settlement, Wishlist
 from src.services.change_set_appliers import (
     AccommodationChangeSetApplier,
     ChangeSetApplierFactory,
     EventChangeSetApplier,
+    ExpenseChangeSetApplier,
     PackingItemChangeSetApplier,
+    SettlementChangeSetApplier,
     TripChangeSetApplier,
     WishlistChangeSetApplier,
     WishlistItemChangeSetApplier,
@@ -26,6 +29,8 @@ from src.services.change_set_appliers import (
         ("wishlist_item", WishlistItemChangeSetApplier),
         ("trip", TripChangeSetApplier),
         ("wishlist", WishlistChangeSetApplier),
+        ("expense", ExpenseChangeSetApplier),
+        ("settlement", SettlementChangeSetApplier),
     ],
 )
 def test_factory_builds_the_applier_for_each_entity(entity, expected):
@@ -208,3 +213,103 @@ def test_a_wishlist_needs_a_name(wishlist, admin_user):
         wishlist_applier(wishlist, admin_user).prepare(
             {"op": "create", "data": {"name": None}}
         )
+
+
+def money_applier(entity, itinerary, user, role="admin"):
+    return ChangeSetApplierFactory.create(entity, itinerary.id, user.id, role)
+
+
+def test_an_expense_is_added_changed_and_removed(
+    itinerary, admin_user, admin_itinerary_user
+):
+    applier = money_applier("expense", itinerary, admin_user)
+
+    applier.apply(
+        applier.prepare(
+            {
+                "op": "create",
+                "data": {
+                    "description": "Taxi",
+                    "amount": 20,
+                    "spent_on": "2026-08-01",
+                },
+            }
+        )
+    )
+    expense = db.session.scalars(
+        select(Expense).where(Expense.itinerary_id == itinerary.id)
+    ).one()
+    assert expense.paid_by_id == admin_user.id
+
+    applier.apply(
+        applier.prepare({"op": "update", "id": expense.id, "data": {"amount": 25}})
+    )
+    assert expense.amount_gbp == 25
+    applier.apply(applier.prepare({"op": "delete", "id": expense.id}))
+    assert expense not in db.session
+
+
+def test_an_expense_preview_lists_who_it_is_split_between(itinerary, admin_user):
+    applier = money_applier("expense", itinerary, admin_user)
+    prepared = applier.prepare(
+        {
+            "op": "update",
+            "id": 1,
+            "data": {"split_type": "selected", "participant_ids": [3, 4]},
+        }
+    )
+
+    assert applier.preview(prepared) == {
+        "split_type": "selected",
+        "participant_ids": [3, 4],
+    }
+
+
+def test_an_expense_needs_a_description_amount_and_date(itinerary, admin_user):
+    applier = money_applier("expense", itinerary, admin_user)
+
+    with pytest.raises(ValidationError):
+        applier.prepare({"op": "create", "data": {"description": "Taxi"}})
+
+
+def test_an_editor_cannot_apply_a_change_to_an_admins_expense(
+    itinerary, admin_user, admin_itinerary_user, editor_user, editor_itinerary_user
+):
+    expense = ExpenseFactory(itinerary=itinerary, paid_by=admin_user)
+    applier = money_applier("expense", itinerary, editor_user, "editor")
+
+    with pytest.raises(UserNotAuthorisedError):
+        applier.apply(
+            applier.prepare({"op": "update", "id": expense.id, "data": {"amount": 1}})
+        )
+
+
+def test_a_settlement_is_added_changed_and_removed(
+    itinerary, admin_user, admin_itinerary_user, editor_user, editor_itinerary_user
+):
+    applier = money_applier("settlement", itinerary, admin_user)
+
+    applier.apply(
+        applier.prepare(
+            {
+                "op": "create",
+                "data": {
+                    "from_user_id": editor_user.id,
+                    "to_user_id": admin_user.id,
+                    "amount_gbp": 8,
+                    "settled_on": "2026-08-04",
+                },
+            }
+        )
+    )
+    settlement = db.session.scalars(
+        select(Settlement).where(Settlement.itinerary_id == itinerary.id)
+    ).one()
+    applier.apply(
+        applier.prepare(
+            {"op": "update", "id": settlement.id, "data": {"amount_gbp": 9}}
+        )
+    )
+    assert settlement.amount_gbp == 9
+    applier.apply(applier.prepare({"op": "delete", "id": settlement.id}))
+    assert settlement not in db.session
