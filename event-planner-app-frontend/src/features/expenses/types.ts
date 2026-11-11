@@ -1,3 +1,5 @@
+import type { CurrencyCode } from "../currency/constants";
+
 export const expenseCategories = [
   "lodging",
   "food",
@@ -22,7 +24,7 @@ export interface Expense {
   description: string;
   category: ExpenseCategory;
   amount: number;
-  currency: string;
+  currency: CurrencyCode;
   amountGbp: number;
   fxRate: number;
   spentOn: string;

@@ -1,7 +1,8 @@
-import { screen, within } from "@testing-library/react";
+import { screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { setCredentials } from "../../auth/services/authSlice";
+import { getLastCurrency, saveLastCurrency } from "../../currency/lastCurrency";
 import {
   createTestStore,
   renderWithProviders,
@@ -37,7 +38,9 @@ function stubApi() {
         ? { events: [newEvent] }
         : pathname.endsWith("/itineraries/1")
           ? trip
-          : [];
+          : pathname.endsWith("/fx/rates")
+            ? { base: "GBP", rates: { GBP: 1, EUR: 1.25 } }
+            : [];
       return new Response(JSON.stringify({ success: true, data }), {
         status: 200,
         headers: { "Content-Type": "application/json" },
@@ -84,5 +87,85 @@ describe("ExpenseForm", () => {
       .getAllByRole("option")
       .map((option) => option.textContent);
     expect(offered).toEqual(names);
+  });
+
+  describe("currency", () => {
+    const renderForm = (
+      props: Partial<Parameters<typeof ExpenseForm>[0]> = {},
+    ) => {
+      stubApi();
+      const onSuccess = vi.fn();
+      renderWithProviders(
+        <ExpenseForm
+          trip={trip}
+          onSuccess={onSuccess}
+          onCancel={vi.fn()}
+          {...props}
+        />,
+      );
+      return { onSuccess };
+    };
+
+    it("starts in pounds when no currency has been used before", () => {
+      renderForm();
+
+      expect(screen.getByLabelText("Currency")).toHaveValue("GBP");
+      expect(screen.getByLabelText("Amount (GBP)")).toBeInTheDocument();
+      expect(screen.queryByRole("status")).not.toBeInTheDocument();
+    });
+
+    it("starts in the currency used last time", () => {
+      saveLastCurrency("EUR");
+      renderForm();
+
+      expect(screen.getByLabelText("Currency")).toHaveValue("EUR");
+      expect(screen.getByLabelText("Amount (EUR)")).toBeInTheDocument();
+    });
+
+    it("shows what the amount is worth in pounds", async () => {
+      saveLastCurrency("EUR");
+      const user = userEvent.setup();
+      renderForm();
+
+      await user.type(screen.getByLabelText(/^Amount/), "100");
+
+      expect(await screen.findByRole("status")).toHaveTextContent("≈ £80.00");
+    });
+
+    it("keeps an expense in the currency it was paid in", () => {
+      saveLastCurrency("EUR");
+      renderForm({
+        expense: {
+          id: 9,
+          itineraryId: 1,
+          description: "Taxi",
+          category: "transport",
+          amount: 20,
+          currency: "USD",
+          amountGbp: 16,
+          fxRate: 0.8,
+          spentOn: "2026-08-01",
+          paidById: 5,
+          splitType: "even_all",
+          shares: [{ userId: 5, amountGbp: 16 }],
+          createdById: 5,
+        },
+      });
+
+      expect(screen.getByLabelText("Currency")).toHaveValue("USD");
+    });
+
+    it("remembers the currency of a saved expense", async () => {
+      const user = userEvent.setup();
+      const { onSuccess } = renderForm();
+
+      await user.type(screen.getByLabelText("Description"), "Dinner");
+      await user.type(screen.getByLabelText(/^Amount/), "40");
+      await user.selectOptions(screen.getByLabelText("Currency"), "EUR");
+      await user.click(screen.getByRole("button", { name: "Add expense" }));
+
+      await waitFor(() => expect(onSuccess).toHaveBeenCalled());
+      expect(getLastCurrency()).toBe("EUR");
+    });
   });
 });
