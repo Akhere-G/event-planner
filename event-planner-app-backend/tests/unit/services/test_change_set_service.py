@@ -157,6 +157,17 @@ def test_rolls_back_and_never_commits_when_a_target_is_missing(editor_user, itin
     rollback.assert_called()
 
 
+def test_commit_false_stages_ops_without_committing(editor_user, itinerary):
+    with patch.object(db.session, "commit") as commit:
+        counts = apply_change_set(
+            itinerary.id, [create_event()], editor_user.id, commit=False
+        )
+
+    commit.assert_not_called()
+    assert counts == {"created": 1, "updated": 0, "deleted": 0}
+    assert len(trip_events(itinerary.id)) == 1
+
+
 def test_cannot_touch_another_trips_event(editor_user, itinerary):
     other_event = EventFactory(itinerary=ItineraryFactory())
 
