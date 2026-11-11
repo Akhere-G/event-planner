@@ -1,4 +1,8 @@
+from datetime import date
+from decimal import Decimal
+
 import pytest
+from sqlalchemy import func, select
 from src.extensions import db
 from src.models import Expense
 
@@ -67,9 +71,102 @@ def test_self_split(admin_client, base, members, admin_user):
     assert shares == [{"userId": admin_user.id, "amountGbp": 30}]
 
 
-def test_non_gbp_rejected(admin_client, base, members):
+@pytest.mark.parametrize("currency", ["XXX", "BGN", "eur"])
+def test_unsupported_currency_rejected(
+    admin_client, base, members, rate_provider, currency
+):
+    res = admin_client.post(base, json=payload(currency=currency))
+    assert res.status_code == 400
+    assert rate_provider.lookups == []
+
+
+def test_gbp_expense_needs_no_rate(admin_client, base, members, rate_provider):
+    res = admin_client.post(base, json=payload())
+    assert res.get_json()["data"]["fxRate"] == 1
+    assert rate_provider.lookups == []
+
+
+def create_euro_expense(client, base, **kw):
+    res = client.post(base, json=payload(currency="EUR", amount=40, **kw))
+    assert res.status_code == 201
+    return res.get_json()["data"]
+
+
+def test_foreign_expense_is_converted_at_the_spend_date_rate(
+    admin_client, base, members, rate_provider
+):
+    data = create_euro_expense(admin_client, base)
+
+    assert data["amount"] == 40
+    assert data["currency"] == "EUR"
+    assert data["fxRate"] == 0.85
+    assert data["amountGbp"] == 34
+    assert sum(share["amountGbp"] for share in data["shares"]) == 34
+    assert rate_provider.lookups == [("EUR", "GBP", date(2026, 8, 1))]
+
+
+def test_changing_the_date_fetches_that_day_s_rate(
+    admin_client, base, members, rate_provider
+):
+    expense = create_euro_expense(admin_client, base)
+    rate_provider.rate = Decimal("0.9")
+
+    res = admin_client.patch(f"{base}/{expense['id']}", json={"spentOn": "2026-08-05"})
+
+    data = res.get_json()["data"]
+    assert data["fxRate"] == 0.9
+    assert data["amountGbp"] == 36
+    assert sum(share["amountGbp"] for share in data["shares"]) == 36
+
+
+def test_changing_the_amount_keeps_the_rate_even_when_rates_are_down(
+    admin_client, base, members, rate_provider
+):
+    expense = create_euro_expense(admin_client, base)
+    rate_provider.down = True
+
+    res = admin_client.patch(f"{base}/{expense['id']}", json={"amount": 50})
+
+    data = res.get_json()["data"]
+    assert res.status_code == 200
+    assert data["fxRate"] == 0.85
+    assert data["amountGbp"] == 42.5
+
+
+def test_editing_something_else_keeps_the_currency(
+    admin_client, base, members, rate_provider
+):
+    expense = create_euro_expense(admin_client, base)
+
+    res = admin_client.patch(f"{base}/{expense['id']}", json={"description": "Lunch"})
+
+    data = res.get_json()["data"]
+    assert data["currency"] == "EUR"
+    assert data["amountGbp"] == 34
+
+
+def test_switching_back_to_gbp_drops_the_conversion(
+    admin_client, base, members, rate_provider
+):
+    expense = create_euro_expense(admin_client, base)
+
+    res = admin_client.patch(f"{base}/{expense['id']}", json={"currency": "GBP"})
+
+    data = res.get_json()["data"]
+    assert data["fxRate"] == 1
+    assert data["amountGbp"] == 40
+
+
+def test_rates_being_down_blocks_a_foreign_expense_and_saves_nothing(
+    admin_client, base, members, rate_provider, itinerary
+):
+    rate_provider.down = True
+
     res = admin_client.post(base, json=payload(currency="EUR"))
-    assert res.status_code in (400, 422)
+
+    assert res.status_code == 503
+    saved = select(func.count()).where(Expense.itinerary_id == itinerary.id)
+    assert db.session.scalar(saved) == 0
 
 
 def test_negative_amount_rejected(admin_client, base, members):

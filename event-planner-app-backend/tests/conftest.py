@@ -1,5 +1,6 @@
 import pytest
 from flask.testing import FlaskClient
+from sqlalchemy import delete
 from sqlalchemy import event as sa_event
 from src import create_app
 from src.extensions import cache, db
@@ -10,6 +11,7 @@ from src.services.flight_providers import (
 )
 from src.models import (
     Event,
+    ExchangeRate,
     Flight,
     Invite,
     Itinerary,
@@ -85,14 +87,21 @@ def flight_number_provider(monkeypatch, app) -> FakeFlightNumberProvider:
     cache.clear()
 
 
+def _clear_rates():
+    """Cached rates are committed by the services, which outlives a test's rollback."""
+    cache.clear()
+    db.session.execute(delete(ExchangeRate))
+    db.session.commit()
+
+
 @pytest.fixture
 def rate_provider(monkeypatch, app) -> FakeRateProvider:
     """Swap the exchange rate provider for a fake and start with a cold cache."""
     provider = FakeRateProvider()
     monkeypatch.setattr(fx_service, "_provider", provider)
-    cache.clear()
+    _clear_rates()
     yield provider
-    cache.clear()
+    _clear_rates()
 
 
 @pytest.fixture
