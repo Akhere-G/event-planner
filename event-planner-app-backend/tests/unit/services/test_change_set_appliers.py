@@ -24,6 +24,16 @@ def test_factory_builds_the_applier_for_each_entity(entity, expected):
     assert (applier.itinerary_id, applier.user_id) == (1, 2)
 
 
+def test_factory_hands_the_role_to_the_applier():
+    applier = ChangeSetApplierFactory.create("event", 1, 2, "editor")
+
+    assert applier.role == "editor"
+
+
+def test_the_role_is_unknown_unless_given():
+    assert ChangeSetApplierFactory.create("event", 1, 2).role is None
+
+
 def test_factory_rejects_unknown_entity():
     with pytest.raises(ValueError):
         ChangeSetApplierFactory.create("flight", 1, 2)

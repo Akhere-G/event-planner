@@ -111,7 +111,9 @@ def retry_ai_task_route(itinerary_id: int, task_id: int, access: ItineraryAccess
 def accept_ai_task_route(itinerary_id: int, task_id: int, access: ItineraryAccess):
     validated = AcceptAiTaskSchema().load(request.get_json(silent=True) or {})
     task = ai_task_service.get_task(itinerary_id, task_id, access.user_id)
-    result = ai_task_service.accept(task, validated["op_indexes"], access.user_id)
+    result = ai_task_service.accept(
+        task, validated["op_indexes"], access.user_id, access.role
+    )
     return api_response(
         success=True,
         data=result,
