@@ -114,3 +114,10 @@ class FlightProviderError(Exception):
 class FlightSearchUnavailableError(AppError):
     status_code = 503
     default_message = "Flight search is temporarily unavailable. Please try again later."
+
+
+class FxUnavailableError(AppError):
+    status_code = 503
+    default_message = (
+        "Exchange rates are unavailable right now. Please try again shortly."
+    )

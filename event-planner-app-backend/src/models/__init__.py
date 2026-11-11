@@ -8,6 +8,7 @@ from src.models.ai_task_model import (
 from src.models.airport_model import Airport
 from src.models.audit_mixins import AuditMixin
 from src.models.event_model import Event
+from src.models.exchange_rate_model import ExchangeRate
 from src.models.flight_model import Flight
 from src.models.expense_model import (
     Expense,
@@ -34,6 +35,7 @@ __all__ = [
     "Airport",
     "AuditMixin",
     "Event",
+    "ExchangeRate",
     "Flight",
     "Expense",
     "ExpenseCategory",

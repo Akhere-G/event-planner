@@ -143,6 +143,7 @@ def register_models():
         Accommodation,
         AiTask,
         Event,
+        ExchangeRate,
         Flight,
         Expense,
         ExpenseShare,
