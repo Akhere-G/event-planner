@@ -1,3 +1,4 @@
+import logging
 from typing import Any
 
 from marshmallow import ValidationError
@@ -9,6 +10,8 @@ from .change_set_appliers import (
     ChangeSetApplierFactory,
     PreparedOp,
 )
+
+logger = logging.getLogger(__name__)
 
 EVENT_FIELDS = (
     "name",
@@ -59,7 +62,7 @@ def apply_change_set(
     return counts
 
 
-def _clean_reason(reason: Any) -> str | None:
+def clean_reason(reason: Any) -> str | None:
     if isinstance(reason, str) and reason.strip():
         return reason.strip()[:200]
     return None
@@ -76,7 +79,7 @@ def build_event_create_ops(suggestions: list[dict]) -> list[dict]:
                 "op": "create",
                 "entity": "event",
                 "data": schema.dump(schema.load(fields)),
-                "reason": _clean_reason(suggestion.get("reason")),
+                "reason": clean_reason(suggestion.get("reason")),
             }
         )
     return ops
@@ -91,7 +94,7 @@ def build_event_update_ops(updates: list[dict]) -> list[dict]:
             "entity": "event",
             "id": update["id"],
             "data": schema.dump(update),
-            "reason": _clean_reason(update.get("reason")),
+            "reason": clean_reason(update.get("reason")),
         }
         for update in updates
     ]
@@ -106,7 +109,7 @@ def build_event_delete_ops(removals: list[dict]) -> list[dict]:
                 "entity": "event",
                 "id": removal["id"],
                 "data": {},
-                "reason": _clean_reason(removal.get("reason")),
+                "reason": clean_reason(removal.get("reason")),
             }
         )
     return ops
@@ -122,5 +125,24 @@ def build_packing_create_op(
         "op": "create",
         "entity": "packing_item",
         "data": {"name": name[:100], "category": category[:50], "is_shared": is_shared},
-        "reason": _clean_reason(reason),
+        "reason": clean_reason(reason),
     }
+
+
+def build_edit_ops(
+    itinerary_id: int, user_id: int | None, proposed: list[dict[str, Any]]
+) -> list[dict[str, Any]]:
+    """Validate proposed ops with their entity schemas and shape them for preview.
+
+    Ops that fail validation are dropped. Nothing is saved.
+    """
+    ops = []
+    for op in proposed:
+        applier = ChangeSetApplierFactory.create(op["entity"], itinerary_id, user_id)
+        try:
+            prepared = applier.prepare(op)
+        except ValidationError as err:
+            logger.warning("Dropped an invalid %s edit: %s", op["entity"], err.messages)
+            continue
+        ops.append({**op, "data": applier.preview(prepared)})
+    return ops
