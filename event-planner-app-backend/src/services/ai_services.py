@@ -1,21 +1,17 @@
 import json
 import logging
-import os
 import re
 from datetime import datetime
 from typing import Any
 
-from google import genai
-from google.genai import types as genai_types
-from groq import Groq
-
 from ..ai_entities.context import TimeRules, ValidationContext
 from ..ai_entities.validators.factory import EntityValidatorFactory
-from ..exceptions import AIProviderError, AIResponseError
+from ..exceptions import AIResponseError
 from ..utils import ai_output_validators
 from ..utils.db_utils import release_connection
 from ..utils.progress import ProgressCallback, no_progress
 from ..utils.trip_time import to_trip_local
+from .ai_providers import AiProviderFactory, generate_with_fallback
 from .flight_context import (
     FlightWindow,
     blocked_windows,
@@ -71,82 +67,11 @@ def format_json(raw_json: str) -> Any:
         raise AIResponseError("AI response contained invalid JSON.") from exc
 
 
-GROQ_MAX_COMPLETION_TOKENS = 8192000
-
-
 def get_ai_response(prompt: str) -> str:
     """
-    Get an AI response, falling back from Gemini to Groq.
+    Get an AI response, trying each AI provider in turn.
     """
-    gemini_api_key = os.getenv("GEMINI_API_KEY")
-    groq_api_key = os.getenv("GROQ_API_KEY")
-
-    if gemini_api_key:
-        try:
-            client_gemini = genai.Client(
-                api_key=gemini_api_key,
-                http_options=genai_types.HttpOptions(timeout=100000),
-            )
-
-            response = client_gemini.models.generate_content(
-                model="gemini-3.5-flash",
-                contents=prompt,
-            )
-
-            if response.text:
-                return response.text
-
-            logger.warning("Gemini returned an empty response.")
-
-        except Exception:
-            logger.exception("Gemini request failed.")
-
-    if groq_api_key:
-        try:
-            client_groq = Groq(api_key=groq_api_key)
-
-            completion = client_groq.chat.completions.create(
-                model="openai/gpt-oss-20b",
-                messages=[
-                    {
-                        "role": "system",
-                        "content": (
-                            "You are an encouraging travel assistant. "
-                            "Use British English. "
-                            "Respond ONLY with valid JSON. "
-                            "Never leave JSON incomplete."
-                        ),
-                    },
-                    {
-                        "role": "user",
-                        "content": prompt,
-                    },
-                ],
-                max_completion_tokens=GROQ_MAX_COMPLETION_TOKENS,
-                timeout=100.0,
-            )
-
-            choice = completion.choices[0]
-            content = choice.message.content
-
-            logger.info(
-                "Groq response: finish_reason=%s, completion_tokens=%s",
-                choice.finish_reason,
-                completion.usage.completion_tokens,
-            )
-
-            if choice.finish_reason == "length":
-                raise RuntimeError("Groq response was truncated by the token limit.")
-
-            if content:
-                return content
-
-            logger.warning("Groq returned an empty response.")
-
-        except Exception:
-            logger.exception("Groq request failed.")
-
-    raise AIProviderError("All AI providers failed.")
+    return generate_with_fallback(prompt, AiProviderFactory.create_all())
 
 
 def get_insights(itinerary_id: int):
