@@ -1,6 +1,7 @@
 import logging
 import os
 import time
+from datetime import date, datetime
 from typing import Optional
 
 import googlemaps
@@ -60,3 +61,8 @@ def get_timezone_for_coordinates(
         raise ValidationError(
             {"timezone": ["Unable to determine timezone for this location."]}
         )
+
+
+def get_timezone_for_trip(latitude: float, longitude: float, start_date: date) -> str:
+    start = datetime.combine(start_date, datetime.min.time())
+    return get_timezone_for_coordinates(latitude, longitude, int(start.timestamp()))
