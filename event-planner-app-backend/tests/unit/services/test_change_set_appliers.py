@@ -56,3 +56,40 @@ def test_update_is_partial_but_still_validated():
     assert applier.prepare({"op": "update", "id": 1, "data": {"name": "New"}}).data
     with pytest.raises(ValidationError):
         applier.prepare({"op": "update", "id": 1, "data": {"latitude": "north"}})
+
+
+def test_preview_of_an_update_dumps_only_the_changed_fields():
+    applier = ChangeSetApplierFactory.create("event", 1, 2)
+    prepared = applier.prepare(
+        {
+            "op": "update",
+            "id": 1,
+            "data": {
+                "start_at": "2026-08-02T17:00:00Z",
+                "end_at": "2026-08-02T19:00:00Z",
+            },
+        }
+    )
+    assert applier.preview(prepared) == {
+        "start_at": "2026-08-02T17:00:00Z",
+        "end_at": "2026-08-02T19:00:00Z",
+    }
+
+
+def test_preview_of_a_delete_is_empty():
+    applier = ChangeSetApplierFactory.create("event", 1, 2)
+    assert applier.preview(applier.prepare({"op": "delete", "id": 5})) == {}
+
+
+def test_wishlist_create_preview_keeps_the_wishlist_name():
+    applier = ChangeSetApplierFactory.create("wishlist_item", 1, 2)
+    prepared = applier.prepare(
+        {"op": "create", "data": {"name": "Louvre", "wishlist_name": "Museums"}}
+    )
+    assert applier.preview(prepared)["wishlist_name"] == "Museums"
+
+
+def test_other_entity_previews_have_no_wishlist_name():
+    applier = ChangeSetApplierFactory.create("packing_item", 1, 2)
+    prepared = applier.prepare({"op": "create", "data": {"name": "Passport"}})
+    assert "wishlist_name" not in applier.preview(prepared)
