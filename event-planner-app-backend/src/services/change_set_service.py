@@ -48,9 +48,18 @@ def validate_ops(
 
 
 def apply_change_set(
-    itinerary_id: int, ops: list[dict], user_id: int | None, role: str | None = None
+    itinerary_id: int,
+    ops: list[dict],
+    user_id: int | None,
+    role: str | None = None,
+    *,
+    commit: bool = True,
 ) -> dict[str, int]:
-    """Validate every op, then apply them all in one transaction (all or nothing)."""
+    """Validate every op, then apply them all in one transaction (all or nothing).
+
+    With ``commit=False`` the ops are only staged, so the caller can add more work
+    to the same transaction and commit once.
+    """
     prepared = validate_ops(itinerary_id, ops, user_id, role)
     counts = {key: 0 for key in _COUNT_KEYS.values()}
 
@@ -58,7 +67,8 @@ def apply_change_set(
         for applier, op in prepared:
             applier.apply(op)
             counts[_COUNT_KEYS[op.kind]] += 1
-        db.session.commit()
+        if commit:
+            db.session.commit()
     except Exception:
         db.session.rollback()
         raise
