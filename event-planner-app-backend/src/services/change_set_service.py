@@ -10,6 +10,7 @@ from .change_set_appliers import (
     ChangeSetApplierFactory,
     PreparedOp,
 )
+from .change_set_types import ChangeOp
 
 logger = logging.getLogger(__name__)
 
@@ -134,9 +135,9 @@ def build_packing_create_op(
 def build_edit_ops(
     itinerary_id: int,
     user_id: int | None,
-    proposed: list[dict[str, Any]],
+    proposed: list[ChangeOp],
     role: str | None = None,
-) -> list[dict[str, Any]]:
+) -> list[ChangeOp]:
     """Ops that fail their entity schema are dropped. Nothing is saved."""
     ops = []
     for op in proposed:
