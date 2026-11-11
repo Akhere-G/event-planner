@@ -1,5 +1,6 @@
 import { apiSlice } from "../../api/apiSlice";
 import type { ApiResponse } from "../../api/types";
+import { expenseDependentTags } from "../../expenses/tags";
 import type {
   AcceptAiTaskResult,
   AiTask,
@@ -95,6 +96,8 @@ export const aiTaskApiSlice = apiSlice.injectEndpoints({
         "Accommodations",
         "Wishlists",
         { type: "PackingItem", id: "LIST" },
+        { type: "Settlements", id: tripId },
+        ...expenseDependentTags(tripId),
       ],
     }),
   }),
