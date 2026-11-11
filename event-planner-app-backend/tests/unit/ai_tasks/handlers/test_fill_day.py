@@ -63,7 +63,7 @@ def run_handler(itinerary, ai_reply=None, ai_error=None, params=None):
     )
     with (
         patch("src.services.ai_services.get_ai_response", fake_ai),
-        patch("src.services.ai_services.get_place_details", return_value=PLACE),
+        patch("src.ai_entities.places.get_place_details", return_value=PLACE),
     ):
         return get_handler("fill_day").run(ctx), reports, prompts
 
@@ -79,11 +79,12 @@ def test_suggestions_for_the_day_become_create_ops(itinerary):
     assert ops[0]["data"]["start_at"] == "2026-08-02T08:00:00Z"  # Paris is UTC+2
 
 
-def test_progress_is_reported_per_place(itinerary):
+def test_progress_is_reported_per_suggestion(itinerary):
     _, reports, _ = run_handler(itinerary)
 
     assert reports.calls[0][0] == "Asking the AI for ideas"
-    assert ("Looking up places", 1, 1) in reports.calls
+    assert ("Looking up places", 1, 2) in reports.calls
+    assert ("Looking up places", 2, 2) in reports.calls
 
 
 def test_a_day_with_nothing_valid_yields_no_ops(itinerary):
@@ -110,7 +111,7 @@ def test_a_place_that_cannot_be_found_is_skipped(itinerary):
             return_value=json.dumps(SUGGESTIONS),
         ),
         patch(
-            "src.services.ai_services.get_place_details",
+            "src.ai_entities.places.get_place_details",
             side_effect=Exception("not found"),
         ),
     ):

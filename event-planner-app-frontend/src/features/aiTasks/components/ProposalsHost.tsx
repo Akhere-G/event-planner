@@ -1,5 +1,9 @@
 import { useState } from "react";
 import { useSearchParams } from "react-router";
+import {
+  readDismissedProposals,
+  saveDismissedProposals,
+} from "../dismissedProposals";
 import { usePendingProposals } from "../hooks";
 import type { AiTask } from "../types";
 import ProposalReviewModal from "./ProposalReviewModal";
@@ -7,20 +11,12 @@ import ProposalsPopup from "./ProposalsPopup";
 
 export const REVIEW_PARAM = "aiTask";
 
-/**
- * Opens the pending-proposals popup whenever a task has finished, on any page.
- * Mount it once for a signed-in user, and per trip for an anonymous visitor
- * (who has no account to look proposals up by).
- */
-export default function ProposalsHost({
-  anonymousTripId,
-}: {
-  anonymousTripId?: number;
-}) {
-  const proposals = usePendingProposals(anonymousTripId);
+export default function ProposalsHost({ tripId }: { tripId: number }) {
+  const proposals = usePendingProposals(tripId);
   const [searchParams, setSearchParams] = useSearchParams();
-  // "Decide later" hides a proposal until the app is next opened.
-  const [dismissed, setDismissed] = useState<ReadonlySet<number>>(new Set());
+  const [dismissed, setDismissed] = useState<ReadonlySet<number>>(
+    () => new Set(readDismissedProposals()),
+  );
   const [reviewing, setReviewing] = useState<AiTask | null>(null);
 
   const requestedId = Number(searchParams.get(REVIEW_PARAM));
@@ -28,8 +24,11 @@ export default function ProposalsHost({
   const current = reviewing ?? requested ?? null;
   const visible = proposals.filter((task) => !dismissed.has(task.id));
 
-  const dismiss = (ids: number[]) =>
-    setDismissed((existing) => new Set([...existing, ...ids]));
+  const dismiss = (ids: number[]) => {
+    const next = new Set([...dismissed, ...ids]);
+    saveDismissedProposals([...next]);
+    setDismissed(next);
+  };
 
   const closeReview = (task: AiTask, decided: boolean) => {
     if (!decided) dismiss([task.id]);

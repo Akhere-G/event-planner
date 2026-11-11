@@ -1,5 +1,7 @@
 from datetime import UTC, date, datetime
 
+import pytest
+
 from src.services.flight_context import (
     FlightWindow,
     blocked_windows,
@@ -7,6 +9,8 @@ from src.services.flight_context import (
     overlaps_any,
     windows_for_day,
 )
+from sqlalchemy import event
+from src.extensions import db
 from tests.factories import FlightFactory
 
 
@@ -32,15 +36,44 @@ def test_a_flight_blocks_three_hours_before_departure_to_two_after_arrival():
 def test_blocked_windows_are_in_trip_local_time(itinerary):
     FlightFactory(itinerary=itinerary, depart_at=utc(1, 10), arrive_at=utc(1, 12, 20))
 
-    [flight] = blocked_windows(itinerary.flights, itinerary.timezone)
+    [flight] = blocked_windows(itinerary.id, itinerary.timezone, labelled=True)
 
     assert flight.label.endswith(" LHR → CDG")
     assert flight.departs == local(1, 12)  # Paris is UTC+2 in August
     assert flight.arrives == local(1, 14, 20)
 
 
+def test_windows_are_unlabelled_unless_asked_for(itinerary):
+    FlightFactory(itinerary=itinerary, depart_at=utc(1, 10), arrive_at=utc(1, 12, 20))
+
+    [flight] = blocked_windows(itinerary.id, itinerary.timezone)
+
+    assert flight.label is None
+    assert flight.arrives == local(1, 14, 20)
+
+
+@pytest.mark.parametrize("labelled", [False, True])
+def test_the_flights_load_in_one_query_whatever_their_number(itinerary, labelled):
+    for day in (1, 2, 3):
+        FlightFactory(
+            itinerary=itinerary, depart_at=utc(day, 10), arrive_at=utc(day, 12)
+        )
+    statements = []
+
+    def count(conn, cursor, statement, parameters, context, executemany):
+        statements.append(statement)
+
+    event.listen(db.engine, "before_cursor_execute", count)
+    try:
+        assert len(blocked_windows(itinerary.id, None, labelled=labelled)) == 3
+    finally:
+        event.remove(db.engine, "before_cursor_execute", count)
+
+    assert len(statements) == 1
+
+
 def test_no_flights_means_no_windows(itinerary):
-    assert blocked_windows(itinerary.flights, itinerary.timezone) == []
+    assert blocked_windows(itinerary.id, itinerary.timezone) == []
 
 
 def test_an_overnight_flight_blocks_both_days_it_spans():

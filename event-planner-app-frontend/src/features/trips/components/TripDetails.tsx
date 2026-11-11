@@ -1,7 +1,7 @@
-import { isAdmin } from "../../users/utils";
+import { canUserEdit, isAdmin } from "../../users/utils";
 import type { Trip } from "../types";
 import TripSummary from "./TripSummary";
-import { TripInsights } from "../../ai/components";
+import { EditTripDrawer, TripInsights } from "../../ai/components";
 import TripActivities from "./TripActivities";
 import AccommodationPage from "../../accommodations/components/AccommodationPage";
 import { getCityBounds } from "../../maps/utils";
@@ -14,7 +14,6 @@ import {
   ProposalsHost,
   TaskProgressCards,
 } from "../../aiTasks/components";
-import useLoadAnonTrip from "../hooks/useLoadAnonTrip";
 
 type TabOption =
   | "activities"
@@ -38,7 +37,6 @@ export default function TripDetails(trip: Trip) {
   const activeTab = searchParams.get("activeTab") ?? "activities";
 
   useTripRealtime(trip.id);
-  const { anonTrip } = useLoadAnonTrip();
 
   function setActiveTab(tab: TabOption) {
     setSearchParams((current) => {
@@ -54,11 +52,13 @@ export default function TripDetails(trip: Trip) {
       <div className="card">
         <TripSummary trip={trip} showActions={isAdmin(trip.role)} />
       </div>
-      <TaskProgressCards tripId={trip.id} />
-      {/* Signed-in users get theirs from the app-wide host. */}
-      {anonTrip?.tripId === trip.id && (
-        <ProposalsHost anonymousTripId={trip.id} />
+      {canUserEdit(trip.role) && (
+        <div className="flex justify-end">
+          <EditTripDrawer trip={trip} />
+        </div>
       )}
+      <TaskProgressCards tripId={trip.id} />
+      {canUserEdit(trip.role) && <ProposalsHost tripId={trip.id} />}
       <div>
         <div className="ml-auto w-full mb-4 flex items-center overflow-x-scroll">
           {tabs.map((tab, i) => {

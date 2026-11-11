@@ -3,17 +3,18 @@ from dataclasses import dataclass, field
 from datetime import date, time
 from typing import Any
 
-from ..utils import ai_output_validators
-from ..utils.ai_output_validators import OptimisationRules
+from ..ai_entities.context import TimeRules, ValidationContext
+from ..ai_entities.describers.base import EntityDescription
+from ..ai_entities.json_types import JsonObject, JsonValue
+from ..ai_entities.parsing import as_int, as_list, as_object, pick
+from ..ai_entities.validators.base import EntityValidator
+from ..ai_entities.validators.factory import EntityValidatorFactory
+from ..exceptions import AIResponseError
 from ..utils.db_utils import release_connection
-from ..utils.location_utils import get_place_details, get_weekly_opening_hours
+from ..utils.location_utils import get_weekly_opening_hours
 from ..utils.progress import ProgressCallback, no_progress
-from .ai_services import (
-    format_json,
-    get_ai_response,
-    to_trip_local,
-    trip_local_to_utc,
-)
+from ..utils.trip_time import to_trip_local
+from .ai_services import format_json, get_ai_response
 from .change_set_service import (
     build_event_create_ops,
     build_event_delete_ops,
@@ -29,6 +30,7 @@ from .itineraries_service import get_itinerary
 
 logger = logging.getLogger(__name__)
 
+TIME_FIELDS = ("start_at", "end_at")
 GOAL_RULES = {
     "minimise_travel": (
         "Order and time the events so the travel between consecutive events is as "
@@ -214,27 +216,6 @@ Events:
 {flight_block}"""
 
 
-def _geocode_creates(creates: list[dict], timezone: str | None) -> list[dict]:
-    placed = []
-    for item in creates:
-        try:
-            details = get_place_details(name=item["name"], address=item.get("address"))
-        except Exception:
-            logger.exception("Failed to geocode venue: %s", item.get("name"))
-            continue
-        placed.append(
-            {
-                **item,
-                "start_at": trip_local_to_utc(item["start_at"], timezone).isoformat(),
-                "end_at": trip_local_to_utc(item["end_at"], timezone).isoformat(),
-                "latitude": details["latitude"],
-                "longitude": details["longitude"],
-                "address": details.get("formatted_address") or item.get("address"),
-            }
-        )
-    return placed
-
-
 def _opening_hours(plan: DayPlan) -> dict[int, str]:
     hours = {}
     for event in plan.events:
@@ -254,11 +235,50 @@ def _event_lines(plan: DayPlan, options: OptimiseOptions) -> list[str]:
     return lines
 
 
-def _event_ids(plan: DayPlan) -> frozenset[int]:
-    ids = set()
+def _event_validator(
+    timezone: str | None, plan: DayPlan, options: OptimiseOptions
+) -> EntityValidator:
+    """Only events that are not locked are known, so only they can be changed."""
+    changeable = {}
     for event in plan.events:
-        ids.add(event.id)
-    return frozenset(ids)
+        if event.id not in options.locked_event_ids:
+            changeable[event.id] = EntityDescription(
+                event.id, event.name, "", {"address": event.address}
+            )
+    rules = TimeRules(frozenset({plan.day}), options.day_start, options.day_end)
+    context = ValidationContext(timezone, flights=plan.flights, time_rules=rules)
+    return EntityValidatorFactory.create("event", context, changeable)
+
+
+def _changes(
+    raw_changes: JsonValue, validator: EntityValidator, options: OptimiseOptions
+) -> tuple[list[JsonObject], list[JsonObject], list[JsonObject]]:
+    """The AI's valid updates, deletes and creates; the rest is dropped."""
+    listed = as_list(raw_changes)
+    if listed is None:
+        raise AIResponseError("AI response must be a list.")
+
+    updates: list[JsonObject] = []
+    deletes: list[JsonObject] = []
+    creates: list[JsonObject] = []
+    for raw in listed:
+        change = as_object(raw)
+        if change is None:
+            continue
+        action, event_id = change.get("action", "update"), as_int(change.get("id"))
+        reason = change.get("reason")
+        if action == "update" and event_id is not None:
+            times = validator.validate_edit(event_id, pick(change, TIME_FIELDS))
+            if times is not None:
+                updates.append({**times, "id": event_id, "reason": reason})
+        elif action == "delete" and options.allow_add_remove:
+            if event_id is not None and validator.knows(event_id):
+                deletes.append({"id": event_id, "reason": reason})
+        elif action == "create" and options.allow_add_remove:
+            data = validator.validate_create(change)
+            if data is not None:
+                creates.append({**data, "reason": reason})
+    return updates, deletes, creates
 
 
 def _day_ops(
@@ -280,38 +300,11 @@ def _day_ops(
         _event_lines(plan, options),
         plan.flights,
     )
-
-    changes = ai_output_validators.validate_optimisation_ops(
+    updates, deletes, creates = _changes(
         format_json(get_ai_response(prompt)),
-        OptimisationRules(
-            day=plan.day,
-            event_ids=_event_ids(plan),
-            locked_ids=options.locked_event_ids,
-            allow_add_remove=options.allow_add_remove,
-            day_start=options.day_start,
-            day_end=options.day_end,
-            blocked=tuple(plan.flights),
-        ),
+        _event_validator(timezone, plan, options),
+        options,
     )
-
-    updates = []
-    deletes = []
-    creates = []
-    for change in changes:
-        if change["action"] == "update":
-            updates.append(
-                {
-                    **change,
-                    "start_at": trip_local_to_utc(change["start_at"], timezone),
-                    "end_at": trip_local_to_utc(change["end_at"], timezone),
-                }
-            )
-        elif change["action"] == "delete":
-            deletes.append(change)
-        elif change["action"] == "create":
-            creates.append(change)
-    creates = _geocode_creates(creates, timezone)
-
     return (
         build_event_update_ops(updates)
         + build_event_delete_ops(deletes)
@@ -326,7 +319,7 @@ def optimise_days(
 ) -> list[dict[str, Any]]:
     itinerary = get_itinerary(itinerary_id)
     destination, timezone = itinerary.destination, itinerary.timezone
-    windows = blocked_windows(itinerary.flights, timezone)
+    windows = blocked_windows(itinerary.id, timezone, labelled=True)
     plans = []
     for day in sorted(set(options.dates)):
         events = _day_events(itinerary, day)

@@ -29,19 +29,7 @@ export function useTripAiTasks(tripId: number, enabled = true) {
   return { tasks, isLoading: query.isLoading, isError: query.isError };
 }
 
-/**
- * Proposals waiting for a decision. Signed-in users see them across every trip;
- * an anonymous visitor has no account to look them up by, so they see the
- * current trip's.
- */
-export function usePendingProposals(anonymousTripId?: number) {
-  const trip = useTripAiTasks(anonymousTripId ?? 0, anonymousTripId != null);
-  const pending = useGetPendingAiTasksQuery(
-    anonymousTripId != null ? skipToken : undefined,
-  );
-
-  if (anonymousTripId != null) {
-    return trip.tasks.filter((task) => task.status === "ready");
-  }
+export function usePendingProposals(tripId: number) {
+  const pending = useGetPendingAiTasksQuery(tripId);
   return pending.data?.data ?? NO_TASKS;
 }

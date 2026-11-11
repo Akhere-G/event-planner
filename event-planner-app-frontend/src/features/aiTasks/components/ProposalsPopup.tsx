@@ -40,8 +40,7 @@ export default function ProposalsPopup({
                 {TASK_LABELS[task.type]}
               </span>
               <span className="text-sm text-text-secondary truncate">
-                {task.tripName} · {task.opCount}{" "}
-                {task.opCount === 1 ? "change" : "changes"}
+                {task.opCount} {task.opCount === 1 ? "change" : "changes"}
                 {task.expiresAt &&
                   ` · expires in ${formatDistanceToNow(parseISO(task.expiresAt))}`}
               </span>

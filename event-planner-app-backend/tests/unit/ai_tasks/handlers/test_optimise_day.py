@@ -65,7 +65,7 @@ def run(itinerary, params, replies, hours=None, place=None):
             return_value=hours,
         ) as hours_lookup,
         patch(
-            "src.services.day_optimisation_service.get_place_details",
+            "src.ai_entities.places.get_place_details",
             return_value=place
             or {"latitude": 1.0, "longitude": 2.0, "formatted_address": "1 Rue, Paris"},
         ),

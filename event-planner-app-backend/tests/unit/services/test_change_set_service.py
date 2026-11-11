@@ -7,7 +7,7 @@ from sqlalchemy import select
 from src.exceptions import EventNotFoundError
 from src.extensions import db
 from src.models import Accommodation, Event, PackingItem, Wishlist, WishlistItem
-from src.services.change_set_service import apply_change_set
+from src.services.change_set_service import apply_change_set, build_edit_ops
 from tests.factories import EventFactory, ItineraryFactory
 
 
@@ -175,3 +175,60 @@ def test_rejects_end_before_start(editor_user, itinerary):
 
     with pytest.raises(ValidationError):
         apply_change_set(itinerary.id, ops, editor_user.id)
+
+
+def test_build_edit_ops_shapes_valid_ops_for_preview(itinerary, event):
+    ops = build_edit_ops(
+        itinerary.id,
+        None,
+        [
+            {
+                "op": "update",
+                "entity": "event",
+                "id": event.id,
+                "data": {"start_at": "2026-08-20T17:00:00+00:00"},
+                "reason": "Later",
+            },
+            {"op": "delete", "entity": "event", "id": 9, "data": {}, "reason": None},
+            {
+                "op": "create",
+                "entity": "wishlist_item",
+                "data": {"name": "Louvre", "wishlist_name": "Museums"},
+                "reason": None,
+            },
+        ],
+    )
+
+    assert ops[0]["op"] == "update"
+    assert ops[1]["op"] == "delete"
+    assert ops[2]["op"] == "create"
+    assert ops[0]["data"] == {"start_at": "2026-08-20T17:00:00Z"}
+    assert ops[1]["data"] == {}
+    assert ops[2]["data"]["wishlist_name"] == "Museums"
+
+
+def test_build_edit_ops_drops_ops_that_fail_validation(itinerary):
+    ops = build_edit_ops(
+        itinerary.id,
+        None,
+        [
+            {"op": "create", "entity": "event", "data": {"name": "No times"}},
+            {"op": "create", "entity": "packing_item", "data": {"name": "Passport"}},
+        ],
+    )
+
+    assert len(ops) == 1
+    assert ops[0]["entity"] == "packing_item"
+
+
+def test_build_edit_ops_saves_nothing(itinerary):
+    build_edit_ops(
+        itinerary.id,
+        None,
+        [{"op": "create", "entity": "packing_item", "data": {"name": "Passport"}}],
+    )
+
+    saved = db.session.execute(
+        select(PackingItem).where(PackingItem.itinerary_id == itinerary.id)
+    )
+    assert saved.scalars().all() == []

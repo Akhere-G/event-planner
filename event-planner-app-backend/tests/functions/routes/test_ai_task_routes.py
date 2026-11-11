@@ -275,31 +275,34 @@ def test_abandoned_running_task_with_no_attempts_left_fails(
     assert data["status"] == "failed"
 
 
-def test_pending_lists_my_ready_proposals_across_trips(
+def test_pending_lists_my_ready_proposals_on_this_trip(
     editor_client, editor_user, itinerary, admin_user
 ):
     mine = ready_task(itinerary, editor_user, [])
     ready_task(itinerary, admin_user, [])
+    ready_task(ItineraryFactory(creator=editor_user), editor_user, [])
     make_task(itinerary, editor_user, status="running")
     expired = ready_task(itinerary, editor_user, [])
     expired.expires_at = utcnow() - timedelta(days=1)
     db.session.flush()
 
-    response = editor_client.get("/api/ai-tasks/pending")
+    response = editor_client.get(f"/api/itineraries/{itinerary.id}/ai-tasks/pending")
 
     assert [t["id"] for t in response.get_json()["data"]] == [mine.id]
 
 
-def test_pending_skips_trips_i_can_no_longer_edit(
-    viewer_client, viewer_user, itinerary
-):
+def test_pending_is_not_offered_to_viewers(viewer_client, viewer_user, itinerary):
     ready_task(itinerary, viewer_user, [])
 
-    assert viewer_client.get("/api/ai-tasks/pending").get_json()["data"] == []
+    response = viewer_client.get(f"/api/itineraries/{itinerary.id}/ai-tasks/pending")
+
+    assert response.status_code == 403
 
 
-def test_pending_requires_login(client):
-    assert client.get("/api/ai-tasks/pending").status_code == 401
+def test_pending_requires_login(client, itinerary):
+    response = client.get(f"/api/itineraries/{itinerary.id}/ai-tasks/pending")
+
+    assert response.status_code == 401
 
 
 def test_cancel_a_queued_task(editor_client, editor_user, itinerary, dispatcher):

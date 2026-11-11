@@ -8,12 +8,10 @@ import {
   Map,
   MoreVertical,
   Plane,
-  Sparkles,
-  Wand2,
 } from "lucide-react";
 import { useCreateAiTaskMutation } from "../../aiTasks/services/aiTaskApiSlice";
 import { useTripAiTasks } from "../../aiTasks/hooks";
-import { activeTaskForDay } from "../../aiTasks/utils";
+import { activeTaskForDay, TASK_ICONS } from "../../aiTasks/utils";
 import OptimiseDayDialog from "../../aiTasks/components/OptimiseDayDialog";
 import type {
   AiTaskParams,
@@ -202,7 +200,7 @@ export default function DayCard({
                       disabled={!!activeFill}
                       className="flex gap-2 items-center"
                     >
-                      <Sparkles className="text-brand-primary" size={18} />
+                      <TASK_ICONS.fill_day className="text-brand-primary" size={18} />
                       Fill in day
                     </DropdownMenuItem>
                     <DropdownMenuItem
@@ -213,7 +211,7 @@ export default function DayCard({
                       disabled={!!activeOptimise}
                       className="flex gap-2 items-center"
                     >
-                      <Wand2 className="text-brand-primary" size={18} />
+                      <TASK_ICONS.optimise_day className="text-brand-primary" size={18} />
                       Optimise day
                     </DropdownMenuItem>
                   </>

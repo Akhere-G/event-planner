@@ -5,12 +5,18 @@ from typing import Any, ClassVar
 from marshmallow import Schema
 
 from ..schemas.accommodation_schema import AccommodationSchema
+from ..exceptions import BadRequestError, UserNotAuthorisedError
+from ..models import UserRole
 from ..schemas.event_schema import EventSchema
+from ..schemas.expense_schema import ExpenseSchema, SettlementSchema
+from ..schemas.itinerary_schema import ItinerarySchema
 from ..schemas.packing_item_schema import PackingItemSchema
-from ..schemas.wishlist_schema import WishlistItemSchema
+from ..schemas.wishlist_schema import WishlistItemSchema, WishlistSchema
 from . import (
     accommodation_service,
     events_service,
+    expense_service,
+    itineraries_service,
     packing_item_service,
     wishlist_service,
 )
@@ -39,9 +45,10 @@ class ChangeSetApplier(ABC):
     schema_class: ClassVar[type[Schema]]
     create_defaults: ClassVar[dict[str, Any]] = {}
 
-    def __init__(self, itinerary_id: int, user_id: int | None):
+    def __init__(self, itinerary_id: int, user_id: int | None, role: str | None = None):
         self.itinerary_id = itinerary_id
         self.user_id = user_id
+        self.role = role
 
     def prepare(self, op: dict) -> PreparedOp:
         """Validate an op's data with the entity's existing schema."""
@@ -53,7 +60,7 @@ class ChangeSetApplier(ABC):
         if kind == "create":
             data = {**self.create_defaults, **data}
 
-        schema = self.schema_class(partial=(kind == "update"))
+        schema = self.schema(partial=(kind == "update"))
         return PreparedOp(
             kind=kind,
             entity_id=op.get("id"),
@@ -61,9 +68,17 @@ class ChangeSetApplier(ABC):
             context=context,
         )
 
+    def schema(self, partial: bool) -> Schema:
+        return self.schema_class(partial=partial)
+
     def extract_context(self, data: dict) -> tuple[dict, dict]:
         """Split non-schema fields out of the op data. Most entities have none."""
         return data, {}
+
+    def preview(self, op: PreparedOp) -> dict[str, Any]:
+        if op.kind == "delete":
+            return {}
+        return self.schema(partial=op.kind == "update").dump(op.data)
 
     def apply(self, op: PreparedOp) -> None:
         if op.kind == "create":
@@ -73,14 +88,78 @@ class ChangeSetApplier(ABC):
         else:
             self.delete(op.entity_id)
 
-    @abstractmethod
-    def create(self, data: dict, context: dict) -> None: ...
+    def create(self, data: dict, context: dict) -> None:
+        raise BadRequestError(f"A {self.entity} can't be added this way.")
 
     @abstractmethod
     def update(self, entity_id: int, data: dict) -> None: ...
 
-    @abstractmethod
-    def delete(self, entity_id: int) -> None: ...
+    def delete(self, entity_id: int) -> None:
+        raise BadRequestError(f"A {self.entity} can't be removed this way.")
+
+
+class TripChangeSetApplier(ChangeSetApplier):
+    entity = "trip"
+    schema_class = ItinerarySchema
+    editable_fields = ("start_date", "end_date", "budget_amount_gbp")
+
+    def schema(self, partial: bool) -> Schema:
+        return ItinerarySchema(partial=partial, only=self.editable_fields)
+
+    def update(self, entity_id, data):
+        if self.role != UserRole.ADMIN.value:
+            raise UserNotAuthorisedError(
+                "You must be an admin to update this itinerary."
+            )
+        itineraries_service.stage_update_itinerary(
+            entity_id, {**data, "updated_by_id": self.user_id}
+        )
+
+
+class ExpenseChangeSetApplier(ChangeSetApplier):
+    entity = "expense"
+    schema_class = ExpenseSchema
+
+    def preview(self, op: PreparedOp) -> dict[str, Any]:
+        data = super().preview(op)
+        if "participant_ids" in op.data:
+            data["participant_ids"] = op.data["participant_ids"]
+        return data
+
+    def create(self, data, context):
+        expense_service.stage_create_expense_as_member(
+            self.user_id, self.role, self.itinerary_id, data
+        )
+
+    def update(self, entity_id, data):
+        expense_service.stage_update_expense(
+            self.user_id, self.role, self.itinerary_id, entity_id, data
+        )
+
+    def delete(self, entity_id):
+        expense_service.stage_delete_expense(
+            self.user_id, self.role, self.itinerary_id, entity_id
+        )
+
+
+class SettlementChangeSetApplier(ChangeSetApplier):
+    entity = "settlement"
+    schema_class = SettlementSchema
+
+    def create(self, data, context):
+        expense_service.stage_create_settlement(
+            self.user_id, self.role, self.itinerary_id, data
+        )
+
+    def update(self, entity_id, data):
+        expense_service.stage_update_settlement(
+            self.user_id, self.role, self.itinerary_id, entity_id, data
+        )
+
+    def delete(self, entity_id):
+        expense_service.stage_delete_settlement(
+            self.user_id, self.role, self.itinerary_id, entity_id
+        )
 
 
 class EventChangeSetApplier(ChangeSetApplier):
@@ -141,6 +220,27 @@ class PackingItemChangeSetApplier(ChangeSetApplier):
         )
 
 
+class WishlistChangeSetApplier(ChangeSetApplier):
+    entity = "wishlist"
+    schema_class = WishlistSchema
+
+    def schema(self, partial: bool) -> Schema:
+        return WishlistSchema(partial=partial, only=("name",))
+
+    def create(self, data, context):
+        wishlist_service.stage_create_wishlist(
+            self.user_id, self.itinerary_id, data["name"]
+        )
+
+    def update(self, entity_id, data):
+        wishlist_service.stage_update_wishlist(
+            self.itinerary_id, entity_id, self.user_id, data["name"]
+        )
+
+    def delete(self, entity_id):
+        wishlist_service.stage_delete_wishlist(self.itinerary_id, entity_id)
+
+
 class WishlistItemChangeSetApplier(ChangeSetApplier):
     entity = "wishlist_item"
     schema_class = WishlistItemSchema
@@ -148,6 +248,12 @@ class WishlistItemChangeSetApplier(ChangeSetApplier):
     def extract_context(self, data):
         name = data.pop("wishlist_name", None) or data.pop("wishlistName", None)
         return data, {"wishlist_name": name or DEFAULT_WISHLIST_NAME}
+
+    def preview(self, op: PreparedOp) -> dict[str, Any]:
+        data = super().preview(op)
+        if op.kind == "create":
+            data["wishlist_name"] = op.context["wishlist_name"]
+        return data
 
     def create(self, data, context):
         wishlist_name = context.get("wishlist_name", DEFAULT_WISHLIST_NAME)
@@ -172,10 +278,14 @@ class WishlistItemChangeSetApplier(ChangeSetApplier):
 _APPLIER_CLASSES: dict[str, type[ChangeSetApplier]] = {
     applier.entity: applier
     for applier in (
+        TripChangeSetApplier,
         EventChangeSetApplier,
         AccommodationChangeSetApplier,
         PackingItemChangeSetApplier,
+        WishlistChangeSetApplier,
         WishlistItemChangeSetApplier,
+        ExpenseChangeSetApplier,
+        SettlementChangeSetApplier,
     )
 }
 
@@ -183,10 +293,10 @@ _APPLIER_CLASSES: dict[str, type[ChangeSetApplier]] = {
 class ChangeSetApplierFactory:
     @staticmethod
     def create(
-        entity: str, itinerary_id: int, user_id: int | None
+        entity: str, itinerary_id: int, user_id: int | None, role: str | None = None
     ) -> ChangeSetApplier:
         try:
             applier_class = _APPLIER_CLASSES[entity]
         except KeyError:
             raise ValueError(f"Unsupported change set entity: {entity}") from None
-        return applier_class(itinerary_id, user_id)
+        return applier_class(itinerary_id, user_id, role)
