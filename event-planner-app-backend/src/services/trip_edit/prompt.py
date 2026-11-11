@@ -1,11 +1,12 @@
 from datetime import date
 from typing import Literal, TypedDict
 
+from ...ai_entities.context import Requester
 from ...models import Itinerary
 from ...utils.clock import utcnow
 from ..flight_context import FlightWindow, format_flight_context
 from ..trip_generation_service import trip_days
-from .editor_base import EntityEditor
+from .registry import EditableEntity
 
 MAX_HISTORY_MESSAGES = 10
 
@@ -98,34 +99,32 @@ def _days(itinerary: Itinerary) -> str:
     return "\n".join(lines)
 
 
-def _sections(editors: dict[str, EntityEditor]) -> str:
+def _sections(entities: dict[str, EditableEntity]) -> str:
     sections = []
-    for editor in editors.values():
-        lines = editor.lines() or ["- none"]
-        sections.append(f"{editor.title}:\n" + "\n".join(lines))
+    for editable in entities.values():
+        lines = editable.lines or ["- none"]
+        sections.append(f"{editable.title}:\n" + "\n".join(lines))
     return "\n\n".join(sections)
 
 
-def _people(editors: dict[str, EntityEditor]) -> str:
-    for editor in editors.values():
-        if not editor.uses_members:
-            continue
-        lines = []
-        for user_id, name in editor.members.items():
-            lines.append(f"- id={user_id} | {name}")
-        return PEOPLE_SECTION.format(
-            people="\n".join(lines),
-            requester=editor.user_id,
-            admin="is an admin" if editor.is_admin else "is not an admin",
-        )
-    return ""
-
-
-def _notes(editors: dict[str, EntityEditor]) -> str:
+def _people(entities: dict[str, EditableEntity], requester: Requester) -> str:
+    if not any(editable.validator.uses_members for editable in entities.values()):
+        return ""
     lines = []
-    for editor in editors.values():
-        if editor.notes:
-            lines.append(f"- {editor.entity}: {editor.notes}")
+    for user_id, name in requester.members.items():
+        lines.append(f"- id={user_id} | {name}")
+    return PEOPLE_SECTION.format(
+        people="\n".join(lines),
+        requester=requester.user_id,
+        admin="is an admin" if requester.is_admin else "is not an admin",
+    )
+
+
+def _notes(entities: dict[str, EditableEntity]) -> str:
+    lines = []
+    for entity, editable in entities.items():
+        if editable.validator.prompt_notes:
+            lines.append(f"- {entity}: {editable.validator.prompt_notes}")
     return "\n".join(lines)
 
 
@@ -136,16 +135,17 @@ def _history(history: list[ChatTurn]) -> str:
     return "\n".join(lines)
 
 
-def _field_hints(editors: dict[str, EntityEditor]) -> str:
+def _field_hints(entities: dict[str, EditableEntity]) -> str:
     lines = []
-    for editor in editors.values():
-        lines.append(f"- {editor.entity}: {editor.hint}")
+    for entity, editable in entities.items():
+        lines.append(f"- {entity}: {editable.validator.prompt_hint}")
     return "\n".join(lines)
 
 
 def build_edit_prompt(
     itinerary: Itinerary,
-    editors: dict[str, EntityEditor],
+    entities: dict[str, EditableEntity],
+    requester: Requester,
     flights: list[FlightWindow],
     message: str,
     history: list[ChatTurn],
@@ -159,18 +159,18 @@ def build_edit_prompt(
         today=utcnow().date(),
         days=_days(itinerary),
     )
-    prompt += TRIP_SECTION.format(sections=_sections(editors))
-    prompt += _people(editors)
+    prompt += TRIP_SECTION.format(sections=_sections(entities))
+    prompt += _people(entities, requester)
     if flights:
         prompt += FLIGHTS_SECTION.format(flights=format_flight_context(flights))
     prompt += RULES.format(timezone=timezone)
-    notes = _notes(editors)
+    notes = _notes(entities)
     if notes:
         prompt += NOTES_SECTION.format(notes=notes)
     if history:
         prompt += CONVERSATION_SECTION.format(history=_history(history))
     prompt += REQUEST_SECTION.format(message=message)
     prompt += FORMAT.format(
-        entities=" | ".join(editors), field_hints=_field_hints(editors)
+        entities=" | ".join(entities), field_hints=_field_hints(entities)
     )
     return prompt

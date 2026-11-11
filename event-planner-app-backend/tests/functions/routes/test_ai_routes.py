@@ -21,9 +21,12 @@ from tests.factories import (
 )
 
 AI = "src.services.trip_editing_service.get_ai_response"
-EVENT_PLACE = "src.services.trip_edit.entity_editors.geocode"
-STAY_PLACE = "src.services.accommodation_service.get_place_details"
-PLACE = {"latitude": 48.86, "longitude": 2.33, "address": "Rue de Rivoli, Paris"}
+PLACE_LOOKUP = "src.ai_entities.places.get_place_details"
+PLACE = {
+    "latitude": 48.86,
+    "longitude": 2.33,
+    "formatted_address": "Rue de Rivoli, Paris",
+}
 
 
 def edit_url(itinerary):
@@ -191,7 +194,7 @@ def test_every_entity_can_be_added(editor_client, itinerary):
         ],
     }
 
-    with patch(EVENT_PLACE, return_value=PLACE), patch(STAY_PLACE, return_value=PLACE):
+    with patch(PLACE_LOOKUP, return_value=PLACE):
         task_id = ask(editor_client, itinerary, reply).get_json()["data"]["task"]["id"]
         response = accept(editor_client, itinerary, task_id, [0, 1, 2, 3])
 

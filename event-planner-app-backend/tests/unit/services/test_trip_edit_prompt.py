@@ -1,14 +1,18 @@
 from datetime import datetime
 
+from src.ai_entities.context import Requester
 from src.services.flight_context import FlightWindow
-from src.services.trip_edit.registry import build_editors
 from src.services.trip_edit.prompt import MAX_HISTORY_MESSAGES, build_edit_prompt
-from tests.factories import edit_context
+from src.services.trip_edit.registry import build_editable_entities
+
+EDITOR = Requester(user_id=None, role="editor", members={})
 
 
-def build(itinerary, message="Move dinner", history=(), flights=()):
-    editors = build_editors(edit_context(itinerary, flights=flights))
-    return build_edit_prompt(itinerary, editors, list(flights), message, list(history))
+def build(itinerary, message="Move dinner", history=(), flights=(), requester=EDITOR):
+    entities = build_editable_entities(itinerary, requester, list(flights))
+    return build_edit_prompt(
+        itinerary, entities, requester, list(flights), message, list(history)
+    )
 
 
 def test_the_prompt_lists_the_days_and_the_trips_items_with_their_ids(itinerary, event):
@@ -60,25 +64,24 @@ def test_the_format_names_every_entity_and_its_fields(itinerary):
     assert "- wishlist_item: name, description; address and wishlist_name" in prompt
 
 
-def test_an_editors_notes_are_added_to_the_prompt(itinerary):
+def test_an_entitys_notes_are_added_to_the_prompt(itinerary):
     prompt = build(itinerary)
 
     assert "NOTES ON SPECIFIC ENTITIES:" in prompt
     assert "- wishlist: removing a list removes its items too" in prompt
 
 
-def test_the_people_are_listed_for_editors_that_name_them(
+def test_the_people_are_listed_for_entities_that_name_them(
     itinerary, admin_user, editor_user
 ):
     members = {admin_user.id: admin_user.username, editor_user.id: editor_user.username}
-    context = edit_context(itinerary, admin_user.id, "admin", members=members)
 
-    prompt = build_edit_prompt(itinerary, build_editors(context), [], "Add lunch", [])
+    prompt = build(itinerary, requester=Requester(admin_user.id, "admin", members))
 
     assert f"- id={editor_user.id} | {editor_user.username}" in prompt
     assert f"The requester is person {admin_user.id}" in prompt
     assert "The requester is an admin." in prompt
 
 
-def test_the_people_are_left_out_when_no_editor_needs_them(itinerary):
+def test_the_people_are_left_out_when_nothing_names_them(itinerary):
     assert "PEOPLE ON THIS TRIP" not in build(itinerary)
