@@ -5,6 +5,7 @@ export const TASK_LABELS: Record<AiTaskType, string> = {
   optimise_day: "Optimise days",
   generate_trip: "Generate trip plan",
   generate_packing: "Smart packing list",
+  edit_trip: "Trip edits",
 };
 
 export const TASK_PROGRESS_LABELS: Record<AiTaskType, string> = {
@@ -12,6 +13,7 @@ export const TASK_PROGRESS_LABELS: Record<AiTaskType, string> = {
   optimise_day: "Optimising days",
   generate_trip: "Planning your trip",
   generate_packing: "Building your packing list",
+  edit_trip: "Editing your trip",
 };
 
 const ACTIVE: AiTaskStatus[] = ["queued", "running"];

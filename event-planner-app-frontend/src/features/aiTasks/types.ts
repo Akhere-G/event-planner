@@ -2,7 +2,11 @@ import type { AutofillConfig } from "../events/types";
 import type { ApplyChangeSetResult, ChangeOp } from "../ai/types";
 
 export type AiTaskType =
-  "fill_day" | "optimise_day" | "generate_trip" | "generate_packing";
+  | "fill_day"
+  | "optimise_day"
+  | "generate_trip"
+  | "generate_packing"
+  | "edit_trip";
 
 export type AiTaskStatus =
   | "queued"
@@ -24,6 +28,7 @@ export interface AiTask {
   params: {
     date?: string;
     dates?: string[];
+    message?: string;
   };
   progressText: string | null;
   progressCurrent: number | null;
@@ -69,6 +74,7 @@ export interface AiTaskParams {
   optimise_day: OptimiseDayParams;
   generate_trip: Record<string, never>;
   generate_packing: Record<string, never>;
+  edit_trip: { message: string };
 }
 
 export interface AiTaskChangedWire {
