@@ -1,9 +1,12 @@
 import {
   BedDouble,
   Calendar,
+  CalendarRange,
   ChevronDown,
+  HandCoins,
   Heart,
   Luggage,
+  Receipt,
   type LucideIcon,
 } from "lucide-react";
 import { ChangePreviewList } from "../../ai/components";
@@ -35,6 +38,26 @@ const AREAS: Record<
     title: "Wishlist",
     subtitle: "Saved ideas and places",
     Icon: Heart,
+  },
+  wishlist: {
+    title: "Wishlists",
+    subtitle: "Lists and their names",
+    Icon: Heart,
+  },
+  trip: {
+    title: "Trip",
+    subtitle: "Dates and budget",
+    Icon: CalendarRange,
+  },
+  expense: {
+    title: "Expenses",
+    subtitle: "Costs and how they are split",
+    Icon: Receipt,
+  },
+  settlement: {
+    title: "Payments",
+    subtitle: "Settling up between travellers",
+    Icon: HandCoins,
   },
 };
 
