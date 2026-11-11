@@ -87,3 +87,21 @@ class EntityValidator(ABC):
             name, address if isinstance(address, str) else None, place_type
         )
         return None if place is None else {**data, **place.as_data()}
+
+    def _relocated(
+        self,
+        current: EntityDescription,
+        data: JsonObject,
+        place_type: str = "establishment",
+    ) -> JsonObject | None:
+        """Edited data whose new address, if it changes, has been located."""
+        if "address" not in data:
+            return data
+        if data["address"] != current.values["address"]:
+            name = data.get("name") or current.label
+            return self._located(data, str(name), place_type)
+        changed: JsonObject = {}
+        for field, value in data.items():
+            if field != "address":
+                changed[field] = value
+        return changed or None

@@ -47,14 +47,10 @@ class EventValidator(EntityValidator):
     ) -> JsonObject | None:
         if "name" in data and not data["name"]:
             return None
-        checked = data
+        timed = data
         if "start_at" in data or "end_at" in data:
-            checked = self._with_utc_times(data)
-        if checked is None:
-            return None
-        if "address" not in data or data["address"] == current.values["address"]:
-            return checked
-        return self._located(checked, str(data.get("name") or current.label))
+            timed = self._with_utc_times(data)
+        return None if timed is None else self._relocated(current, timed)
 
     def _with_utc_times(self, data: JsonObject) -> JsonObject | None:
         start = parse_local_datetime(data.get("start_at"))
