@@ -1,4 +1,4 @@
-import { Sparkles } from "lucide-react";
+import { TASK_ICONS } from "../utils";
 import {
   Dialog,
   DialogContent,
@@ -24,7 +24,7 @@ export default function OptimiseDayDialog({
       >
         <header className="flex items-center gap-3 bg-brand-primary p-4 pr-12 text-text-inverse">
           <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-text-inverse/20">
-            <Sparkles size={20} />
+            <TASK_ICONS.optimise_day size={20} />
           </span>
           <div className="flex flex-col gap-0.5">
             <DialogTitle className="text-lg font-semibold">

@@ -10,7 +10,7 @@ import {
   Bike,
   Wine,
   Milestone,
-  Sparkles,
+  Gem,
   Palmtree,
   Utensils,
   ShoppingBag,
@@ -65,7 +65,7 @@ const INTEREST_OPTIONS: ToggleOption[] = [
     value: "sports_and_adventure",
     icon: Mountain,
   },
-  { label: "Hidden Gems", value: "hidden_gems", icon: Sparkles },
+  { label: "Hidden Gems", value: "hidden_gems", icon: Gem },
 ];
 
 export default function AutofillDayForm({

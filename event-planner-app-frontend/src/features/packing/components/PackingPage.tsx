@@ -4,9 +4,9 @@ import type { Trip } from "../../trips/types";
 import { useGetPackingItemsQuery } from "../services/packingApiSlice";
 import { useCreateAiTaskMutation } from "../../aiTasks/services/aiTaskApiSlice";
 import { useTripAiTasks } from "../../aiTasks/hooks";
+import { TASK_ICONS } from "../../aiTasks/utils";
 import PackingItems from "./PackingItems";
 import {
-  Sparkles,
   UserCheck,
   Users,
   CheckCircle2,
@@ -111,7 +111,7 @@ export default function PackingPage({ trip }: { trip: Trip }) {
                 </>
               ) : (
                 <>
-                  <Sparkles className="w-5 h-5 text-text-inverse" />
+                  <TASK_ICONS.generate_packing className="w-5 h-5 text-text-inverse" />
                   <span>Smart generate</span>
                 </>
               )}
@@ -122,7 +122,7 @@ export default function PackingPage({ trip }: { trip: Trip }) {
         {totalItems === 0 && !isGenerating && (
           <div className="card p-6 md:p-8 bg-linear-to-r from-brand-primary/10 via-surface to-brand-secondary/10 border border-brand-primary/20 rounded-xl text-center flex flex-col items-center gap-4">
             <div className="w-12 h-12 rounded-2xl bg-brand-primary/20 flex items-center justify-center text-brand-primary">
-              <Sparkles className="w-7 h-7" />
+              <TASK_ICONS.generate_packing className="w-7 h-7" />
             </div>
             <div className="max-w-xl flex flex-col gap-1">
               <h3 className="text-lg font-bold text-text-primary">
@@ -138,7 +138,7 @@ export default function PackingPage({ trip }: { trip: Trip }) {
               disabled={isGenerating}
               className="btn-primary flex items-center gap-2 px-6 py-3 text-sm font-semibold shadow-md hover:scale-105 transition-all"
             >
-              <Sparkles className="w-5 h-5" />
+              <TASK_ICONS.generate_packing className="w-5 h-5" />
               <span>Generate Custom Packing List</span>
             </button>
           </div>
