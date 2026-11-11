@@ -3,19 +3,22 @@ from unittest.mock import patch
 import pytest
 from src.exceptions import AIResponseError
 from src.schemas.change_set_schema import MAX_OPS_PER_CHANGE_SET
-from src.services.trip_edit.entity_editors import EDITORS
+from src.services.trip_edit.editor_base import EntityEditor
+from src.services.trip_edit.registry import build_editors
 from src.services.trip_edit.sanitiser import sanitise_edit_ops
-from tests.factories import EventFactory, ItineraryFactory, WishlistItemFactory
+from tests.factories import (
+    EventFactory,
+    ItineraryFactory,
+    WishlistItemFactory,
+    edit_context,
+)
 
 PLACE = {"latitude": 48.86, "longitude": 2.33, "address": "Rue de Rivoli, Paris"}
 GEOCODE = "src.services.trip_edit.entity_editors.geocode"
 
 
 def editors_for(itinerary):
-    editors = {}
-    for entity, editor_class in EDITORS.items():
-        editors[entity] = editor_class(itinerary, None, [])
-    return editors
+    return build_editors(edit_context(itinerary))
 
 
 def test_a_valid_update_keeps_only_allowed_fields(itinerary, event):
@@ -177,3 +180,38 @@ def test_ops_are_capped(itinerary):
 def test_ops_that_are_not_a_list_are_an_error(itinerary):
     with pytest.raises(AIResponseError):
         sanitise_edit_ops({"op": "delete"}, editors_for(itinerary))
+
+
+class CreateOnlyEditor(EntityEditor):
+    entity = "note"
+    title = "NOTES"
+    fields = ("text", "pinned")
+    kinds = ("create",)
+    create_required = ("text",)
+    hint = "text"
+
+    def describe_items(self, itinerary):
+        return {7: "a note"}
+
+
+def note_editors(itinerary):
+    return {"note": CreateOnlyEditor(edit_context(itinerary))}
+
+
+def test_an_op_kind_the_editor_does_not_allow_is_dropped(itinerary):
+    raw = [
+        {"op": "delete", "entity": "note", "id": 7},
+        {"op": "update", "entity": "note", "id": 7, "data": {"text": "x"}},
+    ]
+
+    assert sanitise_edit_ops(raw, note_editors(itinerary)) == []
+
+
+def test_a_create_needs_the_fields_the_editor_requires(itinerary):
+    editors = note_editors(itinerary)
+    without = {"op": "create", "entity": "note", "data": {"pinned": True}}
+    with_text = {"op": "create", "entity": "note", "data": {"text": "Hi"}}
+
+    ops = sanitise_edit_ops([without, with_text], editors)
+
+    assert [op["data"] for op in ops] == [{"text": "Hi"}]

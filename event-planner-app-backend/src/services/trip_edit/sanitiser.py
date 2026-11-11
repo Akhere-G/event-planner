@@ -4,7 +4,7 @@ from typing import Any
 from ...exceptions import AIResponseError
 from ...schemas.change_set_schema import MAX_OPS_PER_CHANGE_SET
 from ..change_set_service import clean_reason
-from .entity_editors import EntityEditor
+from .editor_base import EntityEditor
 
 logger = logging.getLogger(__name__)
 
@@ -34,6 +34,10 @@ def _allowed_data(raw: dict[str, Any], editor: EntityEditor, kind: str) -> dict:
     return allowed
 
 
+def _has_required(data: dict[str, Any], editor: EntityEditor) -> bool:
+    return set(editor.create_required) <= data.keys()
+
+
 def _clean_op(raw: Any, editors: dict[str, EntityEditor]) -> dict[str, Any] | None:
     if not isinstance(raw, dict):
         return _dropped("not an object", raw)
@@ -41,6 +45,8 @@ def _clean_op(raw: Any, editors: dict[str, EntityEditor]) -> dict[str, Any] | No
     if kind not in OP_KINDS or not isinstance(entity, str) or entity not in editors:
         return _dropped("unknown op or entity", raw)
     editor = editors[entity]
+    if kind not in editor.kinds:
+        return _dropped("not allowed for this entity", raw)
 
     op: dict[str, Any] = {"op": kind, "entity": entity, "data": {}}
     if kind != "create":
@@ -49,9 +55,9 @@ def _clean_op(raw: Any, editors: dict[str, EntityEditor]) -> dict[str, Any] | No
             return _dropped("not an item of this trip", raw)
     if kind != "delete":
         data = _allowed_data(raw, editor, kind)
-        if not data or (kind == "create" and "name" not in data):
+        if not data or (kind == "create" and not _has_required(data, editor)):
             return _dropped("no usable data", raw)
-        op["data"] = editor.normalise(kind, data)
+        op["data"] = editor.normalise(kind, op.get("id"), data)
         if op["data"] is None:
             return _dropped("unusable values", raw)
     op["reason"] = clean_reason(raw.get("reason"))

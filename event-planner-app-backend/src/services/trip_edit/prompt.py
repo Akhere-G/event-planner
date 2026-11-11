@@ -4,7 +4,7 @@ from typing import Literal, TypedDict
 from ...models import Itinerary
 from ..flight_context import FlightWindow, format_flight_context
 from ..trip_generation_service import trip_days
-from .entity_editors import EntityEditor
+from .editor_base import EntityEditor
 
 MAX_HISTORY_MESSAGES = 10
 

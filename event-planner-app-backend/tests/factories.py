@@ -21,10 +21,10 @@ from src.models import (
     WishlistItem,
     WishlistItemVote,
 )
+from src.services.trip_edit.editor_base import EditContext
 
 TEST_PASSWORD = "password123"
 TEST_PASSWORD_HASH = bcrypt.generate_password_hash(TEST_PASSWORD).decode("utf-8")
-
 
 class UserFactory(factory.alchemy.SQLAlchemyModelFactory):
     class Meta:
@@ -266,3 +266,9 @@ class AiTaskFactory(factory.alchemy.SQLAlchemyModelFactory):
     params = factory.LazyFunction(dict)
     attempts = 0
     max_attempts = 3
+
+
+def edit_context(
+    itinerary, user_id=None, role="editor", flights=(), members=None
+) -> EditContext:
+    return EditContext(itinerary, user_id, role, list(flights), members or {})

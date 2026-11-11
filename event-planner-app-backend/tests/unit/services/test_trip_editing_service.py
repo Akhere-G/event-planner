@@ -53,7 +53,9 @@ def test_a_request_becomes_a_ready_proposal_and_changes_nothing(
     itinerary, event, editor_user
 ):
     with patch(AI, fake_ai(move(event))):
-        result = edit_trip_with_ai(itinerary.id, editor_user.id, "Dinner at 7", [])
+        result = edit_trip_with_ai(
+            itinerary.id, editor_user.id, "editor", "Dinner at 7", []
+        )
 
     task = result.task
     assert result.reply == "Moved it to 7pm."
@@ -75,7 +77,7 @@ def test_the_model_sees_the_trips_items_the_request_and_the_history(itinerary, e
     history = [{"role": "user", "content": "Hi"}]
 
     with patch(AI, ai):
-        edit_trip_with_ai(itinerary.id, None, "Move dinner", history)
+        edit_trip_with_ai(itinerary.id, None, "editor", "Move dinner", history)
 
     assert f"id={event.id}" in ai.prompts[0]
     assert "Move dinner" in ai.prompts[0]
@@ -86,7 +88,7 @@ def test_a_clarifying_reply_creates_no_proposal(itinerary, event):
     reply = {"reply": "Which dinner do you mean?", "ops": []}
 
     with patch(AI, fake_ai(reply)):
-        result = edit_trip_with_ai(itinerary.id, None, "Move dinner", [])
+        result = edit_trip_with_ai(itinerary.id, None, "editor", "Move dinner", [])
 
     assert result.reply == "Which dinner do you mean?"
     assert result.task is None
@@ -95,12 +97,12 @@ def test_a_clarifying_reply_creates_no_proposal(itinerary, event):
 
 def test_a_missing_reply_gets_a_default(itinerary, event):
     with patch(AI, fake_ai({"ops": None})):
-        assert edit_trip_with_ai(itinerary.id, None, "?", []).reply == (
+        assert edit_trip_with_ai(itinerary.id, None, "editor", "?", []).reply == (
             REPLY_WITHOUT_CHANGES
         )
 
     with patch(AI, fake_ai({"ops": move(event)["ops"]})):
-        assert edit_trip_with_ai(itinerary.id, None, "?", []).reply == (
+        assert edit_trip_with_ai(itinerary.id, None, "editor", "?", []).reply == (
             REPLY_WITH_CHANGES
         )
 
@@ -109,7 +111,7 @@ def test_an_item_of_another_trip_is_ignored(itinerary, event):
     foreign = EventFactory(itinerary=ItineraryFactory())
 
     with patch(AI, fake_ai(move(foreign))):
-        result = edit_trip_with_ai(itinerary.id, None, "Move it", [])
+        result = edit_trip_with_ai(itinerary.id, None, "editor", "Move it", [])
 
     assert result.task is None
     assert proposals(itinerary) == []
@@ -134,7 +136,7 @@ def test_a_created_event_is_geocoded_into_the_proposal(itinerary):
     geocode = "src.services.trip_edit.entity_editors.geocode"
 
     with patch(AI, fake_ai(reply)), patch(geocode, return_value=PLACE):
-        result = edit_trip_with_ai(itinerary.id, None, "Add the Louvre", [])
+        result = edit_trip_with_ai(itinerary.id, None, "editor", "Add the Louvre", [])
 
     data = result.task.result_ops[0]["data"]
     assert data["latitude"] == 48.86
@@ -152,7 +154,7 @@ def test_an_edit_made_while_the_model_thinks_makes_the_proposal_stale(itinerary,
         return json.dumps(move(event))
 
     with patch(AI, edit_during_the_call):
-        result = edit_trip_with_ai(itinerary.id, None, "Dinner at 7", [])
+        result = edit_trip_with_ai(itinerary.id, None, "editor", "Dinner at 7", [])
 
     stale = snapshots.find_stale(itinerary.id, result.task.result_ops)
     assert stale == {0: snapshots.Staleness.CHANGED}
@@ -161,4 +163,4 @@ def test_an_edit_made_while_the_model_thinks_makes_the_proposal_stale(itinerary,
 @pytest.mark.parametrize("reply", ["[]", '"hello"', "not json"])
 def test_a_reply_that_is_not_an_object_is_an_error(itinerary, reply):
     with patch(AI, fake_ai(reply)), pytest.raises(AIResponseError):
-        edit_trip_with_ai(itinerary.id, None, "Move dinner", [])
+        edit_trip_with_ai(itinerary.id, None, "editor", "Move dinner", [])
