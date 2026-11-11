@@ -1,8 +1,4 @@
-"""What every editor shares: the context it is built from and the editor contract.
-
-An editor reads everything it needs from the trip when it is built, so it can be used
-after the database connection has been released.
-"""
+"""An editor copies what it needs when built, so it outlives the DB connection."""
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
@@ -47,7 +43,6 @@ class EntityEditor(ABC):
 
     @classmethod
     def is_available(cls, context: EditContext) -> bool:
-        """Whether this user may be offered the chance to edit this entity."""
         return True
 
     @abstractmethod

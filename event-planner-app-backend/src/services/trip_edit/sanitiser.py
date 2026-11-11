@@ -16,7 +16,6 @@ def _dropped(reason: str, raw: Any) -> None:
 
 
 def _own_entity_id(raw: dict[str, Any], editor: EntityEditor) -> int | None:
-    """The id of an entity of this trip, or None when it is missing or foreign."""
     item_id = raw.get("id")
     if type(item_id) is int and item_id in editor.ids():
         return item_id

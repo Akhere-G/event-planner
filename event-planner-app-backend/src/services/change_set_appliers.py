@@ -76,7 +76,6 @@ class ChangeSetApplier(ABC):
         return data, {}
 
     def preview(self, op: PreparedOp) -> dict[str, Any]:
-        """The op's data as the API shows it, without saving anything."""
         if op.kind == "delete":
             return {}
         return self.schema(partial=op.kind == "update").dump(op.data)
@@ -100,8 +99,6 @@ class ChangeSetApplier(ABC):
 
 
 class TripChangeSetApplier(ChangeSetApplier):
-    """Edits the trip's own dates and budget. Like the trip's PATCH, admin-only."""
-
     entity = "trip"
     schema_class = ItinerarySchema
     editable_fields = ("start_date", "end_date", "budget_amount_gbp")

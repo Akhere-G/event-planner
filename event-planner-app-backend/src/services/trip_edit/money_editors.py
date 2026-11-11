@@ -17,8 +17,6 @@ _CATEGORIES = _category_names()
 
 
 class MemberEditor(EntityEditor):
-    """An editor for records that name the trip's members and belong to one of them."""
-
     uses_members: ClassVar[bool] = True
 
     @classmethod
@@ -137,8 +135,6 @@ class ExpenseEditor(MemberEditor):
 
 
 class SettlementEditor(MemberEditor):
-    """Payments between two members that the user may change."""
-
     entity = "settlement"
     title = "SETTLEMENTS (payments between people; only those you may change)"
     fields = ("from_user_id", "to_user_id", "amount_gbp", "settled_on")
