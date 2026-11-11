@@ -4,7 +4,6 @@ from .base_schema import CamelToSnakeMixin
 
 
 class EventSuggestionRequestSchema(CamelToSnakeMixin, Schema):
-
     date = fields.Date(
         required=True,
         format="%Y-%m-%d",
@@ -37,7 +36,6 @@ MAX_INSTRUCTIONS_LENGTH = 500
 
 
 class OptimiseDayParamsSchema(CamelToSnakeMixin, Schema):
-
     dates = fields.List(
         fields.Date(format="%Y-%m-%d"),
         required=True,
@@ -67,3 +65,30 @@ class OptimiseDayParamsSchema(CamelToSnakeMixin, Schema):
             raise ValidationError(
                 "The day must end after it starts.", field_name="day_end"
             )
+
+
+MAX_CHAT_HISTORY = 20
+MAX_CHAT_CONTENT_LENGTH = 1000
+
+
+class ChatTurnSchema(Schema):
+    role = fields.String(required=True, validate=validate.OneOf(["user", "assistant"]))
+    content = fields.String(
+        required=True, validate=validate.Length(max=MAX_CHAT_CONTENT_LENGTH)
+    )
+
+
+class EditTripRequestSchema(CamelToSnakeMixin, Schema):
+    message = fields.String(
+        required=True,
+        validate=validate.Length(
+            min=1,
+            max=MAX_INSTRUCTIONS_LENGTH,
+            error="Message must be between 1 and {max} characters.",
+        ),
+    )
+    history = fields.List(
+        fields.Nested(ChatTurnSchema),
+        load_default=list,
+        validate=validate.Length(max=MAX_CHAT_HISTORY),
+    )

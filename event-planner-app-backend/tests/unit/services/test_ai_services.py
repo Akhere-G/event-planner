@@ -69,7 +69,7 @@ def test_get_ai_response_falls_back_to_groq_when_gemini_fails(monkeypatch):
 def test_to_trip_local_converts_utc_to_wall_clock():
     from datetime import datetime, timezone
 
-    from src.services.ai_services import to_trip_local
+    from src.utils.trip_time import to_trip_local
 
     value = datetime(2026, 8, 20, 23, 30, tzinfo=timezone.utc)
     assert to_trip_local(value, "Europe/Paris") == datetime(2026, 8, 21, 1, 30)
@@ -78,7 +78,7 @@ def test_to_trip_local_converts_utc_to_wall_clock():
 def test_trip_local_to_utc_ignores_model_offset():
     from datetime import datetime, timezone
 
-    from src.services.ai_services import trip_local_to_utc
+    from src.utils.trip_time import trip_local_to_utc
 
     expected = datetime(2026, 8, 21, 7, 0, tzinfo=timezone.utc)
     assert trip_local_to_utc("2026-08-21T09:00:00", "Europe/Paris") == expected

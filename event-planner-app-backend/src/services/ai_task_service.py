@@ -2,13 +2,13 @@ import logging
 from datetime import timedelta
 from typing import Any
 
-from sqlalchemy import and_, delete, exists, func, select, update
+from sqlalchemy import and_, delete, func, select, update
 
 from ..ai_tasks import snapshots
 from ..ai_tasks.dispatchers.factory import get_dispatcher
 from ..ai_tasks.notifier import TaskNotifier
 from ..ai_tasks.registry import get_handler
-from ..ai_tasks.runner import LEASE
+from ..ai_tasks.runner import LEASE, PROPOSAL_LIFETIME
 from ..exceptions import (
     ActiveAiTaskConflictError,
     AiTaskNotFoundError,
@@ -23,8 +23,6 @@ from ..models import (
     AiTask,
     AiTaskStatus,
     Itinerary,
-    ItineraryUser,
-    UserRole,
 )
 from ..utils.clock import utcnow
 from .change_set_service import apply_change_set
@@ -36,7 +34,6 @@ MAX_ACTIVE_TASKS = 3
 FINISHED_RETENTION = timedelta(days=30)
 
 _ACTIVE = [status.value for status in ACTIVE_STATUSES]
-_EDIT_ROLES = [UserRole.ADMIN.value, UserRole.EDITOR.value]
 
 
 def _notifier() -> TaskNotifier:
@@ -114,22 +111,11 @@ def list_trip_tasks(itinerary_id: int, user_id: int | None) -> list[AiTask]:
     return list(db.session.execute(stmt).scalars())
 
 
-def list_pending_proposals(user_id: int) -> list[AiTask]:
+def list_pending_proposals(itinerary_id: int, user_id: int | None) -> list[AiTask]:
     _housekeeping()
-    can_edit = exists().where(
-        and_(
-            ItineraryUser.itinerary_id == AiTask.itinerary_id,
-            ItineraryUser.user_id == user_id,
-            ItineraryUser.role.in_(_EDIT_ROLES),
-        )
-    )
     stmt = (
-        select(AiTask)
-        .where(
-            AiTask.created_by_id == user_id,
-            AiTask.status == AiTaskStatus.READY.value,
-            can_edit,
-        )
+        _own_tasks(itinerary_id, user_id)
+        .where(AiTask.status == AiTaskStatus.READY.value)
         .order_by(AiTask.finished_at)
     )
     return list(db.session.execute(stmt).scalars())
@@ -198,6 +184,33 @@ def enqueue(
     db.session.commit()
     _notifier().status_changed(task)
     return _dispatch(task.id)
+
+
+def create_proposal(
+    itinerary_id: int,
+    task_type: str,
+    params: dict[str, Any],
+    ops: list[dict[str, Any]],
+    user_id: int | None,
+) -> AiTask:
+    """Store ops that were produced inside the request as a proposal awaiting a
+    decision, so they are accepted, rejected and expired like a background task's."""
+    now = utcnow()
+    task = AiTask(
+        itinerary_id=itinerary_id,
+        type=task_type,
+        status=AiTaskStatus.READY.value,
+        params=params,
+        result_ops=ops,
+        started_at=now,
+        finished_at=now,
+        expires_at=now + PROPOSAL_LIFETIME,
+        created_by_id=user_id,
+        updated_by_id=user_id,
+    )
+    db.session.add(task)
+    db.session.commit()
+    return task
 
 
 def _dispatch(task_id: int) -> AiTask:
@@ -272,7 +285,9 @@ def retry(task: AiTask, user_id: int | None) -> AiTask:
     return new_task
 
 
-def accept(task: AiTask, op_indexes: list[int], user_id: int | None) -> dict[str, Any]:
+def accept(
+    task: AiTask, op_indexes: list[int], user_id: int | None, role: str | None = None
+) -> dict[str, Any]:
     if task.status == AiTaskStatus.EXPIRED.value:
         raise InvalidAiTaskStateError("This proposal has expired.")
     if task.status != AiTaskStatus.READY.value:
@@ -313,6 +328,7 @@ def accept(task: AiTask, op_indexes: list[int], user_id: int | None) -> dict[str
             task.itinerary_id,
             [snapshots.strip_base(ops[i]) for i in applicable],
             user_id,
+            role,
         )
     except Exception:
         db.session.rollback()

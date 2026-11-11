@@ -13,11 +13,24 @@ from typing import Any
 from sqlalchemy import Select, select
 
 from ..extensions import db
-from ..models import Accommodation, Event, PackingItem, Wishlist, WishlistItem
+from ..models import (
+    Accommodation,
+    Event,
+    Expense,
+    Itinerary,
+    PackingItem,
+    Settlement,
+    Wishlist,
+    WishlistItem,
+)
+from ..services.change_set_types import ChangeOp
 
 Snapshot = dict[str, dict[int, str | None]]
 
 _SELECTS: dict[str, Callable[[int], Select]] = {
+    "trip": lambda trip: select(Itinerary.id, Itinerary.updated_at).where(
+        Itinerary.id == trip
+    ),
     "event": lambda trip: select(Event.id, Event.updated_at).where(
         Event.itinerary_id == trip
     ),
@@ -26,6 +39,15 @@ _SELECTS: dict[str, Callable[[int], Select]] = {
     ).where(Accommodation.itinerary_id == trip),
     "packing_item": lambda trip: select(PackingItem.id, PackingItem.updated_at).where(
         PackingItem.itinerary_id == trip
+    ),
+    "expense": lambda trip: select(Expense.id, Expense.updated_at).where(
+        Expense.itinerary_id == trip
+    ),
+    "settlement": lambda trip: select(Settlement.id, Settlement.updated_at).where(
+        Settlement.itinerary_id == trip
+    ),
+    "wishlist": lambda trip: select(Wishlist.id, Wishlist.updated_at).where(
+        Wishlist.itinerary_id == trip
     ),
     "wishlist_item": lambda trip: (
         select(WishlistItem.id, WishlistItem.updated_at)
@@ -55,7 +77,7 @@ def capture(itinerary_id: int) -> Snapshot:
     return snapshot
 
 
-def attach_bases(ops: list[dict[str, Any]], snapshot: Snapshot) -> list[dict[str, Any]]:
+def attach_bases(ops: list[ChangeOp], snapshot: Snapshot) -> list[ChangeOp]:
     with_bases = []
     for op in ops:
         if op["op"] in CHANGING_OPS:

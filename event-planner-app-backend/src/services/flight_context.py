@@ -1,6 +1,11 @@
 from dataclasses import dataclass
 from datetime import date, datetime, time, timedelta
 
+from sqlalchemy import Select, select
+from sqlalchemy.orm import aliased
+
+from ..extensions import db
+from ..models import Airport, Flight
 from ..utils.trip_time import to_trip_local
 
 PRE_DEPARTURE_BUFFER = timedelta(hours=3)
@@ -18,7 +23,7 @@ class FlightWindow:
     the airport) until `POST_ARRIVAL_BUFFER` after arrival (getting out of it).
     """
 
-    label: str
+    label: str | None
     departs: datetime
     arrives: datetime
 
@@ -38,22 +43,47 @@ class FlightWindow:
         return self.overlaps(day_start, day_start + _ONE_DAY)
 
 
-def _label(flight) -> str:
+def _flights_query(itinerary_id: int, labelled: bool) -> Select:
+    stmt = (
+        select(Flight.depart_at, Flight.arrive_at)
+        .where(Flight.itinerary_id == itinerary_id)
+        .order_by(Flight.depart_at)
+    )
+    if not labelled:
+        return stmt
+    departure, arrival = aliased(Airport), aliased(Airport)
     return (
-        f"{flight.airline}{flight.flight_number} "
-        f"{flight.departure_airport.code} → {flight.arrival_airport.code}"
+        stmt.add_columns(
+            Flight.airline,
+            Flight.flight_number,
+            departure.code.label("departure_code"),
+            arrival.code.label("arrival_code"),
+        )
+        .join(departure, departure.id == Flight.departure_airport_id)
+        .join(arrival, arrival.id == Flight.arrival_airport_id)
     )
 
 
-def blocked_windows(flights, timezone_name: str | None) -> list[FlightWindow]:
-    """Plain-data windows for a trip's flights, safe to use after the DB is released."""
+def blocked_windows(
+    itinerary_id: int, timezone_name: str | None, *, labelled: bool = False
+) -> list[FlightWindow]:
+    """Plain-data windows for a trip's flights, safe to use after the DB is released.
+
+    Airports are only read when the windows are labelled, for use in a prompt.
+    """
     windows = []
-    for flight in flights:
+    for row in db.session.execute(_flights_query(itinerary_id, labelled)):
+        label = None
+        if labelled:
+            label = (
+                f"{row.airline}{row.flight_number} "
+                f"{row.departure_code} → {row.arrival_code}"
+            )
         windows.append(
             FlightWindow(
-                label=_label(flight),
-                departs=to_trip_local(flight.depart_at, timezone_name),
-                arrives=to_trip_local(flight.arrive_at, timezone_name),
+                departs=to_trip_local(row.depart_at, timezone_name),
+                arrives=to_trip_local(row.arrive_at, timezone_name),
+                label=label,
             )
         )
     return windows
@@ -79,7 +109,7 @@ def format_flight_context(windows: list[FlightWindow]) -> str:
     lines = []
     for window in windows:
         lines.append(
-            f"- {window.label}: flies {window.departs:{_MINUTES}} to "
+            f"- {window.label or 'Flight'}: flies {window.departs:{_MINUTES}} to "
             f"{window.arrives:{_MINUTES}}; blocked {window.start:{_MINUTES}} to "
             f"{window.end:{_MINUTES}}"
         )

@@ -1,7 +1,9 @@
+import logging
 from typing import Any
 
 from marshmallow import ValidationError
 
+from ..ai_entities.json_types import JsonObject, JsonValue
 from ..extensions import db
 from ..schemas.event_schema import EventSchema
 from .change_set_appliers import (
@@ -9,6 +11,9 @@ from .change_set_appliers import (
     ChangeSetApplierFactory,
     PreparedOp,
 )
+from .change_set_types import ChangeOp
+
+logger = logging.getLogger(__name__)
 
 EVENT_FIELDS = (
     "name",
@@ -25,12 +30,14 @@ _COUNT_KEYS = {"create": "created", "update": "updated", "delete": "deleted"}
 
 
 def validate_ops(
-    itinerary_id: int, ops: list[dict], user_id: int | None
+    itinerary_id: int, ops: list[dict], user_id: int | None, role: str | None = None
 ) -> list[tuple[ChangeSetApplier, PreparedOp]]:
     """Validate every op up front, collecting all errors by op index."""
     prepared, errors = [], {}
     for index, op in enumerate(ops):
-        applier = ChangeSetApplierFactory.create(op["entity"], itinerary_id, user_id)
+        applier = ChangeSetApplierFactory.create(
+            op["entity"], itinerary_id, user_id, role
+        )
         try:
             prepared.append((applier, applier.prepare(op)))
         except ValidationError as err:
@@ -41,10 +48,10 @@ def validate_ops(
 
 
 def apply_change_set(
-    itinerary_id: int, ops: list[dict], user_id: int | None
+    itinerary_id: int, ops: list[dict], user_id: int | None, role: str | None = None
 ) -> dict[str, int]:
     """Validate every op, then apply them all in one transaction (all or nothing)."""
-    prepared = validate_ops(itinerary_id, ops, user_id)
+    prepared = validate_ops(itinerary_id, ops, user_id, role)
     counts = {key: 0 for key in _COUNT_KEYS.values()}
 
     try:
@@ -59,7 +66,7 @@ def apply_change_set(
     return counts
 
 
-def _clean_reason(reason: Any) -> str | None:
+def clean_reason(reason: Any) -> str | None:
     if isinstance(reason, str) and reason.strip():
         return reason.strip()[:200]
     return None
@@ -76,7 +83,7 @@ def build_event_create_ops(suggestions: list[dict]) -> list[dict]:
                 "op": "create",
                 "entity": "event",
                 "data": schema.dump(schema.load(fields)),
-                "reason": _clean_reason(suggestion.get("reason")),
+                "reason": clean_reason(suggestion.get("reason")),
             }
         )
     return ops
@@ -85,16 +92,19 @@ def build_event_create_ops(suggestions: list[dict]) -> list[dict]:
 def build_event_update_ops(updates: list[dict]) -> list[dict]:
     """Turn AI-optimised event times into preview-only update ops."""
     schema = EventSchema(only=("start_at", "end_at"))
-    return [
-        {
-            "op": "update",
-            "entity": "event",
-            "id": update["id"],
-            "data": schema.dump(update),
-            "reason": _clean_reason(update.get("reason")),
-        }
-        for update in updates
-    ]
+    ops = []
+    for update in updates:
+        times = {"start_at": update["start_at"], "end_at": update["end_at"]}
+        ops.append(
+            {
+                "op": "update",
+                "entity": "event",
+                "id": update["id"],
+                "data": schema.dump(schema.load(times)),
+                "reason": clean_reason(update.get("reason")),
+            }
+        )
+    return ops
 
 
 def build_event_delete_ops(removals: list[dict]) -> list[dict]:
@@ -106,21 +116,39 @@ def build_event_delete_ops(removals: list[dict]) -> list[dict]:
                 "entity": "event",
                 "id": removal["id"],
                 "data": {},
-                "reason": _clean_reason(removal.get("reason")),
+                "reason": clean_reason(removal.get("reason")),
             }
         )
     return ops
 
 
-def build_packing_create_op(
-    name: str,
-    category: str,
-    is_shared: bool,
-    reason: str | None = None,
-) -> dict:
+def build_create_op(
+    entity: str, data: JsonObject, reason: JsonValue = None
+) -> ChangeOp:
     return {
         "op": "create",
-        "entity": "packing_item",
-        "data": {"name": name[:100], "category": category[:50], "is_shared": is_shared},
-        "reason": _clean_reason(reason),
+        "entity": entity,
+        "data": data,
+        "reason": clean_reason(reason),
     }
+
+
+def build_edit_ops(
+    itinerary_id: int,
+    user_id: int | None,
+    proposed: list[ChangeOp],
+    role: str | None = None,
+) -> list[ChangeOp]:
+    """Ops that fail their entity schema are dropped. Nothing is saved."""
+    ops = []
+    for op in proposed:
+        applier = ChangeSetApplierFactory.create(
+            op["entity"], itinerary_id, user_id, role
+        )
+        try:
+            prepared = applier.prepare(op)
+        except ValidationError as err:
+            logger.warning("Dropped an invalid %s edit: %s", op["entity"], err.messages)
+            continue
+        ops.append({**op, "data": applier.preview(prepared)})
+    return ops

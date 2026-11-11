@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { eachDayOfInterval, format, parseISO } from "date-fns";
-import { ChevronDown, Loader2, Sparkles, TriangleAlert } from "lucide-react";
+import { ChevronDown, Loader2, TriangleAlert } from "lucide-react";
 import { FormInput, FormTextarea } from "../../../components";
 import type { Event } from "../../events/types";
 import {
@@ -14,7 +14,11 @@ import {
   type OptimiseDaySchema,
 } from "../schemas/optimiseDaySchema";
 import type { AiTask, OptimiseDayParams } from "../types";
-import { activeTaskForDay, describeOptimiseRequest } from "../utils";
+import {
+  activeTaskForDay,
+  describeOptimiseRequest,
+  TASK_ICONS,
+} from "../utils";
 import OptimiseDayPicker from "./OptimiseDayPicker";
 import OptimiseGoalCards from "./OptimiseGoalCards";
 import OptimiseLockedEvents from "./OptimiseLockedEvents";
@@ -321,7 +325,7 @@ export default function OptimiseDayForm({
               {isSubmitting ? (
                 <Loader2 size={16} className="animate-spin" />
               ) : (
-                <Sparkles size={16} />
+                <TASK_ICONS.optimise_day size={16} />
               )}
               Optimise
             </button>

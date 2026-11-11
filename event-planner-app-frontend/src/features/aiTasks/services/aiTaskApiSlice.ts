@@ -1,5 +1,6 @@
 import { apiSlice } from "../../api/apiSlice";
 import type { ApiResponse } from "../../api/types";
+import { expenseDependentTags } from "../../expenses/tags";
 import type {
   AcceptAiTaskResult,
   AiTask,
@@ -22,8 +23,8 @@ export const aiTaskApiSlice = apiSlice.injectEndpoints({
         })),
       ],
     }),
-    getPendingAiTasks: builder.query<ApiResponse<AiTask[]>, void>({
-      query: () => "/ai-tasks/pending",
+    getPendingAiTasks: builder.query<ApiResponse<AiTask[]>, number>({
+      query: (tripId) => `${tripTasksUrl(tripId)}/pending`,
       providesTags: [{ type: "AiTasks", id: "LIST" }],
     }),
     getAiTask: builder.query<
@@ -95,6 +96,8 @@ export const aiTaskApiSlice = apiSlice.injectEndpoints({
         "Accommodations",
         "Wishlists",
         { type: "PackingItem", id: "LIST" },
+        { type: "Settlements", id: tripId },
+        ...expenseDependentTags(tripId),
       ],
     }),
   }),

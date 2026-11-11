@@ -9,12 +9,13 @@ from google import genai
 from google.genai import types as genai_types
 from groq import Groq
 
+from ..ai_entities.context import TimeRules, ValidationContext
+from ..ai_entities.validators.factory import EntityValidatorFactory
 from ..exceptions import AIProviderError, AIResponseError
 from ..utils import ai_output_validators
 from ..utils.db_utils import release_connection
-from ..utils.location_utils import get_place_details
 from ..utils.progress import ProgressCallback, no_progress
-from ..utils.trip_time import to_trip_local, trip_local_to_utc
+from ..utils.trip_time import to_trip_local
 from .flight_context import (
     FlightWindow,
     blocked_windows,
@@ -229,7 +230,9 @@ def get_event_suggestions(
     requested_date = date.strftime("%Y-%m-%d")
     timezone = itinerary.timezone
     day = datetime.strptime(requested_date, "%Y-%m-%d").date()
-    day_flights = windows_for_day(blocked_windows(itinerary.flights, timezone), day)
+    day_flights = windows_for_day(
+        blocked_windows(itinerary.id, timezone, labelled=True), day
+    )
     flights_prompt = _flights_prompt(day_flights)
 
     prompt = f"""
@@ -297,40 +300,21 @@ JSON FORMAT:
     if not isinstance(suggestions, list):
         raise AIResponseError("AI suggestions must be a list.")
 
-    valid_suggestions = []
-    for event in suggestions:
-        if ai_output_validators.validate_event_suggestion(
-            event, requested_date, blocked=day_flights
-        ):
-            valid_suggestions.append(event)
-
-    geocoded_events = []
-
-    for index, event in enumerate(valid_suggestions, start=1):
-        progress("Looking up places", index, len(valid_suggestions))
-        try:
-            details = get_place_details(
-                name=event["name"],
-                address=event.get("address"),
-            )
-
-            start_at = trip_local_to_utc(event["start_at"], timezone)
-            end_at = trip_local_to_utc(event["end_at"], timezone)
-            geocoded_events.append(
-                {
-                    **event,
-                    "start_at": start_at.isoformat(),
-                    "end_at": end_at.isoformat(),
-                    "latitude": details["latitude"],
-                    "longitude": details["longitude"],
-                    "address": details.get("formatted_address") or event.get("address"),
-                }
-            )
-
-        except Exception:
-            logger.exception("Failed to geocode venue: %s", event.get("name"))
-
-    return geocoded_events
+    validator = EntityValidatorFactory.create(
+        "event",
+        ValidationContext(
+            timezone,
+            flights=day_flights,
+            time_rules=TimeRules(days=frozenset({day})),
+        ),
+    )
+    events = []
+    for index, suggestion in enumerate(suggestions, start=1):
+        progress("Looking up places", index, len(suggestions))
+        data = validator.validate_create(suggestion)
+        if data is not None:
+            events.append({**data, "reason": suggestion.get("reason")})
+    return events
 
 
 def generate_packing_list(itinerary_id: int, progress: ProgressCallback = no_progress):
@@ -392,8 +376,11 @@ Schema:
 
     release_connection()
     progress("Asking the AI for a packing list", None, None)
-    return ai_output_validators.validate_packing_items(
-        format_json(get_ai_response(prompt))
+    validator = EntityValidatorFactory.create(
+        "packing_item", ValidationContext(itinerary.timezone)
+    )
+    return ai_output_validators.validate_creates(
+        format_json(get_ai_response(prompt)), validator
     )
 
 
