@@ -1,6 +1,7 @@
 from typing import Any, ClassVar
 
 from ...models import ExpenseCategory, Itinerary, SplitType
+from ...utils.clock import utcnow
 from .. import expense_service
 from .editor_base import EditContext, EntityEditor
 
@@ -23,6 +24,17 @@ class MemberEditor(EntityEditor):
     @classmethod
     def is_available(cls, context: EditContext) -> bool:
         return context.user_id is not None
+
+    def _tidy_common(self, kind: str, data: dict[str, Any], date_field: str) -> dict:
+        tidied = {}
+        for field, value in data.items():
+            if value is not None:
+                tidied[field] = value
+        if kind == "create":
+            tidied.setdefault(date_field, utcnow().date().isoformat())
+        if isinstance(tidied.get(date_field), str):
+            tidied[date_field] = tidied[date_field][:10]
+        return tidied
 
     def _is_member(self, user_id: Any) -> bool:
         return type(user_id) is int and user_id in self.members
@@ -60,7 +72,8 @@ class ExpenseEditor(MemberEditor):
     hint = (
         f"description, category ({_CATEGORIES}), amount (a number, in "
         "currency), currency (3-letter code, GBP when omitted), spent_on "
-        "(YYYY-MM-DD), paid_by_id (a person id; the requester when omitted), "
+        "(YYYY-MM-DD, today when omitted), "
+        "paid_by_id (a person id; the requester when omitted), "
         "split_type (even_all = everyone, selected = the people in participant_ids, "
         "self = only the payer), participant_ids (person ids, only with selected)"
     )
@@ -69,6 +82,18 @@ class ExpenseEditor(MemberEditor):
         "never send shares. Changing who an expense is split between means changing "
         "split_type and participant_ids."
     )
+
+    def tidy(self, kind: str, data: dict[str, Any]) -> dict[str, Any]:
+        tidied = self._tidy_common(kind, data, "spent_on")
+        if isinstance(tidied.get("category"), str):
+            tidied["category"] = tidied["category"].strip().lower()
+        if isinstance(tidied.get("currency"), str):
+            tidied["currency"] = tidied["currency"].strip().upper()
+        if tidied.get("split_type", SplitType.SELECTED.value) != (
+            SplitType.SELECTED.value
+        ):
+            tidied.pop("participant_ids", None)
+        return tidied
 
     def describe_items(self, itinerary: Itinerary) -> dict[int, str]:
         self.payer_ids: dict[int, int] = {}
@@ -122,6 +147,9 @@ class SettlementEditor(MemberEditor):
         "from_user_id (the person who paid), to_user_id (the person who was paid), "
         "amount_gbp (a number, in GBP), settled_on (YYYY-MM-DD)"
     )
+
+    def tidy(self, kind: str, data: dict[str, Any]) -> dict[str, Any]:
+        return self._tidy_common(kind, data, "settled_on")
 
     def describe_items(self, itinerary: Itinerary) -> dict[int, str]:
         self.parties: dict[int, tuple[int, int]] = {}

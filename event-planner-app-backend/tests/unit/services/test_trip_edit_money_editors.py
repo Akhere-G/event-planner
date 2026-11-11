@@ -2,6 +2,7 @@ from datetime import date
 from decimal import Decimal
 
 import pytest
+from src.utils.clock import utcnow
 from src.services.trip_edit.money_editors import ExpenseEditor, SettlementEditor
 from tests.factories import (
     ExpenseFactory,
@@ -181,3 +182,58 @@ def test_an_editor_can_only_record_their_own_payments(
 
     assert editor.normalise("create", None, theirs)
     assert editor.normalise("create", None, someone_elses) is None
+
+
+def test_a_new_expense_without_a_date_is_dated_today(itinerary, admin_user, members):
+    editor = expense_editor(itinerary, admin_user, "admin", members)
+
+    tidied = editor.tidy("create", {"description": "Lunch", "amount": 20})
+
+    assert tidied["spent_on"] == utcnow().date().isoformat()
+
+
+def test_an_expense_is_tidied_the_way_the_form_would_send_it(
+    itinerary, admin_user, members
+):
+    editor = expense_editor(itinerary, admin_user, "admin", members)
+
+    tidied = editor.tidy(
+        "create",
+        {
+            "description": "Lunch",
+            "amount": 20,
+            "category": "Food",
+            "currency": "eur",
+            "spent_on": "2026-08-02T19:00:00",
+            "paid_by_id": None,
+            "split_type": "even_all",
+            "participant_ids": [admin_user.id],
+        },
+    )
+
+    assert tidied == {
+        "description": "Lunch",
+        "amount": 20,
+        "category": "food",
+        "currency": "EUR",
+        "spent_on": "2026-08-02",
+        "split_type": "even_all",
+    }
+
+
+def test_changing_only_the_people_of_an_expense_keeps_them(
+    itinerary, admin_user, members
+):
+    editor = expense_editor(itinerary, admin_user, "admin", members)
+
+    tidied = editor.tidy("update", {"participant_ids": [admin_user.id]})
+
+    assert tidied == {"participant_ids": [admin_user.id]}
+
+
+def test_a_new_settlement_without_a_date_is_dated_today(itinerary, admin_user, members):
+    editor = settlement_editor(itinerary, admin_user, "admin", members)
+
+    tidied = editor.tidy("create", {"amount_gbp": 5, "settled_on": None})
+
+    assert tidied["settled_on"] == utcnow().date().isoformat()
