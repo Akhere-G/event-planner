@@ -8,6 +8,7 @@ from ..middleware.itinerary_access_required import (
     itinerary_access_required,
 )
 from ..middleware.login_required import login_required
+from ..schemas.ai_schema import TripPromptRequestSchema
 from ..schemas.itinerary_schema import ItinerarySchema, ItineraryWithRoleSchema
 from ..services.itineraries_service import (
     create_itinerary,
@@ -19,8 +20,9 @@ from ..services.itineraries_service import (
     update_itinerary,
 )
 from ..services.timezone_service import get_timezone_for_trip
+from ..services.trip_builder_service import create_trip_from_prompt
 from ..utils.format_response import api_response
-from ..utils.rate_limit import get_user_or_ip
+from ..utils.rate_limit import ai_generation_limit, get_user_or_ip
 
 itinerary_bp = Blueprint("itinerary", __name__)
 
@@ -96,6 +98,22 @@ def create_itinerary_route():
         success=True,
         data=schema.dump(new_itinerary),
         message="Succesfully created new itinerary.",
+        status_code=201,
+    )
+
+
+@itinerary_bp.route("/from-prompt", methods=["POST"])
+@limiter.limit(ai_generation_limit, key_func=get_user_or_ip)
+def create_itinerary_from_prompt_route():
+    request_data = TripPromptRequestSchema().load(request.get_json(silent=True) or {})
+    new_itinerary = create_trip_from_prompt(
+        session.get("user_id"), request_data["prompt"]
+    )
+
+    return api_response(
+        success=True,
+        data=ItinerarySchema().dump(new_itinerary),
+        message="Created the trip. Its plan is being made.",
         status_code=201,
     )
 
