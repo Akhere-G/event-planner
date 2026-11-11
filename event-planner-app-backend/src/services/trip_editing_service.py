@@ -1,10 +1,11 @@
 """A chat request becomes a ready AI task to review; nothing is saved to the trip."""
 
 from dataclasses import dataclass
-from typing import Any
 
 from sqlalchemy import select
 
+from ..ai_entities.context import Requester
+from ..ai_entities.json_types import JsonObject
 from ..ai_tasks import snapshots
 from ..exceptions import AIResponseError
 from ..extensions import db
@@ -15,10 +16,9 @@ from .ai_task_service import create_proposal
 from .change_set_service import build_edit_ops
 from .flight_context import blocked_windows
 from .itineraries_service import get_itinerary
-from .trip_edit.editor_base import EditContext
 from .trip_edit.prompt import ChatTurn, build_edit_prompt
-from .trip_edit.registry import build_editors
-from .trip_edit.sanitiser import sanitise_edit_ops
+from .trip_edit.parser import parse_edit_ops
+from .trip_edit.registry import build_editable_entities
 
 EDIT_TRIP_TASK_TYPE = "edit_trip"
 MAX_REPLY_LENGTH = 1000
@@ -44,7 +44,7 @@ def _member_names(itinerary_id: int) -> dict[int, str]:
     return names
 
 
-def _reply(result: dict[str, Any], has_ops: bool) -> str:
+def _reply(result: JsonObject, has_ops: bool) -> str:
     text = result.get("reply")
     if isinstance(text, str) and text.strip():
         return text.strip()[:MAX_REPLY_LENGTH]
@@ -60,10 +60,11 @@ def edit_trip_with_ai(
 ) -> TripEditResult:
     itinerary = get_itinerary(itinerary_id)
     flights = blocked_windows(itinerary_id, itinerary.timezone, labelled=True)
-    members = _member_names(itinerary_id)
-    context = EditContext(itinerary, user_id, role, flights, members)
-    editors = build_editors(context)
-    prompt = build_edit_prompt(itinerary, editors, flights, message, history)
+    requester = Requester(user_id, role, _member_names(itinerary_id))
+    entities = build_editable_entities(itinerary, requester, flights)
+    prompt = build_edit_prompt(
+        itinerary, entities, requester, flights, message, history
+    )
     # Taken before the slow AI call, so edits made while it runs show up as stale.
     snapshot = snapshots.capture(itinerary_id)
     release_connection()
@@ -72,7 +73,7 @@ def edit_trip_with_ai(
     if not isinstance(result, dict):
         raise AIResponseError("AI response must be an object.")
 
-    proposed = sanitise_edit_ops(result.get("ops") or [], editors)
+    proposed = parse_edit_ops(result.get("ops") or [], entities)
     ops = snapshots.attach_bases(
         build_edit_ops(itinerary_id, user_id, proposed, role), snapshot
     )

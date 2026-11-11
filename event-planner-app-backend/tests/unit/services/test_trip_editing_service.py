@@ -15,7 +15,11 @@ from src.services.trip_editing_service import (
 from tests.factories import EventFactory, ItineraryFactory
 
 AI = "src.services.trip_editing_service.get_ai_response"
-PLACE = {"latitude": 48.86, "longitude": 2.33, "address": "Rue de Rivoli, Paris"}
+PLACE = {
+    "latitude": 48.86,
+    "longitude": 2.33,
+    "formatted_address": "Rue de Rivoli, Paris",
+}
 
 
 def fake_ai(reply):
@@ -133,9 +137,9 @@ def test_a_created_event_is_geocoded_into_the_proposal(itinerary):
             }
         ],
     }
-    geocode = "src.services.trip_edit.entity_editors.geocode"
+    lookup = "src.ai_entities.places.get_place_details"
 
-    with patch(AI, fake_ai(reply)), patch(geocode, return_value=PLACE):
+    with patch(AI, fake_ai(reply)), patch(lookup, return_value=PLACE):
         result = edit_trip_with_ai(itinerary.id, None, "editor", "Add the Louvre", [])
 
     data = result.task.result_ops[0]["data"]
