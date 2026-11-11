@@ -280,15 +280,22 @@ def stage_create_expense(
     return expense
 
 
+def stage_create_expense_as_member(
+    user_id: int | None, role: str, itinerary_id: int, data: dict
+) -> Expense:
+    """Like ``stage_create_expense``, but only an admin may name someone else payer."""
+    if data.get("paid_by_id") is not None:
+        _require_self_unless_admin(
+            user_id, role, data["paid_by_id"], PAID_BY_OTHERS_MESSAGE
+        )
+    return stage_create_expense(user_id, itinerary_id, data)
+
+
 def create_expense(
     user_id: int | None, role: str, itinerary_id: int, data: dict
 ) -> Expense:
     try:
-        if data.get("paid_by_id") is not None:
-            _require_self_unless_admin(
-                user_id, role, data["paid_by_id"], PAID_BY_OTHERS_MESSAGE
-            )
-        expense = stage_create_expense(user_id, itinerary_id, data)
+        expense = stage_create_expense_as_member(user_id, role, itinerary_id, data)
         db.session.commit()
         return expense
     except Exception:
@@ -310,44 +317,50 @@ def _require_owner_or_admin(user_id: int | None, role: str, expense: Expense):
         )
 
 
-def update_expense(
+def stage_update_expense(
     user_id: int | None, role: str, itinerary_id: int, expense_id: int, data: dict
 ) -> Expense:
     user_id = _require_user(user_id)
+    expense = get_expense(itinerary_id, expense_id)
+    _require_owner_or_admin(user_id, role, expense)
+
+    current_links = {}
+    for field in LINK_MODELS:
+        current_links[field] = getattr(expense, field)
+    links = _resolve_links(current_links, data)
+    _validate_links(itinerary_id, links, expense.id)
+    for field, value in links.items():
+        setattr(expense, field, value)
+
+    _update_money(expense, data)
+    for field in ("description", "category", "spent_on"):
+        if field in data:
+            setattr(expense, field, data[field])
+    if "paid_by_id" in data:
+        if data["paid_by_id"] != expense.paid_by_id:
+            _require_self_unless_admin(
+                user_id, role, data["paid_by_id"], PAID_BY_OTHERS_MESSAGE
+            )
+        _require_members(itinerary_id, [data["paid_by_id"]])
+        expense.paid_by_id = data["paid_by_id"]
+    if "split_type" in data:
+        expense.split_type = data["split_type"]
+
+    expense.updated_by_id = user_id
+    participant_ids = data.get("participant_ids")
+    if not participant_ids:
+        participant_ids = []
+        for share in expense.shares:
+            participant_ids.append(share.user_id)
+    _write_shares(expense, itinerary_id, {"participant_ids": participant_ids})
+    return expense
+
+
+def update_expense(
+    user_id: int | None, role: str, itinerary_id: int, expense_id: int, data: dict
+) -> Expense:
     try:
-        expense = get_expense(itinerary_id, expense_id)
-        _require_owner_or_admin(user_id, role, expense)
-
-        links = _resolve_links(
-            {field: getattr(expense, field) for field in LINK_MODELS}, data
-        )
-        _validate_links(itinerary_id, links, expense.id)
-        for field, value in links.items():
-            setattr(expense, field, value)
-
-        _update_money(expense, data)
-        for field in ("description", "category", "spent_on"):
-            if field in data:
-                setattr(expense, field, data[field])
-        if "paid_by_id" in data:
-            if data["paid_by_id"] != expense.paid_by_id:
-                _require_self_unless_admin(
-                    user_id, role, data["paid_by_id"], PAID_BY_OTHERS_MESSAGE
-                )
-            _require_members(itinerary_id, [data["paid_by_id"]])
-            expense.paid_by_id = data["paid_by_id"]
-        if "split_type" in data:
-            expense.split_type = data["split_type"]
-
-        expense.updated_by_id = user_id
-        _write_shares(
-            expense,
-            itinerary_id,
-            {
-                "participant_ids": data.get("participant_ids")
-                or [s.user_id for s in expense.shares]
-            },
-        )
+        expense = stage_update_expense(user_id, role, itinerary_id, expense_id, data)
         db.session.commit()
         return expense
     except Exception:
@@ -355,13 +368,20 @@ def update_expense(
         raise
 
 
+def stage_delete_expense(
+    user_id: int | None, role: str, itinerary_id: int, expense_id: int
+) -> None:
+    expense = get_expense(itinerary_id, expense_id)
+    _require_owner_or_admin(user_id, role, expense)
+    db.session.delete(expense)
+    db.session.flush()
+
+
 def delete_expense(
     user_id: int | None, role: str, itinerary_id: int, expense_id: int
 ) -> int:
     try:
-        expense = get_expense(itinerary_id, expense_id)
-        _require_owner_or_admin(user_id, role, expense)
-        db.session.delete(expense)
+        stage_delete_expense(user_id, role, itinerary_id, expense_id)
         db.session.commit()
         return expense_id
     except Exception:
@@ -388,70 +408,97 @@ def get_settlement(itinerary_id: int, settlement_id: int) -> Settlement:
     return settlement
 
 
-def create_settlement(
+def stage_create_settlement(
     user_id: int | None, role: str, itinerary_id: int, data: dict
 ) -> Settlement:
     user_id = _require_user(user_id)
+    _require_self_unless_admin(
+        user_id, role, data["from_user_id"], PAYMENT_FROM_OTHERS_MESSAGE
+    )
+    if data["from_user_id"] == data["to_user_id"]:
+        raise BadRequestError("A settlement needs two different people.")
+    _require_members(itinerary_id, [data["from_user_id"], data["to_user_id"]])
+    settlement = Settlement(
+        itinerary_id=itinerary_id,
+        from_user_id=data["from_user_id"],
+        to_user_id=data["to_user_id"],
+        amount_gbp=to_money(data["amount_gbp"]),
+        settled_on=data["settled_on"],
+        created_by_id=user_id,
+        updated_by_id=user_id,
+    )
+    db.session.add(settlement)
+    db.session.flush()
+    return settlement
+
+
+def create_settlement(
+    user_id: int | None, role: str, itinerary_id: int, data: dict
+) -> Settlement:
     try:
-        _require_self_unless_admin(
-            user_id, role, data["from_user_id"], PAYMENT_FROM_OTHERS_MESSAGE
-        )
-        if data["from_user_id"] == data["to_user_id"]:
-            raise BadRequestError("A settlement needs two different people.")
-        _require_members(itinerary_id, [data["from_user_id"], data["to_user_id"]])
-        settlement = Settlement(
-            itinerary_id=itinerary_id,
-            from_user_id=data["from_user_id"],
-            to_user_id=data["to_user_id"],
-            amount_gbp=to_money(data["amount_gbp"]),
-            settled_on=data["settled_on"],
-            created_by_id=user_id,
-            updated_by_id=user_id,
-        )
-        db.session.add(settlement)
+        settlement = stage_create_settlement(user_id, role, itinerary_id, data)
         db.session.commit()
         return settlement
     except Exception:
         db.session.rollback()
         raise
+
+
+def stage_update_settlement(
+    user_id: int | None,
+    role: str,
+    itinerary_id: int,
+    settlement_id: int,
+    data: dict,
+) -> Settlement:
+    user_id = _require_user(user_id)
+    settlement = get_settlement(itinerary_id, settlement_id)
+    _require_owner_or_admin(user_id, role, settlement)  # type: ignore[arg-type]
+    from_id = data.get("from_user_id", settlement.from_user_id)
+    to_id = data.get("to_user_id", settlement.to_user_id)
+    if from_id != settlement.from_user_id:
+        _require_self_unless_admin(user_id, role, from_id, PAYMENT_FROM_OTHERS_MESSAGE)
+    if from_id == to_id:
+        raise BadRequestError("A settlement needs two different people.")
+    _require_members(itinerary_id, [from_id, to_id])
+    settlement.from_user_id, settlement.to_user_id = from_id, to_id
+    if "amount_gbp" in data:
+        settlement.amount_gbp = to_money(data["amount_gbp"])
+    if "settled_on" in data:
+        settlement.settled_on = data["settled_on"]
+    settlement.updated_by_id = user_id
+    db.session.flush()
+    return settlement
 
 
 def update_settlement(
     user_id: int | None, role: str, itinerary_id: int, settlement_id: int, data: dict
 ) -> Settlement:
-    user_id = _require_user(user_id)
     try:
-        settlement = get_settlement(itinerary_id, settlement_id)
-        _require_owner_or_admin(user_id, role, settlement)  # type: ignore[arg-type]
-        from_id = data.get("from_user_id", settlement.from_user_id)
-        to_id = data.get("to_user_id", settlement.to_user_id)
-        if from_id != settlement.from_user_id:
-            _require_self_unless_admin(
-                user_id, role, from_id, PAYMENT_FROM_OTHERS_MESSAGE
-            )
-        if from_id == to_id:
-            raise BadRequestError("A settlement needs two different people.")
-        _require_members(itinerary_id, [from_id, to_id])
-        settlement.from_user_id, settlement.to_user_id = from_id, to_id
-        if "amount_gbp" in data:
-            settlement.amount_gbp = to_money(data["amount_gbp"])
-        if "settled_on" in data:
-            settlement.settled_on = data["settled_on"]
-        settlement.updated_by_id = user_id
+        settlement = stage_update_settlement(
+            user_id, role, itinerary_id, settlement_id, data
+        )
         db.session.commit()
         return settlement
     except Exception:
         db.session.rollback()
         raise
+
+
+def stage_delete_settlement(
+    user_id: int | None, role: str, itinerary_id: int, settlement_id: int
+) -> None:
+    settlement = get_settlement(itinerary_id, settlement_id)
+    _require_owner_or_admin(user_id, role, settlement)  # type: ignore[arg-type]
+    db.session.delete(settlement)
+    db.session.flush()
 
 
 def delete_settlement(
     user_id: int | None, role: str, itinerary_id: int, settlement_id: int
 ) -> int:
     try:
-        settlement = get_settlement(itinerary_id, settlement_id)
-        _require_owner_or_admin(user_id, role, settlement)  # type: ignore[arg-type]
-        db.session.delete(settlement)
+        stage_delete_settlement(user_id, role, itinerary_id, settlement_id)
         db.session.commit()
         return settlement_id
     except Exception:
