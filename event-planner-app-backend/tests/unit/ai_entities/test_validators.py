@@ -81,6 +81,7 @@ def test_an_edit_of_an_entity_the_trip_does_not_have_is_dropped():
 
 EVENT = {
     "name": "Louvre",
+    "category": "Museum",
     "start_at": "2026-08-02T10:00:00",
     "end_at": "2026-08-02T12:00:00",
     "address": "Rue de Rivoli",
@@ -95,6 +96,7 @@ class TestEvent:
 
         assert checked == {
             "name": "Louvre",
+            "category": "Museum",
             "start_at": "2026-08-02T08:00:00+00:00",
             "end_at": "2026-08-02T10:00:00+00:00",
             "address": "Rue de Rivoli, Paris",
@@ -127,7 +129,7 @@ class TestEvent:
         ],
     )
     def test_bad_times_are_dropped(self, times):
-        raw = {"name": "Louvre", **times}
+        raw = {"name": "Louvre", "category": "Museum", **times}
 
         assert validator("event").validate_create(raw) is None
 

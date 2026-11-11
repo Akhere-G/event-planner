@@ -12,6 +12,7 @@ from ..utils import ai_output_validators
 from ..utils.db_utils import release_connection
 from ..utils.location_utils import get_place_details
 from ..utils.progress import ProgressCallback, no_progress
+from ..utils.trip_time import trip_local_to_utc
 from . import ai_services
 from .change_set_appliers import DEFAULT_WISHLIST_NAME
 from .change_set_service import build_event_create_ops, build_packing_create_op
@@ -124,12 +125,10 @@ def _event_to_op(itinerary, event: Any, days: list[str]) -> dict | None:
         "name": event["name"][:100],
         "description": _text(event.get("description"), 100),
         "category": event["category"][:10],
-        "start_at": ai_services.trip_local_to_utc(
+        "start_at": trip_local_to_utc(
             event["start_at"], itinerary.timezone
         ).isoformat(),
-        "end_at": ai_services.trip_local_to_utc(
-            event["end_at"], itinerary.timezone
-        ).isoformat(),
+        "end_at": trip_local_to_utc(event["end_at"], itinerary.timezone).isoformat(),
         "reason": event.get("reason"),
         **place,
     }

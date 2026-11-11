@@ -17,7 +17,7 @@ class EventValidator(EntityValidator):
 
     entity = "event"
     fields = ("name", "description", "category", "start_at", "end_at", "address")
-    create_required = ("name", "start_at", "end_at")
+    create_required = ("name", "category", "start_at", "end_at")
     prompt_hint = (
         "name, description, category (max 10 characters), start_at, end_at, "
         "address (full street address)"
@@ -35,7 +35,7 @@ class EventValidator(EntityValidator):
         return tidied
 
     def check_create(self, data: JsonObject) -> JsonObject | None:
-        if not data["name"]:
+        if not data["name"] or not data["category"]:
             return None
         timed = self._with_utc_times(data)
         if timed is None:
