@@ -171,6 +171,7 @@ class TestEvent:
         checked = events.validate_edit(3, raw)
 
         assert "latitude" not in checked
+        assert "address" not in checked
         assert places.lookups == []
 
     def test_an_edit_that_changes_the_address_finds_the_new_place(self):

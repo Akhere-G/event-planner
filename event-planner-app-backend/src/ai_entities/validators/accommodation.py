@@ -33,6 +33,4 @@ class AccommodationValidator(EntityValidator):
             return None
         if not dates_in_order(current, data, "start_date", "end_date"):
             return None
-        if "address" not in data or data["address"] == current.values["address"]:
-            return data
-        return self._located(data, str(data.get("name") or current.label), "lodging")
+        return self._relocated(current, data, "lodging")
