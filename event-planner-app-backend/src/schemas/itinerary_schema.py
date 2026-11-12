@@ -4,7 +4,6 @@ from marshmallow_sqlalchemy import auto_field
 from ..models import Itinerary, UserRole
 from .base_schema import BaseSchema
 from .event_schema import EventSchema
-from .invite_schema import InviteSchemaPrivate
 from .user_schema import UserWithRoleSchema
 
 
@@ -51,9 +50,6 @@ class ItinerarySchema(BaseSchema):
     )
     created_at = auto_field(dump_only=True)
     anonymous_access_code = auto_field(dump_only=True)
-    events = fields.Nested(EventSchema, many=True, dump_only=True)
-    user_memberships = fields.Nested(UserWithRoleSchema, many=True, dump_only=True)
-    invites = fields.Nested(InviteSchemaPrivate, many=True, dump_only=True)
 
     @validates_schema
     def validate_times(self, data, **kwargs):
