@@ -1,6 +1,7 @@
 from datetime import UTC, datetime, timedelta
 
 import pytest
+
 from src.calendar_sync.mappers import (
     all_mappers,
     creation_mapper,

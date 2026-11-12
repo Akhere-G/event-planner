@@ -1,11 +1,12 @@
 from datetime import UTC, datetime, timedelta
 
 import pytest
+
 from src.calendar_sync import disconnect as disconnect_module
+from src.calendar_sync.client import GoogleAuthRevokedError
 from src.calendar_sync.connections import get_connection, save_refresh_token
 from src.calendar_sync.disconnect import disconnect_account
 from src.calendar_sync.failures import handle_user_failure
-from src.calendar_sync.client import GoogleAuthRevokedError
 from src.calendar_sync.members import member_role, trip_calendars_for_members
 from src.calendar_sync.trip_sync import disable_trip_sync, enable_trip_sync
 from src.calendar_sync.watch import (
@@ -17,8 +18,8 @@ from src.calendar_sync.watch import (
 from src.exceptions import BadRequestError
 from src.extensions import db
 from src.models import TripCalendar
-
-from .fakes import FakeCalendarClient, make_trip_calendar
+from tests.factories import make_trip_calendar
+from tests.fakes import FakeCalendarClient
 
 
 @pytest.fixture

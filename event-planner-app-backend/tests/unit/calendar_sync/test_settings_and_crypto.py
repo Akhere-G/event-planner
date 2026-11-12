@@ -1,5 +1,6 @@
 import pytest
 from cryptography.fernet import Fernet
+
 from src.calendar_sync.crypto import TokenCipher, get_token_cipher
 from src.calendar_sync.settings import get_settings
 from src.exceptions import CalendarNotConfiguredError

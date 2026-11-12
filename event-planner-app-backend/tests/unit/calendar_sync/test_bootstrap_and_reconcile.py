@@ -1,11 +1,12 @@
 import pytest
+
 from src.calendar_sync.bootstrap import bootstrap_trip_calendar
 from src.calendar_sync.links import find_link
 from src.calendar_sync.reconcile import reconcile_trip_calendar
 from src.extensions import db
 from src.models import Event
-
-from .fakes import FakeCalendarClient, make_trip_calendar
+from tests.factories import make_trip_calendar
+from tests.fakes import FakeCalendarClient
 
 LATER = "2099-01-01T00:00:00Z"
 

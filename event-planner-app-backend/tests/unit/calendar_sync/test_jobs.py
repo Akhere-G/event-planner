@@ -2,10 +2,10 @@ import json
 from unittest.mock import MagicMock
 
 import pytest
+
 from src.ai_tasks.dispatchers.settings import CloudTasksSettings
 from src.calendar_sync.change_listener import queue_push
-from src.calendar_sync.jobs import dispatch_job, get_job_class
-from src.calendar_sync.jobs import dispatchers
+from src.calendar_sync.jobs import dispatch_job, dispatchers, get_job_class
 from src.calendar_sync.jobs.calendar_jobs import (
     BootstrapCalendarJob,
     PullCalendarJob,
@@ -15,8 +15,8 @@ from src.calendar_sync.jobs.calendar_jobs import (
 from src.calendar_sync.scheduled import run_scheduled_sync
 from src.exceptions import UnknownCalendarJobTypeError
 from src.realtime import EntityChange
-
-from .fakes import FakeCalendarClient, make_trip_calendar
+from tests.factories import make_trip_calendar
+from tests.fakes import FakeCalendarClient
 
 SETTINGS = CloudTasksSettings(
     project="proj",
@@ -25,22 +25,6 @@ SETTINGS = CloudTasksSettings(
     service_account_email="tasks@proj.iam.gserviceaccount.com",
     base_url="https://app.example.com",
 )
-
-
-class RecordingDispatcher:
-    def __init__(self):
-        self.jobs = []
-
-    def dispatch(self, job):
-        self.jobs.append(job)
-
-
-@pytest.fixture
-def recorder(app):
-    recording = RecordingDispatcher()
-    app.extensions[dispatchers.EXTENSION_KEY] = recording
-    yield recording
-    app.extensions.pop(dispatchers.EXTENSION_KEY)
 
 
 @pytest.mark.parametrize(
@@ -110,7 +94,7 @@ def test_tests_dispatch_inline_by_default(app, monkeypatch):
     app.extensions.pop(dispatchers.EXTENSION_KEY)
 
 
-def test_committed_event_and_flight_changes_are_queued_together(recorder):
+def test_committed_event_and_flight_changes_are_queued_together(queued_jobs):
     changes = [
         EntityChange(1, "event", 2, False),
         EntityChange(1, "expense", 3, False),
@@ -119,17 +103,17 @@ def test_committed_event_and_flight_changes_are_queued_together(recorder):
 
     queue_push(changes)
 
-    assert recorder.jobs == [PushChangesJob([changes[0], changes[2]])]
+    assert queued_jobs.jobs == [PushChangesJob([changes[0], changes[2]])]
 
 
-def test_changes_nothing_syncs_are_not_queued(recorder):
+def test_changes_nothing_syncs_are_not_queued(queued_jobs):
     queue_push([EntityChange(1, "expense", 3, False)])
 
-    assert recorder.jobs == []
+    assert queued_jobs.jobs == []
 
 
 def test_the_daily_sync_renews_channels_and_queues_every_calendar(
-    app, recorder, admin_user, editor_user, itinerary
+    app, queued_jobs, admin_user, editor_user, itinerary
 ):
     first = make_trip_calendar(admin_user, itinerary)
     second = make_trip_calendar(editor_user, itinerary)
@@ -138,13 +122,13 @@ def test_the_daily_sync_renews_channels_and_queues_every_calendar(
 
     assert result.channels_renewed == 2
     assert result.calendars_queued == 2
-    assert recorder.jobs == [
+    assert queued_jobs.jobs == [
         ReconcileCalendarJob(first.id),
         ReconcileCalendarJob(second.id),
     ]
 
 
-def test_dispatching_hands_the_job_to_the_configured_dispatcher(recorder):
+def test_dispatching_hands_the_job_to_the_configured_dispatcher(queued_jobs):
     dispatch_job(PullCalendarJob(1))
 
-    assert recorder.jobs == [PullCalendarJob(1)]
+    assert queued_jobs.jobs == [PullCalendarJob(1)]

@@ -1,21 +1,24 @@
 import pytest
+from cryptography.fernet import Fernet
 from flask.testing import FlaskClient
 from sqlalchemy import delete
 from sqlalchemy import event as sa_event
+
 from src import create_app
-from src.extensions import cache, db
-from src.services import fx_service
-from src.services.flight_providers import (
-    FlightNumberProviderFactory,
-    FlightProviderFactory,
+from src.calendar_sync.jobs.dispatchers import (
+    EXTENSION_KEY as CALENDAR_JOB_DISPATCHER_KEY,
 )
+from src.extensions import cache, db
 from src.models import (
+    CalendarConnection,
+    CalendarLink,
     Event,
     ExchangeRate,
     Flight,
     Invite,
     Itinerary,
     ItineraryUser,
+    TripCalendar,
     TripTemplate,
     User,
     UserRole,
@@ -23,8 +26,12 @@ from src.models import (
     WishlistItem,
     WishlistItemVote,
 )
+from src.services import fx_service
+from src.services.flight_providers import (
+    FlightNumberProviderFactory,
+    FlightProviderFactory,
+)
 
-from .fakes import FakeFlightNumberProvider, FakeFlightProvider, FakeRateProvider
 from .factories import (
     EventFactory,
     FlightFactory,
@@ -35,6 +42,12 @@ from .factories import (
     WishlistFactory,
     WishlistItemFactory,
     WishlistItemVoteFactory,
+)
+from .fakes import (
+    FakeFlightNumberProvider,
+    FakeFlightProvider,
+    FakeRateProvider,
+    RecordingJobDispatcher,
 )
 
 
@@ -129,6 +142,39 @@ def clean_templates(app):
     db.session.rollback()
     db.session.execute(delete(TripTemplate))
     db.session.commit()
+
+
+@pytest.fixture
+def calendar_settings(monkeypatch) -> dict[str, str]:
+    values = {
+        "GOOGLE_CALENDAR_CLIENT_ID": "client-id",
+        "GOOGLE_CALENDAR_CLIENT_SECRET": "client-secret",
+        "GOOGLE_CALENDAR_REDIRECT_URI": "https://app.example.com/callback",
+        "GOOGLE_CALENDAR_WEBHOOK_URL": "https://app.example.com/webhook",
+        "CALENDAR_TOKEN_ENCRYPTION_KEY": Fernet.generate_key().decode(),
+        "FRONTEND_URL": "https://frontend.example.com",
+    }
+    for name, value in values.items():
+        monkeypatch.setenv(name, value)
+    return values
+
+
+@pytest.fixture
+def clean_calendar_tables(app):
+    """Services commit, which outlives a test's rollback, so clear what they wrote."""
+    yield
+    for model in (CalendarLink, TripCalendar, CalendarConnection):
+        db.session.execute(delete(model))
+    db.session.commit()
+
+
+@pytest.fixture
+def queued_jobs(app) -> RecordingJobDispatcher:
+    """Collects calendar sync jobs instead of running them against Google."""
+    recorder = RecordingJobDispatcher()
+    app.extensions[CALENDAR_JOB_DISPATCHER_KEY] = recorder
+    yield recorder
+    app.extensions.pop(CALENDAR_JOB_DISPATCHER_KEY)
 
 
 @pytest.fixture

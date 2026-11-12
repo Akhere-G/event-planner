@@ -4,6 +4,7 @@ import pytest
 from google.auth.exceptions import RefreshError
 from googleapiclient.errors import HttpError
 from httplib2 import Response
+
 from src.calendar_sync import client as client_module
 from src.calendar_sync.client import (
     CHANNEL_TTL_SECONDS,

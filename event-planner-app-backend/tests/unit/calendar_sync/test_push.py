@@ -1,11 +1,12 @@
 import pytest
+
 from src.calendar_sync.links import find_link
 from src.calendar_sync.push import push_changes, push_trip
 from src.extensions import db
 from src.models import CalendarLink
 from src.realtime import EntityChange
-
-from .fakes import FakeCalendarClient, make_trip_calendar
+from tests.factories import make_trip_calendar
+from tests.fakes import FakeCalendarClient
 
 
 @pytest.fixture

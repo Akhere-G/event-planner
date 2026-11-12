@@ -1,6 +1,7 @@
 from datetime import UTC, datetime
 
 import pytest
+
 from src.calendar_sync.client import GoogleAuthRevokedError
 from src.calendar_sync.connections import get_connection, save_refresh_token
 from src.calendar_sync.links import find_link, find_link_by_google_event, record_sync
@@ -8,8 +9,8 @@ from src.calendar_sync.mappers.times import ensure_utc
 from src.calendar_sync.pull import pull_trip_calendar
 from src.extensions import db
 from src.models import Event, Flight, TripCalendar
-
-from .fakes import FakeCalendarClient, make_trip_calendar
+from tests.factories import make_trip_calendar
+from tests.fakes import FakeCalendarClient
 
 LATER = "2099-01-01T00:00:00Z"
 EARLIER = "2000-01-01T00:00:00Z"

@@ -3,6 +3,7 @@ from urllib.parse import parse_qs, urlparse
 
 import pytest
 import requests
+
 from src.calendar_sync import oauth
 from src.calendar_sync.connections import (
     forget_user,

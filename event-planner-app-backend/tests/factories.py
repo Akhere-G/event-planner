@@ -1,11 +1,12 @@
-from datetime import date, datetime, timezone
+from datetime import UTC, date, datetime
 from decimal import Decimal
 
 import factory
+
 from src.extensions import bcrypt, db
 from src.models import (
-    AiTask,
     Airport,
+    AiTask,
     Event,
     Expense,
     ExpenseShare,
@@ -15,6 +16,7 @@ from src.models import (
     Itinerary,
     ItineraryUser,
     Settlement,
+    TripCalendar,
     User,
     UserRole,
     Wishlist,
@@ -86,8 +88,8 @@ class EventFactory(factory.alchemy.SQLAlchemyModelFactory):
     latitude = 40.7128
     longitude = -74.0060
     description = "Sample event"
-    start_at = datetime(2026, 8, 20, 10, 0, tzinfo=timezone.utc)
-    end_at = datetime(2026, 8, 20, 12, 0, tzinfo=timezone.utc)
+    start_at = datetime(2026, 8, 20, 10, 0, tzinfo=UTC)
+    end_at = datetime(2026, 8, 20, 12, 0, tzinfo=UTC)
     category = "food"
 
     created_by_id = factory.LazyAttribute(lambda obj: obj.creator.id)
@@ -201,8 +203,8 @@ class FlightFactory(factory.alchemy.SQLAlchemyModelFactory):
         address="Paris, FR",
         timezone="Europe/Paris",
     )
-    depart_at = datetime(2026, 8, 1, 8, 0, tzinfo=timezone.utc)
-    arrive_at = datetime(2026, 8, 1, 9, 20, tzinfo=timezone.utc)
+    depart_at = datetime(2026, 8, 1, 8, 0, tzinfo=UTC)
+    arrive_at = datetime(2026, 8, 1, 9, 20, tzinfo=UTC)
     created_by_id = factory.LazyAttribute(lambda obj: obj.creator.id)
     updated_by_id = factory.LazyAttribute(lambda obj: obj.creator.id)
 
@@ -266,3 +268,12 @@ class AiTaskFactory(factory.alchemy.SQLAlchemyModelFactory):
     params = factory.LazyFunction(dict)
     attempts = 0
     max_attempts = 3
+
+
+def make_trip_calendar(user: User, itinerary: Itinerary) -> TripCalendar:
+    trip_calendar = TripCalendar(
+        user_id=user.id, itinerary_id=itinerary.id, google_calendar_id="cal-1"
+    )
+    db.session.add(trip_calendar)
+    db.session.flush()
+    return trip_calendar
