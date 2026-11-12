@@ -2,6 +2,7 @@ from .accommodation_routes import accommodation_bp
 from .ai_routes import ai_bp
 from .ai_task_routes import ai_task_bp
 from .auth_routes import auth_bp
+from .calendar_routes import calendar_bp
 from .event_routes import event_bp
 from .expense_routes import expense_bp
 from .flight_routes import flight_bp
@@ -23,6 +24,7 @@ __all__ = [
     "ai_bp",
     "ai_task_bp",
     "auth_bp",
+    "calendar_bp",
     "event_bp",
     "expense_bp",
     "flight_bp",
