@@ -1,11 +1,12 @@
 import React from "react";
-import { User, Shield, Moon, Save, Palette } from "lucide-react";
+import { User, Shield, Moon, Save, Palette, CalendarSync } from "lucide-react";
 
 import { useDispatch, useSelector } from "react-redux";
 import type { RootState } from "../store";
 import { THEMES } from "../features/theme/constants";
 import { setTheme, toggleDarkMode } from "../features/theme/themeSlice";
 import { usePostHog } from "@posthog/react";
+import { GoogleCalendarSettings } from "../features/googleCalendar/components";
 
 export default function SettingsPage() {
   const { darkMode, theme } = useSelector((state: RootState) => state.theme);
@@ -73,6 +74,12 @@ export default function SettingsPage() {
               />
             </button>
           </div>
+        </SettingsCard>
+        <SettingsCard
+          icon={<CalendarSync className="text-brand-primary" />}
+          title="Google Calendar"
+        >
+          <GoogleCalendarSettings />
         </SettingsCard>
       </div>
     </div>

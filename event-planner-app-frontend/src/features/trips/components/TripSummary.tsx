@@ -40,6 +40,7 @@ import useTripEvents from "../../events/hooks/useTripEvents";
 import type { User } from "../../users/types";
 import PublishTemplateModal from "../../templates/components/PublishTemplateModal";
 import { selectIsDemo } from "../../auth/services/authSlice";
+import { TripSyncMenuItem } from "../../googleCalendar/components";
 
 type ModalType = "edit" | "delete" | "users" | "register" | "publish" | null;
 
@@ -138,6 +139,7 @@ export default function TripSummary({
               <FileText size={16} />
               Export to Word
             </DropdownMenuItem>
+            {!anonTrip && <TripSyncMenuItem tripId={trip.id} />}
             {isAdmin(trip.role) && (
               <>
                 <DropdownMenuItem
