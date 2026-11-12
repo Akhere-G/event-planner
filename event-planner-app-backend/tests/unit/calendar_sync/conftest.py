@@ -1,5 +1,8 @@
 import pytest
 from cryptography.fernet import Fernet
+from sqlalchemy import delete
+from src.extensions import db
+from src.models import CalendarConnection, CalendarLink, TripCalendar
 
 
 @pytest.fixture(autouse=True)
@@ -14,3 +17,12 @@ def calendar_settings(monkeypatch):
     for name, value in values.items():
         monkeypatch.setenv(name, value)
     return values
+
+
+@pytest.fixture(autouse=True)
+def clean_calendar_tables(app):
+    """Services commit, which outlives a test's rollback, so clear what they wrote."""
+    yield
+    for model in (CalendarLink, TripCalendar, CalendarConnection):
+        db.session.execute(delete(model))
+    db.session.commit()
