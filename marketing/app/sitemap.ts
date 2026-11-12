@@ -1,14 +1,14 @@
 import type { MetadataRoute } from "next";
-import { blogPosts } from "./blog/posts";
-import { postPath, SITE_URL } from "./lib/urls";
+import { destinationGuides } from "./destinations/guides";
+import { guidePath, SITE_URL } from "./lib/urls";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = SITE_URL;
-  const postEntries: MetadataRoute.Sitemap = [];
-  for (const post of blogPosts) {
-    postEntries.push({
-      url: `${baseUrl}${postPath(post.slug)}`,
-      lastModified: new Date(post.publishedAt),
+  const guideEntries: MetadataRoute.Sitemap = [];
+  for (const guide of destinationGuides) {
+    guideEntries.push({
+      url: `${baseUrl}${guidePath(guide.slug)}`,
+      lastModified: new Date(guide.publishedAt),
       changeFrequency: "monthly",
       priority: 0.6,
     });
@@ -45,12 +45,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "weekly",
       priority: 0.8,
     },
-    {
-      url: `${baseUrl}/blog`,
-      lastModified: new Date(),
-      changeFrequency: "weekly",
-      priority: 0.7,
-    },
-    ...postEntries,
+    ...guideEntries,
   ];
 }

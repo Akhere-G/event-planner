@@ -7,6 +7,6 @@ export function templateUrl(templateSlug: string): string {
   return `${APP_URL}/templates/${templateSlug}`;
 }
 
-export function postPath(postSlug: string): string {
-  return `/blog/${postSlug}`;
+export function guidePath(guideSlug: string): string {
+  return `/destinations/${guideSlug}`;
 }

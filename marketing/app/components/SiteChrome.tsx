@@ -5,7 +5,7 @@ import { APP_URL } from "../lib/urls";
 
 const LINKS = [
   { label: "Destinations", href: "/destinations" },
-  { label: "Travel guides", href: "/blog" },
+  { label: "Travel guides", href: "/destinations" },
 ];
 
 export function SiteHeader() {
