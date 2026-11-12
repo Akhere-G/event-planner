@@ -18,6 +18,7 @@ import useTripEvents from "../features/events/hooks/useTripEvents";
 import { getDaysWithFilter } from "../features/events/utils";
 import { format, isAfter, isBefore, isSameDay, startOfToday } from "date-fns";
 import { usePostHog } from "@posthog/react";
+import { useGetUsersQuery } from "../features/users/usersApiSlice";
 
 function getDefaultOpenDate(startDate: string, endDate: string) {
   const today = startOfToday();
@@ -34,11 +35,13 @@ function getDefaultOpenDate(startDate: string, endDate: string) {
 
   return format(tripStart, "yyyy-MM-dd");
 }
-
 export default function TripPage() {
-  const { tripId } = useParams();
-  const { data, isLoading, isError, error } = useGetTripQuery(Number(tripId));
-  const { events, isSuccess: hasEvents } = useTripEvents(Number(tripId));
+  const params = useParams();
+  const tripId = Number(params.tripId);
+  const { data, isLoading, isError, error } = useGetTripQuery(tripId);
+  const { data: membersData } = useGetUsersQuery(tripId);
+  const userMemberships = membersData?.data.users;
+  const { events, isSuccess: hasEvents } = useTripEvents(tripId);
   const [showUsersModal, setShowUsersModal] = useState(false);
   const dispatch = useDispatch();
 
@@ -75,16 +78,16 @@ export default function TripPage() {
   }, [tripId, dispatch]);
 
   useEffect(() => {
-    if (data?.data) {
+    if (data?.data && userMemberships) {
       const trip = data.data;
       posthog?.group("trip", String(trip.id), {
         name: trip.name,
         destination: trip.destination,
-        member_count: trip.userMemberships.length,
+        member_count: userMemberships.length,
         created_at: trip.createdAt,
       });
     }
-  }, [posthog, data]);
+  }, [posthog, data, userMemberships]);
 
   return (
     <StateGate

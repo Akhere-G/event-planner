@@ -5,7 +5,7 @@ import { Toaster } from "sonner";
 import { renderWithProviders } from "../../../test-utils/renderWithProviders";
 import { mockApi } from "../../../test-utils/mockApi";
 import ProposalReviewModal from "../components/ProposalReviewModal";
-import { aiTaskDetail, EVENT, ok, TRIP } from "./fixtures";
+import { aiTaskDetail, EVENT, ok, TRIP, USERS } from "./fixtures";
 import type { AiTaskDetail } from "../types";
 
 function setup(detail: AiTaskDetail, extra: Record<string, unknown> = {}) {
@@ -13,6 +13,7 @@ function setup(detail: AiTaskDetail, extra: Record<string, unknown> = {}) {
     "GET /itineraries/5/ai-tasks/1": ok(detail),
     "GET /itineraries/5": ok(TRIP),
     "GET /itineraries/5/events": ok({ events: [EVENT] }),
+    "GET /itineraries/5/users": ok({ users: USERS }),
     ...extra,
   });
   const onClose = vi.fn();
@@ -51,7 +52,9 @@ describe("ProposalReviewModal", () => {
     await waitFor(() => expect(onClose).toHaveBeenCalledWith(true));
     const accept = requests.find((r) => r.path.endsWith("/accept"));
     expect(accept?.body).toEqual({ opIndexes: [0] });
-    expect(await screen.findByText("Changes applied: 1 added.")).toBeInTheDocument();
+    expect(
+      await screen.findByText("Changes applied: 1 added."),
+    ).toBeInTheDocument();
   });
 
   it("mentions changes skipped because their target was deleted", async () => {
@@ -63,7 +66,9 @@ describe("ProposalReviewModal", () => {
       }),
     });
 
-    await user.click(await screen.findByRole("button", { name: "Apply 2 changes" }));
+    await user.click(
+      await screen.findByRole("button", { name: "Apply 2 changes" }),
+    );
 
     expect(
       await screen.findByText(/1 skipped because what they change was deleted/),
@@ -105,19 +110,25 @@ describe("ProposalReviewModal", () => {
     expect(
       screen.getByText(/1 unavailable suggestion won't be applied/),
     ).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Apply 1 change" })).toBeEnabled();
+    expect(
+      screen.getByRole("button", { name: "Apply 1 change" }),
+    ).toBeEnabled();
   });
 
   it("summarises the proposal and filters it by kind", async () => {
     const user = userEvent.setup();
     setup(aiTaskDetail());
 
-    expect(await screen.findByText("2 suggestions across 1 area")).toBeInTheDocument();
-    expect(screen.getByText("1 add")).toBeInTheDocument();
+    expect(
+      await screen.findByText("2 suggestions across 1 area"),
+    ).toBeInTheDocument();
+    const addFilter = await screen.findByRole("button", { name: /^Add\s*1$/ });
 
-    await user.click(screen.getByRole("button", { name: /^Add/ }));
+    await user.click(addFilter);
 
-    expect(screen.getByRole("checkbox", { name: /Add Dinner/ })).toBeInTheDocument();
+    expect(
+      screen.getByRole("checkbox", { name: /Add Dinner/ }),
+    ).toBeInTheDocument();
     expect(screen.queryByRole("checkbox", { name: /Remove/ })).toBeNull();
   });
 
@@ -126,10 +137,14 @@ describe("ProposalReviewModal", () => {
     setup(aiTaskDetail());
 
     await user.click(await screen.findByRole("button", { name: "Clear" }));
-    expect(screen.getByRole("button", { name: "Select changes" })).toBeDisabled();
+    expect(
+      screen.getByRole("button", { name: "Select changes" }),
+    ).toBeDisabled();
 
     await user.click(screen.getByRole("button", { name: "Select all" }));
-    expect(screen.getByRole("button", { name: "Apply 2 changes" })).toBeEnabled();
+    expect(
+      screen.getByRole("button", { name: "Apply 2 changes" }),
+    ).toBeEnabled();
   });
 
   it("opens only the first area to begin with", async () => {
@@ -171,7 +186,9 @@ describe("ProposalReviewModal", () => {
     const user = userEvent.setup();
     const { requests, onClose } = setup(aiTaskDetail());
 
-    await user.click(await screen.findByRole("button", { name: "Decide later" }));
+    await user.click(
+      await screen.findByRole("button", { name: "Decide later" }),
+    );
 
     expect(onClose).toHaveBeenCalledWith(false);
     expect(requests.filter((r) => r.method === "POST")).toEqual([]);
@@ -182,7 +199,9 @@ describe("ProposalReviewModal", () => {
     const { onClose } = setup(aiTaskDetail());
     // The accept route is not mocked, so the 404 body is shown.
 
-    await user.click(await screen.findByRole("button", { name: "Apply 2 changes" }));
+    await user.click(
+      await screen.findByRole("button", { name: "Apply 2 changes" }),
+    );
 
     expect(await screen.findByText(/No mock for POST/)).toBeInTheDocument();
     expect(onClose).not.toHaveBeenCalled();

@@ -23,6 +23,8 @@ import {
 import useDeleteExpense from "../hooks/useDeleteExpense";
 import { expenseCategories, type Expense, type ExpensePrefill } from "../types";
 import { canChangeExpense, formatGbp, payerOptions } from "../utils";
+import { useGetUsersQuery } from "../../users/usersApiSlice";
+import type { User } from "../../users/types";
 
 const splitOptions = [
   { name: "Split evenly between everyone", value: "even_all" },
@@ -65,7 +67,8 @@ export default function ExpenseForm({
   const accommodationId =
     expense?.accommodationId ?? prefill?.accommodationId ?? null;
   const flightId = expense?.flightId ?? prefill?.flightId ?? null;
-
+  const { data } = useGetUsersQuery(trip.id);
+  const userMemberships: User[] = data?.data.users ?? [];
   const { register, handleSubmit, watch, setValue, formState } =
     useForm<ExpenseFormValues>({
       resolver: yupResolver(expenseSchema),
@@ -78,7 +81,7 @@ export default function ExpenseForm({
           expense?.spentOn ??
           prefill?.spentOn ??
           format(new Date(), "yyyy-MM-dd"),
-        paidById: expense?.paidById ?? userId ?? trip.userMemberships[0]?.id,
+        paidById: expense?.paidById ?? userId ?? userMemberships?.[0]?.id,
         link: eventId
           ? "event"
           : accommodationId
@@ -105,10 +108,9 @@ export default function ExpenseForm({
   const splitType = watch("splitType");
   const participantIds = watch("participantIds") ?? [];
   const isLoading = isAdding || isUpdating || isDeleting;
-  const canDelete =
-    !!expense && canChangeExpense(trip.role, userId, expense);
+  const canDelete = !!expense && canChangeExpense(trip.role, userId, expense);
 
-  const members = trip.userMemberships;
+  const members = userMemberships;
   const accommodations = accommodationData?.data ?? [];
   const flights = flightData?.data ?? [];
 

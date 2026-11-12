@@ -11,6 +11,8 @@ import { settlementSchema, type SettlementFormValues } from "../schema";
 import { useAddSettlementMutation } from "../services/expenseApiSlice";
 import type { Transfer } from "../types";
 import { payerOptions } from "../utils";
+import { useGetUsersQuery } from "../../users/usersApiSlice";
+import type { User } from "../../users/types";
 
 export default function SettlementModal({
   open,
@@ -25,8 +27,10 @@ export default function SettlementModal({
 }) {
   const [addSettlement, { isLoading }] = useAddSettlementMutation();
   const userId = useSelector((state: RootState) => state.auth.userId);
-  const members = trip.userMemberships;
-  const fromUserId = suggestion?.fromUserId ?? userId ?? members[0]?.id;
+  const { data } = useGetUsersQuery(trip.id);
+  const members: User[] | undefined = data?.data.users;
+
+  const fromUserId = suggestion?.fromUserId ?? userId ?? members?.[0]?.id;
 
   const { register, handleSubmit, watch, formState } =
     useForm<SettlementFormValues>({
@@ -35,14 +39,14 @@ export default function SettlementModal({
         fromUserId,
         toUserId:
           suggestion?.toUserId ??
-          members.find((m) => m.id !== fromUserId)?.id ??
-          members[0]?.id,
+          members?.find((m) => m.id !== fromUserId)?.id ??
+          members?.[0]?.id,
         amountGbp: suggestion?.amountGbp,
         settledOn: format(new Date(), "yyyy-MM-dd"),
       },
     });
 
-  const toOption = (m: (typeof members)[number]) => ({
+  const toOption = (m: User) => ({
     name: m.username,
     value: String(m.id),
   });
@@ -72,15 +76,18 @@ export default function SettlementModal({
             label="Who paid"
             {...register("fromUserId")}
             value={watch("fromUserId")}
-            options={payerOptions(members, trip.role, userId, fromUserId).map(
-              toOption,
-            )}
+            options={payerOptions(
+              members ?? [],
+              trip.role,
+              userId,
+              fromUserId,
+            ).map(toOption)}
           />
           <FormSelect
             label="Who received it"
             {...register("toUserId")}
             value={watch("toUserId")}
-            options={members.map(toOption)}
+            options={members?.map(toOption) ?? []}
             errorMessage={formState.errors.toUserId?.message}
           />
           <FormInput

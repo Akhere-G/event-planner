@@ -473,10 +473,10 @@ function downloadBlob(blob: Blob, filename: string): void {
   window.URL.revokeObjectURL(url);
 }
 
-export async function exportToDoc(trip: Trip): Promise<void> {
+export async function exportToDoc(trip: Trip, events: Event[]): Promise<void> {
   try {
     const colors = readThemeColors();
-    const days = makeDays(trip.events, trip.startDate, trip.endDate);
+    const days = makeDays(events, trip.startDate, trip.endDate);
     const children: Array<Paragraph | Table> = [
       ...buildTripHeaderSection(trip, colors),
       ...days.flatMap((day) => buildDaySection(day, colors)),
@@ -529,10 +529,7 @@ export const buildFlightCalendarEvents = (flights: Flight[]): IcsEvent[] =>
     endInputType: "utc",
     endOutputType: "utc",
     title: flightTitle(flight),
-    description: [
-      `${flight.airline}${flight.flightNumber}`,
-      flight.notes,
-    ]
+    description: [`${flight.airline}${flight.flightNumber}`, flight.notes]
       .filter(Boolean)
       .join("\n"),
     location: `${flight.departureAirport} airport`,
