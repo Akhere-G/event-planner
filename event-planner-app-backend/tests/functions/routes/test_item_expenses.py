@@ -75,8 +75,8 @@ def make_accommodations(itinerary, admin_user, members, count):
     ]
     db.session.add_all(stays)
     db.session.flush()
-    for stay in stays:
-        add_expense(itinerary, members, accommodation_id=stay.id)
+    for accommodation in stays:
+        add_expense(itinerary, members, accommodation_id=accommodation.id)
     return stays
 
 
@@ -169,14 +169,14 @@ def test_single_event_and_accommodation_and_flight_embed_the_expense(
     admin_client, itinerary, admin_user, members
 ):
     [event] = make_events(itinerary, admin_user, members, 1)
-    [stay] = make_accommodations(itinerary, admin_user, members, 1)
+    [accommodation] = make_accommodations(itinerary, admin_user, members, 1)
     [flight] = make_flights(itinerary, admin_user, members, 1)
 
     assert (
-        admin_client.get(f"{accommodations_url(itinerary)}/{stay.id}").get_json()[
-            "data"
-        ]["expense"]["accommodationId"]
-        == stay.id
+        admin_client.get(
+            f"{accommodations_url(itinerary)}/{accommodation.id}"
+        ).get_json()["data"]["expense"]["accommodationId"]
+        == accommodation.id
     )
     assert (
         admin_client.get(f"{flights_url(itinerary)}/{flight.id}").get_json()["data"][

@@ -105,9 +105,12 @@ def test_accommodations_become_day_offsets(itinerary, admin_user):
     db.session.flush()
     db.session.refresh(itinerary)
 
-    stay = ops_for(build_snapshot_ops(itinerary), "accommodation")[0]
+    accommodation = ops_for(build_snapshot_ops(itinerary), "accommodation")[0]
 
-    assert (stay["start_day_offset"], stay["end_day_offset"]) == (0, 3)
+    assert (accommodation["start_day_offset"], accommodation["end_day_offset"]) == (
+        0,
+        3,
+    )
 
 
 def test_wishlist_items_keep_their_wishlist_name(itinerary, admin_user):

@@ -33,12 +33,12 @@ function collectPoints({
       });
     }
   }
-  for (const [index, stay] of accommodations.entries()) {
+  for (const [index, accommodation] of accommodations.entries()) {
     points.push({
-      key: `stay-${index}`,
-      title: stay.name,
-      latitude: stay.latitude,
-      longitude: stay.longitude,
+      key: `accommodation-${index}`,
+      title: accommodation.name,
+      latitude: accommodation.latitude,
+      longitude: accommodation.longitude,
       color: STAY_COLOR,
       glyph: "S",
     });
