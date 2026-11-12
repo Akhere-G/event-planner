@@ -1,3 +1,4 @@
+import json
 from unittest.mock import MagicMock
 
 import pytest
@@ -8,6 +9,7 @@ from src.ai_tasks.dispatchers.factory import (
     default_dispatcher_name,
     get_dispatcher,
 )
+from src.ai_tasks.dispatchers.http_task import build_http_task
 from src.ai_tasks.dispatchers.inline import InlineDispatcher
 from src.ai_tasks.dispatchers.settings import CloudTasksSettings
 from src.ai_tasks.runner import RunOutcome
@@ -46,6 +48,14 @@ def test_task_posts_back_to_the_internal_run_route_with_an_oidc_token(client):
     )
     assert task.http_request.oidc_token.audience == "https://app.example.com"
     assert task.dispatch_deadline.seconds == 900
+
+
+def test_a_task_can_carry_a_json_body_and_be_unnamed():
+    task = build_http_task(SETTINGS, "https://app.example.com/hook", payload={"a": 1})
+
+    assert task.name == ""
+    assert json.loads(task.http_request.body) == {"a": 1}
+    assert task.http_request.headers["Content-Type"] == "application/json"
 
 
 def test_dispatching_twice_is_harmless(client):
