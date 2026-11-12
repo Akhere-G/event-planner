@@ -1,140 +1,25 @@
-import { Page } from "@playwright/test";
+import { expect, type Page } from "@playwright/test";
 
-export interface MockUser {
-  id: number;
-  username: string;
+export interface Credentials {
   email: string;
+  password: string;
 }
 
-export const defaultMockUser: MockUser = {
-  id: 1,
-  username: "testuser",
+export const defaultCredentials: Credentials = {
   email: "test@example.com",
+  password: "Password123!",
 };
 
-export async function mockAuthCheck(
+export async function login(
   page: Page,
-  authenticated = true,
-  user: MockUser = defaultMockUser,
+  { email, password }: Credentials = defaultCredentials,
 ) {
-  await page.route("**/api/auth/check", async (route) => {
-    if (authenticated) {
-      await route.fulfill({
-        status: 200,
-        contentType: "application/json",
-        body: JSON.stringify({
-          success: true,
-          message: "User is authenticated.",
-          data: {
-            userId: user.id,
-          },
-        }),
-      });
-    } else {
-      await route.fulfill({
-        status: 401,
-        contentType: "application/json",
-        body: JSON.stringify({
-          success: false,
-          message: "Not authenticated.",
-        }),
-      });
-    }
-  });
+  await page.getByRole("textbox", { name: "email" }).fill(email);
+  await page.getByRole("textbox", { name: "password" }).fill(password);
+  await page.getByRole("button", { name: /login/i }).click();
 }
 
-export async function mockSuccessfulLogin(
-  page: Page,
-  user: MockUser = defaultMockUser,
-) {
-  await page.route("**/api/auth/login", async (route) => {
-    await route.fulfill({
-      status: 200,
-      contentType: "application/json",
-      body: JSON.stringify({
-        success: true,
-        message: "Successfully logged in",
-        data: {
-          userId: user.id,
-        },
-      }),
-    });
-  });
-}
-
-export async function mockFailedLogin(
-  page: Page,
-  message = "Invalid credentials.",
-) {
-  await page.route("**/api/auth/login", async (route) => {
-    await route.fulfill({
-      status: 401,
-      contentType: "application/json",
-      body: JSON.stringify({
-        success: false,
-        error: message,
-      }),
-    });
-  });
-}
-
-export async function mockSuccessfulRegistration(
-  page: Page,
-  user: MockUser = defaultMockUser,
-) {
-  await page.route("**/api/auth/register", async (route) => {
-    await route.fulfill({
-      status: 200,
-      contentType: "application/json",
-      body: JSON.stringify({
-        success: true,
-        message: "Successfully registered an account.",
-        data: {
-          userId: user.id,
-        },
-      }),
-    });
-  });
-}
-
-export async function mockRegistrationValidationError(
-  page: Page,
-  error: string | Record<string, string[]> = "Registration failed.",
-) {
-  await page.route("**/api/auth/register", async (route) => {
-    await route.fulfill({
-      status: 400,
-      contentType: "application/json",
-      body: JSON.stringify({
-        success: false,
-        error,
-      }),
-    });
-  });
-}
-
-export async function mockRegistrationServerError(page: Page) {
-  await page.route("**/api/auth/register", async (route) => {
-    await route.fulfill({
-      status: 500,
-      contentType: "application/json",
-      body: JSON.stringify({
-        success: false,
-        message: "Internal server error.",
-      }),
-    });
-  });
-}
-
-export async function mockLogout(page: Page) {
-  await page.route("**/api/auth/logout", async (route) => {
-    await route.fulfill({
-      status: 200,
-      contentType: "application/json",
-      body: JSON.stringify({
-        success: true,
-        message: "Successfully logged out.",
-      }),
-    });
-  });
+export async function expectLoginPage(page: Page) {
+  await expect(page).toHaveURL(/\/login/);
+  await expect(page.getByRole("heading", { name: /login/i })).toBeVisible();
 }

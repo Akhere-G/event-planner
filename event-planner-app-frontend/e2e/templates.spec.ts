@@ -1,5 +1,6 @@
 import { test, expect, type Page } from "@playwright/test";
-import { login } from "./helpers/login";
+import { json, mockApiDefaults, mockAuth, type Session } from "./helpers/api";
+import { login } from "./helpers/auth";
 
 const PARIS = {
   slug: "paris-4-days-itinerary",
@@ -53,48 +54,17 @@ const PARIS_DETAIL = {
   wishlistItems: [],
 };
 
-const USER = {
-  id: 1,
-  username: "testuser",
-  email: "test@example.com",
-  isDemo: false,
-};
-
-const json = (data: unknown, status = 200) => ({
-  status,
-  contentType: "application/json",
-  body: JSON.stringify({ success: status < 400, data }),
-});
-
 function pinOf(template: typeof PARIS) {
   const { slug, title, destination, region, latitude, longitude } = template;
   return { slug, title, destination, region, latitude, longitude };
 }
 
 async function mockTemplatesApi(page: Page, { loggedIn = true } = {}) {
-  const state = { loggedIn, cloneBody: undefined as unknown };
+  const session: Session = { signedIn: loggedIn };
+  const state = { cloneBody: undefined as unknown };
 
-  await page.route("**/maps.googleapis.com/**", (route) => route.abort());
-  await page.route(
-    (url) => url.pathname.startsWith("/api/"),
-    (route) => route.fulfill(json([])),
-  );
-  await page.route("**/api/auth/check", (route) =>
-    state.loggedIn
-      ? route.fulfill(json(USER))
-      : route.fulfill({
-          status: 401,
-          contentType: "application/json",
-          body: JSON.stringify({
-            success: false,
-            message: "Not authenticated.",
-          }),
-        }),
-  );
-  await page.route("**/api/auth/login", (route) => {
-    state.loggedIn = true;
-    return route.fulfill(json(USER));
-  });
+  await mockApiDefaults(page);
+  await mockAuth(page, session);
   await page.route("**/api/templates?**", (route) => {
     const regions = new URL(route.request().url()).searchParams.get("regions");
     const templates = [PARIS, TOKYO].filter(
