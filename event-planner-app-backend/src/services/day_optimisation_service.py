@@ -10,6 +10,7 @@ from ..ai_entities.parsing import as_int, as_list, as_object, pick
 from ..ai_entities.validators.base import EntityValidator
 from ..ai_entities.validators.factory import EntityValidatorFactory
 from ..exceptions import AIResponseError
+from ..models import Itinerary
 from ..utils.db_utils import release_connection
 from ..utils.location_utils import get_weekly_opening_hours
 from ..utils.progress import ProgressCallback, no_progress
@@ -87,7 +88,7 @@ class DayPlan:
     flights: list[FlightWindow]
 
 
-def _day_events(itinerary, day: date) -> list[DayEvent]:
+def _day_events(itinerary: Itinerary, day: date) -> list[DayEvent]:
     day_events = []
     for event in sorted(itinerary.events, key=lambda event: event.start_at):
         start = to_trip_local(event.start_at, itinerary.timezone)
