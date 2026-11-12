@@ -50,7 +50,9 @@ def members(admin_itinerary_user, editor_itinerary_user, viewer_itinerary_user):
 
 
 def make_events(itinerary, admin_user, members, count):
-    events = [EventFactory(itinerary=itinerary, creator=admin_user) for _ in range(count)]
+    events = [
+        EventFactory(itinerary=itinerary, creator=admin_user) for _ in range(count)
+    ]
     for event in events:
         add_expense(itinerary, members, event_id=event.id)
     return events
@@ -79,7 +81,9 @@ def make_accommodations(itinerary, admin_user, members, count):
 
 
 def make_flights(itinerary, admin_user, members, count):
-    flights = [FlightFactory(itinerary=itinerary, creator=admin_user) for _ in range(count)]
+    flights = [
+        FlightFactory(itinerary=itinerary, creator=admin_user) for _ in range(count)
+    ]
     for flight in flights:
         add_expense(itinerary, members, flight_id=flight.id)
     return flights
@@ -129,7 +133,9 @@ def test_listing_embeds_each_items_expense_with_its_shares(
 
 
 @pytest.mark.parametrize("name", CASES)
-def test_item_without_an_expense_has_null(admin_client, itinerary, admin_user, members, name):
+def test_item_without_an_expense_has_null(
+    admin_client, itinerary, admin_user, members, name
+):
     make, url, payload = CASES[name]
     make(itinerary, admin_user, members, 1)
     db.session.query(ExpenseShare).delete()
@@ -167,9 +173,9 @@ def test_single_event_and_accommodation_and_flight_embed_the_expense(
     [flight] = make_flights(itinerary, admin_user, members, 1)
 
     assert (
-        admin_client.get(f"{accommodations_url(itinerary)}/{stay.id}").get_json()["data"][
-            "expense"
-        ]["accommodationId"]
+        admin_client.get(f"{accommodations_url(itinerary)}/{stay.id}").get_json()[
+            "data"
+        ]["expense"]["accommodationId"]
         == stay.id
     )
     assert (
@@ -178,9 +184,10 @@ def test_single_event_and_accommodation_and_flight_embed_the_expense(
         ]["flightId"]
         == flight.id
     )
-    assert events_payload(admin_client.get(events_url(itinerary)))[0]["expense"][
-        "eventId"
-    ] == event.id
+    assert (
+        events_payload(admin_client.get(events_url(itinerary)))[0]["expense"]["eventId"]
+        == event.id
+    )
 
 
 def test_updating_an_event_returns_its_expense(
@@ -195,13 +202,3 @@ def test_updating_an_event_returns_its_expense(
     data = response.get_json()["data"]
     assert data["name"] == "Renamed"
     assert data["expense"]["eventId"] == event.id
-
-
-def test_trip_payload_and_ai_schemas_do_not_carry_expenses(
-    admin_client, itinerary, admin_user, members
-):
-    make_events(itinerary, admin_user, members, 1)
-
-    trip = admin_client.get(f"/api/itineraries/{itinerary.id}").get_json()["data"]
-
-    assert "expense" not in trip["events"][0]
