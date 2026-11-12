@@ -5,6 +5,7 @@ from src.calendar_sync.client import (
     EventsPage,
     GoogleEvent,
     GoogleEventGoneError,
+    SyncTokenExpiredError,
     WatchChannel,
 )
 from src.extensions import db
@@ -20,6 +21,7 @@ class FakeCalendarClient:
         self.events: dict[str, GoogleEvent] = {}
         self.feed: list[GoogleEvent] = []
         self.calls: list[tuple[str, Any]] = []
+        self.sync_token_expired = False
         self._counter = 0
 
     def _stamp(self, event_id: str, body: GoogleEvent) -> GoogleEvent:
@@ -55,6 +57,9 @@ class FakeCalendarClient:
             raise GoogleEventGoneError()
 
     def list_events(self, calendar_id: str, sync_token: str | None) -> EventsPage:
+        self.calls.append(("list", sync_token))
+        if self.sync_token_expired and sync_token is not None:
+            raise SyncTokenExpiredError()
         return EventsPage(self.feed, "next-token")
 
     def watch_events(

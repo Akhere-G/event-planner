@@ -22,6 +22,7 @@ class EventMapper(EntitySyncMapper):
     entity = "event"
     model = Event
     creatable_from_google = True
+    deletable_from_google = True
 
     def to_google(self, obj: Event) -> GoogleEvent:
         return {

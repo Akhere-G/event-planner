@@ -17,6 +17,7 @@ class EntitySyncMapper(ABC):
     entity: ClassVar[str]
     model: ClassVar[type]
     creatable_from_google: ClassVar[bool] = False
+    deletable_from_google: ClassVar[bool] = False
 
     def load(self, entity_id: int) -> Any | None:
         return db.session.get(self.model, entity_id)
