@@ -1,33 +1,8 @@
 import pytest
 from src.ai_tasks.runner import RunOutcome
-from src.middleware import cloud_tasks_auth
 from src.routes import internal_task_routes
 
-AUDIENCE = "https://planner.example.com"
-QUEUE_ACCOUNT = "queue@project.iam.gserviceaccount.com"
-
-
-@pytest.fixture(autouse=True)
-def configured(monkeypatch):
-    monkeypatch.setenv("SERVICE_BASE_URL", AUDIENCE + "/")
-    monkeypatch.setenv("CLOUD_TASKS_SERVICE_ACCOUNT", QUEUE_ACCOUNT)
-
-
-@pytest.fixture
-def claims(monkeypatch):
-    state = {
-        "value": {"email": QUEUE_ACCOUNT, "email_verified": True},
-        "audience": None,
-    }
-
-    def verify(token, audience):
-        state["audience"] = audience
-        if state["value"] is None:
-            raise ValueError("bad token")
-        return state["value"]
-
-    monkeypatch.setattr(cloud_tasks_auth, "verify_google_token", verify)
-    return state
+from tests.cloud_tasks import QUEUE_ACCOUNT, QUEUE_AUDIENCE
 
 
 @pytest.fixture
@@ -57,7 +32,7 @@ def test_runs_the_task_for_the_queue(client, claims, runner):
 
     assert response.status_code == 200
     assert runner.ran == [7]
-    assert claims["audience"] == AUDIENCE
+    assert claims["audience"] == QUEUE_AUDIENCE
 
 
 def test_transient_failure_asks_the_queue_to_retry(client, claims, runner):

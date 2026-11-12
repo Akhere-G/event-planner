@@ -136,3 +136,8 @@ class CalendarNotConfiguredError(AppError):
 class GoogleCalendarApiError(AppError):
     status_code = 502
     default_message = "Google Calendar could not be reached. Please try again."
+
+
+class UnknownCalendarJobTypeError(AppError):
+    status_code = 404
+    default_message = "Unknown calendar sync job type."

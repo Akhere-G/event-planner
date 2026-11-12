@@ -179,6 +179,7 @@ def register_blueprints(app: Flask):
         flight_bp,
         fx_bp,
         expense_bp,
+        internal_calendar_bp,
         internal_task_bp,
         itinerary_bp,
         itinerary_invites_bp,
@@ -255,6 +256,11 @@ def register_blueprints(app: Flask):
     app.register_blueprint(
         internal_task_bp,
         url_prefix="/api/internal",
+    )
+
+    app.register_blueprint(
+        internal_calendar_bp,
+        url_prefix="/api/internal/calendar-sync",
     )
 
     app.register_blueprint(
