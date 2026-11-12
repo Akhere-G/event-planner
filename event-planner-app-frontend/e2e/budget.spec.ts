@@ -1,45 +1,29 @@
 import { test, expect, type Page } from "@playwright/test";
-import { mockAuthCheck } from "./helpers/auth";
+import {
+  buildTrip,
+  json,
+  mockApiDefaults,
+  mockAuth,
+  mockTrip,
+} from "./helpers/api";
 
 const members = [
   { id: 1, username: "testuser", email: "test@example.com", role: "admin" },
   { id: 2, username: "sam", email: "sam@example.com", role: "editor" },
 ];
 
-const trip = {
-  id: 1,
-  name: "Summer Vacation in Paris",
-  destination: "Paris, France",
-  latitude: 48.85,
-  longitude: 2.35,
-  timezone: "Europe/Paris",
-  startDate: "2026-08-01",
+const trip = buildTrip({
   endDate: "2026-08-10",
-  role: "admin",
   budgetAmountGbp: 200,
   userMemberships: members,
-  events: [],
-  invites: [],
-  createdAt: "2026-07-01T00:00:00",
-  anonymousAccessCode: null,
-};
-
-const json = (data: unknown, status = 200) => ({
-  status,
-  contentType: "application/json",
-  body: JSON.stringify({ success: true, data }),
 });
 
 async function mockBudgetApi(page: Page) {
   const expenses: Record<string, unknown>[] = [];
 
-  await page.route(
-    (url) => url.pathname.startsWith("/api/"),
-    (route) => route.fulfill(json([])),
-  );
-  await page.route("**/api/itineraries/1", (route) =>
-    route.fulfill(json(trip)),
-  );
+  await mockApiDefaults(page);
+  await mockAuth(page, { signedIn: true });
+  await mockTrip(page, trip);
   await page.route("**/api/itineraries/1/expenses/balances", (route) => {
     const spent = expenses.reduce((s, e) => s + (e.amountGbp as number), 0);
     route.fulfill(
@@ -80,7 +64,6 @@ test.describe("Budget tab", () => {
     page,
   }) => {
     await mockBudgetApi(page);
-    await mockAuthCheck(page);
 
     await page.goto("/trips/1?activeTab=budget");
 
@@ -91,7 +74,7 @@ test.describe("Budget tab", () => {
 
     await page.getByRole("button", { name: "Add expense" }).first().click();
     await page.getByLabel("Description").fill("Dinner at the harbour");
-    await page.getByLabel("Amount (£)").fill("50");
+    await page.getByLabel("Amount (GBP)").fill("50");
     await page.getByRole("button", { name: "Add expense" }).last().click();
 
     await expect(page.getByText("Expense added.")).toBeVisible();

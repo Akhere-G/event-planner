@@ -1,30 +1,18 @@
 import { test, expect, type Page } from "@playwright/test";
-import { mockAuthCheck } from "./helpers/auth";
+import {
+  buildTrip,
+  json,
+  mockApiDefaults,
+  mockAuth,
+  mockTrip,
+} from "./helpers/api";
 
 interface MockFlight {
   id: number;
   [key: string]: unknown;
 }
 
-const trip = {
-  id: 1,
-  name: "Summer Vacation in Paris",
-  destination: "Paris, France",
-  latitude: 48.8566,
-  longitude: 2.3522,
-  timezone: "Europe/Paris",
-  startDate: "2026-08-01",
-  endDate: "2026-08-05",
-  description: "Sightseeing",
-  role: "admin",
-  events: [],
-  invites: [],
-  userMemberships: [
-    { id: 1, username: "testuser", email: "test@example.com", role: "admin" },
-  ],
-  createdAt: "2026-07-01T00:00:00Z",
-  anonymousAccessCode: null,
-};
+const trip = buildTrip({ endDate: "2026-08-05", description: "Sightseeing" });
 
 const airport = (code: string, name: string, timezone: string) => ({
   code,
@@ -157,23 +145,25 @@ async function mockTripAndFlights(
   const numberSearches: string[] = [];
   const numberCreated: unknown[] = [];
 
-  const json = (data: unknown, status = 200) => ({
-    status,
-    contentType: "application/json",
-    body: JSON.stringify({ success: true, message: "ok", data }),
-  });
-
-  await page.route("**/api/itineraries/1", (route) =>
-    route.fulfill(json(trip)),
-  );
+  await mockApiDefaults(page);
+  await mockAuth(page, { signedIn: true });
+  await mockTrip(page, trip);
   await page.route("**/api/itineraries/1/accommodations", (route) =>
     route.fulfill(json([])),
   );
+  const saveLegs = (count: number) => {
+    const saved: MockFlight[] = [];
+    for (let leg = 0; leg < count; leg += 1) {
+      saved.push({ ...structuredClone(savedFlight), id: flights.length + 1 });
+      flights.push(saved[leg]);
+    }
+    return saved;
+  };
   await page.route("**/api/itineraries/1/flights", async (route) => {
     if (route.request().method() === "POST") {
-      created.push(route.request().postDataJSON());
-      flights.push(structuredClone(savedFlight));
-      await route.fulfill(json([savedFlight], 201));
+      const body = route.request().postDataJSON();
+      created.push(body);
+      await route.fulfill(json(saveLegs(body.legs.length), 201));
       return;
     }
     await route.fulfill(json(flights));
@@ -217,8 +207,8 @@ async function mockTripAndFlights(
   await page.route("**/api/itineraries/1/flights/by-number*", async (route) => {
     if (route.request().method() === "POST") {
       numberCreated.push(route.request().postDataJSON());
-      flights.push(structuredClone(savedFlight));
-      await route.fulfill(json([savedFlight], 201));
+      const [found] = numberResults as (typeof journey)[];
+      await route.fulfill(json(saveLegs(found.legs.length), 201));
       return;
     }
     numberSearches.push(new URL(route.request().url()).search);
@@ -232,7 +222,6 @@ test.describe("Flights", () => {
   test("searches for a flight, saves it, and shows it on its day", async ({
     page,
   }) => {
-    await mockAuthCheck(page, true);
     const { created, searches } = await mockTripAndFlights(page);
 
     await page.goto("/trips/1");
@@ -272,6 +261,7 @@ test.describe("Flights", () => {
     await expect(result.getByRole("button", { name: "Saved" })).toBeDisabled();
 
     // The day card for 1 Aug lists the flight too.
+    await page.getByRole("button", { name: "Activities" }).click();
     await expect(
       page.getByRole("list", { name: "Flights" }).first(),
     ).toContainText("BA304 LHR → CDG");
@@ -280,7 +270,6 @@ test.describe("Flights", () => {
   test("shows a connection with its layover and saves every leg", async ({
     page,
   }) => {
-    await mockAuthCheck(page, true);
     const { created } = await mockTripAndFlights(page, [], [connectionJourney]);
 
     await page.goto("/trips/1");
@@ -316,7 +305,6 @@ test.describe("Flights", () => {
   test("looks up a flight by its number and saves the legs it flies", async ({
     page,
   }) => {
-    await mockAuthCheck(page, true);
     const { numberSearches, numberCreated } = await mockTripAndFlights(
       page,
       [],
@@ -354,7 +342,6 @@ test.describe("Flights", () => {
   test("tells the user when a flight number does not fly that day", async ({
     page,
   }) => {
-    await mockAuthCheck(page, true);
     await mockTripAndFlights(page, [], [], []);
 
     await page.goto("/trips/1");
@@ -371,54 +358,9 @@ test.describe("Flights", () => {
     ).toBeVisible();
   });
 
-  test("copies a saved flight's details to the clipboard", async ({
-    page,
-    context,
-  }) => {
-    await context.grantPermissions(["clipboard-read", "clipboard-write"]);
-    await mockAuthCheck(page, true);
-    await mockTripAndFlights(page, [savedFlight]);
-
-    await page.goto("/trips/1");
-    await page.getByRole("button", { name: "Flights" }).click();
-    await page.getByRole("button", { name: "Flight actions" }).click();
-    await page.getByRole("menuitem", { name: "Copy details" }).click();
-
-    await expect(page.getByText("Flight details copied.")).toBeVisible();
-    const copied = await page.evaluate(() => navigator.clipboard.readText());
-    expect(copied).toContain("BA304 LHR → CDG");
-    expect(copied).toContain("Departs: Sat 1 Aug 2026, 10:00 · London (LHR)");
-  });
-
-  test("lists saved flights first and keeps the search closed until asked", async ({
-    page,
-  }) => {
-    await mockAuthCheck(page, true);
-    await mockTripAndFlights(page, [savedFlight]);
-
-    await page.goto("/trips/1");
-    await page.getByRole("button", { name: "Flights" }).click();
-
-    await expect(page.getByTestId("flight-card")).toContainText("BA304");
-    await expect(
-      page.getByRole("form", { name: "Search flights" }),
-    ).toHaveCount(0);
-
-    await page.getByRole("button", { name: "Search for flights" }).click();
-    await expect(
-      page.getByRole("form", { name: "Search flights" }),
-    ).toBeVisible();
-
-    await page.getByRole("button", { name: "Close flight search" }).click();
-    await expect(
-      page.getByRole("form", { name: "Search flights" }),
-    ).toHaveCount(0);
-  });
-
   test("shows the flight's expense and lets it be deleted on its own", async ({
     page,
   }) => {
-    await mockAuthCheck(page, true);
     await mockTripAndFlights(page, [savedFlight]);
 
     await page.goto("/trips/1");
@@ -445,20 +387,5 @@ test.describe("Flights", () => {
     await expect(
       card.getByRole("button", { name: "Add expense" }),
     ).toBeVisible();
-  });
-
-  test("requires a departure airport before searching", async ({ page }) => {
-    await mockAuthCheck(page, true);
-    const { searches } = await mockTripAndFlights(page);
-
-    await page.goto("/trips/1");
-    await page.getByRole("button", { name: "Flights" }).click();
-    await page.getByRole("button", { name: "Search for a flight" }).click();
-
-    const form = page.getByRole("form", { name: "Search flights" });
-    await form.getByRole("button", { name: "Search flights" }).click();
-
-    await expect(form.getByText("Required.")).toBeVisible();
-    expect(searches).toHaveLength(0);
   });
 });

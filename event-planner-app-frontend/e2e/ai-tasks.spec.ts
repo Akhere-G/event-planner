@@ -1,24 +1,13 @@
 import { test, expect, type Page } from "@playwright/test";
-import { mockAuthCheck } from "./helpers/auth";
+import {
+  buildTrip,
+  json,
+  mockApiDefaults,
+  mockAuth,
+  mockTrip as mockTripRoute,
+} from "./helpers/api";
 
-const trip = {
-  id: 1,
-  name: "Summer Vacation in Paris",
-  destination: "Paris, France",
-  latitude: 48.8566,
-  longitude: 2.3522,
-  timezone: "Europe/Paris",
-  startDate: "2026-08-01",
-  endDate: "2026-08-03",
-  role: "admin",
-  events: [],
-  invites: [],
-  userMemberships: [
-    { id: 1, username: "testuser", email: "test@example.com", role: "admin" },
-  ],
-  createdAt: "2026-07-01T00:00:00Z",
-  anonymousAccessCode: null,
-};
+const trip = buildTrip();
 
 const task = (overrides: Record<string, unknown> = {}) => ({
   id: 9,
@@ -60,14 +49,10 @@ detail.ops = [
 detail.changedOpIndexes = [];
 detail.unavailableOpIndexes = [];
 
-const json = (data: unknown, status = 200) => ({
-  status,
-  contentType: "application/json",
-  body: JSON.stringify({ success: true, message: "ok", data }),
-});
-
 async function mockTrip(page: Page, tripTasks: () => unknown[]) {
-  await page.route("**/api/itineraries/1", (route) => route.fulfill(json(trip)));
+  await mockApiDefaults(page);
+  await mockAuth(page, { signedIn: true });
+  await mockTripRoute(page, trip);
   await page.route("**/api/itineraries/1/events", (route) =>
     route.fulfill(json({ events: [] })),
   );
@@ -87,10 +72,9 @@ async function mockTrip(page: Page, tripTasks: () => unknown[]) {
 
 test.describe("Background AI tasks", () => {
   test("a finished proposal pops up and can be applied", async ({ page }) => {
-    await mockAuthCheck(page, true);
     const accepted: unknown[] = [];
     await mockTrip(page, () => []);
-    await page.route("**/api/ai-tasks/pending", (route) =>
+    await page.route("**/api/itineraries/1/ai-tasks/pending", (route) =>
       route.fulfill(json(accepted.length ? [] : [detail])),
     );
     await page.route("**/api/itineraries/1/ai-tasks/9", (route) =>
@@ -122,7 +106,6 @@ test.describe("Background AI tasks", () => {
   test("a running task shows its progress and can be cancelled", async ({
     page,
   }) => {
-    await mockAuthCheck(page, true);
     let cancelled = false;
     await mockTrip(page, () =>
       cancelled
@@ -135,7 +118,7 @@ test.describe("Background AI tasks", () => {
             }),
           ],
     );
-    await page.route("**/api/ai-tasks/pending", (route) =>
+    await page.route("**/api/itineraries/1/ai-tasks/pending", (route) =>
       route.fulfill(json([])),
     );
     await page.route("**/api/itineraries/1/ai-tasks/9/cancel", (route) => {
@@ -152,14 +135,18 @@ test.describe("Background AI tasks", () => {
   });
 
   test("a failed task can be retried", async ({ page }) => {
-    await mockAuthCheck(page, true);
     let retried = false;
     await mockTrip(page, () =>
       retried
         ? [task({ id: 10, status: "queued" })]
-        : [task({ status: "failed", errorMessage: "The AI service was unavailable." })],
+        : [
+            task({
+              status: "failed",
+              errorMessage: "The AI service was unavailable.",
+            }),
+          ],
     );
-    await page.route("**/api/ai-tasks/pending", (route) =>
+    await page.route("**/api/itineraries/1/ai-tasks/pending", (route) =>
       route.fulfill(json([])),
     );
     await page.route("**/api/itineraries/1/ai-tasks/9/retry", (route) => {
@@ -169,7 +156,9 @@ test.describe("Background AI tasks", () => {
 
     await page.goto("/trips/1");
 
-    await expect(page.getByText("The AI service was unavailable.")).toBeVisible();
+    await expect(
+      page.getByText("The AI service was unavailable."),
+    ).toBeVisible();
     await page.getByRole("button", { name: "Retry" }).click();
     await expect(page.getByText("Optimise days started again.")).toBeVisible();
     await expect(page.getByText("Waiting to start")).toBeVisible();
