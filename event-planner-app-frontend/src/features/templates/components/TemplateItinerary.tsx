@@ -58,18 +58,19 @@ export default function TemplateItinerary({
       {accommodations.length > 0 && (
         <section aria-label="Stays">
           <h3 className="title mb-2 flex items-center gap-2">
-            <BedDouble size={18} aria-hidden /> Where to stay
+            <BedDouble size={18} aria-hidden /> Where to accommodation
           </h3>
           <ul className="flex flex-col gap-2">
-            {accommodations.map((stay, index) => (
+            {accommodations.map((accommodation, index) => (
               <li key={index} className="card">
-                <p className="font-semibold">{stay.name}</p>
+                <p className="font-semibold">{accommodation.name}</p>
                 <p className="text-sm text-text-secondary">
-                  {dayLabel(stay.startDayOffset)} to{" "}
-                  {dayLabel(stay.endDayOffset)} · {stay.address}
+                  {dayLabel(accommodation.startDayOffset)} to{" "}
+                  {dayLabel(accommodation.endDayOffset)} ·{" "}
+                  {accommodation.address}
                 </p>
-                {stay.description && (
-                  <p className="text-sm mt-1">{stay.description}</p>
+                {accommodation.description && (
+                  <p className="text-sm mt-1">{accommodation.description}</p>
                 )}
               </li>
             ))}

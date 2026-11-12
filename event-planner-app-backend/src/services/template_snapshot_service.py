@@ -69,9 +69,9 @@ def _event_ops(itinerary: Itinerary, span: TripSpan) -> list[dict[str, Any]]:
 
 def _accommodation_ops(itinerary: Itinerary, span: TripSpan) -> list[dict[str, Any]]:
     ops = []
-    for stay in sorted(itinerary.accommodations, key=lambda a: a.start_date):
-        if not span.starts_within(stay.start_date) or not span.ends_within(
-            stay.end_date
+    for accommodation in sorted(itinerary.accommodations, key=lambda a: a.start_date):
+        if not span.starts_within(accommodation.start_date) or not span.ends_within(
+            accommodation.end_date
         ):
             continue
         ops.append(
@@ -79,13 +79,13 @@ def _accommodation_ops(itinerary: Itinerary, span: TripSpan) -> list[dict[str, A
                 "op": "create",
                 "entity": "accommodation",
                 "data": {
-                    "name": stay.name,
-                    "description": stay.description,
-                    "address": stay.address,
-                    "latitude": stay.latitude,
-                    "longitude": stay.longitude,
-                    "start_day_offset": span.offset(stay.start_date),
-                    "end_day_offset": span.offset(stay.end_date),
+                    "name": accommodation.name,
+                    "description": accommodation.description,
+                    "address": accommodation.address,
+                    "latitude": accommodation.latitude,
+                    "longitude": accommodation.longitude,
+                    "start_day_offset": span.offset(accommodation.start_date),
+                    "end_day_offset": span.offset(accommodation.end_date),
                 },
             }
         )
