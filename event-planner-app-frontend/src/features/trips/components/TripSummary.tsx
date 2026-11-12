@@ -1,6 +1,7 @@
 import {
   Calendar,
   FileText,
+  Globe,
   MoreVertical,
   Pencil,
   SquareArrowRightExit,
@@ -37,8 +38,10 @@ import { useLazyGetFlightsQuery } from "../../flights/flightApiSlice";
 import RegisterModal from "../../modal/components/RegisterModal";
 import useTripEvents from "../../events/hooks/useTripEvents";
 import type { User } from "../../users/types";
+import PublishTemplateModal from "../../templates/components/PublishTemplateModal";
+import { selectIsDemo } from "../../auth/services/authSlice";
 
-type ModalType = "edit" | "delete" | "users" | "register" | null;
+type ModalType = "edit" | "delete" | "users" | "register" | "publish" | null;
 
 interface TripSummaryProps {
   trip: Trip;
@@ -57,6 +60,7 @@ export default function TripSummary({
   const userMemberships: User[] = data?.data.users ?? [];
   const [removeUser, { isLoading: isRemoveLoading }] = useRemoveUserMutation();
   const { userId } = useSelector((state: RootState) => state.auth);
+  const isDemo = useSelector(selectIsDemo);
 
   const posthog = usePostHog();
   const [fetchFlights] = useLazyGetFlightsQuery();
@@ -143,6 +147,15 @@ export default function TripSummary({
                   <Pencil size={16} />
                   Edit
                 </DropdownMenuItem>
+                {!anonTrip && !isDemo && (
+                  <DropdownMenuItem
+                    onClick={() => setModalType("publish")}
+                    className="flex gap-2 items-center"
+                  >
+                    <Globe size={16} />
+                    Publish as template
+                  </DropdownMenuItem>
+                )}
               </>
             )}
             {!anonTrip && (
@@ -195,6 +208,13 @@ export default function TripSummary({
       )}
       {modalType === "edit" && (
         <EditTripModal
+          trip={trip}
+          open={true}
+          onOpenChange={handleCloseModal}
+        />
+      )}
+      {modalType === "publish" && (
+        <PublishTemplateModal
           trip={trip}
           open={true}
           onOpenChange={handleCloseModal}

@@ -16,6 +16,7 @@ from src.models import (
     Invite,
     Itinerary,
     ItineraryUser,
+    TripTemplate,
     User,
     UserRole,
     Wishlist,
@@ -117,6 +118,17 @@ def app(_db_setup):
         transaction.rollback()
         db.session.remove()
         connection.close()
+
+
+@pytest.fixture
+def clean_templates(app):
+    """Template services commit, which outlives the per-test rollback."""
+    db.session.execute(delete(TripTemplate))
+    db.session.commit()
+    yield
+    db.session.rollback()
+    db.session.execute(delete(TripTemplate))
+    db.session.commit()
 
 
 @pytest.fixture

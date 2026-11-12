@@ -50,6 +50,11 @@ class InviteNotFoundError(AppError):
     default_message = "Invite not found."
 
 
+class TemplateNotFoundError(AppError):
+    status_code = 404
+    default_message = "Template not found."
+
+
 class BadRequestError(AppError):
     status_code = 400
     default_message = "Bad request."

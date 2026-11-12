@@ -154,7 +154,9 @@ def register_models():
         Notification,
         NotificationSubscription,
         PackingItem,
+        TemplateRegion,
         TripPreferences,
+        TripTemplate,
         Settlement,
         User,
         UserRole,
@@ -180,6 +182,8 @@ def register_blueprints(app: Flask):
         notification_bp,
         packing_item_bp,
         preferences_bp,
+        template_bp,
+        template_publish_bp,
         user_bp,
         user_invites_bp,
         wishlist_bp,
@@ -266,6 +270,12 @@ def register_blueprints(app: Flask):
     app.register_blueprint(
         notification_bp,
         url_prefix="/api/notifications",
+    )
+
+    app.register_blueprint(template_bp, url_prefix="/api/templates")
+    app.register_blueprint(
+        template_publish_bp,
+        url_prefix="/api/itineraries/<int:itinerary_id>/publish",
     )
 
 
