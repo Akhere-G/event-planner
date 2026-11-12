@@ -101,7 +101,10 @@ export default function EventCard({
   if (!trip) return null;
   return (
     <StateGate loadingStateProps={{ isLoading }} errorStateProps={{ isError }}>
-      <div className="card flex-1 transition-shadow border-l-4 border-brand-primary relative">
+      <div
+        data-testid="event-card"
+        className="card flex-1 transition-shadow border-l-4 border-brand-primary relative"
+      >
         <div className="flex flex-col">
           <div className="flex justify-between items-start">
             <h3 className="font-bold tracking-tight text-text-primary flex flex-col">
