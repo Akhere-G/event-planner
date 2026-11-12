@@ -15,6 +15,7 @@ logger = logging.getLogger(__name__)
 
 SESSION_INFO_KEY = "realtime_changes"
 USER_SESSION_INFO_KEY = "realtime_user_changes"
+RECORDS_INFO_KEY = "realtime_change_records"
 
 Resolver = Callable[[Session, object], int | None]
 
@@ -29,8 +30,28 @@ class TrackedModel:
     user_resolver: Resolver | None = None
 
 
+@dataclass(frozen=True)
+class EntityChange:
+    """One tracked row that was inserted, updated or deleted in a commit."""
+
+    itinerary_id: int
+    entity: str
+    entity_id: int
+    deleted: bool
+
+
+ChangeListener = Callable[[list[EntityChange]], None]
+
 # Models are registered in register_default_models with register_tracked_model.
 _TRACKED: dict[type, TrackedModel] = {}
+
+# Called after each successful commit with the rows that changed.
+_LISTENERS: list[ChangeListener] = []
+
+
+def register_change_listener(listener: ChangeListener) -> None:
+    if listener not in _LISTENERS:
+        _LISTENERS.append(listener)
 
 
 def register_tracked_model(
@@ -135,6 +156,7 @@ def _resolve(resolver: Resolver | None, session: Session, obj) -> int | None:
 
 def collect_changes(session: Session, flush_context):
     changes = session.info.setdefault(SESSION_INFO_KEY, defaultdict(set))
+    records = session.info.setdefault(RECORDS_INFO_KEY, {})
     user_changes = session.info.setdefault(
         USER_SESSION_INFO_KEY,
         defaultdict(lambda: {"entities": set(), "trip_ids": set()}),
@@ -146,7 +168,9 @@ def collect_changes(session: Session, flush_context):
         o for o in session.dirty if session.is_modified(o, include_collections=False)
     ]
 
-    for obj in [*session.new, *dirty, *session.deleted]:
+    deleted = set(session.deleted)
+
+    for obj in [*session.new, *dirty, *deleted]:
         tracked = _TRACKED.get(type(obj))
         if tracked is None:
             continue
@@ -154,6 +178,11 @@ def collect_changes(session: Session, flush_context):
         itinerary_id = _resolve(tracked.trip_resolver, session, obj)
         if itinerary_id is not None:
             changes[itinerary_id].add(tracked.entity)
+            entity_id = getattr(obj, "id", None)
+            if entity_id is not None:
+                records[(itinerary_id, tracked.entity, entity_id)] = EntityChange(
+                    itinerary_id, tracked.entity, entity_id, deleted=obj in deleted
+                )
 
         user_id = _resolve(tracked.user_resolver, session, obj)
         if user_id is not None:
@@ -162,9 +191,18 @@ def collect_changes(session: Session, flush_context):
                 user_changes[user_id]["trip_ids"].add(itinerary_id)
 
 
+def notify_listeners(records: list[EntityChange]):
+    for listener in _LISTENERS:
+        try:
+            listener(records)
+        except Exception:
+            logger.exception("Change listener %s failed", listener)
+
+
 def emit_changes(session: Session):
     changes = session.info.pop(SESSION_INFO_KEY, None)
     user_changes = session.info.pop(USER_SESSION_INFO_KEY, None)
+    records = session.info.pop(RECORDS_INFO_KEY, None)
     if not changes and not user_changes:
         return
 
@@ -194,10 +232,14 @@ def emit_changes(session: Session):
             user_room(user_id),
         )
 
+    if records:
+        notify_listeners(list(records.values()))
+
 
 def discard_changes(session: Session):
     session.info.pop(SESSION_INFO_KEY, None)
     session.info.pop(USER_SESSION_INFO_KEY, None)
+    session.info.pop(RECORDS_INFO_KEY, None)
 
 
 _registered = False
