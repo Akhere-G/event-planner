@@ -118,13 +118,7 @@ def get_itinerary_memberships(
 
 
 def get_itinerary(itinerary_id: int):
-    stmt = (
-        select(Itinerary)
-        .where(Itinerary.id == itinerary_id)
-        .options(
-            selectinload(Itinerary.events),
-        )
-    )
+    stmt = select(Itinerary).where(Itinerary.id == itinerary_id)
 
     itinerary = db.session.execute(stmt).scalar_one_or_none()
 
@@ -143,11 +137,6 @@ def get_itineraries(
     if not user_id and not anonymous_access_code:
         return []
 
-    options = [
-        selectinload(Itinerary.events),
-        selectinload(Itinerary.invites),
-    ]
-
     result = []
     seen = set()
 
@@ -159,7 +148,6 @@ def get_itineraries(
             .order_by(Itinerary.start_date)
             .limit(limit)
             .offset(offset)
-            .options(*options)
         )
 
         for itinerary, role in db.session.execute(stmt).all():
@@ -167,10 +155,8 @@ def get_itineraries(
             seen.add(itinerary.id)
 
     if anonymous_access_code:
-        stmt = (
-            select(Itinerary)
-            .where(Itinerary.anonymous_access_code == anonymous_access_code)
-            .options(*options)
+        stmt = select(Itinerary).where(
+            Itinerary.anonymous_access_code == anonymous_access_code
         )
 
         for itinerary in db.session.execute(stmt).scalars():
