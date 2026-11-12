@@ -117,7 +117,7 @@ const featureCards = [
 ];
 const NAV_LINKS = [
   { label: "Destinations", href: "/destinations" },
-  { label: "Travel guides", href: "/blog" },
+  { label: "Travel guides", href: "/destinations" },
 ];
 const scrolled = true;
 const menuOpen = false;

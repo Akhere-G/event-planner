@@ -1,6 +1,6 @@
-import type { BlogPost } from "../types";
+import type { DestinationGuide } from "../types";
 
-export const amsterdamPost: BlogPost = {
+export const amsterdamGuide: DestinationGuide = {
   slug: "amsterdam-travel-guide",
   city: "Amsterdam",
   country: "Netherlands",

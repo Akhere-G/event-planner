@@ -8,6 +8,10 @@ import { fitToBounds } from "../../maps/utils";
 const MAP_ID = "e74fd7bd6c063337caf66343";
 const WORLD_CENTER = { lat: 30, lng: 10 };
 const FIT_PADDING = 60;
+const WORLD_RESTRICTION: google.maps.MapRestriction = {
+  latLngBounds: { north: 85, south: -85, west: -180, east: 180 },
+  strictBounds: true,
+};
 
 interface Point {
   latitude: number;
@@ -42,6 +46,7 @@ export default function TemplateMapCanvas({
       <Map
         mapId={MAP_ID}
         minZoom={2}
+        restriction={WORLD_RESTRICTION}
         maxZoom={MAX_ZOOM}
         className="w-full h-full"
         defaultCenter={WORLD_CENTER}

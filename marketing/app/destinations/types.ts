@@ -1,24 +1,24 @@
-export type BlogRegion = "Asia" | "Europe" | "North America";
+export type DestinationRegion = "Asia" | "Europe" | "North America";
 
-export interface BlogPlace {
+export interface GuidePlace {
   name: string;
   area: string;
   description: string;
 }
 
-export interface BlogPost {
+export interface DestinationGuide {
   slug: string;
   city: string;
   country: string;
-  region: BlogRegion;
+  region: DestinationRegion;
   title: string;
   description: string;
   intro: string[];
   bestTime: string;
-  restaurants: BlogPlace[];
-  thingsToDo: BlogPlace[];
-  whereToStay: BlogPlace[];
-  hiddenGems: BlogPlace[];
+  restaurants: GuidePlace[];
+  thingsToDo: GuidePlace[];
+  whereToStay: GuidePlace[];
+  hiddenGems: GuidePlace[];
   templateSlug: string;
   templateTitle: string;
   templateDays: number;

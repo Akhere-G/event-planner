@@ -1,4 +1,4 @@
-import type { BlogPlace } from "../types";
+import type { GuidePlace } from "../types";
 
 export function PlaceSection({
   id,
@@ -7,7 +7,7 @@ export function PlaceSection({
 }: {
   id: string;
   title: string;
-  places: BlogPlace[];
+  places: GuidePlace[];
 }) {
   return (
     <section aria-labelledby={id} className="mt-14">

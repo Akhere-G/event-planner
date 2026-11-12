@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { SiteFooter, SiteHeader } from "../components/SiteChrome";
-import { RegionGroups } from "../blog/components/RegionGroups";
+import { RegionGroups } from "./components/RegionGroups";
 
 export const metadata: Metadata = {
   title: "Holiday destinations and ready-made trip templates",

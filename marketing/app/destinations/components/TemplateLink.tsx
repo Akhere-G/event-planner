@@ -1,19 +1,19 @@
 import { TrackedLink } from "../../components/TrackedLink";
 import { templateUrl } from "../../lib/urls";
-import type { BlogPost } from "../types";
+import type { DestinationGuide } from "../types";
 
 export function TemplateLink({
-  post,
+  guide,
   className,
   label = "See the template",
 }: {
-  post: BlogPost;
+  guide: DestinationGuide;
   className?: string;
   label?: string;
 }) {
   return (
     <TrackedLink
-      href={templateUrl(post.templateSlug)}
+      href={templateUrl(guide.templateSlug)}
       event="template_link_clicked"
       className={className}
     >
