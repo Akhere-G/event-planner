@@ -142,6 +142,8 @@ def register_models():
     from .models import (
         Accommodation,
         AiTask,
+        CalendarConnection,
+        CalendarLink,
         Event,
         ExchangeRate,
         Flight,
@@ -155,6 +157,7 @@ def register_models():
         NotificationSubscription,
         PackingItem,
         TemplateRegion,
+        TripCalendar,
         TripPreferences,
         TripTemplate,
         Settlement,

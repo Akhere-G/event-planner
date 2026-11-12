@@ -7,6 +7,7 @@ from src.models.ai_task_model import (
 )
 from src.models.airport_model import Airport
 from src.models.audit_mixins import AuditMixin
+from src.models.calendar_model import CalendarConnection, CalendarLink, TripCalendar
 from src.models.event_model import Event
 from src.models.exchange_rate_model import ExchangeRate
 from src.models.flight_model import Flight
@@ -35,6 +36,8 @@ __all__ = [
     "AiTaskStatus",
     "Airport",
     "AuditMixin",
+    "CalendarConnection",
+    "CalendarLink",
     "Event",
     "ExchangeRate",
     "Flight",
@@ -49,6 +52,7 @@ __all__ = [
     "NotificationSubscription",
     "PackingItem",
     "TemplateRegion",
+    "TripCalendar",
     "TripPreferences",
     "TripTemplate",
     "Settlement",
