@@ -1,45 +1,55 @@
 import { test, expect } from "@playwright/test";
-import { mockGetTrips, defaultMockTrips } from "./helpers/trip";
+import {
+  buildTrip,
+  json,
+  mockApiDefaults,
+  mockAuth,
+  mockTrip,
+} from "./helpers/api";
 
-test.describe("Trips E2E Flow", () => {
-  test.beforeEach(async ({ page }) => {
-    await mockGetTrips(page, defaultMockTrips);
-  });
+const paris = buildTrip();
+const tokyo = buildTrip({
+  id: 2,
+  name: "Tokyo Adventure",
+  destination: "Tokyo, Japan",
+  role: "viewer",
+});
 
-  test("redirects to trip page from login page when authenticated", async ({
-    page,
-  }) => {
-    await page.goto("/login");
+test.describe("Trips", () => {
+  test("lists the user's trips and opens one", async ({ page }) => {
+    await mockApiDefaults(page);
+    await mockAuth(page, { signedIn: true });
+    await page.route("**/api/itineraries?*", (route) =>
+      route.fulfill(json({ itineraries: [paris, tokyo], hasMore: false })),
+    );
+    await mockTrip(page, paris);
 
-    await expect(page).not.toHaveURL(/\/login/);
-    await expect(page.getByRole("heading", { name: "Trips" })).toBeVisible();
-  });
-
-  test("redirects to trip page from register page when authenticated", async ({
-    page,
-  }) => {
-    await page.goto("/register");
-
-    await expect(page).not.toHaveURL(/\/register/);
-    await expect(page.getByRole("heading", { name: "Trips" })).toBeVisible();
-  });
-
-  test("displays list of itineraries for authenticated user", async ({
-    page,
-  }) => {
     await page.goto("/");
 
     await expect(
-      page.getByText("Summer Vacation in Paris").first(),
+      page.getByRole("heading", { name: tokyo.name, level: 3 }),
     ).toBeVisible();
-    await expect(page.getByText("Tokyo Adventure").first()).toBeVisible();
+    await page.getByRole("article").filter({ hasText: paris.name }).click();
+
+    await expect(page).toHaveURL(`/trips/${paris.id}`);
+    await expect(
+      page.getByRole("heading", { name: paris.name }).first(),
+    ).toBeVisible();
   });
 
-  test("allows navigating to trip details page", async ({ page }) => {
+  test("a user with no trips is offered a way to create one", async ({
+    page,
+  }) => {
+    await mockApiDefaults(page);
+    await mockAuth(page, { signedIn: true });
+    await page.route("**/api/itineraries?*", (route) =>
+      route.fulfill(json({ itineraries: [], hasMore: false })),
+    );
+
     await page.goto("/");
 
-    await page.getByText("Summer Vacation in Paris").first().click();
-
-    await expect(page).toHaveURL(/\/trips\/1/);
+    await expect(page.getByText("No trips.")).toBeVisible();
+    await page.getByRole("button", { name: "Create new trip?" }).click();
+    await expect(page).toHaveURL("/addtrip");
   });
 });
