@@ -16,7 +16,7 @@ export default function EmptyState({
   return (
     <div
       style={{ height: height ? height + "px" : "auto" }}
-      className={`bg-surface border-dashed border-surface-border border-2 rounded-md flex flex-col gap-4 justify-center items-center py-8`}
+      className={`bg-surface border-dashed border-surface-border border-2 rounded-md flex flex-col gap-4 justify-center items-center py-8 text-center`}
     >
       <h2 className="text-text-secondary title">{message}</h2>
       {actions && (
