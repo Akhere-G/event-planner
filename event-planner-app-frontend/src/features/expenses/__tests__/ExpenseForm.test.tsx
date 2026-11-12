@@ -15,13 +15,15 @@ const trip = {
   id: 1,
   role: "admin",
   timezone: "Europe/London",
-  userMemberships: [
-    { id: 5, username: "sam" },
-    { id: 6, username: "kit" },
-  ],
   events: [],
 } as unknown as Trip;
 
+const users = {
+  users: [
+    { id: 5, username: "sam" },
+    { id: 6, username: "kit" },
+  ],
+};
 const newEvent = {
   id: 3,
   name: "Louvre visit",
@@ -40,7 +42,9 @@ function stubApi() {
           ? trip
           : pathname.endsWith("/fx/rates")
             ? { base: "GBP", rates: { GBP: 1, EUR: 1.25 } }
-            : [];
+            : pathname.endsWith("/users")
+              ? users
+              : [];
       return new Response(JSON.stringify({ success: true, data }), {
         status: 200,
         headers: { "Content-Type": "application/json" },
@@ -82,11 +86,10 @@ describe("ExpenseForm", () => {
       { store },
     );
 
-    const select = screen.getByLabelText("Paid by");
-    const offered = within(select)
-      .getAllByRole("option")
-      .map((option) => option.textContent);
-    expect(offered).toEqual(names);
+    const select = await screen.findByLabelText("Paid by");
+    const offered = await within(select).findAllByRole("option");
+
+    expect(offered.map((option) => option.textContent)).toEqual(names);
   });
 
   describe("currency", () => {
@@ -156,8 +159,15 @@ describe("ExpenseForm", () => {
     });
 
     it("remembers the currency of a saved expense", async () => {
+      const store = createTestStore();
+      store.dispatch(setCredentials({ id: 5 }));
+      stubApi();
+      const onSuccess = vi.fn();
       const user = userEvent.setup();
-      const { onSuccess } = renderForm();
+      renderWithProviders(
+        <ExpenseForm trip={trip} onSuccess={onSuccess} onCancel={vi.fn()} />,
+        { store },
+      );
 
       await user.type(screen.getByLabelText("Description"), "Dinner");
       await user.type(screen.getByLabelText(/^Amount/), "40");

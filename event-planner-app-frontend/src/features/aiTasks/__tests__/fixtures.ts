@@ -1,4 +1,5 @@
 import type { Event } from "../../events/types";
+import type { User } from "../../users/types";
 import type { AiTask, AiTaskDetail } from "../types";
 
 export const TRIP = {
@@ -17,6 +18,8 @@ export const TRIP = {
   createdAt: "2026-01-01T00:00:00",
   anonymousAccessCode: null,
 };
+
+export const USERS: User[] = [];
 
 export const EVENT: Event = {
   id: 11,

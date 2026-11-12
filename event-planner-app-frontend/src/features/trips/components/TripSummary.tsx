@@ -13,7 +13,10 @@ import { formatDateRange } from "../../../utils/dateFormattors";
 import { UserAvatarList } from "../../users/components";
 import { useSelector } from "react-redux";
 import { isAdmin } from "../../users/utils";
-import { useRemoveUserMutation } from "../../users/usersApiSlice";
+import {
+  useGetUsersQuery,
+  useRemoveUserMutation,
+} from "../../users/usersApiSlice";
 import { isFetchBaseQueryError } from "../../api/utils";
 import { toast } from "sonner";
 import type { RootState } from "../../../store";
@@ -33,6 +36,7 @@ import useLoadAnonTrip from "../hooks/useLoadAnonTrip";
 import { useLazyGetFlightsQuery } from "../../flights/flightApiSlice";
 import RegisterModal from "../../modal/components/RegisterModal";
 import useTripEvents from "../../events/hooks/useTripEvents";
+import type { User } from "../../users/types";
 
 type ModalType = "edit" | "delete" | "users" | "register" | null;
 
@@ -48,7 +52,9 @@ export default function TripSummary({
 }: TripSummaryProps) {
   const [modalOpen, setIsModalOpen] = useState(false);
   const [modalType, setModalType] = useState<ModalType>(null);
-  const { name, description, startDate, endDate, userMemberships } = trip;
+  const { name, description, startDate, endDate } = trip;
+  const { data } = useGetUsersQuery(trip.id);
+  const userMemberships: User[] = data?.data.users ?? [];
   const [removeUser, { isLoading: isRemoveLoading }] = useRemoveUserMutation();
   const { userId } = useSelector((state: RootState) => state.auth);
 
@@ -109,12 +115,7 @@ export default function TripSummary({
                     "Could not load flights; exporting without them.",
                   );
                 }
-                exportToCalendar(
-                  trip.name,
-                  events,
-                  trip.userMemberships,
-                  flights,
-                );
+                exportToCalendar(trip.name, events, userMemberships, flights);
                 posthog?.capture("export_to_calendar", { trip_id: trip.id });
               }}
               className="flex gap-2 items-center"
@@ -125,7 +126,7 @@ export default function TripSummary({
             <DropdownMenuItem
               onClick={async () => {
                 const { exportToDoc } = await import("../utils");
-                exportToDoc({ ...trip, events });
+                exportToDoc(trip, events);
                 posthog?.capture("export_to_doc", { trip_id: trip.id });
               }}
               className="flex gap-2 items-center"

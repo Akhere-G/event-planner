@@ -15,9 +15,10 @@ const trip = (role: string) =>
     id: 1,
     role,
     timezone: "Europe/London",
-    userMemberships: [{ id: 5, username: "sam" }],
     events: [],
   }) as unknown as Trip;
+
+const users = { users: [{ id: 5, username: "sam" }] };
 
 const expense: Expense = {
   id: 9,
@@ -38,13 +39,13 @@ const expense: Expense = {
 const prefill = { eventId: 3, description: "Museum" };
 
 function stubApi() {
-  const fetchMock = vi.fn().mockImplementation(
-    async () =>
-      new Response(JSON.stringify({ success: true, data: [], message: "" }), {
-        status: 200,
-        headers: { "Content-Type": "application/json" },
-      }),
-  );
+  const fetchMock = vi.fn().mockImplementation(async (request: Request) => {
+    const data = new URL(request.url).pathname.endsWith("/users") ? users : [];
+    return new Response(JSON.stringify({ success: true, data, message: "" }), {
+      status: 200,
+      headers: { "Content-Type": "application/json" },
+    });
+  });
   vi.stubGlobal("fetch", fetchMock);
   return fetchMock;
 }

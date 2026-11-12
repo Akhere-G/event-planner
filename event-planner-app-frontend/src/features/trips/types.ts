@@ -1,7 +1,3 @@
-import type { User } from "../users/types";
-import type { Invite } from "../invites/types";
-import type { Event } from "../events/types";
-
 export interface Trip {
   id: number;
   name: string;
@@ -14,10 +10,6 @@ export interface Trip {
   budgetAmountGbp?: number | null;
   startDate: string;
   endDate: string;
-  userMemberships: User[];
-  /** Snapshot from the trip fetch; use `useTripEvents` for live events. */
-  events: Event[];
-  invites: Invite[];
   adminCode?: string;
   editorCode?: string;
   viewerCode?: string;
