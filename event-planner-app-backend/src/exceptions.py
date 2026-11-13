@@ -126,3 +126,18 @@ class FxUnavailableError(AppError):
     default_message = (
         "Exchange rates are unavailable right now. Please try again shortly."
     )
+
+
+class CalendarNotConfiguredError(AppError):
+    status_code = 503
+    default_message = "Google Calendar sync is not configured on this server."
+
+
+class GoogleCalendarApiError(AppError):
+    status_code = 502
+    default_message = "Google Calendar could not be reached. Please try again."
+
+
+class UnknownCalendarJobTypeError(AppError):
+    status_code = 404
+    default_message = "Unknown calendar sync job type."

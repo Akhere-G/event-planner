@@ -9,7 +9,12 @@ from src.models import (
     Wishlist,
     WishlistItem,
 )
-from src.realtime.change_tracker import SESSION_INFO_KEY, USER_SESSION_INFO_KEY
+from src.realtime.change_tracker import (
+    RECORDS_INFO_KEY,
+    SESSION_INFO_KEY,
+    USER_SESSION_INFO_KEY,
+    EntityChange,
+)
 from tests.factories import (
     EventFactory,
     ExpenseFactory,
@@ -318,3 +323,72 @@ def test_deleting_an_item_announces_the_expense_it_unlinks(
 
     assert "expense" in trip_notices(emitted)[-1]["entities"]
     assert db.session.get(Expense, expense.id).__getattribute__(f"{item}_id") is None
+
+
+@pytest.fixture
+def heard(monkeypatch):
+    listened = []
+    monkeypatch.setattr("src.realtime.change_tracker._LISTENERS", [listened.append])
+    return listened
+
+
+def test_listeners_hear_each_changed_row_after_commit(
+    emitted, heard, itinerary, admin_user
+):
+    event = EventFactory(itinerary=itinerary, creator=admin_user)
+    db.session.flush()
+    assert heard == []
+
+    db.session.commit()
+
+    assert heard == [[EntityChange(itinerary.id, "event", event.id, deleted=False)]]
+
+
+def test_listeners_hear_deletions(emitted, heard, itinerary, admin_user):
+    event = EventFactory(itinerary=itinerary, creator=admin_user)
+    db.session.commit()
+    heard.clear()
+    event_id = event.id
+
+    db.session.delete(event)
+    db.session.commit()
+
+    assert heard == [[EntityChange(itinerary.id, "event", event_id, deleted=True)]]
+
+
+def test_a_row_changed_twice_in_one_commit_is_reported_once(
+    emitted, heard, itinerary, admin_user
+):
+    event = EventFactory(itinerary=itinerary, creator=admin_user)
+    db.session.flush()
+    event.name = "Renamed"
+    db.session.flush()
+
+    db.session.commit()
+
+    assert len(heard[0]) == 1
+
+
+def test_rollback_discards_records_without_notifying(
+    emitted, heard, itinerary, admin_user
+):
+    EventFactory(itinerary=itinerary, creator=admin_user)
+    db.session.flush()
+    assert RECORDS_INFO_KEY in db.session.info
+
+    db.session.rollback()
+
+    assert RECORDS_INFO_KEY not in db.session.info
+    assert heard == []
+
+
+def test_a_failing_listener_does_not_break_commit(
+    monkeypatch, emitted, itinerary, admin_user
+):
+    def boom(_records):
+        raise RuntimeError("queue down")
+
+    monkeypatch.setattr("src.realtime.change_tracker._LISTENERS", [boom])
+    EventFactory(itinerary=itinerary, creator=admin_user)
+
+    db.session.commit()

@@ -117,6 +117,7 @@ def initialise_extensions(app: Flask, testing: bool):
         limiter.init_app(app)
 
     initialise_realtime(app, testing)
+    initialise_calendar_sync(testing)
 
 
 def initialise_realtime(app: Flask, testing: bool):
@@ -138,10 +139,21 @@ def initialise_realtime(app: Flask, testing: bool):
     register_socket_handlers()
 
 
+def initialise_calendar_sync(testing: bool):
+    from .calendar_sync.change_listener import queue_push
+    from .realtime import register_change_listener
+
+    # Tests stay offline: they call the sync code directly with a fake client.
+    if not testing:
+        register_change_listener(queue_push)
+
+
 def register_models():
     from .models import (
         Accommodation,
         AiTask,
+        CalendarConnection,
+        CalendarLink,
         Event,
         ExchangeRate,
         Flight,
@@ -155,6 +167,7 @@ def register_models():
         NotificationSubscription,
         PackingItem,
         TemplateRegion,
+        TripCalendar,
         TripPreferences,
         TripTemplate,
         Settlement,
@@ -172,10 +185,12 @@ def register_blueprints(app: Flask):
         ai_bp,
         ai_task_bp,
         auth_bp,
+        calendar_bp,
         event_bp,
         flight_bp,
         fx_bp,
         expense_bp,
+        internal_calendar_bp,
         internal_task_bp,
         itinerary_bp,
         itinerary_invites_bp,
@@ -252,6 +267,16 @@ def register_blueprints(app: Flask):
     app.register_blueprint(
         internal_task_bp,
         url_prefix="/api/internal",
+    )
+
+    app.register_blueprint(
+        calendar_bp,
+        url_prefix="/api/calendar",
+    )
+
+    app.register_blueprint(
+        internal_calendar_bp,
+        url_prefix="/api/internal/calendar-sync",
     )
 
     app.register_blueprint(

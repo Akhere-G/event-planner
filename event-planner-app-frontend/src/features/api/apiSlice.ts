@@ -57,6 +57,7 @@ export const tagTypes = [
   "Settlements",
   "AiTasks",
   "Templates",
+  "CalendarSync",
 ];
 export const apiSlice = createApi({
   reducerPath: "api",

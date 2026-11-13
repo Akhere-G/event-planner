@@ -3,8 +3,8 @@ from typing import Any
 
 from google.api_core import exceptions as gcp_exceptions
 from google.cloud import tasks_v2
-from google.protobuf import duration_pb2
 
+from .http_task import build_http_task
 from .settings import CloudTasksSettings
 
 
@@ -25,20 +25,10 @@ class CloudTasksDispatcher:
         return f"{self._queue_path}/tasks/ai-task-{task_id}"
 
     def dispatch(self, task_id: int) -> str | None:
-        settings = self._settings
-        task = tasks_v2.Task(
+        task = build_http_task(
+            self._settings,
+            self._settings.run_url(task_id),
             name=self._task_name(task_id),
-            dispatch_deadline=duration_pb2.Duration(
-                seconds=settings.dispatch_deadline_seconds
-            ),
-            http_request=tasks_v2.HttpRequest(
-                http_method=tasks_v2.HttpMethod.POST,
-                url=settings.run_url(task_id),
-                oidc_token=tasks_v2.OidcToken(
-                    service_account_email=settings.service_account_email,
-                    audience=settings.base_url,
-                ),
-            ),
         )
         with suppress(gcp_exceptions.AlreadyExists):
             self._client.create_task(request={"parent": self._queue_path, "task": task})
