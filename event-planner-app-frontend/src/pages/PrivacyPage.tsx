@@ -4,7 +4,7 @@ export default function PrivacyPage() {
       <div className="card">
         <h1 className="title">Privacy Policy</h1>
         <p className="text-text-secondary text-sm mt-2">
-          Last updated: 9 September 2026
+          Last updated: 13 November 2026
         </p>
       </div>
 
@@ -133,7 +133,61 @@ export default function PrivacyPage() {
           provider.
         </p>
 
-        <h3>1.5 Information we currently do not collect</h3>
+        <h3>1.5 Google Calendar integration</h3>
+
+        <p>
+          If you choose to connect your Google account, TripTrack can
+          synchronise a trip with Google Calendar. This is optional. Nothing is
+          shared with Google Calendar unless you connect your account and switch
+          on sync for a trip.
+        </p>
+
+        <p>If you do, we collect and store:</p>
+
+        <ul>
+          <li>
+            A credential (a refresh token) that lets TripTrack use Google
+            Calendar on your behalf. It is stored in encrypted form.
+          </li>
+          <li>
+            The identifier of the Google calendar that TripTrack creates for
+            each trip you sync. The calendar is named "TripTrack: " followed by
+            the trip name.
+          </li>
+          <li>
+            For each synchronised event or flight, the identifier of the
+            matching Google Calendar item, plus technical version markers such
+            as timestamps, used to avoid duplicates and to detect changes.
+          </li>
+        </ul>
+
+        <p>
+          We do not receive your Google password, because you sign in on
+          Google's own pages. The permission we request only lets TripTrack
+          create calendars of its own and manage the events on them. TripTrack
+          does not read your email or contacts, and it does not read or list
+          your other Google calendars or events.
+        </p>
+
+        <p>When sync is switched on for a trip:</p>
+
+        <ul>
+          <li>
+            TripTrack sends the trip's events and flights to Google Calendar.
+            For events this includes the name, address, description, and start
+            and end times. For flights this includes the airline, flight number,
+            departure and arrival airports and times, travel class, booking link
+            and notes.
+          </li>
+          <li>
+            TripTrack receives changes made to items in the TripTrack calendar
+            in Google Calendar, such as a title, location, description or time,
+            and new or deleted events. Changes made there by a trip admin or
+            editor can update the shared trip.
+          </li>
+        </ul>
+
+        <h3>1.6 Information we currently do not collect</h3>
 
         <p>
           TripTrack currently does not allow users to upload files, photographs,
@@ -156,6 +210,10 @@ export default function PrivacyPage() {
           <li>Create, store and display your trips.</li>
           <li>Allow you to create and manage activities within trips.</li>
           <li>Allow you to collaborate with other users.</li>
+          <li>
+            If you choose to connect it, synchronise your trips with Google
+            Calendar.
+          </li>
           <li>
             Display trip locations and activities using mapping functionality.
           </li>
@@ -299,6 +357,35 @@ export default function PrivacyPage() {
           addresses may be processed through Google Maps services.
         </p>
 
+        <h3>Google Calendar</h3>
+
+        <p>
+          If you connect Google Calendar, TripTrack uses the Google Calendar API
+          to create a calendar for each trip you sync and to create, update and
+          delete events on it, and to receive notifications when that calendar
+          changes. Google processes this information under its own privacy
+          policy. Background synchronisation jobs run on Google Cloud Tasks and
+          carry only identifiers of trip items, not their contents.
+        </p>
+
+        <p>
+          TripTrack's use and transfer to any other app of information received
+          from Google APIs will adhere to the{" "}
+          <a
+            href="https://developers.google.com/terms/api-services-user-data-policy"
+            className="text-brand-primary underline"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Google API Services User Data Policy
+          </a>
+          , including the Limited Use requirements. We use information from
+          Google Calendar only to provide the calendar synchronisation feature
+          you have chosen. We do not use it for advertising, we do not sell it,
+          and we do not allow people to read it except with your consent, where
+          needed for security or to investigate abuse, or where required by law.
+        </p>
+
         <h3>Sentry</h3>
 
         <p>
@@ -381,6 +468,17 @@ export default function PrivacyPage() {
           what information you enter into shared trips.
         </p>
 
+        <p>
+          If you sync a shared trip, TripTrack copies the trip's events and
+          flights to the Google calendar of each member of the trip who has also
+          switched on sync, including members with view-only access. Once
+          copied, those items are in that member's own Google account and are
+          outside TripTrack's control. Changes made in Google Calendar by a
+          member with edit access can update the shared trip, and other trip
+          members will then see them. Changes made in Google Calendar by a
+          view-only member do not update the trip.
+        </p>
+
         <h2>7. Data Retention</h2>
 
         <p>
@@ -413,6 +511,25 @@ export default function PrivacyPage() {
           protect our legitimate interests.
         </p>
 
+        <p>
+          If you connect Google Calendar, we keep the stored credential and
+          synchronisation records until you stop syncing the trip, disconnect
+          Google Calendar in Settings, or your account is deleted. Disconnecting
+          deletes the stored credential and asks Google to revoke it. Calendars
+          and events already created in your Google account are not deleted by
+          this and stay there until you delete them. You can also remove
+          TripTrack's access at any time from{" "}
+          <a
+            href="https://myaccount.google.com/permissions"
+            className="text-brand-primary underline"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            your Google Account permissions page
+          </a>
+          .
+        </p>
+
         <h2>8. Data Security</h2>
 
         <p>
@@ -429,6 +546,8 @@ export default function PrivacyPage() {
           You are responsible for keeping your TripTrack password confidential
           and should not share it with other people.
         </p>
+
+        <p>The Google Calendar credential is stored in encrypted form.</p>
 
         <h2>9. International Data Transfers</h2>
 
