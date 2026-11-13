@@ -3,7 +3,7 @@ from dataclasses import dataclass
 
 from ..exceptions import CalendarNotConfiguredError
 
-CALENDAR_SCOPE = "https://www.googleapis.com/auth/calendar"
+CALENDAR_SCOPE = "https://www.googleapis.com/auth/calendar.app.created"
 
 
 def _required(name: str) -> str:
