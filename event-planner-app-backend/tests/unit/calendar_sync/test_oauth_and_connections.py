@@ -29,7 +29,7 @@ def test_authorization_url_asks_for_offline_calendar_access():
     query = parse_qs(urlparse(url).query)
     assert query["client_id"] == ["client-id"]
     assert query["redirect_uri"] == ["https://app.example.com/callback"]
-    assert query["scope"] == ["https://www.googleapis.com/auth/calendar"]
+    assert query["scope"] == ["https://www.googleapis.com/auth/calendar.app.created"]
     assert query["access_type"] == ["offline"]
     assert query["prompt"] == ["consent"]
     assert query["state"] == ["state-1"]

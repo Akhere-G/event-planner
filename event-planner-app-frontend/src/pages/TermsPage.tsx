@@ -4,7 +4,7 @@ export default function TermsPage() {
       <div className="card">
         <h1 className="title">Terms and Conditions</h1>
         <p className="text-text-secondary text-sm mt-2">
-          Last updated: 11 August 2026
+          Last updated: 13 November 2026
         </p>
       </div>
 
@@ -199,7 +199,7 @@ export default function TermsPage() {
           information before relying on it.
         </p>
 
-        <h2>7. Google Maps and Third-Party Services</h2>
+        <h2>7. Google Maps, Google Calendar and Third-Party Services</h2>
 
         <p>
           TripTrack uses third-party services, including Google Maps, to provide
@@ -214,6 +214,71 @@ export default function TermsPage() {
         <p>
           TripTrack is not responsible for the availability, accuracy or
           functionality of third-party services.
+        </p>
+
+        <h3>7.1 Google Calendar sync</h3>
+
+        <p>
+          You may choose to connect your Google account and synchronise a trip
+          with Google Calendar. This is optional. You must be entitled to
+          authorise access to the Google account you connect.
+        </p>
+
+        <p>
+          When you switch on sync for a trip, TripTrack creates a separate
+          Google calendar for that trip, named "TripTrack: " followed by the
+          trip name, and keeps its events and flights in step with the trip:
+        </p>
+
+        <ul>
+          <li>
+            Changes to the trip's events and flights in TripTrack are copied to
+            the calendar.
+          </li>
+          <li>
+            If you are an admin or editor of the trip, changes you make to
+            events in that calendar can update the trip, including creating or
+            deleting events. Other members of the trip will see those changes.
+          </li>
+          <li>
+            If you are a viewer, trip items are copied to your calendar but
+            changes you make in Google Calendar do not update the trip.
+          </li>
+          <li>
+            Flights keep their details in TripTrack. Only a new time made in
+            Google Calendar updates a flight, and deleting a flight there does
+            not delete it from the trip.
+          </li>
+          <li>
+            If the same item is changed in both places before syncing, the later
+            change is kept and the other is overwritten.
+          </li>
+        </ul>
+
+        <p>
+          If you share a trip, each member who switches on sync receives copies
+          in their own Google account. Once copied, those items are outside our
+          control, and you are responsible for what you share with other members
+          of your trips.
+        </p>
+
+        <p>
+          Sync is not instant and is not guaranteed. It depends on Google
+          Calendar being available, and changes may be delayed, missed or
+          conflict. You should not rely on it as your only copy of important
+          travel information.
+        </p>
+
+        <p>
+          You can stop syncing a trip, or disconnect Google Calendar, at any
+          time from TripTrack. You can also remove TripTrack's access from your
+          Google Account permissions. Calendars and events already created in
+          your Google account remain there until you delete them.
+        </p>
+
+        <p>
+          Your use of Google Calendar is also subject to Google's own terms and
+          policies.
         </p>
 
         <h2>8. Intellectual Property</h2>
