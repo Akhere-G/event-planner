@@ -19,73 +19,74 @@ export default function AboutPage() {
     {
       icon: <Sparkles className="text-brand-primary" size={28} />,
       title: "AI Trip Generator",
-      description: "Plan a whole trip from a single sentence.",
+      description:
+        "Turn a single sentence into a complete trip plan in seconds. Describe where you want to go and what you enjoy, and the AI builds the itinerary for you.",
     },
     {
       icon: <MessageSquareText className="text-brand-primary" size={28} />,
       title: "AI Trip Editing",
       description:
-        "Change your plan by just asking. Review every AI change before it's applied.",
+        "Change your plan just by asking, whether that's moving a dinner or adding a day. Every AI change is shown for your review before it's applied, so you stay in control.",
     },
     {
       icon: <Brain className="text-brand-primary" size={28} />,
       title: "Smart Planning",
       description:
-        "Fills empty time, fixes timing clashes and drafts packing lists. You approve every change.",
+        "Fill empty hours with ideas, fix timing clashes and draft packing lists in one step. Every suggestion waits for your approval, so nothing changes without you.",
     },
     {
       icon: <Users className="text-brand-primary" size={28} />,
       title: "Realtime Collaboration",
       description:
-        "Invite your group and everyone sees changes the moment they happen, on every device. No more chasing the latest version in a group chat.",
+        "Everyone in your group sees changes the moment they happen, on every device. No more chasing the latest version through a group chat.",
     },
     {
       icon: <CalendarSync className="text-brand-primary" size={28} />,
       title: "Google Calendar Sync",
       description:
-        "Keep each trip in step with Google Calendar. Changes made on either side show up on the other, so the whole group always has the right plan.",
+        "Keep each trip in step with Google Calendar, with changes flowing both ways. The whole group always has the right plan in their own calendar.",
     },
     {
       icon: <Plane className="text-brand-primary" size={28} />,
       title: "Flight Search",
       description:
-        "Search flights for your trip and keep them alongside your itinerary, so travel plans stay in one place.",
+        "Search for flights without leaving your trip and keep each one beside your itinerary. Arrival times and plans stay lined up in one place.",
     },
     {
       icon: <Map className="text-brand-primary" size={28} />,
       title: "Map & Calendar View",
       description:
-        "See your schedule and your map on one clean screen. No more switching between apps to work out where you need to be.",
+        "See your schedule and your map on one clean screen. You'll know exactly where to be and how to get there without switching apps.",
     },
     {
       icon: <Wallet className="text-brand-primary" size={28} />,
       title: "Budget & Expenses",
       description:
-        "Track what everyone spends, split costs and settle up in a few clicks, without the awkward maths.",
+        "Track what everyone spends, split costs and settle up in a few clicks. No awkward maths and no chasing friends for money.",
     },
     {
       icon: <LayoutTemplate className="text-brand-primary" size={28} />,
       title: "Trip Templates",
       description:
-        "Start from premade destination templates and make them your own in seconds.",
+        "Start from a premade destination template and make it yours in seconds. Skip the blank page and get planning straight away.",
     },
     {
       icon: <Search className="text-brand-primary" size={28} />,
       title: "Google Event Search",
       description:
-        "Find restaurants, museums and hidden landmarks and add them to your trip with a single click.",
+        "Find restaurants, museums and hidden landmarks using Google's database. Add the spots you love to your trip with a single click.",
     },
     {
       icon: <ShieldCheck className="text-brand-primary" size={28} />,
       title: "Admin & Viewer Roles",
       description:
-        "Stay in control. Give co-planners full editing rights, or let others follow the itinerary without changing it.",
+        "Stay in control of who changes what. Give co-planners full editing rights, or let others follow the plan without altering it.",
     },
     {
       icon: <Download className="text-brand-primary" size={28} />,
       title: "Calendar & Word Export",
       description:
-        "Take your plans anywhere. Export to your calendar app as an .ics file, or download the whole trip as a Word document.",
+        "Take your plans anywhere with an .ics file for any calendar app. Or download the whole trip as a Word document to share.",
     },
   ];
 

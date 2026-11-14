@@ -7,14 +7,16 @@ import {
   Search,
   Zap,
   Globe,
-  Bell,
-  Route,
   Lightbulb,
   Download,
-  Backpack,
-  KeyRound,
-  Vote,
-  Palette,
+  CalendarSync,
+  Plane,
+  Wallet,
+  Sparkles,
+  MessageSquareText,
+  Brain,
+  ShieldCheck,
+  LayoutTemplate,
 } from "lucide-react";
 import { TrackedLink } from "./components/TrackedLink";
 import { Logo } from "./components/Logo";
@@ -39,22 +41,29 @@ const features = [
     icon: <Map size={24} />,
     title: "Map & Calendar View",
     description:
-      "Schedule every event in a clear calendar while viewing the routes between them on Google Maps at the same time. See where each activity fits into your day, understand travel time between stops, and adjust your plans without jumping between apps or losing sight of the bigger picture.",
+      "See your day and your map on one screen. Know exactly where each stop sits, how long it takes to get there, and what's next, without switching apps.",
     image: "/trippage_calendar.png",
   },
   {
     icon: <Zap size={24} />,
     title: "Smart Planning",
     description:
-      "Stuck for ideas? Our smart system instantly fills your day with intelligent suggestions based on your preferences, travel pace, and group. It also reorders events to fix timing clashes and group nearby spots together, so you spend less time travelling.",
+      "Plan a whole trip from one sentence, then change it just by asking. Smart Planning fills empty hours with ideas and reorders your day to fix clashes. You review every AI change before it's applied, so you stay in control.",
     image: "/fill_in_day.png",
   },
   {
     icon: <Users size={24} />,
     title: "Team Collaboration",
     description:
-      "Onboard your group in seconds. Simply share a secure link and start planning together—no more back-and-forth in the group chat. Stay in control by assigning roles: let co-planners manage events as Editors, join as Admins, or follow along as Viewers.",
+      "Bring your group on board with one secure link. Everyone sees changes the moment they're made, on every device, so nobody plans from an old version. Give co-planners Editor, Admin or Viewer access, so everyone knows what they can change.",
     image: "/trippage_user_management.png",
+  },
+  {
+    icon: <CalendarSync size={24} />,
+    title: "Calendar Sync",
+    description:
+      "Keep every trip in step with Google Calendar. Changes made on either side show up on the other, so the whole group always has the right plan in their pocket.",
+    image: "/calendar.png",
   },
   {
     icon: <Search size={24} />,
@@ -63,56 +72,94 @@ const features = [
       "Find restaurants, museums, attractions, and hidden gems using Google’s extensive database. Review useful place details, discover what is nearby, and add the right spots to your trip in a single click.",
     image: "/map.png",
   },
+  {
+    icon: <Plane size={24} />,
+    title: "Flight Search",
+    description:
+      "Search for flights without leaving your trip. Keep each flight beside your itinerary, so arrival times and plans always line up.",
+    image: "/flights.png",
+  },
+  {
+    icon: <Wallet size={24} />,
+    title: "Budget & Expenses",
+    description:
+      "Know what your trip costs and who owes whom. Log expenses as you go, split them across the group and settle up in a few clicks.",
+    image: "/budget.png",
+  },
 ];
 
 const featureCards = [
   {
-    icon: <Bell size={20} />,
-    title: "Event Alerts",
+    icon: <Sparkles size={20} />,
+    title: "AI Trip Generator",
     description:
-      "Get timely reminders before events so you never miss an important moment.",
+      "Turn a single sentence into a complete trip plan in seconds. Describe where you want to go and what you enjoy, and the AI builds the itinerary for you.",
   },
   {
-    icon: <Route size={20} />,
-    title: "Route Planning",
+    icon: <MessageSquareText size={20} />,
+    title: "AI Trip Editing",
     description:
-      "Optimise routes between events so your group spends less time travelling.",
+      "Change your plan just by asking, whether that's moving a dinner or adding a day. Every AI change is shown for your review before it's applied, so you stay in control.",
+  },
+  {
+    icon: <Brain size={20} />,
+    title: "Smart Planning",
+    description:
+      "Fill empty hours with ideas, fix timing clashes and draft packing lists in one step. Every suggestion waits for your approval, so nothing changes without you.",
+  },
+  {
+    icon: <Users size={20} />,
+    title: "Realtime Collaboration",
+    description:
+      "Everyone in your group sees changes the moment they happen, on every device. No more chasing the latest version through a group chat.",
+  },
+  {
+    icon: <CalendarSync size={20} />,
+    title: "Google Calendar Sync",
+    description:
+      "Keep each trip in step with Google Calendar, with changes flowing both ways. The whole group always has the right plan in their own calendar.",
+  },
+  {
+    icon: <Plane size={20} />,
+    title: "Flight Search",
+    description:
+      "Search for flights without leaving your trip and keep each one beside your itinerary. Arrival times and plans stay lined up in one place.",
+  },
+  {
+    icon: <Map size={20} />,
+    title: "Map & Calendar View",
+    description:
+      "See your schedule and your map on one clean screen. You'll know exactly where to be and how to get there without switching apps.",
+  },
+  {
+    icon: <Wallet size={20} />,
+    title: "Budget & Expenses",
+    description:
+      "Track what everyone spends, split costs and settle up in a few clicks. No awkward maths and no chasing friends for money.",
+  },
+  {
+    icon: <LayoutTemplate size={20} />,
+    title: "Trip Templates",
+    description:
+      "Start from a premade destination template and make it yours in seconds. Skip the blank page and get planning straight away.",
+  },
+  {
+    icon: <Search size={20} />,
+    title: "Google Event Search",
+    description:
+      "Find restaurants, museums and hidden landmarks using Google's database. Add the spots you love to your trip with a single click.",
+  },
+  {
+    icon: <ShieldCheck size={20} />,
+    title: "Admin & Viewer Roles",
+    description:
+      "Stay in control of who changes what. Give co-planners full editing rights, or let others follow the plan without altering it.",
   },
   {
     icon: <Download size={20} />,
-    title: "Export Options",
+    title: "Calendar & Word Export",
     description:
-      "Export your itinerary to calendars or documents for simple sharing.",
-  },
-  {
-    icon: <Backpack size={20} />,
-    title: "Smart Packing Lists",
-    description:
-      "Generate a practical packing list based on your destination, activities, and plans.",
-  },
-  {
-    icon: <KeyRound size={20} />,
-    title: "Quick Member Invites",
-    description:
-      "Add trip members quickly with a secure invite token and start planning together.",
-  },
-  {
-    icon: <Lightbulb size={20} />,
-    title: "Travel Insights",
-    description:
-      "Explore useful travel tips and practical recommendations on your insights page.",
-  },
-  {
-    icon: <Vote size={20} />,
-    title: "Wishlist Voting",
-    description:
-      "Suggest activities to a shared wishlist and let members vote on what to include.",
-  },
-  {
-    icon: <Palette size={20} />,
-    title: "Colourful Location Themes",
-    description:
-      "Personalise each trip with colourful, location-based themes for a distinctive feel.",
+      "Take your plans anywhere with an .ics file for any calendar app. Or download the whole trip as a Word document to share.",
   },
 ];
 const NAV_LINKS = [
@@ -200,9 +247,9 @@ export default function HomePage() {
       <Navbar />
       <section className="bg-[#0F1419] min-h-screen flex flex-col justify-center pt-24 pb-20 px-3 md:px-5 relative overflow-hidden">
         <div className="absolute top-[10%] right-[5%] w-[400px] h-[400px] rounded-full bg-brand-primary/20 pointer-events-none blur-3xl" />
-        <div className="absolute bottom-[5%] left-[2%] w-[300px] h-[300px] rounded-full bg-[#6B9FB8]/30 pointer-events-none blur-3xl" />
+        <div className="absolute bottom-[-30%] left-[20%] w-[300px] h-[300px] rounded-full bg-[#6B9FB8]/20 pointer-events-none blur-3xl" />
         <svg
-          className="absolute top-0 left-0 w-full h-full pointer-events-none opacity-[0.12]"
+          className="absolute top-0 left-0 w-full h-full pointer-events-none opacity-[0.2]"
           preserveAspectRatio="none"
         >
           <path
@@ -229,9 +276,9 @@ export default function HomePage() {
               <span className="text-brand-primary italic">simplified.</span>
             </h1>
             <p className="text-[clamp(15px,1.8vw,18px)] text-white/70 leading-[1.7] max-w-lg mb-10">
-              We built TripTrack to get rid of messy spreadsheets and endless
-              tabs. One place to plan your route, chat with friends, and let
-              smart features handle the boring bits.
+              Stop juggling spreadsheets, tabs and group chats. TripTrack puts
+              your route, your group and your budget in one place, with AI that
+              builds the plan and you approve every change.
             </p>
             <div className="flex gap-4 flex-wrap">
               <TrackedLink
@@ -289,7 +336,7 @@ export default function HomePage() {
               Why use TripTrack?
             </h2>
             <p className="text-lg text-slate-500 max-w-2xl mx-auto">
-              Everything you need to turn a destination into a trip.
+              Everything your group needs to go from idea to itinerary.
             </p>
           </div>
           <div className="flex flex-col gap-10">
