@@ -43,7 +43,7 @@ export const accommodationApiSlice = apiSlice.injectEndpoints({
         url: `/itineraries/${tripId}/accommodations/${accommodationId}`,
         method: "DELETE",
       }),
-      // The stay's expense stays on the Budget tab, unlinked.
+      // The accomodation's expense stays on the Budget tab, unlinked.
       invalidatesTags: (_result, _error, { tripId }) => [
         "Accommodations",
         { type: "Expenses", id: tripId },

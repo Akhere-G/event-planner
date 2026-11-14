@@ -54,8 +54,8 @@ def move(event):
 
 
 @pytest.fixture
-def stay(itinerary, admin_user):
-    stay = Accommodation(
+def accomodation(itinerary, admin_user):
+    accomodation = Accommodation(
         itinerary_id=itinerary.id,
         name="Hotel Old",
         address="1 Rue Cler, Paris",
@@ -66,9 +66,9 @@ def stay(itinerary, admin_user):
         created_by_id=admin_user.id,
         updated_by_id=admin_user.id,
     )
-    db.session.add(stay)
+    db.session.add(accomodation)
     db.session.flush()
-    return stay
+    return accomodation
 
 
 @pytest.fixture
@@ -205,20 +205,20 @@ def test_every_entity_can_be_added(editor_client, itinerary):
     assert "Orsay" in names(WishlistItem, itinerary)
 
 
-def existing_items(event, stay, packing_item, idea):
+def existing_items(event, accomodation, packing_item, idea):
     return (
         ("event", event),
-        ("accommodation", stay),
+        ("accommodation", accomodation),
         ("packing_item", packing_item),
         ("wishlist_item", idea),
     )
 
 
 def test_every_entity_can_be_changed(
-    editor_client, itinerary, event, stay, packing_item, idea
+    editor_client, itinerary, event, accomodation, packing_item, idea
 ):
     ops = []
-    for entity, item in existing_items(event, stay, packing_item, idea):
+    for entity, item in existing_items(event, accomodation, packing_item, idea):
         data = {"name": "Renamed"}
         ops.append({"op": "update", "entity": entity, "id": item.id, "data": data})
 
@@ -232,10 +232,10 @@ def test_every_entity_can_be_changed(
 
 
 def test_every_entity_can_be_removed(
-    editor_client, itinerary, event, stay, packing_item, idea
+    editor_client, itinerary, event, accomodation, packing_item, idea
 ):
     ops = []
-    for entity, item in existing_items(event, stay, packing_item, idea):
+    for entity, item in existing_items(event, accomodation, packing_item, idea):
         ops.append({"op": "delete", "entity": entity, "id": item.id})
 
     reply = {"reply": "Removed four things.", "ops": ops}

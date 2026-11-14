@@ -190,9 +190,12 @@ def test_materialise_shifts_accommodation_dates():
         }
     ]
 
-    stay = materialise_ops(ops, date(2027, 1, 30), None)[0]["data"]
+    accomodation = materialise_ops(ops, date(2027, 1, 30), None)[0]["data"]
 
-    assert (stay["start_date"], stay["end_date"]) == ("2027-01-30", "2027-02-02")
+    assert (accomodation["start_date"], accomodation["end_date"]) == (
+        "2027-01-30",
+        "2027-02-02",
+    )
 
 
 def test_clone_keeps_local_times_across_a_dst_boundary(app):
