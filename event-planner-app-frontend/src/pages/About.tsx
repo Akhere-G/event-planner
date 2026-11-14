@@ -1,63 +1,91 @@
 import React from "react";
-import { TASK_ICONS } from "../features/aiTasks/utils";import {
+import {
   Map,
   Users,
   Search,
   Brain,
   ShieldCheck,
-  Navigation,
   Download,
+  Sparkles,
+  MessageSquareText,
+  CalendarSync,
+  Plane,
+  Wallet,
+  LayoutTemplate,
 } from "lucide-react";
 
 export default function AboutPage() {
   const FEATURES = [
     {
-      icon: <Map className="text-brand-primary" size={28} />,
-      title: "Map & Calendar View",
+      icon: <Sparkles className="text-brand-primary" size={28} />,
+      title: "AI Trip Generator",
+      description: "Plan a whole trip from a single sentence.",
+    },
+    {
+      icon: <MessageSquareText className="text-brand-primary" size={28} />,
+      title: "AI Trip Editing",
       description:
-        "See your schedule and your map on one screen. No more jumping between apps to figure out where you need to be.",
+        "Change your plan by just asking. Review every AI change before it's applied.",
     },
     {
       icon: <Brain className="text-brand-primary" size={28} />,
-      title: "AI Plan Day",
+      title: "Smart Planning",
       description:
-        "Stuck for ideas? Our AI instantly fills your day with smart suggestions, taking the guesswork out of planning your itinerary.",
-    },
-    {
-      icon: <TASK_ICONS.optimise_day className="text-brand-primary" size={28} />,
-      title: "AI Optimise Day",
-      description:
-        "Our AI reorders your events to fix timing clashes and group nearby spots together, so you spend less time travelling and more time exploring.",
+        "Fills empty time, fixes timing clashes and drafts packing lists. You approve every change.",
     },
     {
       icon: <Users className="text-brand-primary" size={28} />,
-      title: "Seamless Collaboration",
+      title: "Realtime Collaboration",
       description:
-        "Onboard your group in seconds. Simply share a secure link and start planning together—no more back-and-forth in the group chat.",
+        "Invite your group and everyone sees changes the moment they happen, on every device. No more chasing the latest version in a group chat.",
     },
     {
-      icon: <ShieldCheck className="text-brand-primary" size={28} />,
-      title: "Admin & Viewer Roles",
+      icon: <CalendarSync className="text-brand-primary" size={28} />,
+      title: "Google Calendar Sync",
       description:
-        "Stay in control by assigning roles. Let your co-planners manage events as editors, add new users and edit trip details as admins or keep others as Viewers so they can follow along without changing the plan.",
+        "Keep each trip in step with Google Calendar. Changes made on either side show up on the other, so the whole group always has the right plan.",
+    },
+    {
+      icon: <Plane className="text-brand-primary" size={28} />,
+      title: "Flight Search",
+      description:
+        "Search flights for your trip and keep them alongside your itinerary, so travel plans stay in one place.",
+    },
+    {
+      icon: <Map className="text-brand-primary" size={28} />,
+      title: "Map & Calendar View",
+      description:
+        "See your schedule and your map on one clean screen. No more switching between apps to work out where you need to be.",
+    },
+    {
+      icon: <Wallet className="text-brand-primary" size={28} />,
+      title: "Budget & Expenses",
+      description:
+        "Track what everyone spends, split costs and settle up in a few clicks, without the awkward maths.",
+    },
+    {
+      icon: <LayoutTemplate className="text-brand-primary" size={28} />,
+      title: "Trip Templates",
+      description:
+        "Start from premade destination templates and make them your own in seconds.",
     },
     {
       icon: <Search className="text-brand-primary" size={28} />,
       title: "Google Event Search",
       description:
-        "Find restaurants, museums, and hidden gems using Google's database and add them to your trip in a single click.",
+        "Find restaurants, museums and hidden landmarks and add them to your trip with a single click.",
     },
     {
-      icon: <Navigation className="text-brand-primary" size={28} />,
-      title: "AI Travel Tips",
+      icon: <ShieldCheck className="text-brand-primary" size={28} />,
+      title: "Admin & Viewer Roles",
       description:
-        "Get helpful, local advice tailored to your destination—from the best visiting hours to must-try local spots.",
+        "Stay in control. Give co-planners full editing rights, or let others follow the itinerary without changing it.",
     },
     {
       icon: <Download className="text-brand-primary" size={28} />,
-      title: "Calendar Export",
+      title: "Calendar & Word Export",
       description:
-        "Keep your plans in your pocket. Export your entire itinerary to your personal calendar so you're always on schedule, even offline.",
+        "Take your plans anywhere. Export to your calendar app as an .ics file, or download the whole trip as a Word document.",
     },
   ];
 

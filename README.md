@@ -8,14 +8,18 @@ Travel planning, simplified. TripTrack replaces messy spreadsheets and endless b
 
 ## Why Use TripTrack?
 
-* **Map & Calendar View:** See your schedule and your map simultaneously on one clean interface. Eliminate the friction of switching between separate apps to understand your itinerary.
-* **AI Plan Day:** Stuck for inspiration? The built-in AI assistant instantly populates your day with smart local suggestions, taking the guesswork out of building a travel itinerary.
-* **AI Optimise Day:** The intelligent routing engine automatically reorders events to resolve timing clashes and group nearby spots together, ensuring you spend less time travelling and more time exploring.
-* **Real-time Collaboration:** Invite your group to plan trips together. Updates sync instantaneously across all devices, keeping everyone on the same page without chaotic group chats.
-* **Admin & Viewer Roles:** Maintain structural control by assigning specific permissions. Grant co-planners full editing access as Admins, or keep others as Viewers so they can follow the itinerary without altering details.
-* **Google Event Search:** Seamlessly query restaurants, museums, and hidden landmarks using Google's comprehensive database, adding them to your trip configuration with a single click.
-* **AI Travel Tips:** Access context-aware, hyper-local advice tailored dynamically to your destination—ranging from optimal visiting hours to must-try local delicacies.
-* **Calendar Export:** Carry plans everywhere. Export entire trip itineraries to your native personal calendar to keep track of schedules effortlessly, even when offline.
+* **AI Trip Generator:** Plan a whole trip from a single sentence.
+* **AI Trip Editing:** Change your plan by just asking. Review every AI change before it's applied.
+* **Smart Planning:** Fills empty time, fixes timing clashes and drafts packing lists. You approve every change.
+* **Realtime Collaboration:** Invite your group and everyone sees changes the moment they happen, on every device. No more chasing the latest version in a group chat.
+* **Google Calendar Sync:** Keep each trip in step with Google Calendar. Changes made on either side show up on the other, so the whole group always has the right plan.
+* **Flight Search:** Search flights for your trip and keep them alongside your itinerary, so travel plans stay in one place.
+* **Map & Calendar View:** See your schedule and your map on one clean screen. No more switching between apps to work out where you need to be.
+* **Budget & Expenses:** Track what everyone spends, split costs and settle up in a few clicks, without the awkward maths.
+* **Trip Templates:** Start from premade destination templates and make them your own in seconds.
+* **Google Event Search:** Find restaurants, museums and hidden landmarks and add them to your trip with a single click.
+* **Admin & Viewer Roles:** Stay in control. Give co-planners full editing rights, or let others follow the itinerary without changing it.
+* **Calendar & Word Export:** Take your plans anywhere. Export to your calendar app as an .ics file, or download the whole trip as a Word document.
 
 ---
 
@@ -52,4 +56,4 @@ The backend API handles core business logic, strict relational database mapping,
 | **Backend API** | Python / Flask | Scalable RESTful endpoint orchestration |
 | **Database ORM** | SQLAlchemy | Relational state structure and transaction mapping |
 | **Serialization** | Marshmallow | API input validation and JSON formatting schemas |
-| **Integrations** | Google Maps / Gemini | Interactive geo-tracking and automated AI intelligence |
+| **Integrations** | Google Maps / Gemini / Google Calendar | Interactive geo-tracking, automated AI intelligence and two-way calendar sync |
