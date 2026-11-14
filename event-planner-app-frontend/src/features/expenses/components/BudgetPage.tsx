@@ -16,9 +16,13 @@ export default function BudgetPage({ trip }: { trip: Trip }) {
 
   return (
     <StateGate loadingStateProps={{ isLoading }} errorStateProps={{ isError }}>
-      <div className="flex flex-col gap-y-6">
-        <BudgetSummary trip={trip} expenses={expenses} />
-        <div className="grid grid-cols-1 gap-y-6">
+      <div className="flex flex-col xl:flex-row items-stretch justify-stretch gap-4 gap-y-6">
+        <div className="flex-1 flex flex-col gap-4 ">
+          <BudgetSummary trip={trip} expenses={expenses} />
+          <BalancesPanel trip={trip} />
+        </div>
+
+        <div className="grid grid-cols-1 gap-y-6 flex-1">
           <div className="card lg:col-span-2 flex flex-col gap-2">
             <div className="flex items-center justify-between gap-2">
               <h3 className="text-lg font-semibold text-text-primary">
@@ -45,7 +49,6 @@ export default function BudgetPage({ trip }: { trip: Trip }) {
               <ExpenseList trip={trip} expenses={expenses} />
             </StateGate>
           </div>
-          <BalancesPanel trip={trip} />
         </div>
         {isAdding && (
           <ExpenseModal open onOpenChange={setIsAdding} trip={trip} />
