@@ -128,6 +128,7 @@ def publish_itinerary(
     template.latitude = itinerary.latitude
     template.longitude = itinerary.longitude
     template.timezone = itinerary.timezone
+    template.background_image = itinerary.background_image
     template.duration_days = TripSpan.of(itinerary).days
     template.ops = ops
     template.is_public = True
