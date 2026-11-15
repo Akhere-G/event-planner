@@ -11,6 +11,7 @@ from ..exceptions import (
 )
 from ..extensions import db
 from ..models import Itinerary, ItineraryUser, User, UserRole
+from .background_image_service import fill_background_image
 
 
 # TODO: simplify
@@ -169,6 +170,7 @@ def get_itineraries(
 def create_itinerary(user_id: int | None, data: dict):
     try:
         new_itinerary = Itinerary(**data)
+        fill_background_image(new_itinerary)
         db.session.add(new_itinerary)
         db.session.flush()
 
@@ -227,9 +229,13 @@ UPDATABLE_ITINERARY_FIELDS = (
 
 def stage_update_itinerary(itinerary_id: int, data: dict) -> Itinerary:
     itinerary = get_itinerary(itinerary_id)
+    new_destination = data.get("destination", itinerary.destination)
+    moves_destination = new_destination != itinerary.destination
     for field in UPDATABLE_ITINERARY_FIELDS:
         if field in data:
             setattr(itinerary, field, data[field])
+    if moves_destination:
+        fill_background_image(itinerary)
     db.session.flush()
     return itinerary
 
