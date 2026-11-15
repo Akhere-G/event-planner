@@ -124,8 +124,6 @@ export default function EventSearchResultCard() {
     }
   };
 
-  console.log(event);
-
   const hasPhoto = event.photos.length > 0;
   const photo = event.photos[0];
   return (
@@ -189,6 +187,7 @@ export default function EventSearchResultCard() {
                     address: event.address,
                     latitude: event.latitude,
                     longitude: event.longitude,
+                    imageUrl: photo?.url ?? null,
                   }}
                   tripStart={tripStart}
                   tripEnd={tripEnd}

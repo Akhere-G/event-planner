@@ -14,6 +14,7 @@ import {
   type AccommodationSchema,
 } from "../schemas/accommodationSchema";
 import type { CityBounds } from "../../maps/types";
+import { getFirstPhotoUrl } from "../../maps/utils";
 import type { Accommodation } from "../types";
 import { usePostHog } from "@posthog/react";
 import { differenceInDays } from "date-fns";
@@ -52,6 +53,7 @@ export default function AccommodationForm({
     description: selectedAccommodation?.description || "",
     startDate: selectedAccommodation?.startDate || tripStart,
     endDate: selectedAccommodation?.endDate || tripEnd,
+    imageUrl: selectedAccommodation?.imageUrl ?? null,
   };
 
   const {
@@ -78,6 +80,7 @@ export default function AccommodationForm({
         longitude: formState.longitude,
         startDate: formState.startDate,
         endDate: formState.endDate,
+        imageUrl: formState.imageUrl,
       };
 
       if (isEditing && selectedAccommodation?.id) {
@@ -144,6 +147,7 @@ export default function AccommodationForm({
             setValue("latitude", place.geometry.location.lat());
             setValue("longitude", place.geometry.location.lng());
           }
+          setValue("imageUrl", getFirstPhotoUrl(place));
         }}
         errorMessage={errors.address?.message}
         searchTypes={["lodging"]}

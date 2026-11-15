@@ -23,6 +23,7 @@ export const eventSchema = yup.object({
     }),
 
   category: yup.string().default("general"),
+  imageUrl: yup.string().nullable(),
 });
 
 export const updateEventSchema = yup.object({
@@ -42,6 +43,7 @@ export const updateEventSchema = yup.object({
     }),
 
   category: yup.string().default("general"),
+  imageUrl: yup.string().nullable(),
 });
 
 export type EventSchema = yup.InferType<typeof eventSchema>;

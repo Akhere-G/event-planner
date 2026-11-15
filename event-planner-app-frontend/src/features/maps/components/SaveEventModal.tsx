@@ -64,6 +64,7 @@ export default function SaveEventModal({
         category: event.category,
         latitude: event.latitude,
         longitude: event.longitude,
+        imageUrl: event.photos[0]?.url ?? null,
         startAt: `${selectedDate} ${startAt}`,
         endAt: `${selectedDate} ${endAt}`,
       });

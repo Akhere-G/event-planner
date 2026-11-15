@@ -8,7 +8,7 @@ import { isValidationError } from "../../api/utils";
 import { useState } from "react";
 import { useGetTripQuery } from "../../trips/services/tripsApiSlice";
 import { toast } from "sonner";
-import { getCityBounds } from "../../maps/utils";
+import { getCityBounds, getFirstPhotoUrl } from "../../maps/utils";
 import { usePostHog } from "@posthog/react";
 
 export default function AddEventForm({ date }: { date: string }) {
@@ -54,6 +54,7 @@ export default function AddEventForm({ date }: { date: string }) {
       setValue("latitude", 0);
       setValue("startAt", "");
       setValue("endAt", "");
+      setValue("imageUrl", undefined);
       setKey((prev) => prev + 1);
     } catch (err) {
       if (isValidationError(err)) {
@@ -106,6 +107,7 @@ export default function AddEventForm({ date }: { date: string }) {
               }
               setValue("latitude", place.geometry?.location?.lat() ?? 0);
               setValue("longitude", place.geometry?.location?.lng() ?? 0);
+              setValue("imageUrl", getFirstPhotoUrl(place));
             }}
           />
         </div>

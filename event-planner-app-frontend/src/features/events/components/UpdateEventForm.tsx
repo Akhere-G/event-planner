@@ -8,7 +8,7 @@ import { isValidationError } from "../../api/utils";
 import { useEffect, useState } from "react";
 import { useGetTripQuery } from "../../trips/services/tripsApiSlice";
 import { toast } from "sonner";
-import { getCityBounds } from "../../maps/utils";
+import { getCityBounds, getFirstPhotoUrl } from "../../maps/utils";
 import type { Event } from "../types";
 import { usePostHog } from "@posthog/react";
 
@@ -107,6 +107,7 @@ export default function UpdateEventFormView({
             setValue("name", place.name ?? "");
             setValue("latitude", place.geometry?.location?.lat() ?? 0);
             setValue("longitude", place.geometry?.location?.lng() ?? 0);
+            setValue("imageUrl", getFirstPhotoUrl(place));
           }}
         />
 

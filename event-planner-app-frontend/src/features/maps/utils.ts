@@ -105,6 +105,13 @@ export const formatPlace = (
   };
 };
 
+const PLACE_PHOTO_MAX_WIDTH = 800;
+
+export const getFirstPhotoUrl = (
+  place: google.maps.places.PlaceResult,
+): string | null =>
+  place.photos?.[0]?.getUrl({ maxWidth: PLACE_PHOTO_MAX_WIDTH }) ?? null;
+
 export const getCityBounds = ({
   latitude,
   longitude,
