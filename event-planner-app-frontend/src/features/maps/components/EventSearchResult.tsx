@@ -124,102 +124,116 @@ export default function EventSearchResultCard() {
     }
   };
 
+  console.log(event);
+
+  const hasPhoto = event.photos.length > 0;
+  const photo = event.photos[0];
   return (
-    <div className="card border-l-4 border-brand-primary p-2">
-      <div className="flex flex-col">
-        <PlaceHeader
-          name={event.name}
-          rating={event.rating}
-          totalReviews={event.totalReviews}
-          category={event.category}
-        />
-
-        <PlaceAddress
-          name={event.name}
-          address={event.address}
-          placeId={event.placeId}
-        />
-
-        {event.tags.length > 0 && (
-          <div className="flex gap-2 mt-0 lg:mt-2 flex-wrap">
-            {event.tags.map((tag) => (
-              <TagChip key={tag.text} {...tag} />
-            ))}
+    <div className="card border-l-4 border-brand-primary p-2 ">
+      <div className="flex flex-col w-full md:flex-row gap-2">
+        {hasPhoto && (
+          <div className="flex-[0.3] min-w-35 h-30 max-h-[150px] md:max-h-[200px] overflow-hidden rounded-md bg-gray-100 shadow-sm">
+            <img
+              src={photo.url}
+              alt=""
+              className="w-full h-full object-cover shadow-sm object-cover"
+            />
           </div>
         )}
-
-        {event.photos.length > 0 && (
-          <Accordion
-            TitleComponent={() => (
-              <p className="text-xs text-text-secondary">Show More</p>
-            )}
-            headerStyles="p-0! pt-2!"
-            contentStyles="p-0 pb-0!"
-            ContentComponent={() => (
-              <ImageCarousel photos={event.photos} name={event.name} />
-            )}
+        <div className="flex flex-1  lg:flex-[0.7] flex-col">
+          <PlaceHeader
+            name={event.name}
+            rating={event.rating}
+            totalReviews={event.totalReviews}
+            category={event.category}
           />
-        )}
 
-        <SaveEventModal
-          open={isSaveModalOpen}
-          event={event}
-          dates={dates}
-          wishlists={wishlists}
-          isLoading={isLoading}
-          onOpenChange={setIsSaveModalOpen}
-          onSaveEvent={onSaveEvent}
-          onSaveWishlist={onSaveWishlist}
-        />
+          <PlaceAddress
+            name={event.name}
+            address={event.address}
+            placeId={event.placeId}
+          />
 
-        {isAccommodationOpen && (
-          <ConfirmModal
-            open={isAccommodationOpen}
-            onOpenChange={setIsAccommodationOpen}
-            title="Add Accommodation from Search"
-            hideButtons
-          >
-            <div className="p-4">
-              <AccommodationForm
-                tripId={Number(tripId)}
-                cityBounds={cityBounds}
-                selectedAccommodation={{
-                  name: event.name,
-                  address: event.address,
-                  latitude: event.latitude,
-                  longitude: event.longitude,
-                }}
-                tripStart={tripStart}
-                tripEnd={tripEnd}
-                onSuccess={() => {
-                  setIsAccommodationOpen(false);
-                  onAccommodationSaved();
-                }}
-                onCancel={() => setIsAccommodationOpen(false)}
-              />
+          {event.tags.length > 0 && (
+            <div className="flex gap-2 mt-0 lg:mt-2 flex-wrap">
+              {event.tags.map((tag) => (
+                <TagChip key={tag.text} {...tag} />
+              ))}
             </div>
-          </ConfirmModal>
-        )}
+          )}
 
-        {canEdit && (
-          <div className="flex justify-end">
-            {event.isAdded ? (
-              <span className="text-xs flex gap-2 bg-brand-primary px-3 py-1 rounded-full">
-                <Check size={16} />
-                Added
-              </span>
-            ) : (
-              <button
-                onClick={handleAdd}
-                className="flex gap-2 items-center bg-brand-primary text-text-inverse py-1"
-              >
-                <Plus size={16} />
-                Add
-              </button>
-            )}
-          </div>
-        )}
+          <SaveEventModal
+            open={isSaveModalOpen}
+            event={event}
+            dates={dates}
+            wishlists={wishlists}
+            isLoading={isLoading}
+            onOpenChange={setIsSaveModalOpen}
+            onSaveEvent={onSaveEvent}
+            onSaveWishlist={onSaveWishlist}
+          />
+
+          {isAccommodationOpen && (
+            <ConfirmModal
+              open={isAccommodationOpen}
+              onOpenChange={setIsAccommodationOpen}
+              title="Add Accommodation from Search"
+              hideButtons
+            >
+              <div className="p-4">
+                <AccommodationForm
+                  tripId={Number(tripId)}
+                  cityBounds={cityBounds}
+                  selectedAccommodation={{
+                    name: event.name,
+                    address: event.address,
+                    latitude: event.latitude,
+                    longitude: event.longitude,
+                  }}
+                  tripStart={tripStart}
+                  tripEnd={tripEnd}
+                  onSuccess={() => {
+                    setIsAccommodationOpen(false);
+                    onAccommodationSaved();
+                  }}
+                  onCancel={() => setIsAccommodationOpen(false)}
+                />
+              </div>
+            </ConfirmModal>
+          )}
+
+          {canEdit && (
+            <div className="flex w-full justify-end">
+              {event.isAdded ? (
+                <span className="text-xs flex gap-2 bg-brand-primary px-3 py-1 rounded-full">
+                  <Check size={16} />
+                  Added
+                </span>
+              ) : (
+                <button
+                  onClick={handleAdd}
+                  className="flex  gap-2 items-center bg-brand-primary text-text-inverse py-1"
+                >
+                  <Plus size={16} />
+                  Add
+                </button>
+              )}
+            </div>
+          )}
+        </div>
       </div>
+      {event.photos.length > 1 && (
+        <Accordion
+          TitleComponent={() => (
+            <p className="text-xs text-text-secondary">Show More</p>
+          )}
+          headerStyles="p-0"
+          contentStyles="p-0"
+          ContentComponent={() => (
+            <ImageCarousel photos={event.photos.slice(1)} name={event.name} />
+          )}
+        />
+      )}
     </div>
   );
 }
