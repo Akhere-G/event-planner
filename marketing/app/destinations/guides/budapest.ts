@@ -5,6 +5,16 @@ export const budapestGuide: DestinationGuide = {
   city: "Budapest",
   country: "Hungary",
   region: "Europe",
+  image: {
+    src: "/destinations/budapest-hero.jpg",
+    alt: "The Hungarian Parliament Building on the Danube in Budapest",
+    width: 1600,
+    height: 1067,
+    credit: {
+      name: "Ervin Lukacs",
+      url: "https://unsplash.com/photos/sMyQb3i9bNA",
+    },
+  },
   title: "Budapest Travel Guide: Where to Eat, Stay and What to See",
   description:
     "A practical guide to Budapest: where to eat Hungarian classics, what to see on both banks of the Danube, where to stay and hidden gems, with a 3-day itinerary.",

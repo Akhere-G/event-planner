@@ -5,6 +5,16 @@ export const bangkokGuide: DestinationGuide = {
   city: "Bangkok",
   country: "Thailand",
   region: "Asia",
+  image: {
+    src: "/destinations/bangkok-hero.jpg",
+    alt: "Wat Arun temple on the Chao Phraya river in Bangkok",
+    width: 1600,
+    height: 1067,
+    credit: {
+      name: "Anantachai Saothong",
+      url: "https://unsplash.com/photos/0DKDTSFBXc8",
+    },
+  },
   title: "Bangkok Travel Guide: Where to Eat, Stay and What to See",
   description:
     "Plan Bangkok with real picks: where to eat, from Chinatown seafood to Michelin-starred street food, where to stay by area, top sights and hidden gems.",

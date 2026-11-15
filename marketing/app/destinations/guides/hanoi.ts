@@ -5,6 +5,16 @@ export const hanoiGuide: DestinationGuide = {
   city: "Hanoi",
   country: "Vietnam",
   region: "Asia",
+  image: {
+    src: "/destinations/hanoi-hero.jpg",
+    alt: "Motorbikes on a street in Hanoi's Old Quarter",
+    width: 1600,
+    height: 900,
+    credit: {
+      name: "Elliot Andrews",
+      url: "https://unsplash.com/photos/6keOhd7idJo",
+    },
+  },
   title: "Hanoi Travel Guide: Where to Eat, Stay and What to See",
   description:
     "Plan Hanoi with this guide to the best bowls of pho and bun cha, where to stay in the Old Quarter and beyond, what to see and quieter spots worth a detour.",

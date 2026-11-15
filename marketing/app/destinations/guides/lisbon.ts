@@ -5,6 +5,16 @@ export const lisbonGuide: DestinationGuide = {
   city: "Lisbon",
   country: "Portugal",
   region: "Europe",
+  image: {
+    src: "/destinations/lisbon-hero.jpg",
+    alt: "Terracotta rooftops and the river in Lisbon",
+    width: 1600,
+    height: 1200,
+    credit: {
+      name: "Liam McKay",
+      url: "https://unsplash.com/photos/VHWyqXsWHg0",
+    },
+  },
   title: "Lisbon Travel Guide: Where to Eat, Stay and What to See",
   description:
     "Lisbon planned well: the hills worth climbing, seafood and tarts worth the queue, where to stay by neighbourhood and a few quieter spots, plus Sintra.",

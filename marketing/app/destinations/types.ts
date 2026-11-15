@@ -6,11 +6,20 @@ export interface GuidePlace {
   description: string;
 }
 
+export interface GuideImage {
+  src: string;
+  alt: string;
+  width: number;
+  height: number;
+  credit: { name: string; url: string };
+}
+
 export interface DestinationGuide {
   slug: string;
   city: string;
   country: string;
   region: DestinationRegion;
+  image: GuideImage;
   title: string;
   description: string;
   intro: string[];

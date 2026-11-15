@@ -5,6 +5,16 @@ export const newYorkGuide: DestinationGuide = {
   city: "New York",
   country: "USA",
   region: "North America",
+  image: {
+    src: "/destinations/new-york-hero.jpg",
+    alt: "The Brooklyn Bridge and Manhattan skyline in New York",
+    width: 1600,
+    height: 1067,
+    credit: {
+      name: "Luca Bravo",
+      url: "https://unsplash.com/photos/_QdFx92MO2U",
+    },
+  },
   title: "New York Travel Guide: Where to Eat, Stay and What to See",
   description:
     "Plan New York with this guide to classic restaurants, where to stay in Manhattan and Brooklyn, the sights worth your time and quieter spots beyond the crowds.",

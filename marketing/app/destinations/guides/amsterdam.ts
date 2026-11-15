@@ -5,6 +5,16 @@ export const amsterdamGuide: DestinationGuide = {
   city: "Amsterdam",
   country: "Netherlands",
   region: "Europe",
+  image: {
+    src: "/destinations/amsterdam-hero.jpg",
+    alt: "An Amsterdam canal lined with historic buildings",
+    width: 1600,
+    height: 1067,
+    credit: {
+      name: "Azhar J",
+      url: "https://unsplash.com/photos/t2hgHV1R7_g",
+    },
+  },
   title: "Amsterdam Travel Guide: Where to Eat, Stay and What to See",
   description:
     "Amsterdam for first-timers and returners: the museums to book, brown cafes and Dutch comfort food, where to stay by canal and a few quieter corners.",

@@ -5,6 +5,16 @@ export const barcelonaGuide: DestinationGuide = {
   city: "Barcelona",
   country: "Spain",
   region: "Europe",
+  image: {
+    src: "/destinations/barcelona-hero.jpg",
+    alt: "Aerial view of Barcelona's rooftops and the Sagrada Familia",
+    width: 1600,
+    height: 1067,
+    credit: {
+      name: "Logan Armstrong",
+      url: "https://unsplash.com/photos/hVhfqhDYciU",
+    },
+  },
   title: "Barcelona Travel Guide: Where to Eat, Stay and What to See",
   description:
     "Barcelona beyond the postcards: Gaudí's buildings, tapas bars worth the queue, where to stay by neighbourhood and a few quieter places locals still love.",
