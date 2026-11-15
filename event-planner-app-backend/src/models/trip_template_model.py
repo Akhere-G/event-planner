@@ -6,6 +6,7 @@ from sqlalchemy import JSON, Boolean, DateTime, Float, ForeignKey, Integer, Stri
 from sqlalchemy.orm import Mapped, mapped_column
 
 from ..extensions import Base
+from .background_image_mixin import BackgroundImageMixin
 
 
 class TemplateRegion(StrEnum):
@@ -17,7 +18,7 @@ class TemplateRegion(StrEnum):
     SOUTH_AMERICA = "South America"
 
 
-class TripTemplate(Base):
+class TripTemplate(Base, BackgroundImageMixin):
     """A public snapshot of a trip that anyone can browse and clone.
 
     ``ops`` holds create ops in the change-set format, with every time relative to
