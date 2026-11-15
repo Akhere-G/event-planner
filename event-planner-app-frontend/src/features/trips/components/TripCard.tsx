@@ -22,7 +22,7 @@ export default function TripCard({
   openEditTripModal,
   openDeleteTripModal,
 }: TripCardProps) {
-  const { id, name, description, startDate, endDate } = trip;
+  const { id, name, startDate, endDate } = trip;
 
   const handleEdit = () => {
     openEditTripModal(trip);
@@ -43,10 +43,12 @@ export default function TripCard({
       }}
     >
       <div className="relative bg-linear-to-r from-brand-primary to-brand-secondary ">
-        <img
-          className="absolute w-full h-full object-cover"
-          src={trip.backgroundImageUrl || ""}
-        />
+        {trip.backgroundImageUrl && (
+          <img
+            className="absolute w-full h-full object-cover"
+            src={trip.backgroundImageUrl}
+          />
+        )}
         <div className="absolute inset-0 bg-linear-to-b from-black/80 via-black/40 to-transparent" />
 
         <div className="z-1 relative p-4  h-40">
