@@ -1,5 +1,6 @@
 import { Navigate, useLocation } from "react-router";
 import StateGate from "./StateGate";
+import LoadingState from "./LoadingState";
 
 export default function RequireAuth({
   isAuth,
@@ -13,15 +14,17 @@ export default function RequireAuth({
   const location = useLocation();
   const from = location.state?.from ?? location.pathname;
 
-  return (
-    <StateGate
-      loadingStateProps={{ isLoading, message: "Loading your trips..." }}
-    >
-      {!isAuth ? (
-        <Navigate to="/login" state={{ from }} replace />
-      ) : (
-        children
-      )}
-    </StateGate>
-  );
+  if (isLoading) {
+    return (
+      <div className="container">
+        <LoadingState message="Loading your trips..." />
+      </div>
+    );
+  }
+
+  if (!isAuth) {
+    return <Navigate to="/login" state={{ from }} replace />;
+  }
+
+  return children;
 }

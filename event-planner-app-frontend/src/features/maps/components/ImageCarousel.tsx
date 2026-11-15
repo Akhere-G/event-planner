@@ -24,7 +24,7 @@ export default function ImageCarousel({
       <div
         ref={scrollRef}
         onScroll={handleScroll}
-        className={`flex gap-2 overflow-x-auto pb-2 snap-x snap-mandatory ${
+        className={`flex gap-2 overflow-x-auto  snap-x snap-mandatory ${
           isMultiple ? "scrollbar-visible" : "scrollbar-hide"
         }`}
       >

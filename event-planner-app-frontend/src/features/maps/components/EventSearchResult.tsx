@@ -125,8 +125,8 @@ export default function EventSearchResultCard() {
   };
 
   return (
-    <div className="card border-l-4 border-brand-primary">
-      <div className="flex flex-col gap-3">
+    <div className="card border-l-4 border-brand-primary p-2">
+      <div className="flex flex-col">
         <PlaceHeader
           name={event.name}
           rating={event.rating}
@@ -141,7 +141,7 @@ export default function EventSearchResultCard() {
         />
 
         {event.tags.length > 0 && (
-          <div className="flex gap-2 flex-wrap">
+          <div className="flex gap-2 mt-0 lg:mt-2 flex-wrap">
             {event.tags.map((tag) => (
               <TagChip key={tag.text} {...tag} />
             ))}
@@ -154,7 +154,7 @@ export default function EventSearchResultCard() {
               <p className="text-xs text-text-secondary">Show More</p>
             )}
             headerStyles="p-0! pt-2!"
-            contentStyles="p-0 pb-2!"
+            contentStyles="p-0 pb-0!"
             ContentComponent={() => (
               <ImageCarousel photos={event.photos} name={event.name} />
             )}
@@ -211,7 +211,7 @@ export default function EventSearchResultCard() {
             ) : (
               <button
                 onClick={handleAdd}
-                className="flex gap-2 items-center bg-brand-primary text-text-inverse"
+                className="flex gap-2 items-center bg-brand-primary text-text-inverse py-1"
               >
                 <Plus size={16} />
                 Add

@@ -12,7 +12,7 @@ export default function PlaceAddress({
 }) {
   return (
     <div className="flex gap-2 items-start">
-      <p className="text-sm text-text-secondary h-9 line-clamp-2">{address}</p>
+      <p className="text-sm text-text-secondary h-7 line-clamp-2">{address}</p>
       <button
         title="Copy Address"
         className="btn p-1 hover:bg-text-primary/10 rounded transition-colors text-text-primary"

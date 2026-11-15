@@ -12,7 +12,7 @@ export default function PlaceHeader({
   category: string;
 }) {
   return (
-    <header className="truncate font-bold tracking-tight text-text-primary flex flex-col lg:flex-row gap-2 w-full lg:items-center lg:justify-between">
+    <header className="truncate font-bold tracking-tight text-text-primary flex flex-col lg:flex-row  w-full lg:items-center lg:justify-between">
       <h3 className="text-sm lg:text-md truncate p-0! m-0!">{name}</h3>
       <div className="text-xs lg:text-sm flex justify-between items-center gap-2">
         <span className="text-warning flex gap-1 items-center">
