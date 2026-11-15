@@ -66,3 +66,33 @@ def test_unknown_place_is_a_validation_error(gmaps):
 
     with pytest.raises(ValidationError):
         location_utils.get_place_details("Nowhere")
+
+
+def _photo_redirect(location: str) -> MagicMock:
+    response = MagicMock()
+    response.headers = {"Location": location}
+    return response
+
+
+def test_place_photo_url_is_the_redirect_target(gmaps):
+    gmaps.places.return_value = {"results": [{"photos": [{"photo_reference": "r"}]}]}
+    redirect = _photo_redirect("https://lh3.googleusercontent.com/p/abc")
+
+    with patch.object(location_utils.requests, "get", return_value=redirect) as get:
+        url = location_utils.find_place_photo_url("Louvre", "Paris")
+
+    assert url == "https://lh3.googleusercontent.com/p/abc"
+    assert get.call_args.kwargs["params"]["photo_reference"] == "r"
+    assert get.call_args.kwargs["allow_redirects"] is False
+
+
+def test_a_place_without_photos_has_no_photo_url(gmaps):
+    gmaps.places.return_value = {"results": [{"place_id": "abc"}]}
+
+    assert location_utils.find_place_photo_url("Park", None) is None
+
+
+def test_photo_lookup_failures_have_no_photo_url(gmaps):
+    gmaps.places.side_effect = Exception("quota")
+
+    assert location_utils.find_place_photo_url("Louvre", "Paris") is None

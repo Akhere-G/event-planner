@@ -4,6 +4,7 @@ import os
 from functools import lru_cache
 
 import googlemaps
+import requests
 from marshmallow import ValidationError
 
 from ..extensions import cache
@@ -11,6 +12,8 @@ from ..extensions import cache
 logger = logging.getLogger(__name__)
 
 OPENING_HOURS_CACHE_SECONDS = 24 * 60 * 60
+PLACE_PHOTO_URL = "https://maps.googleapis.com/maps/api/place/photo"
+PLACE_PHOTO_MAX_WIDTH = 800
 
 
 @lru_cache(maxsize=4)
@@ -81,3 +84,29 @@ def get_weekly_opening_hours(name: str, address: str | None = None) -> list[str]
 
     cache.set(key, hours or [], timeout=OPENING_HOURS_CACHE_SECONDS)
     return hours or None
+
+
+def find_place_photo_url(name: str, address: str | None) -> str | None:
+    """A URL for the place's first Google photo, or None if it has none.
+
+    The photo endpoint redirects to a googleusercontent URL; storing that target
+    instead of the endpoint keeps the server API key out of the browser.
+    """
+    try:
+        results = _gmaps().places(query=f"{name}, {address or ''}")["results"]
+        if not results or not results[0].get("photos"):
+            return None
+        response = requests.get(
+            PLACE_PHOTO_URL,
+            params={
+                "maxwidth": PLACE_PHOTO_MAX_WIDTH,
+                "photo_reference": results[0]["photos"][0]["photo_reference"],
+                "key": os.getenv("GOOGLE_MAPS_API_KEY"),
+            },
+            allow_redirects=False,
+            timeout=10,
+        )
+    except Exception:
+        logger.warning("Could not fetch a photo for %r.", name, exc_info=True)
+        return None
+    return response.headers.get("Location")
