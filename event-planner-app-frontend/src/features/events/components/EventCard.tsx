@@ -21,13 +21,14 @@ import {
   StateGate,
 } from "../../../components";
 import { eventCategories } from "../constants";
+import { selectIsCompactView } from "../service/eventViewSlice";
 
 import { useParams } from "react-router";
 import { useUpdateEvent } from "../../trips/hooks";
 import { useGetTripQuery } from "../../trips/services/tripsApiSlice";
 import { toast } from "sonner";
 import EditEventDatesModal from "./EditEventDatesModal";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { setIsMapView, setSelectedEvent } from "../../maps/service/mapSlice";
 import EditEventModal from "./EditEventModal";
 import { ExpenseChip } from "../../expenses/components";
@@ -66,6 +67,7 @@ export default function EventCard({
   });
 
   const dispatch = useDispatch();
+  const isCompact = useSelector(selectIsCompactView);
 
   const updateEventData = async (newData: Partial<Event>) => {
     const oldData = eventData;
@@ -106,11 +108,15 @@ export default function EventCard({
         data-testid="event-card"
         className="card flex-1 transition-shadow border-l-4 border-brand-primary relative"
       >
-        <div className="flex gap-3">
-          <PlaceImage
-            src={eventData.imageUrl}
-            className="size-16 sm:size-20 shrink-0 rounded-md"
-          />
+        <div className="flex flex-col lg:flex-row gap-3">
+          {!isCompact && (
+            <div className=" rounded-md">
+              <PlaceImage
+                src={eventData.imageUrl}
+                className="w-full lg:size-16 xl:size-20 size-[100%] max-h-50 shrink-0 rounded-md"
+              />
+            </div>
+          )}
           <div className="flex flex-col flex-1 min-w-0">
             <div className="flex justify-between items-start">
               <h3 className="font-bold tracking-tight text-text-primary flex flex-col">
@@ -219,7 +225,7 @@ export default function EventCard({
                         className="hover:text-brand-primary p-0"
                         title="Change event times"
                       >
-                        {format(start, "p")}
+                        {format(start, "HH:mm")}
                       </button>
                       <span>-</span>
                       <button
@@ -227,14 +233,14 @@ export default function EventCard({
                         className="hover:text-brand-primary p-0"
                         title="Change event times"
                       >
-                        {format(end, "p")}
+                        {format(end, "HH:mm")}
                       </button>
                     </>
                   ) : (
                     <>
-                      <span>{format(start, "p")}</span>
+                      <span>{format(start, "HH:mm")}</span>
                       <span>-</span>
-                      <span>{format(end, "p")}</span>
+                      <span>{format(end, "HH:mm")}</span>
                     </>
                   )}
                 </div>

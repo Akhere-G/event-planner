@@ -4,6 +4,7 @@ import { apiSlice } from "./features/api/apiSlice";
 import { themeSlice } from "./features/theme/themeSlice";
 import { mapSlice } from "./features/maps/service/mapSlice";
 import { realtimeSlice } from "./features/realtime/realtimeSlice";
+import { eventViewSlice } from "./features/events/service/eventViewSlice";
 
 export const store = configureStore({
   reducer: {
@@ -12,6 +13,7 @@ export const store = configureStore({
     [themeSlice.name]: themeSlice.reducer,
     [mapSlice.name]: mapSlice.reducer,
     [realtimeSlice.name]: realtimeSlice.reducer,
+    [eventViewSlice.name]: eventViewSlice.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().concat([apiSlice.middleware]),
