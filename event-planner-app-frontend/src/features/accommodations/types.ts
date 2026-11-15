@@ -10,6 +10,7 @@ export interface Accommodation {
   description?: string;
   startDate: string;
   endDate: string;
+  imageUrl?: string | null;
   expense?: Expense | null;
 }
 
@@ -22,6 +23,7 @@ export interface CreateAccommodationPayload {
   description?: string;
   startDate: string;
   endDate: string;
+  imageUrl?: string | null;
 }
 
 export interface UpdateAccommodationPayload {
@@ -34,6 +36,7 @@ export interface UpdateAccommodationPayload {
   description?: string;
   startDate?: string;
   endDate?: string;
+  imageUrl?: string | null;
 }
 
 export interface DeleteAccommodationPayload {

@@ -8,6 +8,7 @@ from ..extensions import db
 from ..models import Event
 from .expense_service import expense_loader
 from .itineraries_service import get_itinerary
+from .place_image_service import moves_without_image, with_place_image
 
 
 def get_event(itinerary_id: int, event_id: int):
@@ -36,6 +37,7 @@ def get_events(itinerary_id: int):
 
 
 def stage_create_event(itinerary_id: int, data: dict):
+    data = with_place_image(data, data["name"], data["address"])
     event = Event(**data, itinerary_id=itinerary_id)
     db.session.add(event)
     db.session.flush()
@@ -77,6 +79,7 @@ UPDATABLE_EVENT_FIELDS = [
     "description",
     "end_at",
     "start_at",
+    "image_url",
 ]
 
 
@@ -87,6 +90,9 @@ def stage_update_event(
 
     if not event:
         raise EventNotFoundError()
+
+    if moves_without_image(data, event.address):
+        data = with_place_image(data, data.get("name", event.name), data["address"])
 
     for k, v in data.items():
         if k in UPDATABLE_EVENT_FIELDS:

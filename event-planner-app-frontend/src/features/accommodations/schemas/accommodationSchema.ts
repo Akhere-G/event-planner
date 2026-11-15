@@ -6,6 +6,7 @@ export const accommodationSchema = yup.object({
   latitude: yup.number().required(),
   longitude: yup.number().required(),
   description: yup.string().trim().optional().default(""),
+  imageUrl: yup.string().nullable().default(null),
   startDate: yup
     .string()
     .required("Start date is required.")

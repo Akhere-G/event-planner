@@ -10,6 +10,7 @@ from src.calendar_sync.jobs.dispatchers import (
 )
 from src.extensions import cache, db
 from src.models import (
+    BackgroundImage,
     CalendarConnection,
     CalendarLink,
     Event,
@@ -26,7 +27,7 @@ from src.models import (
     WishlistItem,
     WishlistItemVote,
 )
-from src.services import fx_service
+from src.services import background_image_service, fx_service, place_image_service
 from src.services.flight_providers import (
     FlightNumberProviderFactory,
     FlightProviderFactory,
@@ -99,6 +100,28 @@ def flight_number_provider(monkeypatch, app) -> FakeFlightNumberProvider:
     cache.clear()
     yield provider
     cache.clear()
+
+
+@pytest.fixture(autouse=True)
+def place_photos(monkeypatch) -> dict[str, str]:
+    """Photo URLs by place name; places not listed have no photo. No Google calls."""
+    photos: dict[str, str] = {}
+    monkeypatch.setattr(
+        place_image_service,
+        "find_place_photo_url",
+        lambda name, _address: photos.get(name),
+    )
+    return photos
+
+
+@pytest.fixture(autouse=True)
+def destination_images(monkeypatch) -> dict[str, BackgroundImage]:
+    """Photos by destination; destinations not listed have none. No Unsplash calls."""
+    images: dict[str, BackgroundImage] = {}
+    monkeypatch.setattr(
+        background_image_service, "find_destination_image", images.get
+    )
+    return images
 
 
 def _clear_rates():

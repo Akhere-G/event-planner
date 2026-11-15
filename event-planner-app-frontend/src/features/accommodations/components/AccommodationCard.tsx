@@ -22,6 +22,7 @@ import { useGetTripQuery } from "../../trips/services/tripsApiSlice";
 import { getCityBounds } from "../../maps/utils";
 import { canUserEdit } from "../../users/utils";
 import { ExpenseChip } from "../../expenses/components";
+import { PlaceImage } from "../../../components";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -111,107 +112,113 @@ export default function AccommodationCard({
   const editable = canUserEdit(trip.role);
 
   return (
-    <div className="card p-4 space-y-3 relative">
-      <div className="flex justify-between items-start">
-        <div className="flex-1">
-          <div className="flex gap- justify-between">
-            <h3 className="font-semibold text-text-main text-lg">
-              {accommodation.name}
-            </h3>
-            <DropdownMenu>
-              <DropdownMenuTrigger className="p-1 hover:bg-surface-muted rounded transition-colors text-text-secondary">
-                <MoreVertical size={16} />
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem
-                  onClick={handleCopyAddress}
-                  className="flex gap-2 items-center"
-                >
-                  <Copy size={16} />
-                  Copy Address
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={handleOpenInMaps}
-                  className="flex gap-2 items-center"
-                >
-                  <ExternalLink size={16} />
-                  Open in Maps
-                </DropdownMenuItem>
-                {editable && (
-                  <>
-                    <DropdownMenuItem
-                      onClick={() => handleUpdate(accommodation)}
-                      className="flex gap-2 items-center"
-                    >
-                      <Edit2 size={16} />
-                      Edit
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      onClick={() => handleDelete(accommodation)}
-                      className="flex gap-2 items-center text-error"
-                    >
-                      <Trash2 size={16} />
-                      Delete
-                    </DropdownMenuItem>
-                  </>
+    <div className="card p-0 overflow-hidden relative">
+      <PlaceImage src={accommodation.imageUrl} className="w-full h-36" />
+      <div className="p-4 space-y-3">
+        <div className="flex justify-between items-start">
+          <div className="flex-1">
+            <div className="flex gap-2 justify-between">
+              <h3 className="font-semibold text-text-main text-lg">
+                {accommodation.name}
+              </h3>
+              <DropdownMenu>
+                <DropdownMenuTrigger className="p-1 hover:bg-surface-muted rounded transition-colors text-text-secondary">
+                  <MoreVertical size={16} />
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem
+                    onClick={handleCopyAddress}
+                    className="flex gap-2 items-center"
+                  >
+                    <Copy size={16} />
+                    Copy Address
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={handleOpenInMaps}
+                    className="flex gap-2 items-center"
+                  >
+                    <ExternalLink size={16} />
+                    Open in Maps
+                  </DropdownMenuItem>
+                  {editable && (
+                    <>
+                      <DropdownMenuItem
+                        onClick={() => handleUpdate(accommodation)}
+                        className="flex gap-2 items-center"
+                      >
+                        <Edit2 size={16} />
+                        Edit
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => handleDelete(accommodation)}
+                        className="flex gap-2 items-center text-error"
+                      >
+                        <Trash2 size={16} />
+                        Delete
+                      </DropdownMenuItem>
+                    </>
+                  )}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+            <div className="flex items-center gap-2 text-text-secondary text-sm mt-1">
+              <MapPin size={14} className="shrink-0" />
+              <span>{accommodation.address}</span>
+            </div>
+            <div className="flex items-center gap-2 text-text-secondary text-sm mt-1">
+              <Calendar size={14} />
+              <span>
+                {formatDateRange(
+                  accommodation.startDate,
+                  accommodation.endDate,
                 )}
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-          <div className="flex items-center gap-2 text-text-secondary text-sm mt-1">
-            <MapPin size={14} className="shrink-0" />
-            <span>{accommodation.address}</span>
-          </div>
-          <div className="flex items-center gap-2 text-text-secondary text-sm mt-1">
-            <Calendar size={14} />
-            <span>
-              {formatDateRange(accommodation.startDate, accommodation.endDate)}
-            </span>
+              </span>
+            </div>
           </div>
         </div>
-      </div>
 
-      {accommodation.description && (
-        <div className="text-sm text-text-secondary">
-          {shouldShowExpand && !isExpanded ? (
-            <>
-              <p>{accommodation.description.slice(0, 100)}...</p>
-              <button
-                onClick={() => setIsExpanded(true)}
-                className="text-brand-primary hover:underline mt-1 flex items-center gap-1"
-              >
-                <ChevronDown size={14} />
-                Show more
-              </button>
-            </>
-          ) : (
-            <>
-              <p>{accommodation.description}</p>
-              {shouldShowExpand && (
+        {accommodation.description && (
+          <div className="text-sm text-text-secondary">
+            {shouldShowExpand && !isExpanded ? (
+              <>
+                <p>{accommodation.description.slice(0, 100)}...</p>
                 <button
-                  onClick={() => setIsExpanded(false)}
+                  onClick={() => setIsExpanded(true)}
                   className="text-brand-primary hover:underline mt-1 flex items-center gap-1"
                 >
-                  <ChevronUp size={14} />
-                  Show less
+                  <ChevronDown size={14} />
+                  Show more
                 </button>
-              )}
-            </>
-          )}
-        </div>
-      )}
+              </>
+            ) : (
+              <>
+                <p>{accommodation.description}</p>
+                {shouldShowExpand && (
+                  <button
+                    onClick={() => setIsExpanded(false)}
+                    className="text-brand-primary hover:underline mt-1 flex items-center gap-1"
+                  >
+                    <ChevronUp size={14} />
+                    Show less
+                  </button>
+                )}
+              </>
+            )}
+          </div>
+        )}
 
-      <div className="flex justify-end">
-        <ExpenseChip
-          trip={trip}
-          expense={accommodation.expense}
-          prefill={{
-            accommodationId: accommodation.id,
-            description: accommodation.name,
-            category: "lodging",
-            spentOn: accommodation.startDate,
-          }}
-        />
+        <div className="flex justify-end">
+          <ExpenseChip
+            trip={trip}
+            expense={accommodation.expense}
+            prefill={{
+              accommodationId: accommodation.id,
+              description: accommodation.name,
+              category: "lodging",
+              spentOn: accommodation.startDate,
+            }}
+          />
+        </div>
       </div>
 
       <UpdateAccommodationModal

@@ -5,7 +5,14 @@ from marshmallow import ValidationError
 from sqlalchemy import select
 from src.exceptions import TemplateNotFoundError, UserNotAuthorisedError
 from src.extensions import db
-from src.models import Event, Itinerary, ItineraryUser, TripTemplate, UserRole
+from src.models import (
+    BackgroundImage,
+    Event,
+    Itinerary,
+    ItineraryUser,
+    TripTemplate,
+    UserRole,
+)
 from src.services.template_clone_service import clone_template, materialise_ops
 from src.services.template_service import (
     get_public_template,
@@ -263,3 +270,23 @@ def test_demo_users_cannot_clone(app):
 
     with pytest.raises(UserNotAuthorisedError):
         clone_template(template.slug, demo.id, date(2026, 10, 1))
+
+
+PARIS = BackgroundImage("https://img/paris", "Amelie", "https://unsplash.com/@amelie")
+
+
+def test_publish_copies_the_trip_photo(itinerary, admin_user):
+    in_range_event(itinerary, admin_user)
+    itinerary.background_image = PARIS
+
+    template = publish_itinerary(itinerary.id, admin_user.id, "Europe", None, None)
+
+    assert template.background_image == PARIS
+
+
+def test_clone_copies_the_template_photo(app):
+    template = make_template(background_image=PARIS)
+
+    itinerary = clone_template(template.slug, UserFactory().id, date(2026, 10, 1))
+
+    assert itinerary.background_image == PARIS

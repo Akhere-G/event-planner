@@ -2,7 +2,7 @@ from datetime import date
 
 import pytest
 from src.exceptions import ItineraryDoesNotExistError, UserNotAuthorisedError
-from src.models import UserRole
+from src.models import BackgroundImage, UserRole
 from src.services.itineraries_service import (
     create_itinerary,
     delete_itinerary,
@@ -172,3 +172,47 @@ def test_delete_itinerary_success(itinerary):
 def test_delete_itinerary_not_found(app):
     with pytest.raises(ItineraryDoesNotExistError):
         delete_itinerary(99999)
+
+
+TOKYO = BackgroundImage("https://img/tokyo", "Aiko", "https://unsplash.com/@aiko")
+KYOTO = BackgroundImage("https://img/kyoto", "Kenji", "https://unsplash.com/@kenji")
+
+
+def test_create_itinerary_uses_a_photo_of_the_destination(
+    admin_user, destination_images
+):
+    destination_images["Tokyo"] = TOKYO
+
+    new_itinerary = create_itinerary(
+        admin_user.id,
+        {
+            "name": "New Trip",
+            "destination": "Tokyo",
+            "latitude": 35.6762,
+            "longitude": 139.6503,
+            "start_date": date(2026, 9, 1),
+            "end_date": date(2026, 9, 5),
+        },
+    )
+
+    assert new_itinerary.background_image == TOKYO
+
+
+def test_changing_the_destination_refreshes_the_photo(itinerary, destination_images):
+    itinerary.background_image = TOKYO
+    destination_images["Kyoto"] = KYOTO
+
+    updated = update_itinerary(itinerary.id, {"destination": "Kyoto"})
+
+    assert updated.background_image == KYOTO
+
+
+def test_other_edits_keep_the_photo(itinerary, destination_images):
+    itinerary.background_image = TOKYO
+    destination_images[itinerary.destination] = KYOTO
+
+    updated = update_itinerary(
+        itinerary.id, {"name": "Renamed", "destination": itinerary.destination}
+    )
+
+    assert updated.background_image == TOKYO

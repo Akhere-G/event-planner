@@ -66,8 +66,8 @@ test.describe("Trip events", () => {
     const { deleted } = await openTrip(page, "editor");
 
     const louvre = eventCard(page, "Louvre visit");
-    await expect(louvre).toContainText("9:30 AM");
-    await expect(louvre).toContainText("12:00 PM");
+    await expect(louvre).toContainText("9:30");
+    await expect(louvre).toContainText("12:00");
     await expect(eventCard(page, "Seine dinner cruise")).toBeVisible();
 
     await louvre.getByRole("button", { expanded: false }).first().click();
@@ -89,7 +89,7 @@ test.describe("Trip events", () => {
     await openTrip(page, "viewer");
 
     const louvre = eventCard(page, "Louvre visit");
-    await expect(louvre).toContainText("9:30 AM");
+    await expect(louvre).toContainText("9:30");
     await expect(page.getByTitle("Change event times")).toHaveCount(0);
 
     await louvre.getByRole("button", { expanded: false }).first().click();

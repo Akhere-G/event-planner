@@ -50,6 +50,9 @@ class ItinerarySchema(BaseSchema):
     )
     created_at = auto_field(dump_only=True)
     anonymous_access_code = auto_field(dump_only=True)
+    background_image_url = auto_field(dump_only=True)
+    background_image_credit_name = auto_field(dump_only=True)
+    background_image_credit_url = auto_field(dump_only=True)
 
     @validates_schema
     def validate_times(self, data, **kwargs):

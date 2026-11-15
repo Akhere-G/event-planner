@@ -8,10 +8,11 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from ..extensions import Base
 from .audit_mixins import AuditMixin
+from .background_image_mixin import BackgroundImageMixin
 from .event_model import Event
 
 
-class Itinerary(Base, AuditMixin):
+class Itinerary(Base, AuditMixin, BackgroundImageMixin):
     __tablename__ = "itineraries"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)

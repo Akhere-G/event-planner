@@ -44,6 +44,8 @@ class EventSchema(BaseSchema):
 
     description = auto_field()
 
+    image_url = auto_field(allow_none=True)
+
     address = auto_field(
         error_messages={
             "required": "Address is required.",

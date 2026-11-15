@@ -29,6 +29,7 @@ class Accommodation(Base, AuditMixin):
     description: Mapped[Optional[str]] = mapped_column(String(1000), nullable=True)
     start_date: Mapped[date] = mapped_column(Date, index=True)
     end_date: Mapped[date] = mapped_column(Date)
+    image_url: Mapped[str | None] = mapped_column(String(2048), nullable=True)
 
     itinerary: Mapped["Itinerary"] = relationship(back_populates="accommodations")
     creator: Mapped["User"] = relationship(  # type: ignore  # noqa: F821

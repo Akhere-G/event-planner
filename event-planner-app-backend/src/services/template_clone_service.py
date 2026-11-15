@@ -93,6 +93,7 @@ def clone_template(slug: str, user_id: int, start_date: date) -> Itinerary:
             longitude=template.longitude,
             description=description,
             timezone=template.timezone,
+            background_image=template.background_image,
             start_date=start_date,
             end_date=start_date + timedelta(days=template.duration_days - 1),
             created_by_id=user_id,

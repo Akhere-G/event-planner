@@ -10,6 +10,7 @@ export interface Event {
   startAt: string;
   endAt: string;
   category: string;
+  imageUrl?: string | null;
   expense?: Expense | null;
 }
 

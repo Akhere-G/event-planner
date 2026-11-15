@@ -17,16 +17,18 @@ import {
   ConfirmModal,
   EditableSelect,
   EditableText,
+  PlaceImage,
   StateGate,
 } from "../../../components";
 import { eventCategories } from "../constants";
+import { selectIsCompactView } from "../service/eventViewSlice";
 
 import { useParams } from "react-router";
 import { useUpdateEvent } from "../../trips/hooks";
 import { useGetTripQuery } from "../../trips/services/tripsApiSlice";
 import { toast } from "sonner";
 import EditEventDatesModal from "./EditEventDatesModal";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { setIsMapView, setSelectedEvent } from "../../maps/service/mapSlice";
 import EditEventModal from "./EditEventModal";
 import { ExpenseChip } from "../../expenses/components";
@@ -65,6 +67,7 @@ export default function EventCard({
   });
 
   const dispatch = useDispatch();
+  const isCompact = useSelector(selectIsCompactView);
 
   const updateEventData = async (newData: Partial<Event>) => {
     const oldData = eventData;
@@ -105,176 +108,186 @@ export default function EventCard({
         data-testid="event-card"
         className="card flex-1 transition-shadow border-l-4 border-brand-primary relative"
       >
-        <div className="flex flex-col">
-          <div className="flex justify-between items-start">
-            <h3 className="font-bold tracking-tight text-text-primary flex flex-col">
-              <EditableText
-                value={eventData.name}
-                canEdit={canUserEdit(trip.role)}
-                textClassNames="text-lg"
-                setValue={(name) => {
-                  void updateEventData({ name });
+        <div className="flex flex-col lg:flex-row gap-3">
+          {!isCompact && (
+            <div className=" rounded-md">
+              <PlaceImage
+                src={eventData.imageUrl}
+                className="w-full lg:size-16 xl:size-20 size-[100%] max-h-50 shrink-0 rounded-md"
+              />
+            </div>
+          )}
+          <div className="flex flex-col flex-1 min-w-0">
+            <div className="flex justify-between items-start">
+              <h3 className="font-bold tracking-tight text-text-primary flex flex-col">
+                <EditableText
+                  value={eventData.name}
+                  canEdit={canUserEdit(trip.role)}
+                  textClassNames="text-lg"
+                  setValue={(name) => {
+                    void updateEventData({ name });
+                  }}
+                />
+              </h3>
+
+              <DropdownMenu>
+                <DropdownMenuTrigger className="p-1 hover:bg-surface-muted rounded transition-colors text-text-secondary">
+                  <MoreVertical size={16} />
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="min-w-40">
+                  <DropdownMenuItem
+                    onClick={handleView}
+                    className="flex gap-2 items-center"
+                  >
+                    <Eye size={16} />
+                    View
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={handleCopyAddress}
+                    className="flex gap-2 items-center"
+                  >
+                    <Copy size={16} />
+                    Copy Address
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={handleOpenInMaps}
+                    className="flex gap-2 items-center"
+                  >
+                    <ExternalLink size={16} />
+                    Open in Maps
+                  </DropdownMenuItem>
+
+                  {canUserEdit(trip.role) && (
+                    <>
+                      <DropdownMenuItem
+                        onClick={() => setIsEditing(true)}
+                        className="flex gap-2 items-center text-text-primary"
+                      >
+                        <Edit size={16} />
+                        Edit
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => setIsModalOpen(true)}
+                        className="flex gap-2 items-center text-error"
+                      >
+                        <Trash size={16} />
+                        Delete
+                      </DropdownMenuItem>
+                    </>
+                  )}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+
+            <EditableSelect
+              selectedValue={eventData.category}
+              canEdit={canUserEdit(trip.role)}
+              defaultElement={
+                <span className="flex items-center self-end gap-1  px-3 py-1 rounded-full bg-brand-secondary/10 text-brand-secondary text-xs font-semibold capitalize whitespace-nowrap">
+                  <Tag size={14} />
+                  {eventData.category}
+                </span>
+              }
+              setValue={(category) => {
+                void updateEventData({ category });
+              }}
+              options={eventCategories}
+              selectClassName="flex flex-col items-stretch text-center!"
+            />
+
+            <div className="flex items-center gap-2 text-text-secondary text-sm my-2">
+              <MapPin size={14} className="shrink-0" />
+
+              <p className="text-text-secondary text-xs truncate">
+                {eventData.address}
+              </p>
+            </div>
+
+            <EditableText
+              value={eventData?.description ?? ""}
+              canEdit={canUserEdit(trip.role)}
+              textClassNames="text-xs"
+              inputClassNames="text-xs"
+              setValue={(description) => {
+                void updateEventData({ description });
+              }}
+              emptyText="Add notes"
+            />
+
+            <div className="mt-2 flex items-center gap-4 justify-between text-xs text-text-secondary">
+              <div className="flex items-center gap-2 ">
+                <Clock size={16} className="text-brand-primary" />
+                <div className="flex gap-1 text-sm ">
+                  {canUserEdit(trip.role) ? (
+                    <>
+                      <button
+                        onClick={() => setIsDateModalOpen(true)}
+                        className="hover:text-brand-primary p-0"
+                        title="Change event times"
+                      >
+                        {format(start, "HH:mm")}
+                      </button>
+                      <span>-</span>
+                      <button
+                        onClick={() => setIsDateModalOpen(true)}
+                        className="hover:text-brand-primary p-0"
+                        title="Change event times"
+                      >
+                        {format(end, "HH:mm")}
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <span>{format(start, "HH:mm")}</span>
+                      <span>-</span>
+                      <span>{format(end, "HH:mm")}</span>
+                    </>
+                  )}
+                </div>
+              </div>
+              <ExpenseChip
+                trip={trip}
+                expense={event.expense}
+                prefill={{
+                  eventId: event.id,
+                  description: eventData.name,
+                  spentOn: format(start, "yyyy-MM-dd"),
                 }}
               />
-            </h3>
-
-            <DropdownMenu>
-              <DropdownMenuTrigger className="p-1 hover:bg-surface-muted rounded transition-colors text-text-secondary">
-                <MoreVertical size={16} />
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="min-w-40">
-                <DropdownMenuItem
-                  onClick={handleView}
-                  className="flex gap-2 items-center"
-                >
-                  <Eye size={16} />
-                  View
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={handleCopyAddress}
-                  className="flex gap-2 items-center"
-                >
-                  <Copy size={16} />
-                  Copy Address
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={handleOpenInMaps}
-                  className="flex gap-2 items-center"
-                >
-                  <ExternalLink size={16} />
-                  Open in Maps
-                </DropdownMenuItem>
-
-                {canUserEdit(trip.role) && (
-                  <>
-                    <DropdownMenuItem
-                      onClick={() => setIsEditing(true)}
-                      className="flex gap-2 items-center text-text-primary"
-                    >
-                      <Edit size={16} />
-                      Edit
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      onClick={() => setIsModalOpen(true)}
-                      className="flex gap-2 items-center text-error"
-                    >
-                      <Trash size={16} />
-                      Delete
-                    </DropdownMenuItem>
-                  </>
-                )}
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-
-          <EditableSelect
-            selectedValue={eventData.category}
-            canEdit={canUserEdit(trip.role)}
-            defaultElement={
-              <span className="flex items-center self-end gap-1  px-4 py-1 rounded-full bg-brand-secondary/10 text-brand-secondary text-xs font-semibold uppercase w-min ">
-                <Tag size={16} />
-                {eventData.category}
-              </span>
-            }
-            setValue={(category) => {
-              void updateEventData({ category });
-            }}
-            options={eventCategories}
-            selectClassName="flex flex-col items-stretch text-center!"
-          />
-
-          <div className="flex items-center gap-2 text-text-secondary text-sm my-2">
-            <MapPin size={14} className="shrink-0" />
-
-            <p className="text-text-secondary text-xs truncate">
-              {eventData.address}
-            </p>
-          </div>
-
-          <EditableText
-            value={eventData?.description ?? ""}
-            canEdit={canUserEdit(trip.role)}
-            textClassNames="text-xs"
-            inputClassNames="text-xs"
-            setValue={(description) => {
-              void updateEventData({ description });
-            }}
-            emptyText="Add notes"
-          />
-
-          <div className="mt-2 flex items-center gap-4 justify-between text-xs text-text-secondary">
-            <div className="flex items-center gap-2 ">
-              <Clock size={16} className="text-brand-primary" />
-              <div className="flex gap-1 text-sm ">
-                {canUserEdit(trip.role) ? (
-                  <>
-                    <button
-                      onClick={() => setIsDateModalOpen(true)}
-                      className="hover:text-brand-primary p-0"
-                      title="Change event times"
-                    >
-                      {format(start, "p")}
-                    </button>
-                    <span>-</span>
-                    <button
-                      onClick={() => setIsDateModalOpen(true)}
-                      className="hover:text-brand-primary p-0"
-                      title="Change event times"
-                    >
-                      {format(end, "p")}
-                    </button>
-                  </>
-                ) : (
-                  <>
-                    <span>{format(start, "p")}</span>
-                    <span>-</span>
-                    <span>{format(end, "p")}</span>
-                  </>
-                )}
-              </div>
             </div>
-            <ExpenseChip
-              trip={trip}
-              expense={event.expense}
-              prefill={{
-                eventId: event.id,
-                description: eventData.name,
-                spentOn: format(start, "yyyy-MM-dd"),
-              }}
-            />
+
+            {isModalOpen && (
+              <ConfirmModal
+                title={`Delete '${eventData.name}'`}
+                open={isModalOpen}
+                onOpenChange={setIsModalOpen}
+                confirmAction={() => handleDelete(eventData.id)}
+              />
+            )}
+
+            {isDateModalOpen && (
+              <EditEventDatesModal
+                event={event}
+                tripStartDate={trip.startDate}
+                tripEndDate={trip.endDate}
+                open={isDateModalOpen}
+                onOpenChange={setIsDateModalOpen}
+                onSave={async (startAt, endAt) => {
+                  await updateEventData({ startAt, endAt });
+                }}
+              />
+            )}
+            {isEditing && (
+              <EditEventModal
+                event={event}
+                open={isEditing}
+                onOpenChange={setIsEditing}
+                onSave={async (updatedEvent) => {
+                  await updateEventData(updatedEvent);
+                }}
+              />
+            )}
           </div>
-
-          {isModalOpen && (
-            <ConfirmModal
-              title={`Delete '${eventData.name}'`}
-              open={isModalOpen}
-              onOpenChange={setIsModalOpen}
-              confirmAction={() => handleDelete(eventData.id)}
-            />
-          )}
-
-          {isDateModalOpen && (
-            <EditEventDatesModal
-              event={event}
-              tripStartDate={trip.startDate}
-              tripEndDate={trip.endDate}
-              open={isDateModalOpen}
-              onOpenChange={setIsDateModalOpen}
-              onSave={async (startAt, endAt) => {
-                await updateEventData({ startAt, endAt });
-              }}
-            />
-          )}
-          {isEditing && (
-            <EditEventModal
-              event={event}
-              open={isEditing}
-              onOpenChange={setIsEditing}
-              onSave={async (updatedEvent) => {
-                await updateEventData(updatedEvent);
-              }}
-            />
-          )}
         </div>
       </div>
     </StateGate>

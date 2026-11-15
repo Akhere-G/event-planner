@@ -1,7 +1,7 @@
 import { useSearchParams } from "react-router";
 import { Accordion } from "../../../components";
 import { TripCalendar } from "../../calendar/components";
-import { DayList } from "../../events/components";
+import { DayList, EventViewToggle } from "../../events/components";
 import WishlistPanel from "../../wishlist/components/WishlistPanel";
 import type { Trip } from "../types";
 import { useEffect } from "react";
@@ -63,34 +63,37 @@ export default function TripActivities({ trip }: { trip: Trip }) {
         />
       </div>
 
-      <div className="flex items-center">
-        {viewOptions.map((option, index) => {
-          let classNames =
-            "btn-secondary px-4 py-2 border-2 border-surface-border border-l-0 rounded-none active:scale-100";
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div className="flex items-center">
+          {viewOptions.map((option, index) => {
+            let classNames =
+              "btn-secondary px-4 py-2 border-2 border-surface-border border-l-0 rounded-none active:scale-100";
 
-          if (activityView === option.view) {
-            classNames +=
-              " brightness-110 bg-brand-primary/10 border-brand-primary/50 text-text-primary font-bold";
-          }
-          if (index === 0) {
-            classNames += " rounded-l-xl border-l-2";
-          }
-          if (index === viewOptions.length - 1) {
-            classNames += " rounded-r-xl!";
-          }
+            if (activityView === option.view) {
+              classNames +=
+                " brightness-110 bg-brand-primary/10 border-brand-primary/50 text-text-primary font-bold";
+            }
+            if (index === 0) {
+              classNames += " rounded-l-xl border-l-2";
+            }
+            if (index === viewOptions.length - 1) {
+              classNames += " rounded-r-xl!";
+            }
 
-          return (
-            <button
-              key={option.view}
-              type="button"
-              onClick={() => setActivityView(option.view)}
-              className={classNames}
-              aria-pressed={activityView === option.view}
-            >
-              {option.name}
-            </button>
-          );
-        })}
+            return (
+              <button
+                key={option.view}
+                type="button"
+                onClick={() => setActivityView(option.view)}
+                className={classNames}
+                aria-pressed={activityView === option.view}
+              >
+                {option.name}
+              </button>
+            );
+          })}
+        </div>
+        {activityView === "list" && <EventViewToggle />}
       </div>
 
       {activityView === "list" ? (

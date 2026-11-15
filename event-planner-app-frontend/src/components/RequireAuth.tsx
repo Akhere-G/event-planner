@@ -1,5 +1,4 @@
 import { Navigate, useLocation } from "react-router";
-import StateGate from "./StateGate";
 import LoadingState from "./LoadingState";
 
 export default function RequireAuth({

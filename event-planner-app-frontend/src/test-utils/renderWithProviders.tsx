@@ -7,6 +7,7 @@ import { apiSlice } from "../features/api/apiSlice";
 import { authSlice } from "../features/auth/services/authSlice";
 import { realtimeSlice } from "../features/realtime/realtimeSlice";
 import mapReducer from "../features/maps/service/mapSlice";
+import { eventViewSlice } from "../features/events/service/eventViewSlice";
 
 export function createTestStore() {
   return configureStore({
@@ -15,6 +16,7 @@ export function createTestStore() {
       [authSlice.name]: authSlice.reducer,
       [realtimeSlice.name]: realtimeSlice.reducer,
       map: mapReducer,
+      [eventViewSlice.name]: eventViewSlice.reducer,
     },
     middleware: (getDefaultMiddleware) =>
       getDefaultMiddleware().concat(apiSlice.middleware),

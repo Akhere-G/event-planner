@@ -1,4 +1,6 @@
-export interface Trip {
+import type { BackgroundImageFields } from "../../components";
+
+export interface Trip extends BackgroundImageFields {
   id: number;
   name: string;
   destination: string;
