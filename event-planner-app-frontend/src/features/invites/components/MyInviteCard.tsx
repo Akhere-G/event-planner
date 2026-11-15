@@ -80,7 +80,7 @@ export default function MyInviteCard({ invite }: { invite: Invite }) {
           </div>
         )}
         ContentComponent={() => (
-          <div className="p-4 pt-0">
+          <div className="p-4 pb-0 pt-0">
             {invite.itinerary && (
               <TripSummary trip={invite.itinerary} hideTitle />
             )}

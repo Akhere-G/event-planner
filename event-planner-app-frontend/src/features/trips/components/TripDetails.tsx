@@ -10,10 +10,7 @@ import { PackingPage } from "../../packing/components";
 import FlightsPanel from "../../flights/components/FlightsPanel";
 import { useTripRealtime } from "../../realtime";
 import { BudgetPage } from "../../expenses/components";
-import {
-  ProposalsHost,
-  TaskProgressCards,
-} from "../../aiTasks/components";
+import { ProposalsHost, TaskProgressCards } from "../../aiTasks/components";
 
 type TabOption =
   | "activities"
@@ -49,8 +46,12 @@ export default function TripDetails(trip: Trip) {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="card">
-        <TripSummary trip={trip} showActions={isAdmin(trip.role)} />
+      <div className="">
+        <TripSummary
+          isSummary={true}
+          trip={trip}
+          showActions={isAdmin(trip.role)}
+        />
       </div>
       {canUserEdit(trip.role) && (
         <div className="flex justify-end">

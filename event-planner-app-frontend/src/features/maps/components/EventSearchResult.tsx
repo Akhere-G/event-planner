@@ -128,7 +128,7 @@ export default function EventSearchResultCard() {
   const photo = event.photos[0];
   return (
     <div className="card border-l-4 border-brand-primary p-2 ">
-      <div className="flex flex-col w-full md:flex-row gap-2">
+      <div className="flex flex-col w-full xl:flex-row gap-2">
         {hasPhoto && (
           <div className="flex-[0.3] min-w-35 h-30 max-h-[150px] md:max-h-[200px] overflow-hidden rounded-md bg-gray-100 shadow-sm">
             <img

@@ -48,11 +48,13 @@ interface TripSummaryProps {
   trip: Trip;
   showActions?: boolean;
   hideTitle?: boolean;
+  isSummary?: boolean;
 }
 export default function TripSummary({
   trip,
   showActions,
   hideTitle,
+  isSummary,
 }: TripSummaryProps) {
   const [modalOpen, setIsModalOpen] = useState(false);
   const [modalType, setModalType] = useState<ModalType>(null);
@@ -96,116 +98,129 @@ export default function TripSummary({
   };
 
   return (
-    <div className="relative flex flex-col gap-6">
+    <div className="relative flex flex-col">
       {trip.backgroundImageUrl && (
         <div className="relative">
           <PlaceImage
             src={trip.backgroundImageUrl}
-            className="h-40 md:h-56 w-full rounded-md"
+            className="h-40 md:h-56 w-full md:rounded-md md:rounded-b-none"
           />
           <UnsplashCredit image={trip} className="absolute bottom-2 right-2" />
         </div>
       )}
-      <div className="relative flex justify-between items-start">
-        <div>
-          {!hideTitle && <h2 className="title">{name}</h2>}
-          <p className="text-text-secondary">{description}</p>
-        </div>
+      <div
+        className={`${isSummary ? "card" : ""} flex flex-col gap-6 rounded-t-none!`}
+      >
+        <div className="relative flex justify-between items-start">
+          <div>
+            {!hideTitle && <h2 className="title">{name}</h2>}
+            <p className="text-text-secondary">{description}</p>
+          </div>
 
-        <DropdownMenu>
-          <DropdownMenuTrigger className="-mt-2 -mr-4 p-2 btn bg">
-            <MoreVertical size={20} />
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem
-              disabled={isRemoveLoading}
-              onClick={async () => {
-                const { exportToCalendar } = await import("../utils");
-                let flights: Flight[] = [];
-                try {
-                  flights = (await fetchFlights(trip.id).unwrap()).data;
-                } catch {
-                  toast.error(
-                    "Could not load flights; exporting without them.",
-                  );
-                }
-                exportToCalendar(trip.name, events, userMemberships, flights);
-                posthog?.capture("export_to_calendar", { trip_id: trip.id });
-              }}
-              className="flex gap-2 items-center"
-            >
-              <Calendar size={16} />
-              Export to calendar
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              onClick={async () => {
-                const { exportToDoc } = await import("../utils");
-                exportToDoc(trip, events);
-                posthog?.capture("export_to_doc", { trip_id: trip.id });
-              }}
-              className="flex gap-2 items-center"
-            >
-              <FileText size={16} />
-              Export to Word
-            </DropdownMenuItem>
-            {!anonTrip && <TripSyncMenuItem tripId={trip.id} />}
-            {isAdmin(trip.role) && (
-              <>
+          {isSummary && (
+            <DropdownMenu>
+              <DropdownMenuTrigger className="-mt-2 -mr-4 p-2 btn bg">
+                <MoreVertical size={20} />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
                 <DropdownMenuItem
-                  onClick={handleEdit}
+                  disabled={isRemoveLoading}
+                  onClick={async () => {
+                    const { exportToCalendar } = await import("../utils");
+                    let flights: Flight[] = [];
+                    try {
+                      flights = (await fetchFlights(trip.id).unwrap()).data;
+                    } catch {
+                      toast.error(
+                        "Could not load flights; exporting without them.",
+                      );
+                    }
+                    exportToCalendar(
+                      trip.name,
+                      events,
+                      userMemberships,
+                      flights,
+                    );
+                    posthog?.capture("export_to_calendar", {
+                      trip_id: trip.id,
+                    });
+                  }}
                   className="flex gap-2 items-center"
                 >
-                  <Pencil size={16} />
-                  Edit
+                  <Calendar size={16} />
+                  Export to calendar
                 </DropdownMenuItem>
-                {!anonTrip && !isDemo && (
+                <DropdownMenuItem
+                  onClick={async () => {
+                    const { exportToDoc } = await import("../utils");
+                    exportToDoc(trip, events);
+                    posthog?.capture("export_to_doc", { trip_id: trip.id });
+                  }}
+                  className="flex gap-2 items-center"
+                >
+                  <FileText size={16} />
+                  Export to Word
+                </DropdownMenuItem>
+                {!anonTrip && <TripSyncMenuItem tripId={trip.id} />}
+                {isAdmin(trip.role) && (
+                  <>
+                    <DropdownMenuItem
+                      onClick={handleEdit}
+                      className="flex gap-2 items-center"
+                    >
+                      <Pencil size={16} />
+                      Edit
+                    </DropdownMenuItem>
+                    {!anonTrip && !isDemo && (
+                      <DropdownMenuItem
+                        onClick={() => setModalType("publish")}
+                        className="flex gap-2 items-center"
+                      >
+                        <Globe size={16} />
+                        Publish as template
+                      </DropdownMenuItem>
+                    )}
+                  </>
+                )}
+                {!anonTrip && (
                   <DropdownMenuItem
-                    onClick={() => setModalType("publish")}
-                    className="flex gap-2 items-center"
+                    disabled={isRemoveLoading}
+                    onClick={() => setIsModalOpen(true)}
+                    className="flex gap-2 items-center text-error"
                   >
-                    <Globe size={16} />
-                    Publish as template
+                    <SquareArrowRightExit size={16} />
+                    Leave
                   </DropdownMenuItem>
                 )}
-              </>
-            )}
-            {!anonTrip && (
-              <DropdownMenuItem
-                disabled={isRemoveLoading}
-                onClick={() => setIsModalOpen(true)}
-                className="flex gap-2 items-center text-error"
-              >
-                <SquareArrowRightExit size={16} />
-                Leave
-              </DropdownMenuItem>
-            )}
-            {isAdmin(trip.role) && (
-              <DropdownMenuItem
-                onClick={handleDelete}
-                className="flex gap-2 items-center text-error"
-              >
-                <Trash size={16} />
-                Delete
-              </DropdownMenuItem>
-            )}
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
-      <div className="flex justify-between">
-        <div className="flex gap-2 items-center">
-          <Calendar size={20} /> {formatDateRange(startDate, endDate)}
-        </div>
-        <div className="flex items-center gap-3">
-          <UserAvatarList users={userMemberships} />
-          {showActions && (
-            <button
-              className="p-2"
-              aria-label="View Users"
-              onClick={openUsersView}
-            >
-              <UserCog aria-hidden />
-            </button>
+                {isAdmin(trip.role) && (
+                  <DropdownMenuItem
+                    onClick={handleDelete}
+                    className="flex gap-2 items-center text-error"
+                  >
+                    <Trash size={16} />
+                    Delete
+                  </DropdownMenuItem>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
           )}
+        </div>
+        <div className="flex justify-between">
+          <div className="flex gap-2 items-center">
+            <Calendar size={20} /> {formatDateRange(startDate, endDate)}
+          </div>
+          <div className="flex items-center gap-3">
+            <UserAvatarList users={userMemberships} />
+            {showActions && (
+              <button
+                className="p-2"
+                aria-label="View Users"
+                onClick={openUsersView}
+              >
+                <UserCog aria-hidden />
+              </button>
+            )}
+          </div>
         </div>
       </div>
       {modalOpen && (
