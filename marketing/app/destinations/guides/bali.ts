@@ -5,6 +5,16 @@ export const baliGuide: DestinationGuide = {
   city: "Bali",
   country: "Indonesia",
   region: "Asia",
+  image: {
+    src: "/destinations/bali-hero.jpg",
+    alt: "Green rice terraces at Tegalalang in Bali",
+    width: 1600,
+    height: 1067,
+    credit: {
+      name: "Niklas Weiss",
+      url: "https://unsplash.com/photos/-2WlTWZLnRc",
+    },
+  },
   title: "Bali Travel Guide: Where to Eat, Stay and What to See",
   description:
     "Plan Bali with this guide to the best warungs and restaurants, where to stay in Ubud, Seminyak and Uluwatu, what to see and quieter places worth a detour.",

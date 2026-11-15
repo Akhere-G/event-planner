@@ -5,6 +5,16 @@ export const romeGuide: DestinationGuide = {
   city: "Rome",
   country: "Italy",
   region: "Europe",
+  image: {
+    src: "/destinations/rome-hero.jpg",
+    alt: "The Colosseum arena in Rome",
+    width: 1600,
+    height: 1167,
+    credit: {
+      name: "David Köhler",
+      url: "https://unsplash.com/photos/VFRTXGw1VjU",
+    },
+  },
   title: "Rome Travel Guide: Where to Eat, Stay and What to See",
   description:
     "Plan your trip to Rome with the best trattorias, must-see sights, hotels for every budget and hidden gems, plus a ready-made 5-day itinerary to follow.",

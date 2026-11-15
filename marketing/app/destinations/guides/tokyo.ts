@@ -5,6 +5,16 @@ export const tokyoGuide: DestinationGuide = {
   city: "Tokyo",
   country: "Japan",
   region: "Asia",
+  image: {
+    src: "/destinations/tokyo-hero.jpg",
+    alt: "Crowds crossing the Shibuya scramble intersection in Tokyo",
+    width: 1600,
+    height: 1067,
+    credit: {
+      name: "Timo Volz",
+      url: "https://unsplash.com/photos/DGsqL2j028E",
+    },
+  },
   title: "Tokyo Travel Guide: Where to Eat, Stay and What to See",
   description:
     "A practical Tokyo guide: standout places to eat, from tonkatsu to tempura, where to stay by neighbourhood, the best sights and a few quieter corners.",

@@ -5,6 +5,16 @@ export const pragueGuide: DestinationGuide = {
   city: "Prague",
   country: "Czech Republic",
   region: "Europe",
+  image: {
+    src: "/destinations/prague-hero.jpg",
+    alt: "Charles Bridge and Prague Castle across the Vltava river",
+    width: 1600,
+    height: 1067,
+    credit: {
+      name: "William Zhang",
+      url: "https://unsplash.com/photos/6En4WYsNYXM",
+    },
+  },
   title: "Prague Travel Guide: Where to Eat, Stay and What to See",
   description:
     "Plan your Prague trip: where to eat Czech classics and drink great beer, what to see, where to stay and hidden gems, plus a ready-made 3-day itinerary.",

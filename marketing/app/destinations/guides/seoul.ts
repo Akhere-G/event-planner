@@ -5,6 +5,16 @@ export const seoulGuide: DestinationGuide = {
   city: "Seoul",
   country: "South Korea",
   region: "Asia",
+  image: {
+    src: "/destinations/seoul-hero.jpg",
+    alt: "A quiet street between traditional houses in Seoul",
+    width: 1600,
+    height: 900,
+    credit: {
+      name: "Y K",
+      url: "https://unsplash.com/photos/-e6Xu27_T50",
+    },
+  },
   title: "Seoul Travel Guide: Where to Eat, Stay and What to See",
   description:
     "Plan Seoul with real picks: where to eat, from market pancakes to cold noodles, where to stay by area, the best palaces and sights, plus quieter corners.",

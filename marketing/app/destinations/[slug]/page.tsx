@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import { SiteFooter, SiteHeader } from "../../components/SiteChrome";
 import { PlaceSection } from "../components/PlaceSection";
@@ -32,6 +33,7 @@ export async function generateMetadata({
       title: guide.title,
       description: guide.description,
       publishedTime: guide.publishedAt,
+      images: [{ url: guide.image.src, alt: guide.image.alt }],
     },
   };
 }
@@ -75,6 +77,36 @@ export default async function DestinationGuidePage({ params }: GuidePageProps) {
         <h1 className="mt-3 text-4xl md:text-5xl font-semibold text-slate-900 leading-tight">
           {guide.title}
         </h1>
+        <figure className="mt-8">
+          <Image
+            src={guide.image.src}
+            alt={guide.image.alt}
+            width={guide.image.width}
+            height={guide.image.height}
+            loading="eager"
+            fetchPriority="high"
+            sizes="(min-width: 768px) 768px, 100vw"
+            className="aspect-[16/9] w-full rounded-2xl object-cover"
+          />
+          <figcaption className="mt-2 text-xs text-slate-500">
+            Photo by{" "}
+            <a
+              href={`${guide.image.credit.url}?utm_source=triptrack&utm_medium=referral`}
+              className="underline"
+              rel="noopener"
+            >
+              {guide.image.credit.name}
+            </a>{" "}
+            on{" "}
+            <a
+              href="https://unsplash.com/?utm_source=triptrack&utm_medium=referral"
+              className="underline"
+              rel="noopener"
+            >
+              Unsplash
+            </a>
+          </figcaption>
+        </figure>
         <div className="mt-6 space-y-4 text-lg text-slate-600 leading-relaxed">
           {guide.intro.map((paragraph) => (
             <p key={paragraph}>{paragraph}</p>

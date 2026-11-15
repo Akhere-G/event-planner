@@ -5,6 +5,16 @@ export const parisGuide: DestinationGuide = {
   city: "Paris",
   country: "France",
   region: "Europe",
+  image: {
+    src: "/destinations/paris-hero.jpg",
+    alt: "The Eiffel Tower rising above Paris on a clear day",
+    width: 1600,
+    height: 1064,
+    credit: {
+      name: "Chris Karidis",
+      url: "https://unsplash.com/photos/nnzkZNYWHaU",
+    },
+  },
   title: "Paris Travel Guide: Where to Eat, Stay and What to See",
   description:
     "Plan Paris with confidence: bistros worth booking, the museums and landmarks that deserve your time, where to stay and a few quieter corners locals love.",
