@@ -30,6 +30,9 @@ function HeroMockup() {
         alt="TripTrack Homepage"
         width={900}
         height={540}
+        loading="eager"
+        fetchPriority="high"
+        sizes="(min-width: 1024px) 50vw, 100vw"
         className="w-full h-auto object-cover"
       />
     </div>
@@ -378,6 +381,7 @@ export default function HomePage() {
                     alt={feature.title}
                     width={800}
                     height={400}
+                    sizes="(min-width: 1024px) 50vw, 100vw"
                     className="w-full h-full object-cover"
                   />
                 </div>
