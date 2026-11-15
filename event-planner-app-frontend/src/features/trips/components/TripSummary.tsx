@@ -21,7 +21,7 @@ import {
 import { isFetchBaseQueryError } from "../../api/utils";
 import { toast } from "sonner";
 import type { RootState } from "../../../store";
-import { ConfirmModal } from "../../../components";
+import { ConfirmModal, PlaceImage, UnsplashCredit } from "../../../components";
 import { useState } from "react";
 import {
   DropdownMenu,
@@ -97,6 +97,15 @@ export default function TripSummary({
 
   return (
     <div className="relative flex flex-col gap-6">
+      {trip.backgroundImageUrl && (
+        <div className="relative">
+          <PlaceImage
+            src={trip.backgroundImageUrl}
+            className="h-40 md:h-56 w-full rounded-md"
+          />
+          <UnsplashCredit image={trip} className="absolute bottom-2 right-2" />
+        </div>
+      )}
       <div className="relative flex justify-between items-start">
         <div>
           {!hideTitle && <h2 className="title">{name}</h2>}
