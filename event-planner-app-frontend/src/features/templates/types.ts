@@ -1,6 +1,7 @@
+import type { BackgroundImageFields } from "../../components";
 import type { TemplateRegion } from "./constants";
 
-export interface TemplateSummary {
+export interface TemplateSummary extends BackgroundImageFields {
   slug: string;
   title: string;
   description: string | null;

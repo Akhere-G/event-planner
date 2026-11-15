@@ -25,8 +25,7 @@ export default function TemplateDetail() {
           <>
             <div className="card p-0 overflow-hidden">
               <TemplateCover
-                src={template.coverImage}
-                alt={`${template.destination} cover`}
+                template={template}
                 className="h-40 md:h-56 w-full"
               />
               <div className="p-4 flex flex-col md:flex-row md:items-start md:justify-between gap-4">

@@ -16,17 +16,12 @@ export default function TemplateCard({
     region,
     durationDays,
     description,
-    coverImage,
     cloneCount,
   } = template;
 
   return (
     <article className="card relative p-0 overflow-hidden flex flex-col">
-      <TemplateCover
-        src={coverImage}
-        alt={`${destination} cover`}
-        className="h-36 w-full"
-      />
+      <TemplateCover template={template} className="h-36 w-full" />
       <div className="p-4 flex flex-col gap-3 grow">
         <div>
           <h3 className="text-lg font-bold">
