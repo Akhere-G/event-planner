@@ -47,6 +47,7 @@ class AccommodationSchema(BaseSchema):
         },
     )
     description = auto_field(allow_none=True)
+    image_url = auto_field(allow_none=True)
     start_date = auto_field(
         error_messages={
             "required": "Check-in date is required.",

@@ -22,6 +22,7 @@ class Event(Base, AuditMixin):
     start_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
     end_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
     category: Mapped[str] = mapped_column(String(256))
+    image_url: Mapped[str | None] = mapped_column(String(2048), nullable=True)
     reminder_sent_at: Mapped[Optional[datetime]] = mapped_column(
         DateTime(timezone=True), nullable=True
     )
