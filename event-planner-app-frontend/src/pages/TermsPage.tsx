@@ -4,7 +4,7 @@ export default function TermsPage() {
       <div className="card">
         <h1 className="title">Terms and Conditions</h1>
         <p className="text-text-secondary text-sm mt-2">
-          Last updated: 13 November 2026
+          Last updated: 15 November 2026
         </p>
       </div>
 
@@ -459,6 +459,16 @@ export default function TermsPage() {
         <p>
           You can view the Privacy Policy through the Privacy link on the
           TripTrack website.
+        </p>
+
+        <p>
+          TripTrack uses strictly necessary cookies to operate and secure the
+          service. PostHog analytics runs without cookies or browser storage
+          unless you consent to Analytics through our cookie controls. If you
+          enable Analytics, PostHog may use first-party cookies and local storage
+          for product analytics. You can change or withdraw your choice at any
+          time through Cookie settings in the footer or, when signed in, from
+          the Settings page.
         </p>
 
         <h2>16. Changes to These Terms</h2>

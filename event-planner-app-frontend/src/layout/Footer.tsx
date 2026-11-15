@@ -1,7 +1,9 @@
 import { Link } from "react-router";
+import { useCookieConsent } from "../features/cookieConsent";
 
 const Footer = ({ isAuthenticated }: { isAuthenticated: boolean }) => {
   const year = new Date().getFullYear();
+  const { openPreferences } = useCookieConsent();
 
   return (
     <footer className="bg-surface border-t border-surface-border mt-auto pt-12 pb-6 px-4 md:px-8">
@@ -183,6 +185,12 @@ const Footer = ({ isAuthenticated }: { isAuthenticated: boolean }) => {
             >
               Terms
             </Link>
+            <button
+              onClick={openPreferences}
+              className="hover:text-brand-primary underline decoration-brand/30"
+            >
+              Cookie settings
+            </button>
             <button
               onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
               className="hover:text-brand-primary font-bold transition-colors"

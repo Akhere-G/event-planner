@@ -44,6 +44,7 @@ import { usePostHog } from "@posthog/react";
 import useLoadAnonTrip from "./features/trips/hooks/useLoadAnonTrip";
 import { useSaveTripMutation } from "./features/trips/services/tripsApiSlice";
 import { useUserRealtime } from "./features/realtime";
+import { useCookieConsent } from "./features/cookieConsent";
 
 function App() {
   const isAuthenticated = useSelector(selectIsAuthenticated);
@@ -53,6 +54,7 @@ function App() {
   const posthog = usePostHog();
   const [saveTrip] = useSaveTripMutation();
   const navigate = useNavigate();
+  const { analyticsEnabled } = useCookieConsent();
 
   useUserRealtime();
 
@@ -63,12 +65,14 @@ function App() {
   useEffect(() => {
     if (data?.data?.id) {
       dispatch(setCredentials({ id: data.data.id, isDemo: data.data.isDemo }));
-      posthog?.identify(String(data.data.id), {
-        email: data.data.email,
-        username: data.data.username,
-      });
+      if (analyticsEnabled) {
+        posthog.identify(String(data.data.id), {
+          email: data.data.email,
+          username: data.data.username,
+        });
+      }
     }
-  }, [data, dispatch, posthog]);
+  }, [analyticsEnabled, data, dispatch, posthog]);
 
   const isAuth = isAuthenticated || !!data?.data?.id;
 

@@ -1,5 +1,13 @@
 import React from "react";
-import { User, Shield, Moon, Save, Palette, CalendarSync } from "lucide-react";
+import {
+  User,
+  Shield,
+  Moon,
+  Save,
+  Palette,
+  CalendarSync,
+  Cookie,
+} from "lucide-react";
 
 import { useDispatch, useSelector } from "react-redux";
 import type { RootState } from "../store";
@@ -7,10 +15,12 @@ import { THEMES } from "../features/theme/constants";
 import { setTheme, toggleDarkMode } from "../features/theme/themeSlice";
 import { usePostHog } from "@posthog/react";
 import { GoogleCalendarSettings } from "../features/googleCalendar/components";
+import { useCookieConsent } from "../features/cookieConsent";
 
 export default function SettingsPage() {
   const { darkMode, theme } = useSelector((state: RootState) => state.theme);
   const posthog = usePostHog();
+  const { analyticsEnabled, openPreferences } = useCookieConsent();
   const dispatch = useDispatch();
   return (
     <div className="container">
@@ -80,6 +90,19 @@ export default function SettingsPage() {
           title="Google Calendar"
         >
           <GoogleCalendarSettings />
+        </SettingsCard>
+        <SettingsCard
+          icon={<Cookie className="text-brand-primary" />}
+          title="Cookie preferences"
+        >
+          <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
+            <p className="text-text-secondary">
+              Analytics cookies are currently {analyticsEnabled ? "on" : "off"}.
+            </p>
+            <button className="btn-secondary" onClick={openPreferences}>
+              Manage cookie preferences
+            </button>
+          </div>
         </SettingsCard>
       </div>
     </div>

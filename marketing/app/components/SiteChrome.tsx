@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Logo } from "./Logo";
 import { TrackedLink } from "./TrackedLink";
 import { APP_URL } from "../lib/urls";
+import { CookiePreferencesButton } from "./CookiePreferencesButton";
 
 const LINKS = [
   { label: "Destinations", href: "/destinations" },
@@ -69,6 +70,7 @@ export function SiteFooter() {
           >
             Terms
           </TrackedLink>
+          <CookiePreferencesButton />
         </div>
         <span className="text-xs text-white/40 w-full md:w-auto">
           © 2026 TripTrack. Built for travellers.
