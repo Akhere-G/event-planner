@@ -4,6 +4,7 @@ from ..exceptions import BadRequestError, NotFoundError
 from sqlalchemy import select
 from ..utils.location_utils import get_place_details
 from .expense_service import expense_loader
+from .place_image_service import moves_without_image, with_place_image
 
 
 def get_accommodations(itinerary_id: int):
@@ -51,6 +52,8 @@ def stage_create_accommodation(
         latitude = location["latitude"]
         longitude = location["longitude"]
 
+    accommodation_data = with_place_image(accommodation_data, name, address)
+
     accommodation = Accommodation(
         itinerary_id=itinerary_id,
         name=name,
@@ -60,6 +63,7 @@ def stage_create_accommodation(
         description=accommodation_data.get("description"),
         start_date=start_date,
         end_date=end_date,
+        image_url=accommodation_data["image_url"],
         created_by_id=user_id,
         updated_by_id=user_id,
     )
@@ -127,6 +131,13 @@ def stage_update_accommodation(
             "longitude": location["longitude"],
         }
 
+    if moves_without_image(accommodation_data, accommodation.address):
+        accommodation_data = with_place_image(
+            accommodation_data,
+            accommodation_data.get("name", accommodation.name),
+            accommodation_data["address"],
+        )
+
     updatable_fields = [
         "name",
         "address",
@@ -135,6 +146,7 @@ def stage_update_accommodation(
         "description",
         "start_date",
         "end_date",
+        "image_url",
     ]
 
     for field in updatable_fields:

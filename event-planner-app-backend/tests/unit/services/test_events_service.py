@@ -240,3 +240,36 @@ def test_stage_create_event_flushes_without_committing(itinerary):
 
     assert event.id is not None
     commit.assert_not_called()
+
+
+def test_create_event_uses_the_place_photo(admin_user, itinerary, place_photos):
+    place_photos["Louvre"] = "https://photo/louvre"
+
+    event = create_event(
+        itinerary.id,
+        {
+            "name": "Louvre",
+            "address": "Rue de Rivoli, Paris",
+            "latitude": 48.86,
+            "longitude": 2.34,
+            "start_at": datetime(2026, 8, 21, 14, 0, tzinfo=timezone.utc),
+            "end_at": datetime(2026, 8, 21, 16, 0, tzinfo=timezone.utc),
+            "category": "sightseeing",
+            "created_by_id": admin_user.id,
+            "updated_by_id": admin_user.id,
+        },
+    )
+
+    assert event.image_url == "https://photo/louvre"
+
+
+def test_moving_an_event_refreshes_its_image(event, place_photos):
+    place_photos["Musee d'Orsay"] = "https://photo/orsay"
+
+    updated = update_event(
+        event.itinerary_id,
+        event.id,
+        {"name": "Musee d'Orsay", "address": "1 Rue de la Legion d'Honneur"},
+    )
+
+    assert updated.image_url == "https://photo/orsay"
