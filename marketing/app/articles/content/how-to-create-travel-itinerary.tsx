@@ -174,6 +174,7 @@ export const howToCreateTravelItineraryArticle: TravelArticle = {
   excerpt:
     "A step-by-step method for turning saved places and bookings into a realistic day-by-day trip plan.",
   primaryKeyword: "how to create a travel itinerary",
+  secondaryKeywords: ["travel itinerary planner", "trip itinerary template"],
   searchIntent: "Teach travellers how to build a usable itinerary",
   image: barcelonaGuide.image,
   publishedAt: "2026-11-16",

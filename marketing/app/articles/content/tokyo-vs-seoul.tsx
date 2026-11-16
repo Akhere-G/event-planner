@@ -190,6 +190,7 @@ export const tokyoVsSeoulArticle: TravelArticle = {
   excerpt:
     "A like-for-like comparison of two compelling Asian capitals, with a clear answer for different travel styles.",
   primaryKeyword: "Tokyo vs Seoul",
+  secondaryKeywords: ["Tokyo or Seoul", "Asia city break comparison"],
   searchIntent: "Help travellers choose between two destinations",
   image: tokyoGuide.image,
   publishedAt: "2026-11-16",

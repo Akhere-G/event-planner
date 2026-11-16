@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import type { ReactNode } from "react";
 import { TrackedLink } from "../../components/TrackedLink";
 import { APP_URL, guidePath, templateUrl } from "../../lib/urls";
@@ -108,6 +109,37 @@ export function ComparisonTable({
   );
 }
 
+export function ProductScreenshot({
+  src,
+  alt,
+  width,
+  height,
+  caption,
+}: {
+  src: string;
+  alt: string;
+  width: number;
+  height: number;
+  caption: string;
+}) {
+  return (
+    <figure className="my-10">
+      <Image
+        src={src}
+        alt={alt}
+        width={width}
+        height={height}
+        loading="lazy"
+        sizes="(min-width: 768px) 704px, calc(100vw - 32px)"
+        className="h-auto w-full rounded-2xl border border-surface-border"
+      />
+      <figcaption className="mt-3 text-sm leading-6 text-text-secondary">
+        {caption}
+      </figcaption>
+    </figure>
+  );
+}
+
 export function TripTrackCta({
   title,
   children,
@@ -162,8 +194,8 @@ export function Sources({ sources }: { sources: ArticleSource[] }) {
         Sources and practical checks
       </h2>
       <p className="mt-2 text-sm leading-6 text-text-secondary">
-        Transport, opening arrangements and visitor rules can change. Check the official
-        pages below again before booking.
+        Features, prices, opening arrangements and visitor rules can change. Check the
+        relevant official pages again before relying on them.
       </p>
       <ul className="mt-4 space-y-2 text-sm text-text-secondary">
         {sources.map((source) => (

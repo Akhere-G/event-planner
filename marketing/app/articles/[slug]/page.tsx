@@ -70,7 +70,7 @@ function structuredData(article: TravelArticle) {
       mainEntityOfPage: articleUrl,
       author: { "@type": "Organization", name: "TripTrack" },
       publisher: { "@type": "Organization", name: "TripTrack" },
-      keywords: article.primaryKeyword,
+      keywords: [article.primaryKeyword, ...article.secondaryKeywords],
     },
     {
       "@context": "https://schema.org",
@@ -137,7 +137,13 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
           {article.title}
         </h1>
         <p className="mt-4 text-sm text-text-secondary">
-          Published 16 November 2026 · {article.readingMinutes} minute read
+          Published {new Intl.DateTimeFormat("en-GB", {
+            day: "numeric",
+            month: "long",
+            year: "numeric",
+            timeZone: "UTC",
+          }).format(new Date(`${article.publishedAt}T00:00:00Z`))} ·{" "}
+          {article.readingMinutes} minute read
         </p>
         <figure className="mt-8">
           <Image

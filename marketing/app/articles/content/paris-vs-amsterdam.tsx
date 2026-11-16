@@ -183,6 +183,7 @@ export const parisVsAmsterdamArticle: TravelArticle = {
   excerpt:
     "A practical, balanced comparison of two favourite European city breaks, from cost and culture to pace and ideal trip length.",
   primaryKeyword: "Paris vs Amsterdam",
+  secondaryKeywords: ["Paris or Amsterdam", "European city break comparison"],
   searchIntent: "Help travellers choose between two destinations",
   image: parisGuide.image,
   publishedAt: "2026-11-16",

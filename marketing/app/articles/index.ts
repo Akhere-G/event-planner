@@ -1,12 +1,18 @@
 import { bangkokVsHanoiArticle } from "./content/bangkok-vs-hanoi";
+import { bestTravelPlanningAppsArticle } from "./content/best-travel-planning-apps";
 import { howToCreateTravelItineraryArticle } from "./content/how-to-create-travel-itinerary";
 import { parisVsAmsterdamArticle } from "./content/paris-vs-amsterdam";
 import { pragueVsBudapestArticle } from "./content/prague-vs-budapest";
 import { tokyoVsSeoulArticle } from "./content/tokyo-vs-seoul";
 import { travelPlanningChecklistArticle } from "./content/travel-planning-checklist";
+import { triptrackVsTripitArticle } from "./content/triptrack-vs-tripit";
+import { wanderlogVsTriptrackArticle } from "./content/wanderlog-vs-triptrack";
 import type { ArticleCategorySlug, TravelArticle } from "./types";
 
 export const travelArticles: TravelArticle[] = [
+  bestTravelPlanningAppsArticle,
+  wanderlogVsTriptrackArticle,
+  triptrackVsTripitArticle,
   bangkokVsHanoiArticle,
   howToCreateTravelItineraryArticle,
   travelPlanningChecklistArticle,
@@ -25,6 +31,12 @@ export const articleCategories: {
     label: "Destination comparisons",
     description:
       "Balanced, like-for-like comparisons to help you choose where to travel next.",
+  },
+  {
+    slug: "product-comparisons",
+    label: "Travel planner comparisons",
+    description:
+      "Evidence-led comparisons of travel-planning apps, their prices and the travellers they suit.",
   },
   {
     slug: "travel-planning",

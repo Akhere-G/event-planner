@@ -2,6 +2,180 @@
 
 Research date: 16 November 2026
 
+## Product marketing article cluster: research and delivery
+
+This section records the product-market research and implementation completed on
+16 November 2026. It supplements the destination-content research below.
+
+### TripTrack feature and pricing audit
+
+The marketing site, React client and Flask services were checked before writing.
+The published articles only rely on features that have matching implementation:
+
+- Trip creation supports manual entry, templates and prompt-based generation.
+- Activities can be added, edited and arranged in day, list and calendar views.
+- Google Maps libraries provide place search, place details, pins, directions and
+  route modes inside the itinerary.
+- AI services generate trips, suggest ways to fill time and produce reviewable
+  change proposals. The UI previews changes before applying them.
+- Invitations, Admin/Editor/Viewer roles and realtime trip updates support group
+  planning.
+- Google Calendar has account connection, per-trip enable/disable, bootstrap jobs,
+  webhook handling and changes in both directions. TripTrack also exports `.ics`.
+- Flights can be searched by route or flight number, saved, edited and displayed on
+  the relevant days. No implementation of real-time disruption alerts was verified,
+  so the articles say “flight search and saved flight details”, not “live tracking”.
+- Accommodation, packing lists, shared expenses, balances and settlements are
+  implemented. Word itinerary export is also present.
+- Anonymous trip creation exists in the application, but there is no public pricing
+  page, subscription price or formal free-tier contract. The new articles therefore
+  do not call TripTrack free.
+- No native mobile application or verified offline itinerary mode was found.
+
+### Google Trends findings
+
+Google Trends Explore was checked directly for the UK, US and worldwide markets over
+the past five years and past 12 months. The comparison used `travel planner`,
+`travel planning app`, `itinerary planner`, `AI travel planner` and
+`Wanderlog alternative` as search terms.
+
+The figures below are rounded averages of the weekly relative-interest index within
+each five-term comparison. They are not search volumes, cannot be compared as absolute
+market sizes between rows and should not be treated as keyword-difficulty scores.
+
+| Market and period | travel planner | travel planning app | itinerary planner | AI travel planner | Wanderlog alternative |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| UK, five years | 59 | 1 | 3 | <1 | <1 |
+| UK, 12 months | 63 | 3 | 5 | 1 | <1 |
+| US, five years | 32 | 3 | 6 | 2 | <1 |
+| US, 12 months | 50 | 9 | 7 | 5 | <1 |
+| Worldwide, five years | 45 | 4 | 7 | 3 | <1 |
+| Worldwide, 12 months | 71 | 12 | 10 | 8 | <1 |
+
+Useful related-query signals:
+
+- In the UK five-year view, `notion travel planner`, `wanderlog` and
+  `travel ai planner` were breakout related queries for `travel planner`; `trip
+  planner ai` was up 3,950%.
+- UK five-year related queries for `itinerary planner` included breakout AI variants,
+  `wanderlog` and `google sheets` (+350%).
+- In the UK 12-month view, `best travel apps for planning` was a breakout related
+  query. `ai itinerary planner` was up 110%, while `travel itinerary planner`,
+  `itinerary planner app` and `travel planner` were each up 60% as related queries.
+- US five-year related queries also showed breakout growth for AI trip-planning
+  variants.
+- `Wanderlog alternative` did not have enough UK data for a related-query report and
+  remained below one in the compared Trends series. It is retained as a commercially
+  relevant comparison cluster, not presented as a high-volume keyword.
+
+Google Keyword Planner was not available without an authenticated advertising
+account. No Keyword Planner volume or competition figures are claimed.
+
+### Competitors investigated
+
+Official product, help and pricing pages were checked for:
+
+- **Wanderlog:** free itinerary/map/collaboration workflow; Pro from US$39.99/year
+  or US$16.99/month, with offline access, route optimisation, Gmail scanning and
+  unlimited AI. Official help confirms view/edit collaboration permissions.
+- **TripIt:** free itinerary organiser and US$49/year Pro plan. Email-confirmation
+  import is the core workflow. Pro adds real-time flight alerts and related travel-day
+  tools. Its calendar feed is read-only; trip sharing can grant edit permissions.
+- **Google Maps:** saved and shared place lists, discovery and navigation. It is a
+  component of a planning workflow rather than a full booking itinerary.
+- **Google Sheets and Docs:** no-cost real-time collaboration and version history;
+  highly flexible, but without native travel-specific map, flight or itinerary logic.
+- **Notion:** free individual plan and US$10/member/month Plus price on the page
+  checked; strong custom databases and collaboration, with setup required for a
+  travel workflow.
+- **Roadtrippers:** road-trip specialist. Free plan is one saved trip with three
+  stops; paid plans start at US$35.99/year. Higher tiers add more stops, collaboration,
+  navigation, traffic, offline maps and RV tools.
+- **Polarsteps:** planning, tracking, sharing and travel memories remain free; the
+  optional Plus subscription adds enhanced maps, statistics and Travel Book benefits.
+- **Stippl:** AI itinerary, route, budget, packing, documents, journal and group
+  planning across web and mobile. Official pages describe the core planner as free
+  and list a €5/month Pro plan on the itinerary page checked.
+
+App Store listings and recent user reviews were used as qualitative checks, not as a
+substitute for official feature documentation. Wanderlog users commonly praise its
+map, organisation and family-group workflow; some recent long-trip feedback reports
+lag or complexity. TripIt reviews emphasise having reservation details in one place.
+Roadtrippers reviews praise stop ordering and route planning but request deeper
+expense tracking. Polarsteps reviews praise travel sharing and memories while some
+users request stronger collaboration.
+
+### Published priorities
+
+| Priority | Article and URL | Primary keyword | Secondary keywords | Intent and reason |
+| --- | --- | --- | --- | --- |
+| 1 | **Best Travel Planning Apps: 8 Tools Compared Honestly** — `/articles/best-travel-planning-apps` | best travel planning apps | best apps for planning travel; travel itinerary planner; trip planning software | Broad commercial investigation. It matches the strongest general Trends theme and the rising UK “best travel apps for planning” query while using explicit inclusion criteria rather than claiming a popularity ranking. |
+| 2 | **Wanderlog vs TripTrack: Which Travel Planner Fits Your Trip?** — `/articles/wanderlog-vs-triptrack` | Wanderlog vs TripTrack | Wanderlog alternative; TripTrack travel planner; Wanderlog comparison | High product relevance. Wanderlog appears repeatedly in rising related queries, but the article does not overstate the sparse exact-alternative demand. |
+| 3 | **TripTrack vs TripIt: Planning App or Booking Organiser?** — `/articles/triptrack-vs-tripit` | TripTrack vs TripIt | TripIt alternative; TripIt comparison; travel itinerary organiser | High commercial intent and a genuinely useful distinction between pre-booking planning and post-booking organisation. |
+
+The three pages form a deliberate initial cluster: a broad comparison sends readers
+to two direct alternatives, and all three link back to the product, destination guides,
+templates and one another. This avoids publishing overlapping “best free”, “most
+popular” and “best websites” listicles before there is enough evidence to distinguish
+their search intent.
+
+### Images, internal links and conversion
+
+- Every article uses an existing locally stored Unsplash hero with verified credit.
+- The comparison pages add genuine TripTrack screenshots of the calendar/map,
+  Google-powered map, roles, flights and shared budget. No competitor interface was
+  fabricated or reproduced from an unverified source.
+- Screenshots use responsive Next Image rendering, explicit dimensions, lazy loading,
+  borders and descriptive alt text.
+- Each article includes a restrained final CTA to the TripTrack app, direct links to
+  a relevant destination guide and itinerary template, source links and cards for the
+  other comparison articles.
+- The copy lets readers evaluate the product without claiming that registration,
+  pricing or a permanent free tier works in a way that has not been verified.
+
+### SEO implementation
+
+- A new `product-comparisons` category is statically generated and linked from the
+  article index.
+- Every article has a unique title, description, slug, canonical URL, Open Graph and
+  Twitter metadata in the initial static HTML.
+- `TravelArticle` now stores researched secondary keywords. BlogPosting JSON-LD
+  includes the primary and secondary keyword set.
+- Each page renders BlogPosting and BreadcrumbList structured data.
+- The generated sitemap automatically includes the new category and all three pages.
+- Headings follow one H1 with descriptive H2/H3 sections; comparison criteria are
+  rendered as accessible tables.
+
+### Verification and outstanding issues
+
+- `npm run lint` passes.
+- `npm run build -- --webpack` passes and statically generates all three new article
+  pages, the new category, existing articles, guides, robots and sitemap.
+- The broad comparison page was rendered in the local browser. The canonical URL,
+  metadata description, H1, JSON-LD and responsive layout were verified.
+- Prices are dated snapshots in USD or EUR and need editorial review before future
+  updates. Polarsteps did not expose a stable public Plus price in the official pages
+  reviewed, so no amount is quoted.
+- Google Trends is relative and sampled. Re-run it before a major roadmap refresh.
+- Keyword Planner, Search Console conversion data and live SERP rankings were not
+  available. These should inform the next publishing batch.
+- TripTrack should publish a clear pricing/plan page before targeting “free travel
+  planner” terms. Until then, avoid free-plan claims in metadata and body copy.
+- Competitor screenshots were deliberately deferred. Add them only from current,
+  permission-safe product captures with dates and alt text.
+
+### Files changed for this cluster
+
+- `app/articles/types.ts`
+- `app/articles/index.ts`
+- `app/articles/[slug]/page.tsx`
+- `app/articles/components/ArticleElements.tsx`
+- `app/articles/content/best-travel-planning-apps.tsx`
+- `app/articles/content/wanderlog-vs-triptrack.tsx`
+- `app/articles/content/triptrack-vs-tripit.tsx`
+- Six existing article records updated with secondary-keyword metadata
+- `SEO_RESEARCH.md`
+
 ## Subsequent additions
 
 The collection now includes six articles. Bangkok vs Hanoi was added at the user's

@@ -314,6 +314,7 @@ export const bangkokVsHanoiArticle: TravelArticle = {
   excerpt:
     "Temples and river journeys or Old Quarter walks and coffee? Compare the details that shape a holiday in Bangkok or Hanoi.",
   primaryKeyword: "Bangkok vs Hanoi",
+  secondaryKeywords: ["Bangkok or Hanoi", "South-East Asia city comparison"],
   searchIntent: "Help travellers choose between two destinations",
   image: hanoiGuide.image,
   publishedAt: "2026-11-16",

@@ -168,6 +168,7 @@ export const pragueVsBudapestArticle: TravelArticle = {
   excerpt:
     "Two beautiful Central European breaks compared on the details that shape the actual holiday.",
   primaryKeyword: "Prague vs Budapest",
+  secondaryKeywords: ["Prague or Budapest", "European city break comparison"],
   searchIntent: "Help travellers choose between two destinations",
   image: pragueGuide.image,
   publishedAt: "2026-11-16",

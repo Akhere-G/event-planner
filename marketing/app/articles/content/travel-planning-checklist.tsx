@@ -165,6 +165,7 @@ export const travelPlanningChecklistArticle: TravelArticle = {
   excerpt:
     "An ordered, practical checklist from the first booking decision to the morning you leave.",
   primaryKeyword: "travel planning checklist",
+  secondaryKeywords: ["holiday planning checklist", "trip planning checklist"],
   searchIntent: "Help travellers prepare for a holiday without missing key tasks",
   image: bangkokGuide.image,
   publishedAt: "2026-11-16",

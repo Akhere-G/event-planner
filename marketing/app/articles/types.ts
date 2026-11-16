@@ -3,6 +3,7 @@ import type { GuideImage } from "../destinations/types";
 
 export type ArticleCategorySlug =
   | "destination-comparisons"
+  | "product-comparisons"
   | "travel-planning";
 
 export interface ArticleSource {
@@ -18,6 +19,7 @@ export interface TravelArticle {
   description: string;
   excerpt: string;
   primaryKeyword: string;
+  secondaryKeywords: string[];
   searchIntent: string;
   image: GuideImage;
   publishedAt: string;
