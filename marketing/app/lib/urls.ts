@@ -10,3 +10,11 @@ export function templateUrl(templateSlug: string): string {
 export function guidePath(guideSlug: string): string {
   return `/destinations/${guideSlug}`;
 }
+
+export function articlePath(articleSlug: string): string {
+  return `/articles/${articleSlug}`;
+}
+
+export function articleCategoryPath(categorySlug: string): string {
+  return `/articles/category/${categorySlug}`;
+}

@@ -1,6 +1,12 @@
 import type { MetadataRoute } from "next";
 import { destinationGuides } from "./destinations/guides";
-import { guidePath, SITE_URL } from "./lib/urls";
+import { articleCategories, travelArticles } from "./articles";
+import {
+  articleCategoryPath,
+  articlePath,
+  guidePath,
+  SITE_URL,
+} from "./lib/urls";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = SITE_URL;
@@ -10,6 +16,26 @@ export default function sitemap(): MetadataRoute.Sitemap {
       url: `${baseUrl}${guidePath(guide.slug)}`,
       lastModified: new Date(guide.publishedAt),
       changeFrequency: "monthly",
+      priority: 0.6,
+    });
+  }
+
+  const articleEntries: MetadataRoute.Sitemap = [];
+  for (const article of travelArticles) {
+    articleEntries.push({
+      url: `${baseUrl}${articlePath(article.slug)}`,
+      lastModified: new Date(article.updatedAt),
+      changeFrequency: "monthly",
+      priority: 0.7,
+    });
+  }
+
+  const categoryEntries: MetadataRoute.Sitemap = [];
+  for (const category of articleCategories) {
+    categoryEntries.push({
+      url: `${baseUrl}${articleCategoryPath(category.slug)}`,
+      lastModified: new Date("2026-11-16"),
+      changeFrequency: "weekly",
       priority: 0.6,
     });
   }
@@ -45,6 +71,14 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "weekly",
       priority: 0.8,
     },
+    {
+      url: `${baseUrl}/articles`,
+      lastModified: new Date("2026-11-16"),
+      changeFrequency: "weekly",
+      priority: 0.8,
+    },
     ...guideEntries,
+    ...categoryEntries,
+    ...articleEntries,
   ];
 }

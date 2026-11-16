@@ -6,7 +6,7 @@ import { CookiePreferencesButton } from "./CookiePreferencesButton";
 
 const LINKS = [
   { label: "Destinations", href: "/destinations" },
-  { label: "Travel guides", href: "/destinations" },
+  { label: "Travel articles", href: "/articles" },
 ];
 
 export function SiteHeader() {
