@@ -10,6 +10,8 @@ import {
   TripTrackCta,
 } from "../components/ArticleElements";
 import type { TravelArticle } from "../types";
+import { ArticlePhoto } from "../components/ArticlePhoto";
+import { articlePhotos } from "../photos";
 
 function Content() {
   return (
@@ -74,6 +76,11 @@ function Content() {
         </p>
       </ArticleSection>
 
+      <ArticlePhoto
+        image={articlePhotos.pragueSquare}
+        caption="Prague’s Old Town Square puts several of the city’s historic landmarks within one compact area."
+      />
+
       <ArticleSection id="food" title="Food and drink">
         <p>
           Prague is a natural choice for Czech lager, beer halls and hearty dishes
@@ -109,6 +116,11 @@ function Content() {
           into a slower walk.
         </p>
       </ArticleSection>
+
+      <ArticlePhoto
+        image={articlePhotos.budapestBridge}
+        caption="The Chain Bridge and Parliament give Budapest’s Danube waterfront a different character after dark."
+      />
 
       <ArticleSection id="when-to-go" title="Best time to visit">
         <p>

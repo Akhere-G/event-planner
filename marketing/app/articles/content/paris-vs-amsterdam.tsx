@@ -10,6 +10,8 @@ import {
   TripTrackCta,
 } from "../components/ArticleElements";
 import type { TravelArticle } from "../types";
+import { ArticlePhoto } from "../components/ArticlePhoto";
+import { articlePhotos } from "../photos";
 
 function Content() {
   return (
@@ -84,6 +86,11 @@ function Content() {
         </p>
       </ArticleSection>
 
+      <ArticlePhoto
+        image={articlePhotos.parisCafe}
+        caption="Leave room between Paris’s headline sights for a café stop and a slower meal."
+      />
+
       <ArticleSection id="culture" title="Museums, sights and neighbourhoods">
         <p>
           Paris has the deeper bench. The Louvre, Musée d’Orsay, Centre Pompidou
@@ -124,6 +131,11 @@ function Content() {
           map as a checklist.
         </p>
       </ArticleSection>
+
+      <ArticlePhoto
+        image={articlePhotos.amsterdamCanal}
+        caption="Amsterdam’s canals connect neighbourhood walks with the city’s everyday cycling culture."
+      />
 
       <ArticleSection id="when-to-go" title="Best time to visit">
         <p>

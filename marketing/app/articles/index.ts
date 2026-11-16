@@ -1,3 +1,4 @@
+import { bangkokVsHanoiArticle } from "./content/bangkok-vs-hanoi";
 import { howToCreateTravelItineraryArticle } from "./content/how-to-create-travel-itinerary";
 import { parisVsAmsterdamArticle } from "./content/paris-vs-amsterdam";
 import { pragueVsBudapestArticle } from "./content/prague-vs-budapest";
@@ -6,6 +7,7 @@ import { travelPlanningChecklistArticle } from "./content/travel-planning-checkl
 import type { ArticleCategorySlug, TravelArticle } from "./types";
 
 export const travelArticles: TravelArticle[] = [
+  bangkokVsHanoiArticle,
   howToCreateTravelItineraryArticle,
   travelPlanningChecklistArticle,
   parisVsAmsterdamArticle,

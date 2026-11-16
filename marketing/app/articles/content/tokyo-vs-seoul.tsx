@@ -10,6 +10,8 @@ import {
   TripTrackCta,
 } from "../components/ArticleElements";
 import type { TravelArticle } from "../types";
+import { ArticlePhoto } from "../components/ArticlePhoto";
+import { articlePhotos } from "../photos";
 
 function Content() {
   return (
@@ -101,6 +103,11 @@ function Content() {
         </p>
       </ArticleSection>
 
+      <ArticlePhoto
+        image={articlePhotos.tokyoTemple}
+        caption="Senso-ji provides a historic starting point for a day exploring Tokyo’s Asakusa neighbourhood."
+      />
+
       <ArticleSection id="nightlife" title="Nightlife">
         <p>
           Seoul has the easier edge for energetic late nights. Hongdae mixes live
@@ -130,6 +137,11 @@ function Content() {
           usually requires fewer cross-city journeys than Tokyo.
         </p>
       </ArticleSection>
+
+      <ArticlePhoto
+        image={articlePhotos.seoulPalace}
+        caption="Gyeongbokgung’s painted palace buildings bring Seoul’s royal history into a central sightseeing day."
+      />
 
       <ArticleSection id="when-to-go" title="Best time to visit">
         <p>

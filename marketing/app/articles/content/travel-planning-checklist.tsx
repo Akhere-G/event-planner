@@ -9,6 +9,8 @@ import {
   TripTrackCta,
 } from "../components/ArticleElements";
 import type { TravelArticle } from "../types";
+import { ArticlePhoto } from "../components/ArticlePhoto";
+import { articlePhotos } from "../photos";
 
 function Content() {
   return (
@@ -35,6 +37,11 @@ function Content() {
           <li>Check travel insurance terms before relying on cancellation cover.</li>
         </CheckList>
       </ArticleSection>
+
+      <ArticlePhoto
+        image={articlePhotos.passportLuggage}
+        caption="Check the entry requirements for the passport you will travel on before committing to bookings."
+      />
 
       <ArticleSection id="after-booking" title="As soon as transport is booked">
         <CheckList>
@@ -113,6 +120,11 @@ function Content() {
           space.
         </p>
       </ArticleSection>
+
+      <ArticlePhoto
+        image={articlePhotos.airportBoard}
+        caption="Keep flight times and terminal details with your itinerary, then recheck them before departure."
+      />
 
       <ArticleSection id="day-before" title="The day before you leave">
         <CheckList>

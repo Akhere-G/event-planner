@@ -9,6 +9,8 @@ import {
   TripTrackCta,
 } from "../components/ArticleElements";
 import type { TravelArticle } from "../types";
+import { ArticlePhoto } from "../components/ArticlePhoto";
+import { articlePhotos } from "../photos";
 
 function Content() {
   return (
@@ -53,6 +55,11 @@ function Content() {
           alternatives without forcing them into the schedule.
         </p>
       </ArticleSection>
+
+      <ArticlePhoto
+        image={articlePhotos.planningMap}
+        caption="Write down the places that matter most before fitting them into individual days."
+      />
 
       <ArticleSection id="map" title="3. Put every candidate on a map">
         <p>
@@ -100,6 +107,11 @@ function Content() {
           if a queue is longer than expected.
         </p>
       </ArticleSection>
+
+      <ArticlePhoto
+        image={articlePhotos.barcelonaStreet}
+        caption="A walk through Barcelona’s Gothic Quarter shows why nearby streets and sights belong in the same part of your itinerary."
+      />
 
       <ArticleSection id="bookings" title="6. Book only what benefits from booking">
         <p>
