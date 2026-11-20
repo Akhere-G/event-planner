@@ -59,19 +59,7 @@ def configure_app(app: Flask, testing: bool):
         engine_options = {}
     elif environment == "PROD":
         config = ProductionConfig()
-
-        cert_path = os.getenv(
-            "DB_CA_CERT_PATH",
-            "/app/certs/ca.pem",
-        )
-
-        engine_options = {
-            "connect_args": {
-                "ssl": {
-                    "ca": cert_path,
-                }
-            }
-        }
+        engine_options = {"pool_pre_ping": True}
     else:
         config = DevConfig()
         engine_options = {}
