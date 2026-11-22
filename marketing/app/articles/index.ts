@@ -1,11 +1,24 @@
 import { bangkokVsHanoiArticle } from "./content/bangkok-vs-hanoi";
+import { berlinVsAmsterdamArticle } from "./content/berlin-vs-amsterdam";
 import { bestTravelPlanningAppsArticle } from "./content/best-travel-planning-apps";
+import { dubaiVsMarrakechArticle } from "./content/dubai-vs-marrakech";
+import { dubaiVsMiamiArticle } from "./content/dubai-vs-miami";
 import { howToCreateTravelItineraryArticle } from "./content/how-to-create-travel-itinerary";
+import { ibizaVsMykonosArticle } from "./content/ibiza-vs-mykonos";
+import { krakowVsBudapestArticle } from "./content/krakow-vs-budapest";
+import { krakowVsPragueArticle } from "./content/krakow-vs-prague";
+import { lasVegasVsNewYorkArticle } from "./content/las-vegas-vs-new-york";
+import { marbellaVsIbizaArticle } from "./content/marbella-vs-ibiza";
+import { miamiVsLasVegasArticle } from "./content/miami-vs-las-vegas";
 import { parisVsAmsterdamArticle } from "./content/paris-vs-amsterdam";
+import { phuketVsBaliArticle } from "./content/phuket-vs-bali";
 import { pragueVsBudapestArticle } from "./content/prague-vs-budapest";
+import { splitVsMykonosArticle } from "./content/split-vs-mykonos";
+import { tenerifeVsMarbellaArticle } from "./content/tenerife-vs-marbella";
 import { tokyoVsSeoulArticle } from "./content/tokyo-vs-seoul";
 import { travelPlanningChecklistArticle } from "./content/travel-planning-checklist";
 import { triptrackVsTripitArticle } from "./content/triptrack-vs-tripit";
+import { tulumVsBaliArticle } from "./content/tulum-vs-bali";
 import { wanderlogVsTriptrackArticle } from "./content/wanderlog-vs-triptrack";
 import type { ArticleCategorySlug, TravelArticle } from "./types";
 
@@ -13,12 +26,25 @@ export const travelArticles: TravelArticle[] = [
   bestTravelPlanningAppsArticle,
   wanderlogVsTriptrackArticle,
   triptrackVsTripitArticle,
+  ibizaVsMykonosArticle,
+  marbellaVsIbizaArticle,
+  krakowVsBudapestArticle,
+  dubaiVsMarrakechArticle,
+  miamiVsLasVegasArticle,
+  tulumVsBaliArticle,
   bangkokVsHanoiArticle,
   howToCreateTravelItineraryArticle,
   travelPlanningChecklistArticle,
   parisVsAmsterdamArticle,
   tokyoVsSeoulArticle,
   pragueVsBudapestArticle,
+  splitVsMykonosArticle,
+  tenerifeVsMarbellaArticle,
+  krakowVsPragueArticle,
+  berlinVsAmsterdamArticle,
+  dubaiVsMiamiArticle,
+  lasVegasVsNewYorkArticle,
+  phuketVsBaliArticle,
 ];
 
 export const articleCategories: {
