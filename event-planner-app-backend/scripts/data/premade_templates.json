@@ -6435,5 +6435,4868 @@
         }
       }
     ]
+  },
+  {
+    "slug": "ibiza-4-days-itinerary",
+    "title": "Ibiza in 4 days: beaches, sunsets, one big night and Formentera",
+    "description": "Four days that mix the walled old town, the island's best beaches, a sunset on the Sant Antoni strip, an open-air pool party and a ferry to Formentera. Built for groups of friends who want a big night without losing the whole holiday to it.",
+    "destination": "Ibiza, Spain",
+    "region": "Europe",
+    "latitude": 38.9067,
+    "longitude": 1.4206,
+    "timezone": "Europe/Madrid",
+    "duration_days": 4,
+    "cover_image": null,
+    "ops": [
+      {
+        "op": "create",
+        "entity": "accommodation",
+        "data": {
+          "name": "Ibiza Gran Hotel",
+          "description": "A smart marina hotel facing Dalt Vila, with an easy taxi ride to the beaches and clubs.",
+          "address": "Passeig Joan Carles I 17, 07800 Ibiza",
+          "latitude": 38.915,
+          "longitude": 1.4468,
+          "start_day_offset": 0,
+          "end_day_offset": 4
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "Dalt Vila",
+          "description": "Walk up through the Portal de ses Taules to the cathedral terrace for views over the harbour and the old walls.",
+          "address": "Portal de ses Taules, 07800 Ibiza",
+          "latitude": 38.9067,
+          "longitude": 1.4362,
+          "category": "sightseeing",
+          "day_offset": 0,
+          "start_time": "10:00",
+          "end_day_offset": 0,
+          "end_time": "12:00"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "Lunch at Comidas Bar San Juan",
+          "description": "A cheap, cheerful canteen near the port. No bookings, so arrive just as it opens if you're a big group.",
+          "address": "Carrer de Guillem de Montgrí 8, 07800 Ibiza",
+          "latitude": 38.9089,
+          "longitude": 1.4366,
+          "category": "dining",
+          "day_offset": 0,
+          "start_time": "12:30",
+          "end_day_offset": 0,
+          "end_time": "13:45"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "Ses Salines beach",
+          "description": "Claim a stretch of sand inside the nature park and swim until late afternoon.",
+          "address": "Platja de ses Salines, 07818 Sant Josep de sa Talaia, Ibiza",
+          "latitude": 38.8395,
+          "longitude": 1.3915,
+          "category": "leisure",
+          "day_offset": 0,
+          "start_time": "15:00",
+          "end_day_offset": 0,
+          "end_time": "18:30"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "Dinner at Can Pilot",
+          "description": "Big grilled-meat platters at a local favourite in Sant Rafel, handy for taxis to the clubs afterwards.",
+          "address": "Avinguda Isidor Macabich 31, 07816 Sant Rafel de Sa Creu, Ibiza",
+          "latitude": 38.9466,
+          "longitude": 1.4086,
+          "category": "dining",
+          "day_offset": 0,
+          "start_time": "21:00",
+          "end_day_offset": 0,
+          "end_time": "22:30"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "Cala Comte",
+          "description": "A late morning swim in shallow turquoise water, then lunch at one of the beach bars above the cove.",
+          "address": "Cala Comte, 07839 Sant Josep de sa Talaia, Ibiza",
+          "latitude": 38.9636,
+          "longitude": 1.2216,
+          "category": "leisure",
+          "day_offset": 1,
+          "start_time": "11:00",
+          "end_day_offset": 1,
+          "end_time": "15:00"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "Pool time and siesta",
+          "description": "Rest up before the evening. A late night is coming.",
+          "address": "Passeig Joan Carles I 17, 07800 Ibiza",
+          "latitude": 38.915,
+          "longitude": 1.4468,
+          "category": "leisure",
+          "day_offset": 1,
+          "start_time": "16:30",
+          "end_day_offset": 1,
+          "end_time": "18:30"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "Sunset on the Sant Antoni strip",
+          "description": "Grab a spot on the rocks near Café del Mar for the island's most famous sunset.",
+          "address": "Carrer de Vara de Rey 27, 07820 Sant Antoni de Portmany, Ibiza",
+          "latitude": 38.9818,
+          "longitude": 1.2977,
+          "category": "entertainment",
+          "day_offset": 1,
+          "start_time": "19:30",
+          "end_day_offset": 1,
+          "end_time": "21:00"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "Santa Gertrudis village",
+          "description": "Wander the small village square and its craft shops, a quiet contrast to the coast.",
+          "address": "Plaça de l'Església 11, 07814 Santa Gertrudis de Fruitera, Ibiza",
+          "latitude": 39.0003,
+          "longitude": 1.4316,
+          "category": "sightseeing",
+          "day_offset": 2,
+          "start_time": "11:30",
+          "end_day_offset": 2,
+          "end_time": "12:45"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "Lunch at Bar Costa",
+          "description": "Jamón, cheese and toasted sandwiches under the hanging hams.",
+          "address": "Plaça de l'Església 11, 07814 Santa Gertrudis de Fruitera, Ibiza",
+          "latitude": 39.0003,
+          "longitude": 1.4316,
+          "category": "dining",
+          "day_offset": 2,
+          "start_time": "13:00",
+          "end_day_offset": 2,
+          "end_time": "14:30"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "Ushuaïa Ibiza",
+          "description": "An open-air pool party with headline DJs. Book tickets in advance and check the line-up.",
+          "address": "Platja d'en Bossa 10, 07817 Sant Josep de sa Talaia, Ibiza",
+          "latitude": 38.8817,
+          "longitude": 1.4044,
+          "category": "entertainment",
+          "day_offset": 2,
+          "start_time": "17:00",
+          "end_day_offset": 2,
+          "end_time": "23:30"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "Formentera day trip",
+          "description": "Take the fast ferry, hire scooters or bikes and head to Ses Illetes beach. Check the last ferry back.",
+          "address": "Estació Marítima de Formentera, 07800 Ibiza",
+          "latitude": 38.9116,
+          "longitude": 1.441,
+          "category": "adventure",
+          "day_offset": 3,
+          "start_time": "09:30",
+          "end_day_offset": 3,
+          "end_time": "18:30"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "wishlist_item",
+        "data": {
+          "name": "Es Boldado",
+          "wishlist_name": "Top restaurants",
+          "address": "Cala d'Hort, 07830 Sant Josep de sa Talaia, Ibiza",
+          "latitude": 38.8897,
+          "longitude": 1.2246,
+          "description": "A cliffside seafood restaurant looking straight at the rock of Es Vedrà. Order paella or the catch of the day and book a table for sunset."
+        }
+      },
+      {
+        "op": "create",
+        "entity": "wishlist_item",
+        "data": {
+          "name": "Can Pilot",
+          "wishlist_name": "Top restaurants",
+          "address": "Avinguda Isidor Macabich 31, 07816 Sant Rafel de Sa Creu, Ibiza",
+          "latitude": 38.9466,
+          "longitude": 1.4086,
+          "description": "A long-running grill house loved by locals for big plates of meat cooked over wood. Good value for a hungry group before a night out."
+        }
+      },
+      {
+        "op": "create",
+        "entity": "wishlist_item",
+        "data": {
+          "name": "Bar Costa",
+          "wishlist_name": "Top restaurants",
+          "address": "Plaça de l'Església 11, 07814 Santa Gertrudis de Fruitera, Ibiza",
+          "latitude": 39.0003,
+          "longitude": 1.4316,
+          "description": "A village bar hung with hams, serving jamón, cheese and toasted sandwiches on the square. Perfect for a slow lunch inland."
+        }
+      },
+      {
+        "op": "create",
+        "entity": "wishlist_item",
+        "data": {
+          "name": "Comidas Bar San Juan",
+          "wishlist_name": "Top restaurants",
+          "address": "Carrer de Guillem de Montgrí 8, 07800 Ibiza",
+          "latitude": 38.9089,
+          "longitude": 1.4366,
+          "description": "A tiny, old-fashioned canteen near the port with simple Spanish dishes at very low prices. No bookings, so expect to share a table."
+        }
+      },
+      {
+        "op": "create",
+        "entity": "wishlist_item",
+        "data": {
+          "name": "Atlantis (Sa Pedrera)",
+          "wishlist_name": "Hidden gems",
+          "address": "Sa Pedrera, 07830 Sant Josep de sa Talaia, Ibiza",
+          "latitude": 38.879,
+          "longitude": 1.216,
+          "description": "An old sandstone quarry carved into the coast, with rock pools and carvings. A steep, unmarked walk down, so wear proper shoes."
+        }
+      },
+      {
+        "op": "create",
+        "entity": "wishlist_item",
+        "data": {
+          "name": "Benirràs Sunday drums",
+          "wishlist_name": "Hidden gems",
+          "address": "Platja de Benirràs, 07810 Sant Joan de Labritja, Ibiza",
+          "latitude": 39.0886,
+          "longitude": 1.4545,
+          "description": "On Sunday evenings in summer, drummers gather on Benirràs beach to play the sun down. A gentler side of Ibiza's music culture."
+        }
+      },
+      {
+        "op": "create",
+        "entity": "wishlist_item",
+        "data": {
+          "name": "Puig de Missa",
+          "wishlist_name": "Hidden gems",
+          "address": "Puig de Missa, 07840 Santa Eulària des Riu, Ibiza",
+          "latitude": 38.9866,
+          "longitude": 1.5302,
+          "description": "A whitewashed hilltop church above Santa Eulària with a small ethnographic museum and wide views over the coast."
+        }
+      },
+      {
+        "op": "create",
+        "entity": "wishlist_item",
+        "data": {
+          "name": "Punta de sa Galera",
+          "wishlist_name": "Hidden gems",
+          "address": "Punta de sa Galera, 07820 Sant Antoni de Portmany, Ibiza",
+          "latitude": 39.0045,
+          "longitude": 1.2933,
+          "description": "Flat rock terraces near Cala Salada where locals swim and watch the sunset away from the crowds."
+        }
+      },
+      {
+        "op": "create",
+        "entity": "packing_item",
+        "data": {
+          "name": "Swimwear (at least two sets)",
+          "category": "Clothing"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "packing_item",
+        "data": {
+          "name": "Light evening outfits for beach clubs and dinners",
+          "category": "Clothing"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "packing_item",
+        "data": {
+          "name": "Comfortable sandals and one pair of shoes for walking",
+          "category": "Clothing"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "packing_item",
+        "data": {
+          "name": "High-SPF sunscreen and after-sun",
+          "category": "Toiletries"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "packing_item",
+        "data": {
+          "name": "Sunglasses and a hat",
+          "category": "Clothing"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "packing_item",
+        "data": {
+          "name": "Phone power bank",
+          "category": "Electronics"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "packing_item",
+        "data": {
+          "name": "Passport and photo ID for club entry",
+          "category": "Documents"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "packing_item",
+        "data": {
+          "name": "Reusable water bottle",
+          "category": "Misc"
+        }
+      }
+    ]
+  },
+  {
+    "slug": "mykonos-4-days-itinerary",
+    "title": "Mykonos in 4 days: Little Venice, Delos and the south-coast beaches",
+    "description": "Four days of whitewashed lanes, sunset drinks in Little Venice, a boat trip to ancient Delos, beach days on the south coast and a lazy lunch at Kiki's. Suits friends and couples who want the island's highlights at a relaxed pace.",
+    "destination": "Mykonos, Greece",
+    "region": "Europe",
+    "latitude": 37.4467,
+    "longitude": 25.3289,
+    "timezone": "Europe/Athens",
+    "duration_days": 4,
+    "cover_image": null,
+    "ops": [
+      {
+        "op": "create",
+        "entity": "accommodation",
+        "data": {
+          "name": "Belvedere Hotel",
+          "description": "A stylish hotel with a pool, a short walk from the lanes and bars of Mykonos Town.",
+          "address": "School of Fine Arts District, Mykonos 846 00, Greece",
+          "latitude": 37.4486,
+          "longitude": 25.3315,
+          "start_day_offset": 0,
+          "end_day_offset": 4
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "Mykonos Town and Paraportiani",
+          "description": "Lose yourselves in the lanes of Chora and see the Church of Paraportiani.",
+          "address": "Paraportiani, Mykonos 846 00, Greece",
+          "latitude": 37.4462,
+          "longitude": 25.3256,
+          "category": "culture",
+          "day_offset": 0,
+          "start_time": "10:00",
+          "end_day_offset": 0,
+          "end_time": "11:30"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "Kato Mili windmills",
+          "description": "Walk up to the windmills in the soft light before sunset.",
+          "address": "Kato Mili, Mykonos 846 00, Greece",
+          "latitude": 37.4446,
+          "longitude": 25.3253,
+          "category": "sightseeing",
+          "day_offset": 0,
+          "start_time": "17:30",
+          "end_day_offset": 0,
+          "end_time": "18:30"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "Sunset drinks in Little Venice",
+          "description": "Find a waterfront bar for sunset. Book a table at the busiest spots.",
+          "address": "Little Venice, Mykonos 846 00, Greece",
+          "latitude": 37.4453,
+          "longitude": 25.3257,
+          "category": "entertainment",
+          "day_offset": 0,
+          "start_time": "19:00",
+          "end_day_offset": 0,
+          "end_time": "20:30"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "Dinner at Kounelas",
+          "description": "Grilled fish of the day in a simple courtyard taverna.",
+          "address": "Mykonos Town, Mykonos 846 00, Greece",
+          "latitude": 37.4467,
+          "longitude": 25.3268,
+          "category": "dining",
+          "day_offset": 0,
+          "start_time": "21:00",
+          "end_day_offset": 0,
+          "end_time": "22:30"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "Boat trip to Delos",
+          "description": "Ancient sanctuary of Apollo. Bring water, a hat and cash for tickets.",
+          "address": "Old Port, Mykonos 846 00, Greece",
+          "latitude": 37.4489,
+          "longitude": 25.327,
+          "category": "culture",
+          "day_offset": 1,
+          "start_time": "09:30",
+          "end_day_offset": 1,
+          "end_time": "14:00"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "Lunch at Niko's Taverna",
+          "description": "Greek classics near the old port after the boat comes back.",
+          "address": "Agias Monis Square, Mykonos Town 846 00, Greece",
+          "latitude": 37.4471,
+          "longitude": 25.3277,
+          "category": "dining",
+          "day_offset": 1,
+          "start_time": "14:30",
+          "end_day_offset": 1,
+          "end_time": "15:45"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "Psarou beach",
+          "description": "Sunbeds and calm water on the sheltered south coast.",
+          "address": "Platis Gialos, Mykonos 846 00, Greece",
+          "latitude": 37.4148,
+          "longitude": 25.346,
+          "category": "leisure",
+          "day_offset": 1,
+          "start_time": "16:30",
+          "end_day_offset": 1,
+          "end_time": "19:00"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "Ano Mera and Panagia Tourliani",
+          "description": "The island's second village and its monastery.",
+          "address": "Ano Mera, Mykonos 846 00, Greece",
+          "latitude": 37.4475,
+          "longitude": 25.394,
+          "category": "culture",
+          "day_offset": 2,
+          "start_time": "10:00",
+          "end_day_offset": 2,
+          "end_time": "11:30"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "Lunch at Kiki's Tavern",
+          "description": "No bookings and no electricity. Queue with a drink and swim at Agios Sostis afterwards.",
+          "address": "Agios Sostis, Mykonos 846 00, Greece",
+          "latitude": 37.486,
+          "longitude": 25.358,
+          "category": "dining",
+          "day_offset": 2,
+          "start_time": "13:00",
+          "end_day_offset": 2,
+          "end_time": "15:00"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "Night out at Paradise beach",
+          "description": "The island's party beach, busiest in July and August.",
+          "address": "Paradise Beach, Mykonos 846 00, Greece",
+          "latitude": 37.4105,
+          "longitude": 25.3565,
+          "category": "entertainment",
+          "day_offset": 2,
+          "start_time": "22:00",
+          "end_day_offset": 2,
+          "end_time": "23:59"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "Armenistis Lighthouse",
+          "description": "A quiet headland with a view to Tinos.",
+          "address": "Armenistis Lighthouse, Mykonos 846 00, Greece",
+          "latitude": 37.4877,
+          "longitude": 25.3138,
+          "category": "sightseeing",
+          "day_offset": 3,
+          "start_time": "11:00",
+          "end_day_offset": 3,
+          "end_time": "12:00"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "Lunch at Fokos Taverna",
+          "description": "Home-style dishes on a wild northern beach.",
+          "address": "Fokos Beach, Mykonos 846 00, Greece",
+          "latitude": 37.4806,
+          "longitude": 25.4091,
+          "category": "dining",
+          "day_offset": 3,
+          "start_time": "13:00",
+          "end_day_offset": 3,
+          "end_time": "16:00"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "wishlist_item",
+        "data": {
+          "name": "Kiki's Tavern",
+          "wishlist_name": "Top restaurants",
+          "address": "Agios Sostis, Mykonos 846 00, Greece",
+          "latitude": 37.486,
+          "longitude": 25.358,
+          "description": "A tiny grill above a quiet beach with no electricity and no bookings. Expect to queue with a drink, and it is worth it."
+        }
+      },
+      {
+        "op": "create",
+        "entity": "wishlist_item",
+        "data": {
+          "name": "Kounelas",
+          "wishlist_name": "Top restaurants",
+          "address": "Mykonos Town, Mykonos 846 00, Greece",
+          "latitude": 37.4467,
+          "longitude": 25.3268,
+          "description": "A simple fish taverna in the lanes near the old port, with grilled catch of the day and a courtyard. Good value for Mykonos."
+        }
+      },
+      {
+        "op": "create",
+        "entity": "wishlist_item",
+        "data": {
+          "name": "Niko's Taverna",
+          "wishlist_name": "Top restaurants",
+          "address": "Agias Monis Square, Mykonos Town 846 00, Greece",
+          "latitude": 37.4471,
+          "longitude": 25.3277,
+          "description": "A long-running taverna near the old port serving Greek classics in generous portions, popular for a late lunch."
+        }
+      },
+      {
+        "op": "create",
+        "entity": "wishlist_item",
+        "data": {
+          "name": "M-Eating",
+          "wishlist_name": "Top restaurants",
+          "address": "Kalogera 10, Mykonos 846 00, Greece",
+          "latitude": 37.4455,
+          "longitude": 25.329,
+          "description": "Modern Greek cooking on Kalogera street, using island ingredients. Book for a celebratory dinner."
+        }
+      },
+      {
+        "op": "create",
+        "entity": "wishlist_item",
+        "data": {
+          "name": "Agios Sostis beach",
+          "wishlist_name": "Hidden gems",
+          "address": "Agios Sostis, Mykonos 846 00, Greece",
+          "latitude": 37.4862,
+          "longitude": 25.3585,
+          "description": "An undeveloped beach with no sunbeds, home to Kiki's Tavern. Bring your own shade."
+        }
+      },
+      {
+        "op": "create",
+        "entity": "wishlist_item",
+        "data": {
+          "name": "Panagia Tourliani Monastery",
+          "wishlist_name": "Hidden gems",
+          "address": "Ano Mera, Mykonos 846 00, Greece",
+          "latitude": 37.4473,
+          "longitude": 25.3943,
+          "description": "A 16th-century monastery with an ornate carved wooden iconostasis in a peaceful village square."
+        }
+      },
+      {
+        "op": "create",
+        "entity": "wishlist_item",
+        "data": {
+          "name": "Kapari beach",
+          "wishlist_name": "Hidden gems",
+          "address": "Kapari, Mykonos 846 00, Greece",
+          "latitude": 37.4255,
+          "longitude": 25.3047,
+          "description": "A small cove near Agios Ioannis with a sunset view, reached down a rough track. Quiet even in high season."
+        }
+      },
+      {
+        "op": "create",
+        "entity": "wishlist_item",
+        "data": {
+          "name": "Lia beach",
+          "wishlist_name": "Hidden gems",
+          "address": "Lia Beach, Mykonos 846 00, Greece",
+          "latitude": 37.4463,
+          "longitude": 25.4354,
+          "description": "A long, clean beach at the far eastern end of the island with a good taverna and fewer crowds."
+        }
+      },
+      {
+        "op": "create",
+        "entity": "packing_item",
+        "data": {
+          "name": "Swimwear and a beach towel",
+          "category": "Clothing"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "packing_item",
+        "data": {
+          "name": "Windproof layer for breezy evenings",
+          "category": "Clothing"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "packing_item",
+        "data": {
+          "name": "Flat sandals for cobbled lanes",
+          "category": "Clothing"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "packing_item",
+        "data": {
+          "name": "High-SPF sunscreen",
+          "category": "Toiletries"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "packing_item",
+        "data": {
+          "name": "Sunglasses and a hat",
+          "category": "Clothing"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "packing_item",
+        "data": {
+          "name": "Cash for tavernas, sea taxis and Delos tickets",
+          "category": "Documents"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "packing_item",
+        "data": {
+          "name": "Driving licence if you plan to hire a quad or car",
+          "category": "Documents"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "packing_item",
+        "data": {
+          "name": "Phone power bank",
+          "category": "Electronics"
+        }
+      }
+    ]
+  },
+  {
+    "slug": "marbella-4-days-itinerary",
+    "title": "Marbella in 4 days: old town, beach clubs and a day in Ronda",
+    "description": "Four days that mix the orange-tree squares of the old town, a beach-club day, a night in Puerto Banús and a trip inland to Ronda's gorge. Built for groups of friends, hen dos and birthdays that want sun and a good night out.",
+    "destination": "Marbella, Spain",
+    "region": "Europe",
+    "latitude": 36.5101,
+    "longitude": -4.8825,
+    "timezone": "Europe/Madrid",
+    "duration_days": 4,
+    "cover_image": null,
+    "ops": [
+      {
+        "op": "create",
+        "entity": "accommodation",
+        "data": {
+          "name": "Amàre Beach Hotel Marbella",
+          "description": "An adults-only beachfront hotel with a rooftop and pool, a short walk from the old town.",
+          "address": "Avenida Severo Ochoa 8, 29603 Marbella, Spain",
+          "latitude": 36.5063,
+          "longitude": -4.879,
+          "start_day_offset": 0,
+          "end_day_offset": 4
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "Old Town and Plaza de los Naranjos",
+          "description": "Wander the whitewashed lanes and settle in on the square for a drink.",
+          "address": "Plaza de los Naranjos, 29601 Marbella, Spain",
+          "latitude": 36.5103,
+          "longitude": -4.8848,
+          "category": "sightseeing",
+          "day_offset": 0,
+          "start_time": "17:30",
+          "end_day_offset": 0,
+          "end_time": "19:00"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "Avenida del Mar",
+          "description": "Walk down past the Dalí sculptures to the seafront.",
+          "address": "Avenida del Mar, 29602 Marbella, Spain",
+          "latitude": 36.5085,
+          "longitude": -4.8852,
+          "category": "sightseeing",
+          "day_offset": 0,
+          "start_time": "19:15",
+          "end_day_offset": 0,
+          "end_time": "19:45"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "Tapas at Bar El Estrecho",
+          "description": "Squeeze in at the bar for fried fish, croquetas and cold beer.",
+          "address": "Calle San Lázaro 12, 29601 Marbella, Spain",
+          "latitude": 36.5099,
+          "longitude": -4.884,
+          "category": "dining",
+          "day_offset": 0,
+          "start_time": "21:00",
+          "end_day_offset": 0,
+          "end_time": "23:00"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "Ocean Club beach day",
+          "description": "Pool, day beds and DJs. Reserve a bed or table in advance.",
+          "address": "Avenida Lola Flores, 29660 Puerto Banús, Spain",
+          "latitude": 36.4836,
+          "longitude": -4.9567,
+          "category": "leisure",
+          "day_offset": 1,
+          "start_time": "11:00",
+          "end_day_offset": 1,
+          "end_time": "18:00"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "Dinner at La Sala Puerto Banús",
+          "description": "A lively dinner that turns into a party.",
+          "address": "Calle Belgica, 29660 Puerto Banús, Spain",
+          "latitude": 36.4862,
+          "longitude": -4.953,
+          "category": "dining",
+          "day_offset": 1,
+          "start_time": "21:00",
+          "end_day_offset": 1,
+          "end_time": "23:00"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "Puerto Banús bars",
+          "description": "Walk the marina and pick a bar.",
+          "address": "Puerto Banús, 29660 Marbella, Spain",
+          "latitude": 36.4855,
+          "longitude": -4.9524,
+          "category": "entertainment",
+          "day_offset": 1,
+          "start_time": "23:00",
+          "end_day_offset": 1,
+          "end_time": "23:59"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "Ronda day trip",
+          "description": "The Puente Nuevo, the old town and the gorge. About an hour each way by car or coach.",
+          "address": "Puente Nuevo, 29400 Ronda, Spain",
+          "latitude": 36.7409,
+          "longitude": -5.1657,
+          "category": "sightseeing",
+          "day_offset": 2,
+          "start_time": "10:00",
+          "end_day_offset": 2,
+          "end_time": "17:00"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "Dinner at Casanis Bistrot",
+          "description": "A relaxed courtyard dinner in the old town.",
+          "address": "Calle Ancha 6, 29601 Marbella, Spain",
+          "latitude": 36.5113,
+          "longitude": -4.8866,
+          "category": "dining",
+          "day_offset": 2,
+          "start_time": "20:30",
+          "end_day_offset": 2,
+          "end_time": "22:30"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "Golden Mile walk",
+          "description": "A seafront stroll past the grand hotels.",
+          "address": "Paseo Marítimo, 29602 Marbella, Spain",
+          "latitude": 36.501,
+          "longitude": -4.925,
+          "category": "leisure",
+          "day_offset": 3,
+          "start_time": "10:00",
+          "end_day_offset": 3,
+          "end_time": "11:30"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "Lunch at Bibo Marbella",
+          "description": "Sharing plates at Puente Romano to finish the trip.",
+          "address": "Puente Romano, Bulevar Príncipe Alfonso de Hohenlohe, 29602 Marbella, Spain",
+          "latitude": 36.5034,
+          "longitude": -4.9147,
+          "category": "dining",
+          "day_offset": 3,
+          "start_time": "13:00",
+          "end_day_offset": 3,
+          "end_time": "15:30"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "wishlist_item",
+        "data": {
+          "name": "Bar El Estrecho",
+          "wishlist_name": "Top restaurants",
+          "address": "Calle San Lázaro 12, 29601 Marbella, Spain",
+          "latitude": 36.5099,
+          "longitude": -4.884,
+          "description": "A narrow, long-running tapas bar in the old town, busy with locals. Squeeze in at the bar and order fried fish and croquetas."
+        }
+      },
+      {
+        "op": "create",
+        "entity": "wishlist_item",
+        "data": {
+          "name": "Casanis Bistrot",
+          "wishlist_name": "Top restaurants",
+          "address": "Calle Ancha 6, 29601 Marbella, Spain",
+          "latitude": 36.5113,
+          "longitude": -4.8866,
+          "description": "French-Mediterranean cooking in a courtyard off Calle Ancha. A good choice for a relaxed group dinner."
+        }
+      },
+      {
+        "op": "create",
+        "entity": "wishlist_item",
+        "data": {
+          "name": "La Sala Puerto Banús",
+          "wishlist_name": "Top restaurants",
+          "address": "Calle Belgica, 29660 Puerto Banús, Spain",
+          "latitude": 36.4862,
+          "longitude": -4.953,
+          "description": "A lively restaurant and bar that turns into a party later on, popular with hen and stag groups. Book for weekends."
+        }
+      },
+      {
+        "op": "create",
+        "entity": "wishlist_item",
+        "data": {
+          "name": "Bibo Marbella",
+          "wishlist_name": "Top restaurants",
+          "address": "Puente Romano, Bulevar Príncipe Alfonso de Hohenlohe, 29602 Marbella, Spain",
+          "latitude": 36.5034,
+          "longitude": -4.9147,
+          "description": "Dani García's playful Andalusian brasserie at Puente Romano, with a colourful dining room and sharing plates."
+        }
+      },
+      {
+        "op": "create",
+        "entity": "wishlist_item",
+        "data": {
+          "name": "Museo del Bonsái",
+          "wishlist_name": "Hidden gems",
+          "address": "Parque Arroyo de la Represa, 29601 Marbella, Spain",
+          "latitude": 36.5131,
+          "longitude": -4.886,
+          "description": "A small, peaceful museum of bonsai trees in a park near the old town, a cool escape from the heat."
+        }
+      },
+      {
+        "op": "create",
+        "entity": "wishlist_item",
+        "data": {
+          "name": "Dunas de Artola",
+          "wishlist_name": "Hidden gems",
+          "address": "Dunas de Artola, 29604 Marbella, Spain",
+          "latitude": 36.489,
+          "longitude": -4.744,
+          "description": "Protected sand dunes and a boardwalk next to a wide, quieter beach east of town."
+        }
+      },
+      {
+        "op": "create",
+        "entity": "wishlist_item",
+        "data": {
+          "name": "Istán",
+          "wishlist_name": "Hidden gems",
+          "address": "Istán, 29611 Málaga, Spain",
+          "latitude": 36.583,
+          "longitude": -4.948,
+          "description": "A white village up the valley above the Concepción reservoir, with natural springs and mountain views."
+        }
+      },
+      {
+        "op": "create",
+        "entity": "wishlist_item",
+        "data": {
+          "name": "Refugio de Juanar",
+          "wishlist_name": "Hidden gems",
+          "address": "Refugio de Juanar, 29611 Ojén, Spain",
+          "latitude": 36.59,
+          "longitude": -4.873,
+          "description": "A mountain lodge in pine and olive woods with trails to a viewpoint over the coast."
+        }
+      },
+      {
+        "op": "create",
+        "entity": "packing_item",
+        "data": {
+          "name": "Swimwear and a cover-up for beach clubs",
+          "category": "Clothing"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "packing_item",
+        "data": {
+          "name": "Smart-casual outfits for Puerto Banús",
+          "category": "Clothing"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "packing_item",
+        "data": {
+          "name": "Walking shoes for Ronda",
+          "category": "Clothing"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "packing_item",
+        "data": {
+          "name": "High-SPF sunscreen",
+          "category": "Toiletries"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "packing_item",
+        "data": {
+          "name": "Sunglasses and a hat",
+          "category": "Clothing"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "packing_item",
+        "data": {
+          "name": "Photo ID for bars and clubs",
+          "category": "Documents"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "packing_item",
+        "data": {
+          "name": "Driving licence if you plan to hire a car",
+          "category": "Documents"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "packing_item",
+        "data": {
+          "name": "Phone power bank",
+          "category": "Electronics"
+        }
+      }
+    ]
+  },
+  {
+    "slug": "tenerife-5-days-itinerary",
+    "title": "Tenerife in 5 days: Mount Teide, beaches and the green north",
+    "description": "Five days that pair the beaches and nightlife of the south with Mount Teide, the village of Masca, a whale-watching boat trip and the colonial old town of La Laguna. Suits groups of friends who want sun with a bit of adventure.",
+    "destination": "Tenerife, Spain",
+    "region": "Europe",
+    "latitude": 28.2916,
+    "longitude": -16.6291,
+    "timezone": "Atlantic/Canary",
+    "duration_days": 5,
+    "cover_image": null,
+    "ops": [
+      {
+        "op": "create",
+        "entity": "accommodation",
+        "data": {
+          "name": "Hard Rock Hotel Tenerife",
+          "description": "A large resort with pools and a beach club, convenient for the south's beaches and nightlife.",
+          "address": "Avenida de Bruselas, 38660 Adeje, Tenerife",
+          "latitude": 28.0869,
+          "longitude": -16.7351,
+          "start_day_offset": 0,
+          "end_day_offset": 5
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "Pool and beach time",
+          "description": "Settle in and find your stretch of sand in Costa Adeje.",
+          "address": "Avenida de Bruselas, 38660 Adeje, Tenerife",
+          "latitude": 28.0869,
+          "longitude": -16.7351,
+          "category": "leisure",
+          "day_offset": 0,
+          "start_time": "15:00",
+          "end_day_offset": 0,
+          "end_time": "18:30"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "Dinner at Bianco",
+          "description": "A relaxed first-night group dinner.",
+          "address": "Avenida de Bruselas, 38660 Costa Adeje, Tenerife",
+          "latitude": 28.088,
+          "longitude": -16.736,
+          "category": "dining",
+          "day_offset": 0,
+          "start_time": "20:30",
+          "end_day_offset": 0,
+          "end_time": "22:30"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "Teide National Park and cable car",
+          "description": "Drive up through the lava fields and take the cable car. Bring a warm layer.",
+          "address": "Teleférico del Teide, Carretera TF-21 km 43, 38300 La Orotava, Tenerife",
+          "latitude": 28.2557,
+          "longitude": -16.6185,
+          "category": "adventure",
+          "day_offset": 1,
+          "start_time": "08:30",
+          "end_day_offset": 1,
+          "end_time": "16:00"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "Night out on the Veronicas strip",
+          "description": "Bars and clubs in Playa de las Américas.",
+          "address": "Avenida Rafael Puig Lluvina, 38660 Playa de las Américas, Tenerife",
+          "latitude": 28.0617,
+          "longitude": -16.7311,
+          "category": "entertainment",
+          "day_offset": 1,
+          "start_time": "20:00",
+          "end_day_offset": 1,
+          "end_time": "23:30"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "Los Gigantes boat trip",
+          "description": "Cliffs, pilot whales and dolphins.",
+          "address": "Puerto de Los Gigantes, 38683 Santiago del Teide, Tenerife",
+          "latitude": 28.2445,
+          "longitude": -16.841,
+          "category": "adventure",
+          "day_offset": 2,
+          "start_time": "10:00",
+          "end_day_offset": 2,
+          "end_time": "12:30"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "Lunch at El Rincón de Juan Carlos",
+          "description": "A celebratory tasting menu. Book well ahead.",
+          "address": "Royal Hideaway Corales Resort, Avenida Virgen de Guadalupe 21, 38679 La Caleta, Adeje, Tenerife",
+          "latitude": 28.1016,
+          "longitude": -16.7536,
+          "category": "dining",
+          "day_offset": 2,
+          "start_time": "13:30",
+          "end_day_offset": 2,
+          "end_time": "15:30"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "Masca",
+          "description": "Drive the mountain road to the ravine village.",
+          "address": "Masca, 38489 Buenavista del Norte, Tenerife",
+          "latitude": 28.3063,
+          "longitude": -16.8411,
+          "category": "sightseeing",
+          "day_offset": 2,
+          "start_time": "16:30",
+          "end_day_offset": 2,
+          "end_time": "18:30"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "Siam Park",
+          "description": "A full day of slides and wave pools.",
+          "address": "Avenida Siam, 38660 Costa Adeje, Tenerife",
+          "latitude": 28.0732,
+          "longitude": -16.7259,
+          "category": "leisure",
+          "day_offset": 3,
+          "start_time": "10:00",
+          "end_day_offset": 3,
+          "end_time": "17:00"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "Dinner at Papagayo Beach Club",
+          "description": "Dinner by the sea before the music starts.",
+          "address": "Avenida Rafael Puig Lluvina 26, 38660 Playa de las Américas, Tenerife",
+          "latitude": 28.057,
+          "longitude": -16.73,
+          "category": "dining",
+          "day_offset": 3,
+          "start_time": "20:00",
+          "end_day_offset": 3,
+          "end_time": "22:00"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "La Laguna old town",
+          "description": "Colourful colonial streets and cafés.",
+          "address": "Plaza del Adelantado, 38201 San Cristóbal de La Laguna, Tenerife",
+          "latitude": 28.4874,
+          "longitude": -16.3159,
+          "category": "culture",
+          "day_offset": 4,
+          "start_time": "10:00",
+          "end_day_offset": 4,
+          "end_time": "12:30"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "Lunch at La Hierbita",
+          "description": "Canarian classics in Santa Cruz.",
+          "address": "Calle El Clavel 19, 38002 Santa Cruz de Tenerife",
+          "latitude": 28.4679,
+          "longitude": -16.2496,
+          "category": "dining",
+          "day_offset": 4,
+          "start_time": "13:00",
+          "end_day_offset": 4,
+          "end_time": "14:30"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "Playa de las Teresitas",
+          "description": "A last swim on golden sand.",
+          "address": "Playa de las Teresitas, 38120 San Andrés, Tenerife",
+          "latitude": 28.5085,
+          "longitude": -16.1859,
+          "category": "leisure",
+          "day_offset": 4,
+          "start_time": "15:30",
+          "end_day_offset": 4,
+          "end_time": "18:00"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "wishlist_item",
+        "data": {
+          "name": "El Rincón de Juan Carlos",
+          "wishlist_name": "Top restaurants",
+          "address": "Royal Hideaway Corales Resort, Avenida Virgen de Guadalupe 21, 38679 La Caleta, Adeje, Tenerife",
+          "latitude": 28.1016,
+          "longitude": -16.7536,
+          "description": "A Michelin-starred restaurant run by two brothers, with creative Canarian tasting menus, now at the Royal Hideaway Corales resort. Book well ahead."
+        }
+      },
+      {
+        "op": "create",
+        "entity": "wishlist_item",
+        "data": {
+          "name": "La Hierbita",
+          "wishlist_name": "Top restaurants",
+          "address": "Calle El Clavel 19, 38002 Santa Cruz de Tenerife",
+          "latitude": 28.4679,
+          "longitude": -16.2496,
+          "description": "A traditional Canarian restaurant in an old house in the capital, good for papas arrugadas, mojo and grilled cheese."
+        }
+      },
+      {
+        "op": "create",
+        "entity": "wishlist_item",
+        "data": {
+          "name": "Bianco",
+          "wishlist_name": "Top restaurants",
+          "address": "Avenida de Bruselas, 38660 Costa Adeje, Tenerife",
+          "latitude": 28.088,
+          "longitude": -16.736,
+          "description": "A popular Italian restaurant in the south, often recommended for group dinners and hen parties."
+        }
+      },
+      {
+        "op": "create",
+        "entity": "wishlist_item",
+        "data": {
+          "name": "Los Abrigos harbour restaurants",
+          "wishlist_name": "Top restaurants",
+          "address": "Calle La Marina, 38618 Los Abrigos, Tenerife",
+          "latitude": 28.0279,
+          "longitude": -16.5927,
+          "description": "A row of fish restaurants above a small harbour near the airport, where you pick your fish from the counter."
+        }
+      },
+      {
+        "op": "create",
+        "entity": "wishlist_item",
+        "data": {
+          "name": "Garachico rock pools",
+          "wishlist_name": "Hidden gems",
+          "address": "El Caletón, 38450 Garachico, Tenerife",
+          "latitude": 28.374,
+          "longitude": -16.764,
+          "description": "Natural pools formed by an old lava flow beside a pretty town. Only swim when the sea is calm."
+        }
+      },
+      {
+        "op": "create",
+        "entity": "wishlist_item",
+        "data": {
+          "name": "Punta de Teno lighthouse",
+          "wishlist_name": "Hidden gems",
+          "address": "Punta de Teno, 38480 Buenavista del Norte, Tenerife",
+          "latitude": 28.3417,
+          "longitude": -16.9214,
+          "description": "A remote lighthouse at the island's western tip with views of the Los Gigantes cliffs. Road access is limited, so check before you go."
+        }
+      },
+      {
+        "op": "create",
+        "entity": "wishlist_item",
+        "data": {
+          "name": "Benijo beach",
+          "wishlist_name": "Hidden gems",
+          "address": "Playa de Benijo, 38129 Santa Cruz de Tenerife",
+          "latitude": 28.5781,
+          "longitude": -16.1857,
+          "description": "A wild black-sand beach with sea stacks, best at sunset. Strong currents, so take care swimming."
+        }
+      },
+      {
+        "op": "create",
+        "entity": "wishlist_item",
+        "data": {
+          "name": "Casa de los Balcones",
+          "wishlist_name": "Hidden gems",
+          "address": "Calle San Francisco 3, 38300 La Orotava, Tenerife",
+          "latitude": 28.3909,
+          "longitude": -16.523,
+          "description": "A 17th-century house famous for its carved wooden balconies, in a handsome hill town."
+        }
+      },
+      {
+        "op": "create",
+        "entity": "packing_item",
+        "data": {
+          "name": "Swimwear and a beach towel",
+          "category": "Clothing"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "packing_item",
+        "data": {
+          "name": "Warm jacket for Mount Teide",
+          "category": "Clothing"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "packing_item",
+        "data": {
+          "name": "Trainers or walking shoes",
+          "category": "Clothing"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "packing_item",
+        "data": {
+          "name": "High-SPF sunscreen",
+          "category": "Toiletries"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "packing_item",
+        "data": {
+          "name": "Sunglasses and a hat",
+          "category": "Clothing"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "packing_item",
+        "data": {
+          "name": "Driving licence and credit card for car hire",
+          "category": "Documents"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "packing_item",
+        "data": {
+          "name": "Cable car booking confirmation",
+          "category": "Documents"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "packing_item",
+        "data": {
+          "name": "Phone power bank",
+          "category": "Electronics"
+        }
+      }
+    ]
+  },
+  {
+    "slug": "split-4-days-itinerary",
+    "title": "Split in 4 days: Diocletian's Palace, the islands and Hvar",
+    "description": "Four days that start inside a Roman palace, then head out on the water: a speedboat to the Blue Cave and Vis, a sunset climb up Marjan Hill and a catamaran to Hvar's harbour and beach bars. Suits friends and couples who want city, sea and island in one trip.",
+    "destination": "Split, Croatia",
+    "region": "Europe",
+    "latitude": 43.5081,
+    "longitude": 16.4402,
+    "timezone": "Europe/Zagreb",
+    "duration_days": 4,
+    "cover_image": null,
+    "ops": [
+      {
+        "op": "create",
+        "entity": "accommodation",
+        "data": {
+          "name": "Cornaro Hotel",
+          "description": "A modern hotel with a rooftop bar, steps from Diocletian's Palace.",
+          "address": "Sinjska 6, 21000 Split, Croatia",
+          "latitude": 43.5103,
+          "longitude": 16.4385,
+          "start_day_offset": 0,
+          "end_day_offset": 4
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "Diocletian's Palace",
+          "description": "The Peristyle, the cellars and the cathedral bell tower.",
+          "address": "Peristil, 21000 Split, Croatia",
+          "latitude": 43.5082,
+          "longitude": 16.4402,
+          "category": "culture",
+          "day_offset": 0,
+          "start_time": "10:00",
+          "end_day_offset": 0,
+          "end_time": "12:30"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "Lunch at Buffet Fife",
+          "description": "Hearty Dalmatian dishes at low prices.",
+          "address": "Trumbićeva obala 11, 21000 Split, Croatia",
+          "latitude": 43.5075,
+          "longitude": 16.4351,
+          "category": "dining",
+          "day_offset": 0,
+          "start_time": "13:00",
+          "end_day_offset": 0,
+          "end_time": "14:15"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "Bačvice beach",
+          "description": "Swim and watch the locals play picigin.",
+          "address": "Bačvice, 21000 Split, Croatia",
+          "latitude": 43.5022,
+          "longitude": 16.4485,
+          "category": "leisure",
+          "day_offset": 0,
+          "start_time": "16:00",
+          "end_day_offset": 0,
+          "end_time": "18:30"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "Dinner at Bokeria Kitchen & Wine",
+          "description": "A lively group dinner in the old town.",
+          "address": "Domaldova 8, 21000 Split, Croatia",
+          "latitude": 43.5095,
+          "longitude": 16.4377,
+          "category": "dining",
+          "day_offset": 0,
+          "start_time": "20:30",
+          "end_day_offset": 0,
+          "end_time": "22:30"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "Blue Cave and islands boat trip",
+          "description": "A full day by speedboat to the Blue Cave, Vis and the Pakleni Islands.",
+          "address": "Obala Lazareta, 21000 Split, Croatia",
+          "latitude": 43.5066,
+          "longitude": 16.4422,
+          "category": "adventure",
+          "day_offset": 1,
+          "start_time": "07:30",
+          "end_day_offset": 1,
+          "end_time": "17:30"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "Dinner at Konoba Fetivi",
+          "description": "Grilled fish in a family tavern.",
+          "address": "Tomića stine 4, 21000 Split, Croatia",
+          "latitude": 43.5085,
+          "longitude": 16.4337,
+          "category": "dining",
+          "day_offset": 1,
+          "start_time": "20:30",
+          "end_day_offset": 1,
+          "end_time": "22:00"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "Green Market",
+          "description": "Fruit, cheese and lavender by the palace wall.",
+          "address": "Pazar, 21000 Split, Croatia",
+          "latitude": 43.5085,
+          "longitude": 16.4415,
+          "category": "markets",
+          "day_offset": 2,
+          "start_time": "09:30",
+          "end_day_offset": 2,
+          "end_time": "11:00"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "Marjan Hill sunset",
+          "description": "Climb the steps from Varoš for the view over the city.",
+          "address": "Vidilica, Nazorov prilaz 1, 21000 Split, Croatia",
+          "latitude": 43.5094,
+          "longitude": 16.4291,
+          "category": "sightseeing",
+          "day_offset": 2,
+          "start_time": "17:30",
+          "end_day_offset": 2,
+          "end_time": "19:30"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "Wine at Zinfandel",
+          "description": "Croatian wines with small plates.",
+          "address": "Marulićeva 2, 21000 Split, Croatia",
+          "latitude": 43.5091,
+          "longitude": 16.4389,
+          "category": "dining",
+          "day_offset": 2,
+          "start_time": "20:30",
+          "end_day_offset": 2,
+          "end_time": "22:00"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "Hvar day trip",
+          "description": "Catamaran to Hvar Town, its fortress and beach bars. Check the return time.",
+          "address": "Split ferry port, Gat Svetog Duje, 21000 Split, Croatia",
+          "latitude": 43.5045,
+          "longitude": 16.4428,
+          "category": "sightseeing",
+          "day_offset": 3,
+          "start_time": "08:30",
+          "end_day_offset": 3,
+          "end_time": "18:30"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "wishlist_item",
+        "data": {
+          "name": "Konoba Fetivi",
+          "wishlist_name": "Top restaurants",
+          "address": "Tomića stine 4, 21000 Split, Croatia",
+          "latitude": 43.5085,
+          "longitude": 16.4337,
+          "description": "A family-run tavern known for simply grilled fish and seafood risotto. Book for dinner."
+        }
+      },
+      {
+        "op": "create",
+        "entity": "wishlist_item",
+        "data": {
+          "name": "Bokeria Kitchen & Wine",
+          "wishlist_name": "Top restaurants",
+          "address": "Domaldova 8, 21000 Split, Croatia",
+          "latitude": 43.5095,
+          "longitude": 16.4377,
+          "description": "A lively market-inspired restaurant and wine bar in the old town, good for a group dinner."
+        }
+      },
+      {
+        "op": "create",
+        "entity": "wishlist_item",
+        "data": {
+          "name": "Zinfandel Food & Wine Bar",
+          "wishlist_name": "Top restaurants",
+          "address": "Marulićeva 2, 21000 Split, Croatia",
+          "latitude": 43.5091,
+          "longitude": 16.4389,
+          "description": "Croatian wines by the glass with small plates, in a stylish room near the palace."
+        }
+      },
+      {
+        "op": "create",
+        "entity": "wishlist_item",
+        "data": {
+          "name": "Buffet Fife",
+          "wishlist_name": "Top restaurants",
+          "address": "Trumbićeva obala 11, 21000 Split, Croatia",
+          "latitude": 43.5075,
+          "longitude": 16.4351,
+          "description": "A no-frills local canteen on the western end of the Riva, with hearty Dalmatian dishes at low prices."
+        }
+      },
+      {
+        "op": "create",
+        "entity": "wishlist_item",
+        "data": {
+          "name": "Kašjuni beach",
+          "wishlist_name": "Hidden gems",
+          "address": "Kašjuni, 21000 Split, Croatia",
+          "latitude": 43.5005,
+          "longitude": 16.406,
+          "description": "A pebbly bay on the far side of Marjan Hill with clearer water and fewer people than the city beaches."
+        }
+      },
+      {
+        "op": "create",
+        "entity": "wishlist_item",
+        "data": {
+          "name": "Klis Fortress",
+          "wishlist_name": "Hidden gems",
+          "address": "Klis Fortress, 21231 Klis, Croatia",
+          "latitude": 43.559,
+          "longitude": 16.524,
+          "description": "A clifftop fortress above Split with sweeping views, used as a filming location for Game of Thrones."
+        }
+      },
+      {
+        "op": "create",
+        "entity": "wishlist_item",
+        "data": {
+          "name": "Varoš quarter",
+          "wishlist_name": "Hidden gems",
+          "address": "Varoš, 21000 Split, Croatia",
+          "latitude": 43.5092,
+          "longitude": 16.434,
+          "description": "The old fishermen's district below Marjan, with stone lanes and small taverns."
+        }
+      },
+      {
+        "op": "create",
+        "entity": "wishlist_item",
+        "data": {
+          "name": "Gregory of Nin statue",
+          "wishlist_name": "Hidden gems",
+          "address": "Strossmayerov park, 21000 Split, Croatia",
+          "latitude": 43.5104,
+          "longitude": 16.4396,
+          "description": "A giant bronze bishop by Ivan Meštrović outside the Golden Gate. Rubbing his toe is said to bring luck."
+        }
+      },
+      {
+        "op": "create",
+        "entity": "packing_item",
+        "data": {
+          "name": "Swimwear and a quick-dry towel",
+          "category": "Clothing"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "packing_item",
+        "data": {
+          "name": "Water shoes for pebbly beaches",
+          "category": "Clothing"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "packing_item",
+        "data": {
+          "name": "Comfortable shoes for stone streets",
+          "category": "Clothing"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "packing_item",
+        "data": {
+          "name": "High-SPF sunscreen",
+          "category": "Toiletries"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "packing_item",
+        "data": {
+          "name": "Sunglasses and a hat",
+          "category": "Clothing"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "packing_item",
+        "data": {
+          "name": "Waterproof phone pouch for boat trips",
+          "category": "Electronics"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "packing_item",
+        "data": {
+          "name": "Euros in cash for small bars and markets",
+          "category": "Documents"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "packing_item",
+        "data": {
+          "name": "Seasickness tablets",
+          "category": "Toiletries"
+        }
+      }
+    ]
+  },
+  {
+    "slug": "krakow-3-days-itinerary",
+    "title": "Kraków in 3 days: Old Town, Kazimierz, Auschwitz and the salt mine",
+    "description": "Three days that pair the medieval Old Town and Wawel with the bars and history of Kazimierz, plus the two classic day trips: the Auschwitz-Birkenau memorial and the Wieliczka salt mine. Suits groups of friends who want a great-value city break with real substance.",
+    "destination": "Kraków, Poland",
+    "region": "Europe",
+    "latitude": 50.0614,
+    "longitude": 19.9366,
+    "timezone": "Europe/Warsaw",
+    "duration_days": 3,
+    "cover_image": null,
+    "ops": [
+      {
+        "op": "create",
+        "entity": "accommodation",
+        "data": {
+          "name": "PURO Kraków Kazimierz",
+          "description": "A modern design hotel on the edge of Kazimierz, walkable to the Old Town.",
+          "address": "Halicka 6, 31-036 Kraków, Poland",
+          "latitude": 50.053,
+          "longitude": 19.953,
+          "start_day_offset": 0,
+          "end_day_offset": 3
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "Main Market Square",
+          "description": "The Cloth Hall, St Mary's Basilica and the hourly trumpet call.",
+          "address": "Rynek Główny, 31-042 Kraków, Poland",
+          "latitude": 50.0617,
+          "longitude": 19.9373,
+          "category": "sightseeing",
+          "day_offset": 0,
+          "start_time": "10:00",
+          "end_day_offset": 0,
+          "end_time": "12:00"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "Lunch at Pierogarnia Krakowiacy",
+          "description": "Pierogi with every filling.",
+          "address": "Szewska 23, 31-009 Kraków, Poland",
+          "latitude": 50.0623,
+          "longitude": 19.9346,
+          "category": "dining",
+          "day_offset": 0,
+          "start_time": "12:30",
+          "end_day_offset": 0,
+          "end_time": "13:30"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "Wawel Castle and Cathedral",
+          "description": "Book timed tickets for the state rooms.",
+          "address": "Wawel 5, 31-001 Kraków, Poland",
+          "latitude": 50.0541,
+          "longitude": 19.9354,
+          "category": "culture",
+          "day_offset": 0,
+          "start_time": "14:00",
+          "end_day_offset": 0,
+          "end_time": "16:30"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "Dinner at Pod Wawelem",
+          "description": "Huge plates and big beers.",
+          "address": "Świętej Gertrudy 26-29, 31-048 Kraków, Poland",
+          "latitude": 50.0565,
+          "longitude": 19.9396,
+          "category": "dining",
+          "day_offset": 0,
+          "start_time": "19:30",
+          "end_day_offset": 0,
+          "end_time": "21:30"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "Auschwitz-Birkenau Memorial",
+          "description": "A guided visit to the memorial. Book well ahead.",
+          "address": "Więźniów Oświęcimia 20, 32-603 Oświęcim, Poland",
+          "latitude": 50.027,
+          "longitude": 19.2036,
+          "category": "culture",
+          "day_offset": 1,
+          "start_time": "08:00",
+          "end_day_offset": 1,
+          "end_time": "15:00"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "Kazimierz walk",
+          "description": "Synagogues and squares of the old Jewish quarter.",
+          "address": "Szeroka, 31-053 Kraków, Poland",
+          "latitude": 50.052,
+          "longitude": 19.947,
+          "category": "culture",
+          "day_offset": 1,
+          "start_time": "17:00",
+          "end_day_offset": 1,
+          "end_time": "18:30"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "Dinner at Starka",
+          "description": "Polish cooking and home-made vodkas.",
+          "address": "Józefa 14, 31-056 Kraków, Poland",
+          "latitude": 50.051,
+          "longitude": 19.9445,
+          "category": "dining",
+          "day_offset": 1,
+          "start_time": "19:30",
+          "end_day_offset": 1,
+          "end_time": "21:30"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "Wieliczka Salt Mine",
+          "description": "Underground chapels carved from salt.",
+          "address": "Daniłowicza 10, 32-020 Wieliczka, Poland",
+          "latitude": 49.9832,
+          "longitude": 20.0547,
+          "category": "sightseeing",
+          "day_offset": 2,
+          "start_time": "10:00",
+          "end_day_offset": 2,
+          "end_time": "13:00"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "Oskar Schindler's Factory",
+          "description": "The city's wartime story.",
+          "address": "Lipowa 4, 30-702 Kraków, Poland",
+          "latitude": 50.0475,
+          "longitude": 19.9614,
+          "category": "culture",
+          "day_offset": 2,
+          "start_time": "14:30",
+          "end_day_offset": 2,
+          "end_time": "16:30"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "Vistula boulevards",
+          "description": "Drinks on a bar boat below Wawel.",
+          "address": "Bulwar Czerwieński, 31-069 Kraków, Poland",
+          "latitude": 50.0535,
+          "longitude": 19.932,
+          "category": "leisure",
+          "day_offset": 2,
+          "start_time": "17:30",
+          "end_day_offset": 2,
+          "end_time": "19:00"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "Zapiekanki at Plac Nowy",
+          "description": "The classic late-night snack.",
+          "address": "Plac Nowy 4, 31-056 Kraków, Poland",
+          "latitude": 50.0518,
+          "longitude": 19.9447,
+          "category": "dining",
+          "day_offset": 2,
+          "start_time": "22:00",
+          "end_day_offset": 2,
+          "end_time": "23:00"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "wishlist_item",
+        "data": {
+          "name": "Pod Wawelem",
+          "wishlist_name": "Top restaurants",
+          "address": "Świętej Gertrudy 26-29, 31-048 Kraków, Poland",
+          "latitude": 50.0565,
+          "longitude": 19.9396,
+          "description": "A big, cheerful beer hall serving huge portions of Polish classics. Ideal for a hungry group."
+        }
+      },
+      {
+        "op": "create",
+        "entity": "wishlist_item",
+        "data": {
+          "name": "Pierogarnia Krakowiacy",
+          "wishlist_name": "Top restaurants",
+          "address": "Szewska 23, 31-009 Kraków, Poland",
+          "latitude": 50.0623,
+          "longitude": 19.9346,
+          "description": "A homely pierogi restaurant with fillings from potato and cheese to duck. Cheap and filling."
+        }
+      },
+      {
+        "op": "create",
+        "entity": "wishlist_item",
+        "data": {
+          "name": "Starka",
+          "wishlist_name": "Top restaurants",
+          "address": "Józefa 14, 31-056 Kraków, Poland",
+          "latitude": 50.051,
+          "longitude": 19.9445,
+          "description": "A cosy Kazimierz restaurant with home-made flavoured vodkas and Polish cooking."
+        }
+      },
+      {
+        "op": "create",
+        "entity": "wishlist_item",
+        "data": {
+          "name": "Plac Nowy zapiekanki",
+          "wishlist_name": "Top restaurants",
+          "address": "Plac Nowy 4, 31-056 Kraków, Poland",
+          "latitude": 50.0518,
+          "longitude": 19.9447,
+          "description": "The round market hall at Plac Nowy sells zapiekanki, long open baguette toasties, late into the night."
+        }
+      },
+      {
+        "op": "create",
+        "entity": "wishlist_item",
+        "data": {
+          "name": "Kopiec Krakusa",
+          "wishlist_name": "Hidden gems",
+          "address": "Kopiec Krakusa, 30-547 Kraków, Poland",
+          "latitude": 50.038,
+          "longitude": 19.9585,
+          "description": "An ancient earth mound on a hill south of the river with a sweeping view of the city at sunset."
+        }
+      },
+      {
+        "op": "create",
+        "entity": "wishlist_item",
+        "data": {
+          "name": "Zakrzówek",
+          "wishlist_name": "Hidden gems",
+          "address": "Zakrzówek, 30-379 Kraków, Poland",
+          "latitude": 50.0383,
+          "longitude": 19.9139,
+          "description": "A flooded former quarry with turquoise water, now a public swimming area in summer."
+        }
+      },
+      {
+        "op": "create",
+        "entity": "wishlist_item",
+        "data": {
+          "name": "Nowa Huta",
+          "wishlist_name": "Hidden gems",
+          "address": "Plac Centralny, 31-929 Kraków, Poland",
+          "latitude": 50.0718,
+          "longitude": 20.0378,
+          "description": "A planned socialist-realist district built in the 1950s, best seen on a guided tour."
+        }
+      },
+      {
+        "op": "create",
+        "entity": "wishlist_item",
+        "data": {
+          "name": "Ghetto Heroes Square",
+          "wishlist_name": "Hidden gems",
+          "address": "Plac Bohaterów Getta, 30-547 Kraków, Poland",
+          "latitude": 50.047,
+          "longitude": 19.9545,
+          "description": "A quiet memorial of empty bronze chairs on the site of the former ghetto."
+        }
+      },
+      {
+        "op": "create",
+        "entity": "packing_item",
+        "data": {
+          "name": "Comfortable walking shoes",
+          "category": "Clothing"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "packing_item",
+        "data": {
+          "name": "Warm layer for the salt mine",
+          "category": "Clothing"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "packing_item",
+        "data": {
+          "name": "Waterproof jacket",
+          "category": "Clothing"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "packing_item",
+        "data": {
+          "name": "Respectful, modest clothing for the Auschwitz visit",
+          "category": "Clothing"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "packing_item",
+        "data": {
+          "name": "Passport or ID for memorial and museum entry",
+          "category": "Documents"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "packing_item",
+        "data": {
+          "name": "Booking confirmations for Auschwitz and Wieliczka",
+          "category": "Documents"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "packing_item",
+        "data": {
+          "name": "Some złoty in cash",
+          "category": "Documents"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "packing_item",
+        "data": {
+          "name": "Phone power bank",
+          "category": "Electronics"
+        }
+      }
+    ]
+  },
+  {
+    "slug": "berlin-4-days-itinerary",
+    "title": "Berlin in 4 days: the Wall, Museum Island and a proper night out",
+    "description": "Four days that cover the Brandenburg Gate and Reichstag, the Wall's memorials and murals, Museum Island and the food and bars of Kreuzberg, with a big night in Friedrichshain. Suits groups of friends who want history by day and nightlife after dark.",
+    "destination": "Berlin, Germany",
+    "region": "Europe",
+    "latitude": 52.52,
+    "longitude": 13.405,
+    "timezone": "Europe/Berlin",
+    "duration_days": 4,
+    "cover_image": null,
+    "ops": [
+      {
+        "op": "create",
+        "entity": "accommodation",
+        "data": {
+          "name": "Michelberger Hotel",
+          "description": "A sociable hotel by Warschauer Strasse station, near the East Side Gallery and the clubs.",
+          "address": "Warschauer Straße 39-40, 10243 Berlin, Germany",
+          "latitude": 52.5058,
+          "longitude": 13.4479,
+          "start_day_offset": 0,
+          "end_day_offset": 4
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "Brandenburg Gate",
+          "description": "Start with the city's great landmark.",
+          "address": "Pariser Platz, 10117 Berlin, Germany",
+          "latitude": 52.5163,
+          "longitude": 13.3777,
+          "category": "sightseeing",
+          "day_offset": 0,
+          "start_time": "10:00",
+          "end_day_offset": 0,
+          "end_time": "11:00"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "Memorial to the Murdered Jews of Europe",
+          "description": "Walk through the field of slabs and visit the information centre.",
+          "address": "Cora-Berliner-Straße 1, 10117 Berlin, Germany",
+          "latitude": 52.5139,
+          "longitude": 13.3787,
+          "category": "culture",
+          "day_offset": 0,
+          "start_time": "11:00",
+          "end_day_offset": 0,
+          "end_time": "12:00"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "Reichstag dome",
+          "description": "Register online in advance for your time slot.",
+          "address": "Platz der Republik 1, 11011 Berlin, Germany",
+          "latitude": 52.5186,
+          "longitude": 13.3762,
+          "category": "sightseeing",
+          "day_offset": 0,
+          "start_time": "12:30",
+          "end_day_offset": 0,
+          "end_time": "13:30"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "Dinner at Zur letzten Instanz",
+          "description": "Traditional German food in one of the city's oldest restaurants.",
+          "address": "Waisenstraße 14-16, 10179 Berlin, Germany",
+          "latitude": 52.5167,
+          "longitude": 13.4146,
+          "category": "dining",
+          "day_offset": 0,
+          "start_time": "19:30",
+          "end_day_offset": 0,
+          "end_time": "21:30"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "Berlin Wall Memorial",
+          "description": "The preserved border strip and watchtower.",
+          "address": "Bernauer Straße 111, 13355 Berlin, Germany",
+          "latitude": 52.5352,
+          "longitude": 13.3903,
+          "category": "culture",
+          "day_offset": 1,
+          "start_time": "10:00",
+          "end_day_offset": 1,
+          "end_time": "12:00"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "Museum Island",
+          "description": "Pick one or two museums, such as the Neues Museum.",
+          "address": "Bodestraße 1-3, 10178 Berlin, Germany",
+          "latitude": 52.5169,
+          "longitude": 13.4019,
+          "category": "culture",
+          "day_offset": 1,
+          "start_time": "13:00",
+          "end_day_offset": 1,
+          "end_time": "16:30"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "Currywurst at Curry 36",
+          "description": "The classic Berlin snack before a night out.",
+          "address": "Mehringdamm 36, 10961 Berlin, Germany",
+          "latitude": 52.4935,
+          "longitude": 13.3878,
+          "category": "dining",
+          "day_offset": 1,
+          "start_time": "19:00",
+          "end_day_offset": 1,
+          "end_time": "20:30"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "East Side Gallery",
+          "description": "Murals along the longest surviving stretch of the Wall.",
+          "address": "Mühlenstraße, 10243 Berlin, Germany",
+          "latitude": 52.505,
+          "longitude": 13.4397,
+          "category": "sightseeing",
+          "day_offset": 2,
+          "start_time": "11:00",
+          "end_day_offset": 2,
+          "end_time": "13:00"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "Lunch at Markthalle Neun",
+          "description": "Food stalls and local beer in a restored market hall.",
+          "address": "Eisenbahnstraße 42-43, 10997 Berlin, Germany",
+          "latitude": 52.5022,
+          "longitude": 13.4316,
+          "category": "dining",
+          "day_offset": 2,
+          "start_time": "13:30",
+          "end_day_offset": 2,
+          "end_time": "15:00"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "Tempelhofer Feld",
+          "description": "Cycle or skate down the old runways.",
+          "address": "Tempelhofer Damm, 12101 Berlin, Germany",
+          "latitude": 52.473,
+          "longitude": 13.401,
+          "category": "leisure",
+          "day_offset": 2,
+          "start_time": "16:00",
+          "end_day_offset": 2,
+          "end_time": "18:00"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "Dinner at Katz Orange",
+          "description": "Slow-roasted meat in a former brewery.",
+          "address": "Bergstraße 22, 10115 Berlin, Germany",
+          "latitude": 52.531,
+          "longitude": 13.3965,
+          "category": "dining",
+          "day_offset": 2,
+          "start_time": "19:00",
+          "end_day_offset": 2,
+          "end_time": "21:00"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "Mauerpark Sunday flea market",
+          "description": "Flea market stalls and open-air karaoke.",
+          "address": "Bernauer Straße 63-64, 13355 Berlin, Germany",
+          "latitude": 52.543,
+          "longitude": 13.4025,
+          "category": "markets",
+          "day_offset": 3,
+          "start_time": "11:00",
+          "end_day_offset": 3,
+          "end_time": "14:00"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "Prater Garten",
+          "description": "Long tables under the chestnut trees to finish the trip.",
+          "address": "Kastanienallee 7-9, 10435 Berlin, Germany",
+          "latitude": 52.5397,
+          "longitude": 13.41,
+          "category": "leisure",
+          "day_offset": 3,
+          "start_time": "15:00",
+          "end_day_offset": 3,
+          "end_time": "17:30"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "wishlist_item",
+        "data": {
+          "name": "Curry 36",
+          "wishlist_name": "Top restaurants",
+          "address": "Mehringdamm 36, 10961 Berlin, Germany",
+          "latitude": 52.4935,
+          "longitude": 13.3878,
+          "description": "A late-opening stand famous for currywurst and chips, the classic Berlin snack."
+        }
+      },
+      {
+        "op": "create",
+        "entity": "wishlist_item",
+        "data": {
+          "name": "Mustafa's Gemüse Kebap",
+          "wishlist_name": "Top restaurants",
+          "address": "Mehringdamm 32, 10961 Berlin, Germany",
+          "latitude": 52.4938,
+          "longitude": 13.388,
+          "description": "A legendary vegetable döner stall with a queue to match. Worth the wait."
+        }
+      },
+      {
+        "op": "create",
+        "entity": "wishlist_item",
+        "data": {
+          "name": "Markthalle Neun",
+          "wishlist_name": "Top restaurants",
+          "address": "Eisenbahnstraße 42-43, 10997 Berlin, Germany",
+          "latitude": 52.5022,
+          "longitude": 13.4316,
+          "description": "A restored market hall with food stalls, a bakery and a craft brewery. On Thursday evenings it hosts a street-food night."
+        }
+      },
+      {
+        "op": "create",
+        "entity": "wishlist_item",
+        "data": {
+          "name": "Prater Garten",
+          "wishlist_name": "Top restaurants",
+          "address": "Kastanienallee 7-9, 10435 Berlin, Germany",
+          "latitude": 52.5397,
+          "longitude": 13.41,
+          "description": "Berlin's oldest beer garden, with long tables under chestnut trees. Perfect for a group on a summer evening."
+        }
+      },
+      {
+        "op": "create",
+        "entity": "wishlist_item",
+        "data": {
+          "name": "Teufelsberg",
+          "wishlist_name": "Hidden gems",
+          "address": "Teufelsseechaussee 10, 14193 Berlin, Germany",
+          "latitude": 52.4977,
+          "longitude": 13.2416,
+          "description": "An abandoned Cold War listening station on a hill of rubble, now covered in street art."
+        }
+      },
+      {
+        "op": "create",
+        "entity": "wishlist_item",
+        "data": {
+          "name": "Klunkerkranich",
+          "wishlist_name": "Hidden gems",
+          "address": "Karl-Marx-Straße 66, 12043 Berlin, Germany",
+          "latitude": 52.4813,
+          "longitude": 13.4337,
+          "description": "A rooftop bar and garden on top of a shopping centre car park, with sunset views."
+        }
+      },
+      {
+        "op": "create",
+        "entity": "wishlist_item",
+        "data": {
+          "name": "Landwehr Canal",
+          "wishlist_name": "Hidden gems",
+          "address": "Maybachufer, 12047 Berlin, Germany",
+          "latitude": 52.4945,
+          "longitude": 13.4245,
+          "description": "The canal banks around Paul-Lincke-Ufer, lined with cafés and the Turkish market on Tuesdays and Fridays."
+        }
+      },
+      {
+        "op": "create",
+        "entity": "wishlist_item",
+        "data": {
+          "name": "Treptower Park Soviet War Memorial",
+          "wishlist_name": "Hidden gems",
+          "address": "Puschkinallee, 12435 Berlin, Germany",
+          "latitude": 52.4855,
+          "longitude": 13.4695,
+          "description": "A vast, monumental memorial and cemetery in a riverside park."
+        }
+      },
+      {
+        "op": "create",
+        "entity": "packing_item",
+        "data": {
+          "name": "Comfortable walking shoes",
+          "category": "Clothing"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "packing_item",
+        "data": {
+          "name": "Dark, low-key outfit for clubs",
+          "category": "Clothing"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "packing_item",
+        "data": {
+          "name": "Waterproof jacket",
+          "category": "Clothing"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "packing_item",
+        "data": {
+          "name": "Euros in cash (many bars are cash only)",
+          "category": "Documents"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "packing_item",
+        "data": {
+          "name": "Passport or ID for club entry",
+          "category": "Documents"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "packing_item",
+        "data": {
+          "name": "Reichstag dome registration confirmation",
+          "category": "Documents"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "packing_item",
+        "data": {
+          "name": "Universal power adapter (Germany uses types C and F)",
+          "category": "Electronics"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "packing_item",
+        "data": {
+          "name": "Phone power bank",
+          "category": "Electronics"
+        }
+      }
+    ]
+  },
+  {
+    "slug": "dubai-5-days-itinerary",
+    "title": "Dubai in 5 days: Burj Khalifa, desert safari and old Dubai",
+    "description": "Five days that mix the Burj Khalifa and fountains, a desert safari with dinner at camp, a beach and water-park day, a classic Friday brunch and the souks and abras of old Dubai. Suits groups celebrating a birthday or hen do in the sun.",
+    "destination": "Dubai, United Arab Emirates",
+    "region": "Asia",
+    "latitude": 25.2048,
+    "longitude": 55.2708,
+    "timezone": "Asia/Dubai",
+    "duration_days": 5,
+    "cover_image": null,
+    "ops": [
+      {
+        "op": "create",
+        "entity": "accommodation",
+        "data": {
+          "name": "Rove Downtown",
+          "description": "A stylish, good-value hotel with a pool and views of the Burj Khalifa.",
+          "address": "312 Al Sa'ada Street, Downtown Dubai, UAE",
+          "latitude": 25.1907,
+          "longitude": 55.2803,
+          "start_day_offset": 0,
+          "end_day_offset": 5
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "JBR beach and The Walk",
+          "description": "A first swim and a stroll along the promenade.",
+          "address": "Jumeirah Beach Residence, Dubai Marina, UAE",
+          "latitude": 25.078,
+          "longitude": 55.134,
+          "category": "leisure",
+          "day_offset": 0,
+          "start_time": "16:00",
+          "end_day_offset": 0,
+          "end_time": "18:00"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "Dinner at Time Out Market",
+          "description": "Food stalls for every taste in the group.",
+          "address": "Souk Al Bahar, Downtown Dubai, UAE",
+          "latitude": 25.1945,
+          "longitude": 55.2765,
+          "category": "dining",
+          "day_offset": 0,
+          "start_time": "20:00",
+          "end_day_offset": 0,
+          "end_time": "22:00"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "Burj Khalifa at sunset",
+          "description": "Book a sunset slot ahead.",
+          "address": "1 Sheikh Mohammed bin Rashid Boulevard, Downtown Dubai, UAE",
+          "latitude": 25.1972,
+          "longitude": 55.2744,
+          "category": "sightseeing",
+          "day_offset": 1,
+          "start_time": "17:00",
+          "end_day_offset": 1,
+          "end_time": "18:30"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "Dubai Fountain shows",
+          "description": "Free shows on the lake below the tower.",
+          "address": "Downtown Dubai, UAE",
+          "latitude": 25.195,
+          "longitude": 55.275,
+          "category": "entertainment",
+          "day_offset": 1,
+          "start_time": "19:00",
+          "end_day_offset": 1,
+          "end_time": "20:00"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "Museum of the Future",
+          "description": "Immersive exhibitions in a striking building.",
+          "address": "Sheikh Zayed Road, Trade Centre 2, Dubai, UAE",
+          "latitude": 25.219,
+          "longitude": 55.282,
+          "category": "culture",
+          "day_offset": 1,
+          "start_time": "10:30",
+          "end_day_offset": 1,
+          "end_time": "13:00"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "Desert safari",
+          "description": "Dune drives, camels and dinner at a desert camp.",
+          "address": "Dubai Desert Conservation Reserve, Dubai, UAE",
+          "latitude": 24.8333,
+          "longitude": 55.6667,
+          "category": "adventure",
+          "day_offset": 2,
+          "start_time": "15:00",
+          "end_day_offset": 2,
+          "end_time": "22:00"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "Atlantis Aquaventure",
+          "description": "Record-breaking slides at the tip of the Palm.",
+          "address": "Atlantis The Palm, Crescent Road, Dubai, UAE",
+          "latitude": 25.1317,
+          "longitude": 55.1173,
+          "category": "leisure",
+          "day_offset": 3,
+          "start_time": "10:00",
+          "end_day_offset": 3,
+          "end_time": "17:00"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "Dinner at Pierchic",
+          "description": "Seafood on a pier facing the Burj Al Arab.",
+          "address": "Al Qasr, Madinat Jumeirah, Umm Suqeim, Dubai, UAE",
+          "latitude": 25.1355,
+          "longitude": 55.1855,
+          "category": "dining",
+          "day_offset": 3,
+          "start_time": "19:30",
+          "end_day_offset": 3,
+          "end_time": "21:30"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "Breakfast at Arabian Tea House",
+          "description": "Emirati breakfast in a courtyard.",
+          "address": "Al Fahidi Street, Al Fahidi Historical Neighbourhood, Dubai, UAE",
+          "latitude": 25.2638,
+          "longitude": 55.3,
+          "category": "dining",
+          "day_offset": 4,
+          "start_time": "09:30",
+          "end_day_offset": 4,
+          "end_time": "11:00"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "Al Fahidi and the abra crossing",
+          "description": "Old Dubai's lanes and the creek.",
+          "address": "Al Fahidi Historical Neighbourhood, Dubai, UAE",
+          "latitude": 25.2637,
+          "longitude": 55.2995,
+          "category": "culture",
+          "day_offset": 4,
+          "start_time": "11:00",
+          "end_day_offset": 4,
+          "end_time": "13:00"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "Gold and spice souks",
+          "description": "Browse and haggle politely.",
+          "address": "Gold Souk, Deira, Dubai, UAE",
+          "latitude": 25.2694,
+          "longitude": 55.297,
+          "category": "markets",
+          "day_offset": 4,
+          "start_time": "13:00",
+          "end_day_offset": 4,
+          "end_time": "14:30"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "Brunch",
+          "description": "Finish with Dubai's famous brunch. Book ahead and check the dress code.",
+          "address": "Downtown Dubai, UAE",
+          "latitude": 25.1972,
+          "longitude": 55.2744,
+          "category": "dining",
+          "day_offset": 4,
+          "start_time": "15:00",
+          "end_day_offset": 4,
+          "end_time": "18:00"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "wishlist_item",
+        "data": {
+          "name": "Al Ustad Special Kebab",
+          "wishlist_name": "Top restaurants",
+          "address": "Al Musalla Road, Al Fahidi, Dubai, UAE",
+          "latitude": 25.2603,
+          "longitude": 55.2989,
+          "description": "A family-run kebab house open since the 1970s, loved for simple grilled meats and rice. Cheap and cheerful."
+        }
+      },
+      {
+        "op": "create",
+        "entity": "wishlist_item",
+        "data": {
+          "name": "Ravi Restaurant",
+          "wishlist_name": "Top restaurants",
+          "address": "Al Satwa Road, Satwa, Dubai, UAE",
+          "latitude": 25.2304,
+          "longitude": 55.2785,
+          "description": "A legendary, inexpensive Pakistani canteen open late, famous for its curries and breads."
+        }
+      },
+      {
+        "op": "create",
+        "entity": "wishlist_item",
+        "data": {
+          "name": "Arabian Tea House",
+          "wishlist_name": "Top restaurants",
+          "address": "Al Fahidi Street, Al Fahidi Historical Neighbourhood, Dubai, UAE",
+          "latitude": 25.2638,
+          "longitude": 55.3,
+          "description": "A courtyard café in the historic district serving Emirati breakfasts and dishes."
+        }
+      },
+      {
+        "op": "create",
+        "entity": "wishlist_item",
+        "data": {
+          "name": "Pierchic",
+          "wishlist_name": "Top restaurants",
+          "address": "Al Qasr, Madinat Jumeirah, Umm Suqeim, Dubai, UAE",
+          "latitude": 25.1355,
+          "longitude": 55.1855,
+          "description": "A seafood restaurant at the end of a pier with views of the Burj Al Arab. Book for sunset."
+        }
+      },
+      {
+        "op": "create",
+        "entity": "wishlist_item",
+        "data": {
+          "name": "Alserkal Avenue",
+          "wishlist_name": "Hidden gems",
+          "address": "Alserkal Avenue, Al Quoz 1, Dubai, UAE",
+          "latitude": 25.1442,
+          "longitude": 55.2266,
+          "description": "Converted warehouses filled with art galleries, cafés and independent shops."
+        }
+      },
+      {
+        "op": "create",
+        "entity": "wishlist_item",
+        "data": {
+          "name": "Al Shindagha Museum",
+          "wishlist_name": "Hidden gems",
+          "address": "Al Shindagha, Bur Dubai, Dubai, UAE",
+          "latitude": 25.269,
+          "longitude": 55.289,
+          "description": "A museum quarter on the creek telling the story of Dubai, including a perfume house."
+        }
+      },
+      {
+        "op": "create",
+        "entity": "wishlist_item",
+        "data": {
+          "name": "Hatta",
+          "wishlist_name": "Hidden gems",
+          "address": "Hatta Dam, Hatta, Dubai, UAE",
+          "latitude": 24.7836,
+          "longitude": 56.1145,
+          "description": "A mountain enclave about 90 minutes away with kayaking on a dam lake and hiking trails."
+        }
+      },
+      {
+        "op": "create",
+        "entity": "wishlist_item",
+        "data": {
+          "name": "Al Qudra Lakes",
+          "wishlist_name": "Hidden gems",
+          "address": "Al Qudra Lakes, Saih Al Salam, Dubai, UAE",
+          "latitude": 24.836,
+          "longitude": 55.364,
+          "description": "Man-made lakes in the desert, popular for sunset picnics and stargazing."
+        }
+      },
+      {
+        "op": "create",
+        "entity": "packing_item",
+        "data": {
+          "name": "Lightweight clothing that covers shoulders and knees for souks and old Dubai",
+          "category": "Clothing"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "packing_item",
+        "data": {
+          "name": "Smart outfit for brunch and rooftop bars",
+          "category": "Clothing"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "packing_item",
+        "data": {
+          "name": "Swimwear",
+          "category": "Clothing"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "packing_item",
+        "data": {
+          "name": "High-SPF sunscreen",
+          "category": "Toiletries"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "packing_item",
+        "data": {
+          "name": "Sunglasses and a hat",
+          "category": "Clothing"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "packing_item",
+        "data": {
+          "name": "Light scarf or layer for cold air-conditioning",
+          "category": "Clothing"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "packing_item",
+        "data": {
+          "name": "Passport valid for at least six months",
+          "category": "Documents"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "packing_item",
+        "data": {
+          "name": "Phone power bank",
+          "category": "Electronics"
+        }
+      }
+    ]
+  },
+  {
+    "slug": "marrakech-4-days-itinerary",
+    "title": "Marrakech in 4 days: souks, gardens, hammam and the Atlas",
+    "description": "Four days that start in the souks and on Jemaa el-Fnaa, then add palaces and gardens, a hammam afternoon, a group dinner with a show and a day in the Atlas Mountains. Suits groups of friends and hen dos staying in a riad.",
+    "destination": "Marrakech, Morocco",
+    "region": "Africa",
+    "latitude": 31.6295,
+    "longitude": -7.9811,
+    "timezone": "Africa/Casablanca",
+    "duration_days": 4,
+    "cover_image": null,
+    "ops": [
+      {
+        "op": "create",
+        "entity": "accommodation",
+        "data": {
+          "name": "Book a whole riad",
+          "description": "A private riad in the medina with a courtyard, plunge pool and roof terrace.",
+          "address": "Medina, Marrakech 40000, Morocco",
+          "latitude": 31.629,
+          "longitude": -7.988,
+          "start_day_offset": 0,
+          "end_day_offset": 4
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "Jemaa el-Fnaa at sunset",
+          "description": "Watch the evening market set up from a terrace.",
+          "address": "Jemaa el-Fnaa, Marrakech 40000, Morocco",
+          "latitude": 31.6258,
+          "longitude": -7.9891,
+          "category": "sightseeing",
+          "day_offset": 0,
+          "start_time": "17:00",
+          "end_day_offset": 0,
+          "end_time": "18:30"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "Dinner at the Jemaa el-Fnaa stalls",
+          "description": "Pick a busy stall and share plenty of dishes.",
+          "address": "Jemaa el-Fnaa, Marrakech 40000, Morocco",
+          "latitude": 31.6258,
+          "longitude": -7.9891,
+          "category": "dining",
+          "day_offset": 0,
+          "start_time": "19:00",
+          "end_day_offset": 0,
+          "end_time": "20:30"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "The souks",
+          "description": "Lanterns, leather and spices. Agree a price before you buy.",
+          "address": "Souk Semmarine, Marrakech 40000, Morocco",
+          "latitude": 31.629,
+          "longitude": -7.987,
+          "category": "markets",
+          "day_offset": 1,
+          "start_time": "09:30",
+          "end_day_offset": 1,
+          "end_time": "12:00"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "Lunch at Nomad",
+          "description": "Modern Moroccan food on a roof terrace.",
+          "address": "1 Derb Aarjan, Rahba Lakdima, Marrakech 40000, Morocco",
+          "latitude": 31.6299,
+          "longitude": -7.9864,
+          "category": "dining",
+          "day_offset": 1,
+          "start_time": "12:30",
+          "end_day_offset": 1,
+          "end_time": "14:00"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "Ben Youssef Madrasa",
+          "description": "Carved cedar and stucco in a restored college.",
+          "address": "Rue Assouel, Marrakech 40000, Morocco",
+          "latitude": 31.632,
+          "longitude": -7.9862,
+          "category": "culture",
+          "day_offset": 1,
+          "start_time": "14:30",
+          "end_day_offset": 1,
+          "end_time": "16:00"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "Hammam",
+          "description": "A steam bath and scrub. Book a spa for a group.",
+          "address": "Les Bains de Marrakech, 2 Derb Sedra, Bab Agnaou, Marrakech 40000, Morocco",
+          "latitude": 31.619,
+          "longitude": -7.989,
+          "category": "wellness",
+          "day_offset": 1,
+          "start_time": "16:30",
+          "end_day_offset": 1,
+          "end_time": "18:30"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "Jardin Majorelle",
+          "description": "Book timed tickets for the blue garden.",
+          "address": "Rue Yves Saint Laurent, Marrakech 40090, Morocco",
+          "latitude": 31.6417,
+          "longitude": -8.0033,
+          "category": "sightseeing",
+          "day_offset": 2,
+          "start_time": "09:00",
+          "end_day_offset": 2,
+          "end_time": "11:00"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "Bahia Palace",
+          "description": "Tiled courtyards and painted ceilings.",
+          "address": "Rue Riad Zitoun el Jdid, Marrakech 40000, Morocco",
+          "latitude": 31.6216,
+          "longitude": -7.9831,
+          "category": "culture",
+          "day_offset": 2,
+          "start_time": "11:30",
+          "end_day_offset": 2,
+          "end_time": "13:00"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "Lunch at Le Jardin",
+          "description": "A green courtyard away from the souks.",
+          "address": "32 Souk Sidi Abdelaziz, Marrakech 40000, Morocco",
+          "latitude": 31.6327,
+          "longitude": -7.9876,
+          "category": "dining",
+          "day_offset": 2,
+          "start_time": "13:30",
+          "end_day_offset": 2,
+          "end_time": "15:00"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "Dinner and show at Comptoir Darna",
+          "description": "A lively group night with belly dancing.",
+          "address": "Avenue Echouhada, Hivernage, Marrakech 40000, Morocco",
+          "latitude": 31.6232,
+          "longitude": -8.011,
+          "category": "entertainment",
+          "day_offset": 2,
+          "start_time": "20:00",
+          "end_day_offset": 2,
+          "end_time": "23:00"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "Atlas Mountains and Imlil",
+          "description": "A walk through Berber villages with lunch in the mountains.",
+          "address": "Imlil, Asni, Morocco",
+          "latitude": 31.137,
+          "longitude": -7.919,
+          "category": "adventure",
+          "day_offset": 3,
+          "start_time": "08:30",
+          "end_day_offset": 3,
+          "end_time": "17:30"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "wishlist_item",
+        "data": {
+          "name": "Jemaa el-Fnaa food stalls",
+          "wishlist_name": "Top restaurants",
+          "address": "Jemaa el-Fnaa, Marrakech 40000, Morocco",
+          "latitude": 31.6258,
+          "longitude": -7.9891,
+          "description": "Every evening the square fills with grills and stalls serving tagines, snails and harira soup. Pick a busy stall."
+        }
+      },
+      {
+        "op": "create",
+        "entity": "wishlist_item",
+        "data": {
+          "name": "Nomad",
+          "wishlist_name": "Top restaurants",
+          "address": "1 Derb Aarjan, Rahba Lakdima, Marrakech 40000, Morocco",
+          "latitude": 31.6299,
+          "longitude": -7.9864,
+          "description": "A modern Moroccan restaurant with a roof terrace over the spice square. Book for sunset."
+        }
+      },
+      {
+        "op": "create",
+        "entity": "wishlist_item",
+        "data": {
+          "name": "Café des Épices",
+          "wishlist_name": "Top restaurants",
+          "address": "75 Rahba Lakdima, Marrakech 40000, Morocco",
+          "latitude": 31.6298,
+          "longitude": -7.9862,
+          "description": "A relaxed café on the spice square, good for mint tea and a light lunch."
+        }
+      },
+      {
+        "op": "create",
+        "entity": "wishlist_item",
+        "data": {
+          "name": "Le Jardin",
+          "wishlist_name": "Top restaurants",
+          "address": "32 Souk Sidi Abdelaziz, Marrakech 40000, Morocco",
+          "latitude": 31.6327,
+          "longitude": -7.9876,
+          "description": "A green courtyard restaurant in a restored riad, a calm break from the souks."
+        }
+      },
+      {
+        "op": "create",
+        "entity": "wishlist_item",
+        "data": {
+          "name": "Le Jardin Secret",
+          "wishlist_name": "Hidden gems",
+          "address": "121 Rue Mouassine, Marrakech 40000, Morocco",
+          "latitude": 31.6315,
+          "longitude": -7.9898,
+          "description": "A restored riad garden with a tower view over the rooftops, peaceful even in high season."
+        }
+      },
+      {
+        "op": "create",
+        "entity": "wishlist_item",
+        "data": {
+          "name": "Saadian Tombs",
+          "wishlist_name": "Hidden gems",
+          "address": "Rue de la Kasbah, Marrakech 40000, Morocco",
+          "latitude": 31.6173,
+          "longitude": -7.9886,
+          "description": "Ornate royal tombs hidden for centuries and rediscovered in 1917."
+        }
+      },
+      {
+        "op": "create",
+        "entity": "wishlist_item",
+        "data": {
+          "name": "Menara Gardens",
+          "wishlist_name": "Hidden gems",
+          "address": "Menara Gardens, Marrakech 40000, Morocco",
+          "latitude": 31.614,
+          "longitude": -8.022,
+          "description": "Olive groves around a large pool with a pavilion and the Atlas Mountains behind."
+        }
+      },
+      {
+        "op": "create",
+        "entity": "wishlist_item",
+        "data": {
+          "name": "Mellah",
+          "wishlist_name": "Hidden gems",
+          "address": "Mellah, Marrakech 40000, Morocco",
+          "latitude": 31.6198,
+          "longitude": -7.983,
+          "description": "The old Jewish quarter, with a restored synagogue and a quieter spice market."
+        }
+      },
+      {
+        "op": "create",
+        "entity": "packing_item",
+        "data": {
+          "name": "Light clothing that covers shoulders and knees",
+          "category": "Clothing"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "packing_item",
+        "data": {
+          "name": "Warm layer for cool evenings and the mountains",
+          "category": "Clothing"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "packing_item",
+        "data": {
+          "name": "Comfortable shoes for uneven medina lanes",
+          "category": "Clothing"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "packing_item",
+        "data": {
+          "name": "Swimwear for the riad pool and hammam",
+          "category": "Clothing"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "packing_item",
+        "data": {
+          "name": "High-SPF sunscreen",
+          "category": "Toiletries"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "packing_item",
+        "data": {
+          "name": "Small notes and coins in dirhams",
+          "category": "Documents"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "packing_item",
+        "data": {
+          "name": "Passport valid for your whole stay",
+          "category": "Documents"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "packing_item",
+        "data": {
+          "name": "Universal power adapter (Morocco uses types C and E)",
+          "category": "Electronics"
+        }
+      }
+    ]
+  },
+  {
+    "slug": "miami-4-days-itinerary",
+    "title": "Miami in 4 days: South Beach, Wynwood and Little Havana",
+    "description": "Four days of South Beach sun and Ocean Drive neon, Wynwood murals and bars, café cubano in Little Havana, an Everglades airboat ride and a big night out. Suits groups of friends and birthday trips.",
+    "destination": "Miami, United States",
+    "region": "North America",
+    "latitude": 25.7617,
+    "longitude": -80.1918,
+    "timezone": "America/New_York",
+    "duration_days": 4,
+    "cover_image": null,
+    "ops": [
+      {
+        "op": "create",
+        "entity": "accommodation",
+        "data": {
+          "name": "Freehand Miami",
+          "description": "A sociable hotel and hostel with the Broken Shaker bar, a short ride from South Beach.",
+          "address": "2727 Indian Creek Drive, Miami Beach, FL 33140, USA",
+          "latitude": 25.804,
+          "longitude": -80.126,
+          "start_day_offset": 0,
+          "end_day_offset": 4
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "South Beach",
+          "description": "Find a spot near the lifeguard huts at Lummus Park.",
+          "address": "Lummus Park, Ocean Drive, Miami Beach, FL 33139, USA",
+          "latitude": 25.781,
+          "longitude": -80.13,
+          "category": "leisure",
+          "day_offset": 0,
+          "start_time": "14:00",
+          "end_day_offset": 0,
+          "end_time": "17:30"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "Ocean Drive at dusk",
+          "description": "Walk the Art Deco District as the neon comes on.",
+          "address": "Ocean Drive, Miami Beach, FL 33139, USA",
+          "latitude": 25.782,
+          "longitude": -80.131,
+          "category": "sightseeing",
+          "day_offset": 0,
+          "start_time": "18:00",
+          "end_day_offset": 0,
+          "end_time": "19:30"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "Dinner at Time Out Market Miami",
+          "description": "Food stalls for every taste in the group.",
+          "address": "1601 Drexel Avenue, Miami Beach, FL 33139, USA",
+          "latitude": 25.79,
+          "longitude": -80.1335,
+          "category": "dining",
+          "day_offset": 0,
+          "start_time": "20:00",
+          "end_day_offset": 0,
+          "end_time": "22:00"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "Little Havana",
+          "description": "Calle Ocho, Domino Park and Cuban music.",
+          "address": "SW 8th Street and 15th Avenue, Miami, FL 33135, USA",
+          "latitude": 25.7656,
+          "longitude": -80.219,
+          "category": "culture",
+          "day_offset": 1,
+          "start_time": "10:00",
+          "end_day_offset": 1,
+          "end_time": "12:00"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "Lunch at Versailles",
+          "description": "Cuban classics and café cubano.",
+          "address": "3555 SW 8th Street, Miami, FL 33135, USA",
+          "latitude": 25.7651,
+          "longitude": -80.2534,
+          "category": "dining",
+          "day_offset": 1,
+          "start_time": "12:00",
+          "end_day_offset": 1,
+          "end_time": "13:30"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "Wynwood Walls",
+          "description": "Murals, galleries and breweries.",
+          "address": "2516 NW 2nd Avenue, Miami, FL 33127, USA",
+          "latitude": 25.801,
+          "longitude": -80.1994,
+          "category": "culture",
+          "day_offset": 1,
+          "start_time": "15:00",
+          "end_day_offset": 1,
+          "end_time": "17:30"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "Dinner at Coyo Taco",
+          "description": "Tacos before a night out in Wynwood.",
+          "address": "2300 NW 2nd Avenue, Miami, FL 33127, USA",
+          "latitude": 25.7995,
+          "longitude": -80.199,
+          "category": "dining",
+          "day_offset": 1,
+          "start_time": "19:00",
+          "end_day_offset": 1,
+          "end_time": "21:00"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "Everglades airboat tour",
+          "description": "Alligators and sawgrass about an hour from downtown.",
+          "address": "Shark Valley, Tamiami Trail, Miami, FL 33194, USA",
+          "latitude": 25.7577,
+          "longitude": -80.766,
+          "category": "adventure",
+          "day_offset": 2,
+          "start_time": "09:00",
+          "end_day_offset": 2,
+          "end_time": "13:00"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "Vizcaya Museum and Gardens",
+          "description": "A Renaissance-style villa on the bay.",
+          "address": "3251 South Miami Avenue, Miami, FL 33129, USA",
+          "latitude": 25.7444,
+          "longitude": -80.2105,
+          "category": "culture",
+          "day_offset": 2,
+          "start_time": "15:30",
+          "end_day_offset": 2,
+          "end_time": "17:30"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "Dinner at Joe's Stone Crab",
+          "description": "A Miami institution. Expect to wait.",
+          "address": "11 Washington Avenue, Miami Beach, FL 33139, USA",
+          "latitude": 25.769,
+          "longitude": -80.135,
+          "category": "dining",
+          "day_offset": 2,
+          "start_time": "20:00",
+          "end_day_offset": 2,
+          "end_time": "22:00"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "Key Biscayne",
+          "description": "Quieter beaches and the Cape Florida lighthouse.",
+          "address": "1200 S Crandon Boulevard, Key Biscayne, FL 33149, USA",
+          "latitude": 25.6747,
+          "longitude": -80.1567,
+          "category": "leisure",
+          "day_offset": 3,
+          "start_time": "10:00",
+          "end_day_offset": 3,
+          "end_time": "14:00"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "Brickell rooftop bars",
+          "description": "Skyline views for a final drink.",
+          "address": "Brickell Avenue, Miami, FL 33131, USA",
+          "latitude": 25.765,
+          "longitude": -80.192,
+          "category": "entertainment",
+          "day_offset": 3,
+          "start_time": "18:00",
+          "end_day_offset": 3,
+          "end_time": "20:00"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "wishlist_item",
+        "data": {
+          "name": "Versailles",
+          "wishlist_name": "Top restaurants",
+          "address": "3555 SW 8th Street, Miami, FL 33135, USA",
+          "latitude": 25.7651,
+          "longitude": -80.2534,
+          "description": "The city's most famous Cuban restaurant, with a ventanita window for café cubano and croquetas."
+        }
+      },
+      {
+        "op": "create",
+        "entity": "wishlist_item",
+        "data": {
+          "name": "Joe's Stone Crab",
+          "wishlist_name": "Top restaurants",
+          "address": "11 Washington Avenue, Miami Beach, FL 33139, USA",
+          "latitude": 25.769,
+          "longitude": -80.135,
+          "description": "A Miami institution since 1913, famous for stone crabs in season and key lime pie. Expect a wait."
+        }
+      },
+      {
+        "op": "create",
+        "entity": "wishlist_item",
+        "data": {
+          "name": "Coyo Taco",
+          "wishlist_name": "Top restaurants",
+          "address": "2300 NW 2nd Avenue, Miami, FL 33127, USA",
+          "latitude": 25.7995,
+          "longitude": -80.199,
+          "description": "Busy taqueria with a bar in the back, ideal before a night out in Wynwood."
+        }
+      },
+      {
+        "op": "create",
+        "entity": "wishlist_item",
+        "data": {
+          "name": "Mandolin Aegean Bistro",
+          "wishlist_name": "Top restaurants",
+          "address": "4312 NE 2nd Avenue, Miami, FL 33137, USA",
+          "latitude": 25.816,
+          "longitude": -80.194,
+          "description": "Greek and Turkish dishes in a garden courtyard, a relaxed group lunch."
+        }
+      },
+      {
+        "op": "create",
+        "entity": "wishlist_item",
+        "data": {
+          "name": "Broken Shaker",
+          "wishlist_name": "Hidden gems",
+          "address": "2727 Indian Creek Drive, Miami Beach, FL 33140, USA",
+          "latitude": 25.804,
+          "longitude": -80.126,
+          "description": "An award-winning cocktail bar around a pool and garden at the Freehand hotel."
+        }
+      },
+      {
+        "op": "create",
+        "entity": "wishlist_item",
+        "data": {
+          "name": "Venetian Pool",
+          "wishlist_name": "Hidden gems",
+          "address": "2701 De Soto Boulevard, Coral Gables, FL 33134, USA",
+          "latitude": 25.746,
+          "longitude": -80.274,
+          "description": "A 1920s public pool carved from a coral rock quarry, with waterfalls and grottoes."
+        }
+      },
+      {
+        "op": "create",
+        "entity": "wishlist_item",
+        "data": {
+          "name": "Domino Park",
+          "wishlist_name": "Hidden gems",
+          "address": "801 SW 15th Avenue, Miami, FL 33135, USA",
+          "latitude": 25.7655,
+          "longitude": -80.2185,
+          "description": "Watch locals play dominoes at Máximo Gómez Park on Calle Ocho."
+        }
+      },
+      {
+        "op": "create",
+        "entity": "wishlist_item",
+        "data": {
+          "name": "Bill Baggs lighthouse",
+          "wishlist_name": "Hidden gems",
+          "address": "1200 S Crandon Boulevard, Key Biscayne, FL 33149, USA",
+          "latitude": 25.6665,
+          "longitude": -80.156,
+          "description": "The oldest standing structure in Miami-Dade, at the tip of Key Biscayne."
+        }
+      },
+      {
+        "op": "create",
+        "entity": "packing_item",
+        "data": {
+          "name": "Swimwear and a beach towel",
+          "category": "Clothing"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "packing_item",
+        "data": {
+          "name": "Going-out outfits for clubs (check dress codes)",
+          "category": "Clothing"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "packing_item",
+        "data": {
+          "name": "Light rain jacket for summer storms",
+          "category": "Clothing"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "packing_item",
+        "data": {
+          "name": "Reef-safe, high-SPF sunscreen",
+          "category": "Toiletries"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "packing_item",
+        "data": {
+          "name": "Insect repellent for the Everglades",
+          "category": "Toiletries"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "packing_item",
+        "data": {
+          "name": "Passport and approved ESTA",
+          "category": "Documents"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "packing_item",
+        "data": {
+          "name": "Photo ID (US bars check ID for everyone)",
+          "category": "Documents"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "packing_item",
+        "data": {
+          "name": "US plug adapter (types A and B)",
+          "category": "Electronics"
+        }
+      }
+    ]
+  },
+  {
+    "slug": "las-vegas-4-days-itinerary",
+    "title": "Las Vegas in 4 days: the Strip, a show, a pool party and the Grand Canyon",
+    "description": "Four days of Strip icons and fountains, a headline show, a pool party, the buffet, downtown's Fremont Street and a day trip to the Grand Canyon. Built for stags, hens and milestone birthdays.",
+    "destination": "Las Vegas, United States",
+    "region": "North America",
+    "latitude": 36.1147,
+    "longitude": -115.1728,
+    "timezone": "America/Los_Angeles",
+    "duration_days": 4,
+    "cover_image": null,
+    "ops": [
+      {
+        "op": "create",
+        "entity": "accommodation",
+        "data": {
+          "name": "The LINQ Hotel",
+          "description": "A good-value hotel in the middle of the Strip, on a pedestrian street of bars.",
+          "address": "3535 S Las Vegas Boulevard, Las Vegas, NV 89109, USA",
+          "latitude": 36.1177,
+          "longitude": -115.1705,
+          "start_day_offset": 0,
+          "end_day_offset": 4
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "Welcome to Las Vegas sign",
+          "description": "The classic first photo.",
+          "address": "5100 S Las Vegas Boulevard, Las Vegas, NV 89119, USA",
+          "latitude": 36.082,
+          "longitude": -115.1728,
+          "category": "sightseeing",
+          "day_offset": 0,
+          "start_time": "17:00",
+          "end_day_offset": 0,
+          "end_time": "17:45"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "Dinner at Eataly",
+          "description": "Pasta and pizza before the evening.",
+          "address": "3770 S Las Vegas Boulevard, Las Vegas, NV 89109, USA",
+          "latitude": 36.1024,
+          "longitude": -115.1747,
+          "category": "dining",
+          "day_offset": 0,
+          "start_time": "18:30",
+          "end_day_offset": 0,
+          "end_time": "20:00"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "Bellagio fountains",
+          "description": "Free shows set to music.",
+          "address": "3600 S Las Vegas Boulevard, Las Vegas, NV 89109, USA",
+          "latitude": 36.1126,
+          "longitude": -115.1767,
+          "category": "sightseeing",
+          "day_offset": 0,
+          "start_time": "20:30",
+          "end_day_offset": 0,
+          "end_time": "21:30"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "Pool party",
+          "description": "DJs and cabanas at a resort day club. Book ahead.",
+          "address": "3770 S Las Vegas Boulevard, Las Vegas, NV 89109, USA",
+          "latitude": 36.115,
+          "longitude": -115.173,
+          "category": "entertainment",
+          "day_offset": 1,
+          "start_time": "11:00",
+          "end_day_offset": 1,
+          "end_time": "17:00"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "Dinner at Gordon Ramsay Hell's Kitchen",
+          "description": "Beef Wellington and sticky toffee pudding.",
+          "address": "3570 S Las Vegas Boulevard, Las Vegas, NV 89109, USA",
+          "latitude": 36.117,
+          "longitude": -115.172,
+          "category": "dining",
+          "day_offset": 1,
+          "start_time": "19:00",
+          "end_day_offset": 1,
+          "end_time": "20:30"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "A big show",
+          "description": "Cirque du Soleil, comedy or a residency.",
+          "address": "3600 S Las Vegas Boulevard, Las Vegas, NV 89109, USA",
+          "latitude": 36.1126,
+          "longitude": -115.1767,
+          "category": "entertainment",
+          "day_offset": 1,
+          "start_time": "21:00",
+          "end_day_offset": 1,
+          "end_time": "23:00"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "Grand Canyon day trip",
+          "description": "West Rim and Skywalk by coach or helicopter.",
+          "address": "Grand Canyon West, AZ 86434, USA",
+          "latitude": 36.012,
+          "longitude": -113.811,
+          "category": "adventure",
+          "day_offset": 2,
+          "start_time": "07:00",
+          "end_day_offset": 2,
+          "end_time": "17:00"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "Bacchanal Buffet",
+          "description": "Book a slot and arrive hungry.",
+          "address": "3570 S Las Vegas Boulevard, Las Vegas, NV 89109, USA",
+          "latitude": 36.1162,
+          "longitude": -115.1745,
+          "category": "dining",
+          "day_offset": 2,
+          "start_time": "19:30",
+          "end_day_offset": 2,
+          "end_time": "21:00"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "Red Rock Canyon",
+          "description": "A scenic drive and short hike.",
+          "address": "1000 Scenic Loop Drive, Las Vegas, NV 89161, USA",
+          "latitude": 36.1355,
+          "longitude": -115.427,
+          "category": "adventure",
+          "day_offset": 3,
+          "start_time": "10:00",
+          "end_day_offset": 3,
+          "end_time": "12:30"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "Lunch at Lotus of Siam",
+          "description": "Northern Thai cooking loved by locals.",
+          "address": "620 E Flamingo Road, Las Vegas, NV 89119, USA",
+          "latitude": 36.1149,
+          "longitude": -115.1495,
+          "category": "dining",
+          "day_offset": 3,
+          "start_time": "14:00",
+          "end_day_offset": 3,
+          "end_time": "15:30"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "The Neon Museum",
+          "description": "Historic casino signs at dusk.",
+          "address": "770 Las Vegas Boulevard N, Las Vegas, NV 89101, USA",
+          "latitude": 36.177,
+          "longitude": -115.135,
+          "category": "culture",
+          "day_offset": 3,
+          "start_time": "18:00",
+          "end_day_offset": 3,
+          "end_time": "19:30"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "Fremont Street Experience",
+          "description": "The canopy light show and old casinos.",
+          "address": "Fremont Street, Las Vegas, NV 89101, USA",
+          "latitude": 36.17,
+          "longitude": -115.144,
+          "category": "entertainment",
+          "day_offset": 3,
+          "start_time": "20:00",
+          "end_day_offset": 3,
+          "end_time": "22:30"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "wishlist_item",
+        "data": {
+          "name": "Bacchanal Buffet",
+          "wishlist_name": "Top restaurants",
+          "address": "3570 S Las Vegas Boulevard, Las Vegas, NV 89109, USA",
+          "latitude": 36.1162,
+          "longitude": -115.1745,
+          "description": "The Strip's most famous buffet, with hundreds of dishes. Arrive hungry and book a time slot."
+        }
+      },
+      {
+        "op": "create",
+        "entity": "wishlist_item",
+        "data": {
+          "name": "Secret Pizza",
+          "wishlist_name": "Top restaurants",
+          "address": "3708 S Las Vegas Boulevard, Las Vegas, NV 89109, USA",
+          "latitude": 36.1097,
+          "longitude": -115.174,
+          "description": "An unmarked pizza counter down a corridor of album covers, open late."
+        }
+      },
+      {
+        "op": "create",
+        "entity": "wishlist_item",
+        "data": {
+          "name": "Gordon Ramsay Hell's Kitchen",
+          "wishlist_name": "Top restaurants",
+          "address": "3570 S Las Vegas Boulevard, Las Vegas, NV 89109, USA",
+          "latitude": 36.117,
+          "longitude": -115.172,
+          "description": "Beef Wellington and sticky toffee pudding in a room modelled on the TV show. Book ahead."
+        }
+      },
+      {
+        "op": "create",
+        "entity": "wishlist_item",
+        "data": {
+          "name": "Lotus of Siam",
+          "wishlist_name": "Top restaurants",
+          "address": "620 E Flamingo Road, Las Vegas, NV 89119, USA",
+          "latitude": 36.1149,
+          "longitude": -115.1495,
+          "description": "Award-winning northern Thai cooking, much loved by locals."
+        }
+      },
+      {
+        "op": "create",
+        "entity": "wishlist_item",
+        "data": {
+          "name": "The Neon Museum",
+          "wishlist_name": "Hidden gems",
+          "address": "770 Las Vegas Boulevard N, Las Vegas, NV 89101, USA",
+          "latitude": 36.177,
+          "longitude": -115.135,
+          "description": "A boneyard of restored historic casino signs, best on an evening tour."
+        }
+      },
+      {
+        "op": "create",
+        "entity": "wishlist_item",
+        "data": {
+          "name": "Arts District",
+          "wishlist_name": "Hidden gems",
+          "address": "1025 S 1st Street, Las Vegas, NV 89101, USA",
+          "latitude": 36.159,
+          "longitude": -115.153,
+          "description": "Galleries, breweries and vintage shops south of downtown, with a First Friday street event."
+        }
+      },
+      {
+        "op": "create",
+        "entity": "wishlist_item",
+        "data": {
+          "name": "Seven Magic Mountains",
+          "wishlist_name": "Hidden gems",
+          "address": "S Las Vegas Boulevard, Jean, NV 89019, USA",
+          "latitude": 35.838,
+          "longitude": -115.271,
+          "description": "A desert art installation of brightly painted stacked boulders."
+        }
+      },
+      {
+        "op": "create",
+        "entity": "wishlist_item",
+        "data": {
+          "name": "Valley of Fire",
+          "wishlist_name": "Hidden gems",
+          "address": "29450 Valley of Fire Highway, Overton, NV 89040, USA",
+          "latitude": 36.43,
+          "longitude": -114.51,
+          "description": "Nevada's oldest state park, with flaming red rock formations about an hour away."
+        }
+      },
+      {
+        "op": "create",
+        "entity": "packing_item",
+        "data": {
+          "name": "Swimwear for pool parties",
+          "category": "Clothing"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "packing_item",
+        "data": {
+          "name": "Smart outfits for clubs and shows",
+          "category": "Clothing"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "packing_item",
+        "data": {
+          "name": "Comfortable shoes for long Strip walks",
+          "category": "Clothing"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "packing_item",
+        "data": {
+          "name": "Light jacket for cold air-conditioning and desert evenings",
+          "category": "Clothing"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "packing_item",
+        "data": {
+          "name": "High-SPF sunscreen",
+          "category": "Toiletries"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "packing_item",
+        "data": {
+          "name": "Passport and approved ESTA",
+          "category": "Documents"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "packing_item",
+        "data": {
+          "name": "Photo ID (needed for bars, clubs and casinos)",
+          "category": "Documents"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "packing_item",
+        "data": {
+          "name": "US plug adapter (types A and B)",
+          "category": "Electronics"
+        }
+      }
+    ]
+  },
+  {
+    "slug": "tulum-5-days-itinerary",
+    "title": "Tulum in 5 days: Maya ruins, cenotes and beach clubs",
+    "description": "Five days that combine the clifftop Maya ruins, swims in cenotes, a bike ride through the jungle city of Cobá, a beach-club afternoon and dinners on the beach road. Suits groups of friends on a bucket-list trip to Mexico.",
+    "destination": "Tulum, Mexico",
+    "region": "North America",
+    "latitude": 20.2114,
+    "longitude": -87.4654,
+    "timezone": "America/Cancun",
+    "duration_days": 5,
+    "cover_image": null,
+    "ops": [
+      {
+        "op": "create",
+        "entity": "accommodation",
+        "data": {
+          "name": "Aldea Zamá apartments",
+          "description": "Modern apartments between town and beach, often with rooftop pools.",
+          "address": "Aldea Zamá, Tulum, Quintana Roo 77760, Mexico",
+          "latitude": 20.201,
+          "longitude": -87.456,
+          "start_day_offset": 0,
+          "end_day_offset": 5
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "Playa Paraíso",
+          "description": "A first swim on white sand.",
+          "address": "Playa Paraíso, Tulum, Quintana Roo 77780, Mexico",
+          "latitude": 20.198,
+          "longitude": -87.44,
+          "category": "leisure",
+          "day_offset": 0,
+          "start_time": "16:00",
+          "end_day_offset": 0,
+          "end_time": "18:30"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "Tacos at Antojitos La Chiapaneca",
+          "description": "Al pastor tacos in town.",
+          "address": "Avenida Tulum, Tulum Pueblo, Quintana Roo 77760, Mexico",
+          "latitude": 20.2105,
+          "longitude": -87.4651,
+          "category": "dining",
+          "day_offset": 0,
+          "start_time": "20:00",
+          "end_day_offset": 0,
+          "end_time": "21:30"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "Tulum Archaeological Site",
+          "description": "Arrive at opening time to beat the heat.",
+          "address": "Carretera Federal 307, Tulum, Quintana Roo 77780, Mexico",
+          "latitude": 20.2147,
+          "longitude": -87.429,
+          "category": "culture",
+          "day_offset": 1,
+          "start_time": "08:00",
+          "end_day_offset": 1,
+          "end_time": "10:30"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "Gran Cenote",
+          "description": "Swim and snorkel with turtles.",
+          "address": "Carretera Tulum-Cobá km 3.5, Tulum, Quintana Roo 77796, Mexico",
+          "latitude": 20.2465,
+          "longitude": -87.4642,
+          "category": "leisure",
+          "day_offset": 1,
+          "start_time": "11:00",
+          "end_day_offset": 1,
+          "end_time": "13:00"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "Lunch at El Camello Jr.",
+          "description": "Ceviche and fried fish.",
+          "address": "Avenida Tulum, Tulum Pueblo, Quintana Roo 77760, Mexico",
+          "latitude": 20.204,
+          "longitude": -87.469,
+          "category": "dining",
+          "day_offset": 1,
+          "start_time": "13:30",
+          "end_day_offset": 1,
+          "end_time": "14:30"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "Dinner at Hartwood",
+          "description": "Wood-fired cooking in the jungle. Book well ahead.",
+          "address": "Carretera Tulum-Boca Paila km 7.6, Tulum, Quintana Roo 77780, Mexico",
+          "latitude": 20.154,
+          "longitude": -87.455,
+          "category": "dining",
+          "day_offset": 1,
+          "start_time": "19:30",
+          "end_day_offset": 1,
+          "end_time": "21:30"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "Cobá ruins by bike",
+          "description": "Cycle the forest paths of a jungle Maya city.",
+          "address": "Cobá, Quintana Roo 77793, Mexico",
+          "latitude": 20.4949,
+          "longitude": -87.7357,
+          "category": "culture",
+          "day_offset": 2,
+          "start_time": "08:00",
+          "end_day_offset": 2,
+          "end_time": "14:00"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "Cenote Calavera",
+          "description": "Jump in through holes in the rock.",
+          "address": "Carretera Tulum-Cobá km 1.7, Tulum, Quintana Roo 77796, Mexico",
+          "latitude": 20.23,
+          "longitude": -87.468,
+          "category": "leisure",
+          "day_offset": 2,
+          "start_time": "15:00",
+          "end_day_offset": 2,
+          "end_time": "16:30"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "Akumal turtles",
+          "description": "Swim with sea turtles using official guides.",
+          "address": "Akumal, Quintana Roo 77776, Mexico",
+          "latitude": 20.3959,
+          "longitude": -87.3153,
+          "category": "adventure",
+          "day_offset": 3,
+          "start_time": "08:30",
+          "end_day_offset": 3,
+          "end_time": "13:00"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "Beach club afternoon",
+          "description": "Day beds and cocktails on the beach road.",
+          "address": "Carretera Tulum-Boca Paila km 9, Tulum, Quintana Roo 77780, Mexico",
+          "latitude": 20.147,
+          "longitude": -87.456,
+          "category": "leisure",
+          "day_offset": 3,
+          "start_time": "14:00",
+          "end_day_offset": 3,
+          "end_time": "19:00"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "Dinner at Arca",
+          "description": "Inventive Mexican cooking over fire.",
+          "address": "Carretera Tulum-Boca Paila km 7.6, Tulum, Quintana Roo 77780, Mexico",
+          "latitude": 20.1545,
+          "longitude": -87.4552,
+          "category": "dining",
+          "day_offset": 3,
+          "start_time": "20:00",
+          "end_day_offset": 3,
+          "end_time": "22:00"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "Sian Ka'an Biosphere Reserve",
+          "description": "Lagoons and a floating river channel with a local guide.",
+          "address": "Sian Ka'an, Quintana Roo, Mexico",
+          "latitude": 20.09,
+          "longitude": -87.49,
+          "category": "adventure",
+          "day_offset": 4,
+          "start_time": "08:00",
+          "end_day_offset": 4,
+          "end_time": "14:00"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "wishlist_item",
+        "data": {
+          "name": "Antojitos La Chiapaneca",
+          "wishlist_name": "Top restaurants",
+          "address": "Avenida Tulum, Tulum Pueblo, Quintana Roo 77760, Mexico",
+          "latitude": 20.2105,
+          "longitude": -87.4651,
+          "description": "A cheap and busy taco stand famous for al pastor tacos. A must for a late-night bite."
+        }
+      },
+      {
+        "op": "create",
+        "entity": "wishlist_item",
+        "data": {
+          "name": "Hartwood",
+          "wishlist_name": "Top restaurants",
+          "address": "Carretera Tulum-Boca Paila km 7.6, Tulum, Quintana Roo 77780, Mexico",
+          "latitude": 20.154,
+          "longitude": -87.455,
+          "description": "A celebrated wood-fired restaurant in the jungle with a daily changing menu. Book well ahead."
+        }
+      },
+      {
+        "op": "create",
+        "entity": "wishlist_item",
+        "data": {
+          "name": "Arca",
+          "wishlist_name": "Top restaurants",
+          "address": "Carretera Tulum-Boca Paila km 7.6, Tulum, Quintana Roo 77780, Mexico",
+          "latitude": 20.1545,
+          "longitude": -87.4552,
+          "description": "Inventive Mexican cooking over fire in an open-air dining room. Good for a celebration."
+        }
+      },
+      {
+        "op": "create",
+        "entity": "wishlist_item",
+        "data": {
+          "name": "Taqueria Honorio",
+          "wishlist_name": "Top restaurants",
+          "address": "Calle Satélite Sur, Tulum Pueblo, Quintana Roo 77760, Mexico",
+          "latitude": 20.214,
+          "longitude": -87.463,
+          "description": "A morning favourite for cochinita pibil tacos and tortas. Go early before it sells out."
+        }
+      },
+      {
+        "op": "create",
+        "entity": "wishlist_item",
+        "data": {
+          "name": "Cenote Zacil-Ha",
+          "wishlist_name": "Hidden gems",
+          "address": "Carretera Tulum-Cobá km 8, Tulum, Quintana Roo 77796, Mexico",
+          "latitude": 20.2744,
+          "longitude": -87.4883,
+          "description": "A round open-air cenote with a small zip line and a snack bar, quieter than the famous ones."
+        }
+      },
+      {
+        "op": "create",
+        "entity": "wishlist_item",
+        "data": {
+          "name": "Laguna de Kaan Luum",
+          "wishlist_name": "Hidden gems",
+          "address": "Carretera Federal 307 km 237, Tulum, Quintana Roo, Mexico",
+          "latitude": 20.072,
+          "longitude": -87.601,
+          "description": "A turquoise lagoon with a deep sinkhole at its centre and swings in the water."
+        }
+      },
+      {
+        "op": "create",
+        "entity": "wishlist_item",
+        "data": {
+          "name": "Muyil ruins",
+          "wishlist_name": "Hidden gems",
+          "address": "Muyil, Quintana Roo 77780, Mexico",
+          "latitude": 20.078,
+          "longitude": -87.61,
+          "description": "A small, quiet Maya site with a boardwalk through the jungle to a lagoon."
+        }
+      },
+      {
+        "op": "create",
+        "entity": "wishlist_item",
+        "data": {
+          "name": "Punta Allen",
+          "wishlist_name": "Hidden gems",
+          "address": "Punta Allen, Quintana Roo, Mexico",
+          "latitude": 19.799,
+          "longitude": -87.478,
+          "description": "A remote fishing village at the end of a long dirt road, known for dolphin and fly-fishing trips."
+        }
+      },
+      {
+        "op": "create",
+        "entity": "packing_item",
+        "data": {
+          "name": "Swimwear (at least two sets)",
+          "category": "Clothing"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "packing_item",
+        "data": {
+          "name": "Water shoes for cenotes",
+          "category": "Clothing"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "packing_item",
+        "data": {
+          "name": "Light long sleeves for jungle evenings",
+          "category": "Clothing"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "packing_item",
+        "data": {
+          "name": "Biodegradable sunscreen (required at many cenotes)",
+          "category": "Toiletries"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "packing_item",
+        "data": {
+          "name": "Insect repellent",
+          "category": "Toiletries"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "packing_item",
+        "data": {
+          "name": "Snorkel and mask",
+          "category": "Specialty Gear"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "packing_item",
+        "data": {
+          "name": "Mexican pesos in cash",
+          "category": "Documents"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "packing_item",
+        "data": {
+          "name": "Waterproof phone pouch",
+          "category": "Electronics"
+        }
+      }
+    ]
+  },
+  {
+    "slug": "phuket-1-week-itinerary",
+    "title": "Phuket in 1 week: beaches, Phi Phi, Phang Nga Bay and Old Town",
+    "description": "A week of beach days on the west coast, speedboat trips to the Phi Phi islands and Phang Nga Bay, colourful Old Town, a sunset at Promthep Cape, a cooking class and a big night on Bangla Road. Suits groups of friends on a long-haul beach trip.",
+    "destination": "Phuket, Thailand",
+    "region": "Asia",
+    "latitude": 7.8804,
+    "longitude": 98.3923,
+    "timezone": "Asia/Bangkok",
+    "duration_days": 7,
+    "cover_image": null,
+    "ops": [
+      {
+        "op": "create",
+        "entity": "accommodation",
+        "data": {
+          "name": "Pool villas in Kamala and Bang Tao",
+          "description": "A private pool villa on the west coast, good value for a larger group.",
+          "address": "Kamala, Kathu, Phuket 83150, Thailand",
+          "latitude": 7.953,
+          "longitude": 98.283,
+          "start_day_offset": 0,
+          "end_day_offset": 7
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "Kata beach",
+          "description": "Settle in with a swim and a beach massage.",
+          "address": "Kata Beach, Karon, Mueang Phuket 83100, Thailand",
+          "latitude": 7.82,
+          "longitude": 98.298,
+          "category": "leisure",
+          "day_offset": 0,
+          "start_time": "15:00",
+          "end_day_offset": 0,
+          "end_time": "18:00"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "Dinner at Mom Tri's Kitchen",
+          "description": "Sea views for the first night.",
+          "address": "12 Kata Noi Road, Karon, Mueang Phuket 83100, Thailand",
+          "latitude": 7.807,
+          "longitude": 98.295,
+          "category": "dining",
+          "day_offset": 0,
+          "start_time": "19:30",
+          "end_day_offset": 0,
+          "end_time": "21:00"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "Phi Phi islands day trip",
+          "description": "Speedboat to Maya Bay and the Phi Phi islands.",
+          "address": "Rassada Pier, Mueang Phuket 83000, Thailand",
+          "latitude": 7.877,
+          "longitude": 98.404,
+          "category": "adventure",
+          "day_offset": 1,
+          "start_time": "07:30",
+          "end_day_offset": 1,
+          "end_time": "17:00"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "Seafood at Banzaan Fresh Market",
+          "description": "Pick your seafood and have it cooked upstairs.",
+          "address": "Sai Kor Road, Patong, Kathu, Phuket 83150, Thailand",
+          "latitude": 7.8935,
+          "longitude": 98.298,
+          "category": "dining",
+          "day_offset": 1,
+          "start_time": "20:00",
+          "end_day_offset": 1,
+          "end_time": "21:30"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "Phuket Old Town",
+          "description": "Shophouses, cafés and street art.",
+          "address": "Thalang Road, Talat Yai, Mueang Phuket 83000, Thailand",
+          "latitude": 7.886,
+          "longitude": 98.389,
+          "category": "culture",
+          "day_offset": 2,
+          "start_time": "10:00",
+          "end_day_offset": 2,
+          "end_time": "13:00"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "Lunch at One Chun",
+          "description": "Southern Thai home cooking.",
+          "address": "48/1 Thepkasattri Road, Talat Yai, Mueang Phuket 83000, Thailand",
+          "latitude": 7.8865,
+          "longitude": 98.392,
+          "category": "dining",
+          "day_offset": 2,
+          "start_time": "13:00",
+          "end_day_offset": 2,
+          "end_time": "14:30"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "Promthep Cape sunset",
+          "description": "Arrive early for a spot.",
+          "address": "Promthep Cape, Rawai, Mueang Phuket 83130, Thailand",
+          "latitude": 7.762,
+          "longitude": 98.305,
+          "category": "sightseeing",
+          "day_offset": 2,
+          "start_time": "17:00",
+          "end_day_offset": 2,
+          "end_time": "19:00"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "Phang Nga Bay",
+          "description": "Sea canoes among the limestone karsts.",
+          "address": "Ao Po Grand Marina, Pa Khlok, Thalang, Phuket 83110, Thailand",
+          "latitude": 8.071,
+          "longitude": 98.449,
+          "category": "adventure",
+          "day_offset": 3,
+          "start_time": "08:00",
+          "end_day_offset": 3,
+          "end_time": "17:00"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "Thai cooking class",
+          "description": "Market visit and curries.",
+          "address": "Phuket Old Town, Mueang Phuket 83000, Thailand",
+          "latitude": 7.886,
+          "longitude": 98.389,
+          "category": "workshops",
+          "day_offset": 4,
+          "start_time": "10:00",
+          "end_day_offset": 4,
+          "end_time": "14:00"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "Big Buddha",
+          "description": "Views over the south of the island.",
+          "address": "Big Buddha, Karon, Mueang Phuket 83100, Thailand",
+          "latitude": 7.8278,
+          "longitude": 98.3127,
+          "category": "sightseeing",
+          "day_offset": 4,
+          "start_time": "16:00",
+          "end_day_offset": 4,
+          "end_time": "17:30"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "Bangla Road",
+          "description": "A big night in Patong.",
+          "address": "Bangla Road, Patong, Kathu, Phuket 83150, Thailand",
+          "latitude": 7.8935,
+          "longitude": 98.2965,
+          "category": "entertainment",
+          "day_offset": 4,
+          "start_time": "21:00",
+          "end_day_offset": 4,
+          "end_time": "23:59"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "Freedom Beach",
+          "description": "A longtail boat to a secluded beach.",
+          "address": "Freedom Beach, Patong, Kathu, Phuket 83150, Thailand",
+          "latitude": 7.877,
+          "longitude": 98.278,
+          "category": "leisure",
+          "day_offset": 5,
+          "start_time": "11:00",
+          "end_day_offset": 5,
+          "end_time": "16:00"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "Dinner at Kan Eang@Pier",
+          "description": "Seafood on Chalong Bay.",
+          "address": "44/1 Viset Road, Chalong, Mueang Phuket 83130, Thailand",
+          "latitude": 7.824,
+          "longitude": 98.354,
+          "category": "dining",
+          "day_offset": 5,
+          "start_time": "18:30",
+          "end_day_offset": 5,
+          "end_time": "20:30"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "event",
+        "data": {
+          "name": "Last morning on Karon beach",
+          "description": "A final swim before the airport.",
+          "address": "Kata Beach, Karon, Mueang Phuket 83100, Thailand",
+          "latitude": 7.82,
+          "longitude": 98.298,
+          "category": "leisure",
+          "day_offset": 6,
+          "start_time": "10:00",
+          "end_day_offset": 6,
+          "end_time": "12:30"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "wishlist_item",
+        "data": {
+          "name": "One Chun",
+          "wishlist_name": "Top restaurants",
+          "address": "48/1 Thepkasattri Road, Talat Yai, Mueang Phuket 83000, Thailand",
+          "latitude": 7.8865,
+          "longitude": 98.392,
+          "description": "Southern Thai home cooking in a pretty old shophouse, including moo hong, the island's braised pork."
+        }
+      },
+      {
+        "op": "create",
+        "entity": "wishlist_item",
+        "data": {
+          "name": "Raya Restaurant",
+          "wishlist_name": "Top restaurants",
+          "address": "48 Dibuk Road, Talat Yai, Mueang Phuket 83000, Thailand",
+          "latitude": 7.8862,
+          "longitude": 98.3877,
+          "description": "A long-running restaurant in a colonial mansion, known for its crab curry with rice noodles."
+        }
+      },
+      {
+        "op": "create",
+        "entity": "wishlist_item",
+        "data": {
+          "name": "Kan Eang@Pier",
+          "wishlist_name": "Top restaurants",
+          "address": "44/1 Viset Road, Chalong, Mueang Phuket 83130, Thailand",
+          "latitude": 7.824,
+          "longitude": 98.354,
+          "description": "A big seafood restaurant on Chalong Bay, good for groups and sunset."
+        }
+      },
+      {
+        "op": "create",
+        "entity": "wishlist_item",
+        "data": {
+          "name": "Banzaan Fresh Market",
+          "wishlist_name": "Top restaurants",
+          "address": "Sai Kor Road, Patong, Kathu, Phuket 83150, Thailand",
+          "latitude": 7.8935,
+          "longitude": 98.298,
+          "description": "A local market with cheap seafood cooked to order upstairs."
+        }
+      },
+      {
+        "op": "create",
+        "entity": "wishlist_item",
+        "data": {
+          "name": "Freedom Beach",
+          "wishlist_name": "Hidden gems",
+          "address": "Freedom Beach, Patong, Kathu, Phuket 83150, Thailand",
+          "latitude": 7.877,
+          "longitude": 98.278,
+          "description": "A secluded beach south of Patong, reached by longtail boat."
+        }
+      },
+      {
+        "op": "create",
+        "entity": "wishlist_item",
+        "data": {
+          "name": "Khao Rang viewpoint",
+          "wishlist_name": "Hidden gems",
+          "address": "Khao Rang, Mueang Phuket 83000, Thailand",
+          "latitude": 7.892,
+          "longitude": 98.38,
+          "description": "A hill above Phuket Town with views and a restaurant, popular with locals."
+        }
+      },
+      {
+        "op": "create",
+        "entity": "wishlist_item",
+        "data": {
+          "name": "Bang Pae Waterfall",
+          "wishlist_name": "Hidden gems",
+          "address": "Bang Pae Waterfall, Pa Khlok, Thalang, Phuket 83110, Thailand",
+          "latitude": 8.037,
+          "longitude": 98.392,
+          "description": "A jungle waterfall in a national park, next to a gibbon rehabilitation project."
+        }
+      },
+      {
+        "op": "create",
+        "entity": "wishlist_item",
+        "data": {
+          "name": "Koh Yao Noi",
+          "wishlist_name": "Hidden gems",
+          "address": "Koh Yao Noi, Phang Nga 82160, Thailand",
+          "latitude": 8.1149,
+          "longitude": 98.6231,
+          "description": "A quiet island a short boat ride away, with rice fields and views of the karsts."
+        }
+      },
+      {
+        "op": "create",
+        "entity": "packing_item",
+        "data": {
+          "name": "Swimwear (at least two sets)",
+          "category": "Clothing"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "packing_item",
+        "data": {
+          "name": "Modest outfit for temples and the Big Buddha",
+          "category": "Clothing"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "packing_item",
+        "data": {
+          "name": "Light rain jacket",
+          "category": "Clothing"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "packing_item",
+        "data": {
+          "name": "Reef-safe, high-SPF sunscreen",
+          "category": "Toiletries"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "packing_item",
+        "data": {
+          "name": "Insect repellent",
+          "category": "Toiletries"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "packing_item",
+        "data": {
+          "name": "Waterproof phone pouch for boat trips",
+          "category": "Electronics"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "packing_item",
+        "data": {
+          "name": "Universal power adapter (Thailand uses types A, B, C and F)",
+          "category": "Electronics"
+        }
+      },
+      {
+        "op": "create",
+        "entity": "packing_item",
+        "data": {
+          "name": "Travel insurance that covers scooters and boat trips",
+          "category": "Documents"
+        }
+      }
+    ]
   }
 ]
