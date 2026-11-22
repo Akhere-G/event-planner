@@ -318,19 +318,43 @@ metadata, Twitter card metadata, initial-HTML metadata, descriptive image alt te
 all five articles and all related guide pages are present in the generated sitemap.
 All article and category routes are statically generated.
 
+## November 2026 expansion
+
+On 22 November 2026 the site grew to 26 destination guides, 32 articles, 15 feature
+pages and an FAQ page.
+
+- **Destinations.** Thirteen new guides cover the places UK groups in their twenties
+  and thirties plan trips to: Ibiza, Mykonos, Marbella, Tenerife, Split, Kraków,
+  Berlin, Dubai, Marrakech, Miami, Las Vegas, Tulum and Phuket. Dubai and Marrakech
+  sit in a new "Middle East & Africa" region. Each has a premade template in
+  `event-planner-app-backend/scripts/data/premade_templates.json`, which still has to
+  be seeded into production.
+- **Comparisons.** One comparison per new destination, each written from a
+  group-trip angle.
+- **Travel inspiration.** A new category holds year-led and trend-led posts. The
+  2027 round-up and budget topics above were published after checking 2027 trend
+  reports from BBC Travel, Skyscanner and Expedia. They avoid price figures; readers
+  are told to compare their own dates instead. The trend posts draw on GTA VI's
+  release, Skyscanner's "Sten Do Surge", the 2 August 2027 eclipse, Eurovision 2027
+  in Burgas and set-jetting.
+- **Images.** Body photos for the new articles, and the new guides' heroes, are
+  hotlinked from Unsplash and credited by source (see `public/articles/CREDITS.md`).
+- **Features and FAQ.** Feature pages and the FAQ replace the three sitemap URLs
+  that used to return 404. Feature screenshots live in `public/features/`.
+
 ## Topics deliberately not published
 
 - Restaurant listicles and “hidden gems” pages were deferred. They require a larger
   venue-by-venue verification pass for current opening status, booking rules and
   pricing, and would overlap heavily with the existing guide sections.
-- “Best places to visit in 2027” and other year-led round-ups were deferred because
+- (Published November 2026, see above.) “Best places to visit in 2027” and other year-led round-ups were deferred because
   the inaccessible Trends interface prevented the requested emerging-demand check,
   and publishing before that research would encourage speculative recommendations.
 - Exact-duration destination articles such as “3 days in Paris” were deferred where
   an existing TripTrack itinerary template already serves that intent. A future
   article should add materially richer editorial guidance rather than duplicate a
   template.
-- Budget-destination rankings were deferred because a defensible comparison requires
+- (Published November 2026 without price figures, see above.) Budget-destination rankings were deferred because a defensible comparison requires
   a dated, consistent cost dataset across all destinations.
 - Solo-travel and nightlife rankings were deferred despite promising demand signals;
   they need safety, late-transport and neighbourhood research across the full city
