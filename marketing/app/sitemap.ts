@@ -1,12 +1,15 @@
 import type { MetadataRoute } from "next";
 import { destinationGuides } from "./destinations/guides";
 import { articleCategories, travelArticles } from "./articles";
+import { featurePages, featurePath } from "./features";
 import {
   articleCategoryPath,
   articlePath,
   guidePath,
   SITE_URL,
 } from "./lib/urls";
+
+const CONTENT_UPDATED_AT = new Date("2026-11-22");
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = SITE_URL;
@@ -30,11 +33,21 @@ export default function sitemap(): MetadataRoute.Sitemap {
     });
   }
 
+  const featureEntries: MetadataRoute.Sitemap = [];
+  for (const feature of featurePages) {
+    featureEntries.push({
+      url: `${baseUrl}${featurePath(feature.slug)}`,
+      lastModified: CONTENT_UPDATED_AT,
+      changeFrequency: "monthly",
+      priority: 0.8,
+    });
+  }
+
   const categoryEntries: MetadataRoute.Sitemap = [];
   for (const category of articleCategories) {
     categoryEntries.push({
       url: `${baseUrl}${articleCategoryPath(category.slug)}`,
-      lastModified: new Date("2026-11-16"),
+      lastModified: CONTENT_UPDATED_AT,
       changeFrequency: "weekly",
       priority: 0.6,
     });
@@ -48,22 +61,16 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 1,
     },
     {
-      url: `${baseUrl}/trip-planner`,
-      lastModified: new Date(),
+      url: `${baseUrl}/features`,
+      lastModified: CONTENT_UPDATED_AT,
       changeFrequency: "monthly",
       priority: 0.9,
     },
     {
-      url: `${baseUrl}/itinerary-planner`,
-      lastModified: new Date(),
+      url: `${baseUrl}/faq`,
+      lastModified: CONTENT_UPDATED_AT,
       changeFrequency: "monthly",
-      priority: 0.9,
-    },
-    {
-      url: `${baseUrl}/ai-travel-planner`,
-      lastModified: new Date(),
-      changeFrequency: "monthly",
-      priority: 0.9,
+      priority: 0.7,
     },
     {
       url: `${baseUrl}/destinations`,
@@ -73,10 +80,11 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
     {
       url: `${baseUrl}/articles`,
-      lastModified: new Date("2026-11-16"),
+      lastModified: CONTENT_UPDATED_AT,
       changeFrequency: "weekly",
       priority: 0.8,
     },
+    ...featureEntries,
     ...guideEntries,
     ...categoryEntries,
     ...articleEntries,

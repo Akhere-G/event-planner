@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { TrackedLink } from "./components/TrackedLink";
 import { Logo } from "./components/Logo";
+import { featurePath } from "./features";
 
 const url = process.env.NEXT_PUBLIC_BASE_URL || "https://app.triptrack.uk";
 function HeroMockup() {
@@ -95,79 +96,93 @@ const featureCards = [
   {
     icon: <Sparkles size={20} />,
     title: "AI Trip Generator",
+    featureSlug: "ai-trip-generator",
     description:
       "Turn a single sentence into a complete trip plan in seconds. Describe where you want to go and what you enjoy, and the AI builds the itinerary for you.",
   },
   {
     icon: <MessageSquareText size={20} />,
     title: "AI Trip Editing",
+    featureSlug: "ai-proposals",
     description:
       "Change your plan just by asking, whether that's moving a dinner or adding a day. Every AI change is shown for your review before it's applied, so you stay in control.",
   },
   {
     icon: <Brain size={20} />,
     title: "Smart Planning",
+    featureSlug: "smart-day-optimiser",
     description:
       "Fill empty hours with ideas, fix timing clashes and draft packing lists in one step. Every suggestion waits for your approval, so nothing changes without you.",
   },
   {
     icon: <Users size={20} />,
     title: "Realtime Collaboration",
+    featureSlug: "collaboration-roles",
     description:
       "Everyone in your group sees changes the moment they happen, on every device. No more chasing the latest version through a group chat.",
   },
   {
     icon: <CalendarSync size={20} />,
     title: "Google Calendar Sync",
+    featureSlug: "google-calendar-sync",
     description:
       "Keep each trip in step with Google Calendar, with changes flowing both ways. The whole group always has the right plan in their own calendar.",
   },
   {
     icon: <Plane size={20} />,
     title: "Flight Search",
+    featureSlug: "flight-search",
     description:
       "Search for flights without leaving your trip and keep each one beside your itinerary. Arrival times and plans stay lined up in one place.",
   },
   {
     icon: <Map size={20} />,
     title: "Map & Calendar View",
+    featureSlug: "trip-calendar",
     description:
       "See your schedule and your map on one clean screen. You'll know exactly where to be and how to get there without switching apps.",
   },
   {
     icon: <Wallet size={20} />,
     title: "Budget & Expenses",
+    featureSlug: "group-expenses",
     description:
       "Track what everyone spends, split costs and settle up in a few clicks. No awkward maths and no chasing friends for money.",
   },
   {
     icon: <LayoutTemplate size={20} />,
     title: "Trip Templates",
+    featureSlug: "trip-templates-export",
     description:
       "Start from a premade destination template and make it yours in seconds. Skip the blank page and get planning straight away.",
   },
   {
     icon: <Search size={20} />,
     title: "Google Event Search",
+    featureSlug: "google-maps-place-search",
     description:
       "Find restaurants, museums and hidden landmarks using Google's database. Add the spots you love to your trip with a single click.",
   },
   {
     icon: <ShieldCheck size={20} />,
     title: "Admin & Viewer Roles",
+    featureSlug: "collaboration-roles",
     description:
       "Stay in control of who changes what. Give co-planners full editing rights, or let others follow the plan without altering it.",
   },
   {
     icon: <Download size={20} />,
     title: "Calendar & Word Export",
+    featureSlug: "trip-templates-export",
     description:
       "Take your plans anywhere with an .ics file for any calendar app. Or download the whole trip as a Word document to share.",
   },
 ];
 const NAV_LINKS = [
+  { label: "Features", href: "/features" },
   { label: "Destinations", href: "/destinations" },
-  { label: "Travel guides", href: "/destinations" },
+  { label: "Travel articles", href: "/articles" },
+  { label: "FAQ", href: "/faq" },
 ];
 const scrolled = true;
 const menuOpen = false;
@@ -391,9 +406,10 @@ export default function HomePage() {
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-12">
             {featureCards.map((card) => (
-              <div
+              <Link
                 key={card.title}
-                className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm"
+                href={featurePath(card.featureSlug)}
+                className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm transition-shadow hover:shadow-md"
               >
                 <div className="flex items-center gap-3 mb-3">
                   <div className="w-10 h-10 rounded-lg bg-brand-primary/10 flex items-center justify-center text-brand-primary">
@@ -406,7 +422,7 @@ export default function HomePage() {
                 <p className="text-sm text-slate-500 leading-[1.6]">
                   {card.description}
                 </p>
-              </div>
+              </Link>
             ))}
           </div>
         </div>
