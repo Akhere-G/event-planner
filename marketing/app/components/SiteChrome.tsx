@@ -5,8 +5,10 @@ import { APP_URL } from "../lib/urls";
 import { CookiePreferencesButton } from "./CookiePreferencesButton";
 
 const LINKS = [
+  { label: "Features", href: "/features" },
   { label: "Destinations", href: "/destinations" },
   { label: "Travel articles", href: "/articles" },
+  { label: "FAQ", href: "/faq" },
 ];
 
 export function SiteHeader() {

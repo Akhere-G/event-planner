@@ -13,6 +13,7 @@ export const budapestGuide: DestinationGuide = {
     credit: {
       name: "Ervin Lukacs",
       url: "https://unsplash.com/photos/sMyQb3i9bNA",
+      source: "Unsplash",
     },
   },
   title: "Budapest Travel Guide: Where to Eat, Stay and What to See",

@@ -13,6 +13,7 @@ export const lisbonGuide: DestinationGuide = {
     credit: {
       name: "Liam McKay",
       url: "https://unsplash.com/photos/VHWyqXsWHg0",
+      source: "Unsplash",
     },
   },
   title: "Lisbon Travel Guide: Where to Eat, Stay and What to See",

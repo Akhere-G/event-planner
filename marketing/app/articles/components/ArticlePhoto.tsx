@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { PhotoCredit } from "../../components/PhotoCredit";
 import type { GuideImage } from "../../destinations/types";
 
 export function ArticlePhoto({
@@ -22,14 +23,7 @@ export function ArticlePhoto({
       <figcaption className="mt-3 text-sm leading-6 text-text-secondary">
         {caption}
         <span className="mt-1 block text-xs">
-          Photo by{" "}
-          <a href={image.credit.url} className="underline" rel="noopener">
-            {image.credit.name}
-          </a>{" "}
-          on{" "}
-          <a href="https://www.pexels.com/" className="underline" rel="noopener">
-            Pexels
-          </a>
+          <PhotoCredit credit={image.credit} />
         </span>
       </figcaption>
     </figure>

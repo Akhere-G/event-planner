@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { PhotoCredit } from "../../components/PhotoCredit";
 import { SiteFooter, SiteHeader } from "../../components/SiteChrome";
 import {
   articleCategoryPath,
@@ -157,22 +158,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
             className="aspect-[16/9] w-full rounded-2xl object-cover"
           />
           <figcaption className="mt-2 text-xs text-text-secondary">
-            Photo by{" "}
-            <a
-              href={`${article.image.credit.url}?utm_source=triptrack&utm_medium=referral`}
-              className="underline"
-              rel="noopener"
-            >
-              {article.image.credit.name}
-            </a>{" "}
-            on{" "}
-            <a
-              href="https://unsplash.com/?utm_source=triptrack&utm_medium=referral"
-              className="underline"
-              rel="noopener"
-            >
-              Unsplash
-            </a>
+            <PhotoCredit credit={article.image.credit} />
           </figcaption>
         </figure>
         <article className="mt-8 [&>p]:mt-4 [&>p]:text-lg [&>p]:leading-8 [&>p]:text-text-secondary">

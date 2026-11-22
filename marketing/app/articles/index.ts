@@ -1,24 +1,70 @@
 import { bangkokVsHanoiArticle } from "./content/bangkok-vs-hanoi";
+import { berlinVsAmsterdamArticle } from "./content/berlin-vs-amsterdam";
+import { bestGroupHolidayDestinations2027Article } from "./content/best-group-holiday-destinations-2027";
+import { bestStagAndHenDestinationsAbroad2027Article } from "./content/best-stag-and-hen-destinations-abroad-2027";
 import { bestTravelPlanningAppsArticle } from "./content/best-travel-planning-apps";
+import { cheapestHolidayDestinations2027Article } from "./content/cheapest-holiday-destinations-2027";
+import { dubaiVsMarrakechArticle } from "./content/dubai-vs-marrakech";
+import { dubaiVsMiamiArticle } from "./content/dubai-vs-miami";
+import { eurovision2027BurgasGroupTripArticle } from "./content/eurovision-2027-burgas-group-trip";
+import { eventsWorthPlanningATripAround2027Article } from "./content/events-worth-planning-a-trip-around-2027";
 import { howToCreateTravelItineraryArticle } from "./content/how-to-create-travel-itinerary";
+import { howToPlanAGroupHolidayArticle } from "./content/how-to-plan-a-group-holiday";
+import { ibizaVsMykonosArticle } from "./content/ibiza-vs-mykonos";
+import { krakowVsBudapestArticle } from "./content/krakow-vs-budapest";
+import { krakowVsPragueArticle } from "./content/krakow-vs-prague";
+import { lasVegasVsNewYorkArticle } from "./content/las-vegas-vs-new-york";
+import { marbellaVsIbizaArticle } from "./content/marbella-vs-ibiza";
+import { miamiVsLasVegasArticle } from "./content/miami-vs-las-vegas";
 import { parisVsAmsterdamArticle } from "./content/paris-vs-amsterdam";
+import { partyInMiamiLikeGtaViArticle } from "./content/party-in-miami-like-gta-vi";
+import { phuketVsBaliArticle } from "./content/phuket-vs-bali";
 import { pragueVsBudapestArticle } from "./content/prague-vs-budapest";
+import { setJetting2027Article } from "./content/set-jetting-2027";
+import { solarEclipse2027LuxorOrSpainArticle } from "./content/solar-eclipse-2027-luxor-or-spain";
+import { splitVsMykonosArticle } from "./content/split-vs-mykonos";
+import { tenerifeVsMarbellaArticle } from "./content/tenerife-vs-marbella";
 import { tokyoVsSeoulArticle } from "./content/tokyo-vs-seoul";
 import { travelPlanningChecklistArticle } from "./content/travel-planning-checklist";
 import { triptrackVsTripitArticle } from "./content/triptrack-vs-tripit";
+import { tulumVsBaliArticle } from "./content/tulum-vs-bali";
 import { wanderlogVsTriptrackArticle } from "./content/wanderlog-vs-triptrack";
+import { whatIsAStenDoArticle } from "./content/what-is-a-sten-do";
 import type { ArticleCategorySlug, TravelArticle } from "./types";
 
 export const travelArticles: TravelArticle[] = [
+  partyInMiamiLikeGtaViArticle,
+  bestGroupHolidayDestinations2027Article,
+  whatIsAStenDoArticle,
+  howToPlanAGroupHolidayArticle,
+  eventsWorthPlanningATripAround2027Article,
+  cheapestHolidayDestinations2027Article,
+  bestStagAndHenDestinationsAbroad2027Article,
+  eurovision2027BurgasGroupTripArticle,
+  solarEclipse2027LuxorOrSpainArticle,
+  setJetting2027Article,
   bestTravelPlanningAppsArticle,
   wanderlogVsTriptrackArticle,
   triptrackVsTripitArticle,
+  ibizaVsMykonosArticle,
+  marbellaVsIbizaArticle,
+  krakowVsBudapestArticle,
+  dubaiVsMarrakechArticle,
+  miamiVsLasVegasArticle,
+  tulumVsBaliArticle,
   bangkokVsHanoiArticle,
   howToCreateTravelItineraryArticle,
   travelPlanningChecklistArticle,
   parisVsAmsterdamArticle,
   tokyoVsSeoulArticle,
   pragueVsBudapestArticle,
+  splitVsMykonosArticle,
+  tenerifeVsMarbellaArticle,
+  krakowVsPragueArticle,
+  berlinVsAmsterdamArticle,
+  dubaiVsMiamiArticle,
+  lasVegasVsNewYorkArticle,
+  phuketVsBaliArticle,
 ];
 
 export const articleCategories: {
@@ -37,6 +83,12 @@ export const articleCategories: {
     label: "Travel planner comparisons",
     description:
       "Evidence-led comparisons of travel-planning apps, their prices and the travellers they suit.",
+  },
+  {
+    slug: "travel-inspiration",
+    label: "Travel inspiration",
+    description:
+      "Where to go next with your friends: trending destinations, big events and ideas inspired by what everyone is watching and playing.",
   },
   {
     slug: "travel-planning",

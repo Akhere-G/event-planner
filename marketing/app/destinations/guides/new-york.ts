@@ -3,7 +3,7 @@ import type { DestinationGuide } from "../types";
 export const newYorkGuide: DestinationGuide = {
   slug: "new-york-travel-guide",
   city: "New York",
-  country: "USA",
+  country: "United States",
   region: "North America",
   image: {
     src: "/destinations/new-york-hero.jpg",
@@ -13,6 +13,7 @@ export const newYorkGuide: DestinationGuide = {
     credit: {
       name: "Luca Bravo",
       url: "https://unsplash.com/photos/_QdFx92MO2U",
+      source: "Unsplash",
     },
   },
   title: "New York Travel Guide: Where to Eat, Stay and What to See",

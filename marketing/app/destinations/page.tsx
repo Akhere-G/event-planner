@@ -5,7 +5,7 @@ import { RegionGroups } from "./components/RegionGroups";
 export const metadata: Metadata = {
   title: "Holiday destinations and ready-made trip templates",
   description:
-    "Thirteen popular city break destinations across Asia, Europe and North America, each with a travel guide and a free itinerary template to copy and customise.",
+    "City breaks, beach islands and group holiday favourites across Europe, Asia, the Middle East, Africa and North America, each with a travel guide and a free itinerary template to copy and customise.",
   alternates: { canonical: "/destinations" },
 };
 

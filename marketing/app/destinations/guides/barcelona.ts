@@ -13,6 +13,7 @@ export const barcelonaGuide: DestinationGuide = {
     credit: {
       name: "Logan Armstrong",
       url: "https://unsplash.com/photos/hVhfqhDYciU",
+      source: "Unsplash",
     },
   },
   title: "Barcelona Travel Guide: Where to Eat, Stay and What to See",

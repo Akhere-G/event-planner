@@ -3,6 +3,7 @@ import type { DestinationGuide, DestinationRegion } from "./types";
 export const REGION_ORDER: DestinationRegion[] = [
   "Asia",
   "Europe",
+  "Middle East & Africa",
   "North America",
 ];
 

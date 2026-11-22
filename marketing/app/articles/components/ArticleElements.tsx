@@ -2,13 +2,21 @@ import Link from "next/link";
 import Image from "next/image";
 import type { ReactNode } from "react";
 import { TrackedLink } from "../../components/TrackedLink";
-import { APP_URL, guidePath, templateUrl } from "../../lib/urls";
+import { APP_URL, articlePath, guidePath, templateUrl } from "../../lib/urls";
 import { getGuide } from "../../destinations/guides";
 import type { ArticleSource } from "../types";
 
 export function GuideLink({ slug, children }: { slug: string; children: ReactNode }) {
   return (
     <Link className="font-medium text-brand-primary underline" href={guidePath(slug)}>
+      {children}
+    </Link>
+  );
+}
+
+export function ArticleLink({ slug, children }: { slug: string; children: ReactNode }) {
+  return (
+    <Link className="font-medium text-brand-primary underline" href={articlePath(slug)}>
       {children}
     </Link>
   );

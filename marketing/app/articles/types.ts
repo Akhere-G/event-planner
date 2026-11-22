@@ -4,7 +4,8 @@ import type { GuideImage } from "../destinations/types";
 export type ArticleCategorySlug =
   | "destination-comparisons"
   | "product-comparisons"
-  | "travel-planning";
+  | "travel-planning"
+  | "travel-inspiration";
 
 export interface ArticleSource {
   title: string;
