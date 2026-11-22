@@ -1,9 +1,14 @@
 import { bangkokVsHanoiArticle } from "./content/bangkok-vs-hanoi";
 import { berlinVsAmsterdamArticle } from "./content/berlin-vs-amsterdam";
+import { bestGroupHolidayDestinations2027Article } from "./content/best-group-holiday-destinations-2027";
+import { bestStagAndHenDestinationsAbroad2027Article } from "./content/best-stag-and-hen-destinations-abroad-2027";
 import { bestTravelPlanningAppsArticle } from "./content/best-travel-planning-apps";
+import { cheapestHolidayDestinations2027Article } from "./content/cheapest-holiday-destinations-2027";
 import { dubaiVsMarrakechArticle } from "./content/dubai-vs-marrakech";
 import { dubaiVsMiamiArticle } from "./content/dubai-vs-miami";
+import { eventsWorthPlanningATripAround2027Article } from "./content/events-worth-planning-a-trip-around-2027";
 import { howToCreateTravelItineraryArticle } from "./content/how-to-create-travel-itinerary";
+import { howToPlanAGroupHolidayArticle } from "./content/how-to-plan-a-group-holiday";
 import { ibizaVsMykonosArticle } from "./content/ibiza-vs-mykonos";
 import { krakowVsBudapestArticle } from "./content/krakow-vs-budapest";
 import { krakowVsPragueArticle } from "./content/krakow-vs-prague";
@@ -23,6 +28,11 @@ import { wanderlogVsTriptrackArticle } from "./content/wanderlog-vs-triptrack";
 import type { ArticleCategorySlug, TravelArticle } from "./types";
 
 export const travelArticles: TravelArticle[] = [
+  bestGroupHolidayDestinations2027Article,
+  howToPlanAGroupHolidayArticle,
+  eventsWorthPlanningATripAround2027Article,
+  cheapestHolidayDestinations2027Article,
+  bestStagAndHenDestinationsAbroad2027Article,
   bestTravelPlanningAppsArticle,
   wanderlogVsTriptrackArticle,
   triptrackVsTripitArticle,
@@ -63,6 +73,12 @@ export const articleCategories: {
     label: "Travel planner comparisons",
     description:
       "Evidence-led comparisons of travel-planning apps, their prices and the travellers they suit.",
+  },
+  {
+    slug: "travel-inspiration",
+    label: "Travel inspiration",
+    description:
+      "Where to go next with your friends: trending destinations, big events and ideas inspired by what everyone is watching and playing.",
   },
   {
     slug: "travel-planning",
