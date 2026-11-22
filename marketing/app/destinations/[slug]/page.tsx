@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import { notFound } from "next/navigation";
+import { PhotoCredit } from "../../components/PhotoCredit";
 import { SiteFooter, SiteHeader } from "../../components/SiteChrome";
 import { PlaceSection } from "../components/PlaceSection";
 import { TemplateLink } from "../components/TemplateLink";
@@ -89,22 +90,7 @@ export default async function DestinationGuidePage({ params }: GuidePageProps) {
             className="aspect-[16/9] w-full rounded-2xl object-cover"
           />
           <figcaption className="mt-2 text-xs text-slate-500">
-            Photo by{" "}
-            <a
-              href={`${guide.image.credit.url}?utm_source=triptrack&utm_medium=referral`}
-              className="underline"
-              rel="noopener"
-            >
-              {guide.image.credit.name}
-            </a>{" "}
-            on{" "}
-            <a
-              href="https://unsplash.com/?utm_source=triptrack&utm_medium=referral"
-              className="underline"
-              rel="noopener"
-            >
-              Unsplash
-            </a>
+            <PhotoCredit credit={guide.image.credit} />
           </figcaption>
         </figure>
         <div className="mt-6 space-y-4 text-lg text-slate-600 leading-relaxed">

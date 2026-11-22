@@ -13,6 +13,7 @@ export const bangkokGuide: DestinationGuide = {
     credit: {
       name: "Anantachai Saothong",
       url: "https://unsplash.com/photos/0DKDTSFBXc8",
+      source: "Unsplash",
     },
   },
   title: "Bangkok Travel Guide: Where to Eat, Stay and What to See",

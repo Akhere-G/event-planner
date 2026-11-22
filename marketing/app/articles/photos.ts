@@ -9,6 +9,7 @@ export const articlePhotos = {
     credit: {
       name: "Johan Van Geijl",
       url: "https://www.pexels.com/photo/wat-arun-in-bangkok-26847891/",
+      source: "Pexels",
     },
   },
   hanoiLake: {
@@ -19,6 +20,7 @@ export const articlePhotos = {
     credit: {
       name: "Ama Journey",
       url: "https://www.pexels.com/photo/tranquil-scene-at-hoan-kiem-lake-in-hanoi-35542946/",
+      source: "Pexels",
     },
   },
   parisCafe: {
@@ -29,6 +31,7 @@ export const articlePhotos = {
     credit: {
       name: "Serhii Kovalov",
       url: "https://www.pexels.com/photo/cozy-parisian-cafe-with-street-view-38828336/",
+      source: "Pexels",
     },
   },
   amsterdamCanal: {
@@ -39,6 +42,7 @@ export const articlePhotos = {
     credit: {
       name: "Omar Ramadan",
       url: "https://www.pexels.com/photo/charming-amsterdam-canal-with-bicycles-31792409/",
+      source: "Pexels",
     },
   },
   tokyoTemple: {
@@ -49,6 +53,7 @@ export const articlePhotos = {
     credit: {
       name: "Justin Schlesinger",
       url: "https://www.pexels.com/photo/senso-ji-temple-in-tokyo-20943345/",
+      source: "Pexels",
     },
   },
   seoulPalace: {
@@ -59,6 +64,7 @@ export const articlePhotos = {
     credit: {
       name: "Alina Dmytrenko",
       url: "https://www.pexels.com/photo/traditional-korean-architecture-in-seoul-31743309/",
+      source: "Pexels",
     },
   },
   pragueSquare: {
@@ -69,6 +75,7 @@ export const articlePhotos = {
     credit: {
       name: "Bohdan Hyrovych",
       url: "https://www.pexels.com/photo/historic-old-town-square-with-clock-tower-38904021/",
+      source: "Pexels",
     },
   },
   budapestBridge: {
@@ -79,6 +86,7 @@ export const articlePhotos = {
     credit: {
       name: "Barbara Hartmann Fara",
       url: "https://www.pexels.com/photo/budapest-s-chain-bridge-and-parliament-night-scene-33863371/",
+      source: "Pexels",
     },
   },
   planningMap: {
@@ -89,6 +97,7 @@ export const articlePhotos = {
     credit: {
       name: "Lara Jameson",
       url: "https://www.pexels.com/photo/person-writing-on-a-notebook-place-on-a-world-map-8828672/",
+      source: "Pexels",
     },
   },
   barcelonaStreet: {
@@ -99,6 +108,7 @@ export const articlePhotos = {
     credit: {
       name: "Alina Skazka",
       url: "https://www.pexels.com/photo/carre-del-bisbe-city-street-in-barcelona-spain-15494499/",
+      source: "Pexels",
     },
   },
   passportLuggage: {
@@ -109,6 +119,7 @@ export const articlePhotos = {
     credit: {
       name: "Yazid N",
       url: "https://www.pexels.com/photo/indonesian-passport-on-suitcase-at-airport-39075599/",
+      source: "Pexels",
     },
   },
   airportBoard: {
@@ -119,6 +130,7 @@ export const articlePhotos = {
     credit: {
       name: "Josh Withers",
       url: "https://www.pexels.com/photo/departures-on-screen-at-airport-16739071/",
+      source: "Pexels",
     },
   },
 } satisfies Record<string, GuideImage>;

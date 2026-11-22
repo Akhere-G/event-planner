@@ -13,6 +13,7 @@ export const seoulGuide: DestinationGuide = {
     credit: {
       name: "Y K",
       url: "https://unsplash.com/photos/-e6Xu27_T50",
+      source: "Unsplash",
     },
   },
   title: "Seoul Travel Guide: Where to Eat, Stay and What to See",

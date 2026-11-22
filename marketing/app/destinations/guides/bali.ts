@@ -13,6 +13,7 @@ export const baliGuide: DestinationGuide = {
     credit: {
       name: "Niklas Weiss",
       url: "https://unsplash.com/photos/-2WlTWZLnRc",
+      source: "Unsplash",
     },
   },
   title: "Bali Travel Guide: Where to Eat, Stay and What to See",

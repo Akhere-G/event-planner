@@ -13,6 +13,7 @@ export const tokyoGuide: DestinationGuide = {
     credit: {
       name: "Timo Volz",
       url: "https://unsplash.com/photos/DGsqL2j028E",
+      source: "Unsplash",
     },
   },
   title: "Tokyo Travel Guide: Where to Eat, Stay and What to See",

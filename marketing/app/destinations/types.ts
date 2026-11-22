@@ -1,5 +1,7 @@
 export type DestinationRegion = "Asia" | "Europe" | "North America";
 
+export type PhotoSource = "Unsplash" | "Pexels";
+
 export interface GuidePlace {
   name: string;
   area: string;
@@ -11,7 +13,7 @@ export interface GuideImage {
   alt: string;
   width: number;
   height: number;
-  credit: { name: string; url: string };
+  credit: { name: string; url: string; source: PhotoSource };
 }
 
 export interface DestinationGuide {

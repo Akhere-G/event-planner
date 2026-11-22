@@ -13,6 +13,7 @@ export const hanoiGuide: DestinationGuide = {
     credit: {
       name: "Elliot Andrews",
       url: "https://unsplash.com/photos/6keOhd7idJo",
+      source: "Unsplash",
     },
   },
   title: "Hanoi Travel Guide: Where to Eat, Stay and What to See",

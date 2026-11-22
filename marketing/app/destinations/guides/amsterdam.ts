@@ -13,6 +13,7 @@ export const amsterdamGuide: DestinationGuide = {
     credit: {
       name: "Azhar J",
       url: "https://unsplash.com/photos/t2hgHV1R7_g",
+      source: "Unsplash",
     },
   },
   title: "Amsterdam Travel Guide: Where to Eat, Stay and What to See",

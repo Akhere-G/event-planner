@@ -13,6 +13,7 @@ export const romeGuide: DestinationGuide = {
     credit: {
       name: "David Köhler",
       url: "https://unsplash.com/photos/VFRTXGw1VjU",
+      source: "Unsplash",
     },
   },
   title: "Rome Travel Guide: Where to Eat, Stay and What to See",

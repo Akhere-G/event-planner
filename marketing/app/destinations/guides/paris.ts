@@ -13,6 +13,7 @@ export const parisGuide: DestinationGuide = {
     credit: {
       name: "Chris Karidis",
       url: "https://unsplash.com/photos/nnzkZNYWHaU",
+      source: "Unsplash",
     },
   },
   title: "Paris Travel Guide: Where to Eat, Stay and What to See",

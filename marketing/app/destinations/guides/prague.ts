@@ -13,6 +13,7 @@ export const pragueGuide: DestinationGuide = {
     credit: {
       name: "William Zhang",
       url: "https://unsplash.com/photos/6En4WYsNYXM",
+      source: "Unsplash",
     },
   },
   title: "Prague Travel Guide: Where to Eat, Stay and What to See",
