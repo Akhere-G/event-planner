@@ -1,4 +1,8 @@
-export type DestinationRegion = "Asia" | "Europe" | "North America";
+export type DestinationRegion =
+  | "Asia"
+  | "Europe"
+  | "Middle East & Africa"
+  | "North America";
 
 export type PhotoSource = "Unsplash" | "Pexels";
 
