@@ -6,6 +6,7 @@ import { bestTravelPlanningAppsArticle } from "./content/best-travel-planning-ap
 import { cheapestHolidayDestinations2027Article } from "./content/cheapest-holiday-destinations-2027";
 import { dubaiVsMarrakechArticle } from "./content/dubai-vs-marrakech";
 import { dubaiVsMiamiArticle } from "./content/dubai-vs-miami";
+import { eurovision2027BurgasGroupTripArticle } from "./content/eurovision-2027-burgas-group-trip";
 import { eventsWorthPlanningATripAround2027Article } from "./content/events-worth-planning-a-trip-around-2027";
 import { howToCreateTravelItineraryArticle } from "./content/how-to-create-travel-itinerary";
 import { howToPlanAGroupHolidayArticle } from "./content/how-to-plan-a-group-holiday";
@@ -16,8 +17,11 @@ import { lasVegasVsNewYorkArticle } from "./content/las-vegas-vs-new-york";
 import { marbellaVsIbizaArticle } from "./content/marbella-vs-ibiza";
 import { miamiVsLasVegasArticle } from "./content/miami-vs-las-vegas";
 import { parisVsAmsterdamArticle } from "./content/paris-vs-amsterdam";
+import { partyInMiamiLikeGtaViArticle } from "./content/party-in-miami-like-gta-vi";
 import { phuketVsBaliArticle } from "./content/phuket-vs-bali";
 import { pragueVsBudapestArticle } from "./content/prague-vs-budapest";
+import { setJetting2027Article } from "./content/set-jetting-2027";
+import { solarEclipse2027LuxorOrSpainArticle } from "./content/solar-eclipse-2027-luxor-or-spain";
 import { splitVsMykonosArticle } from "./content/split-vs-mykonos";
 import { tenerifeVsMarbellaArticle } from "./content/tenerife-vs-marbella";
 import { tokyoVsSeoulArticle } from "./content/tokyo-vs-seoul";
@@ -25,14 +29,20 @@ import { travelPlanningChecklistArticle } from "./content/travel-planning-checkl
 import { triptrackVsTripitArticle } from "./content/triptrack-vs-tripit";
 import { tulumVsBaliArticle } from "./content/tulum-vs-bali";
 import { wanderlogVsTriptrackArticle } from "./content/wanderlog-vs-triptrack";
+import { whatIsAStenDoArticle } from "./content/what-is-a-sten-do";
 import type { ArticleCategorySlug, TravelArticle } from "./types";
 
 export const travelArticles: TravelArticle[] = [
+  partyInMiamiLikeGtaViArticle,
   bestGroupHolidayDestinations2027Article,
+  whatIsAStenDoArticle,
   howToPlanAGroupHolidayArticle,
   eventsWorthPlanningATripAround2027Article,
   cheapestHolidayDestinations2027Article,
   bestStagAndHenDestinationsAbroad2027Article,
+  eurovision2027BurgasGroupTripArticle,
+  solarEclipse2027LuxorOrSpainArticle,
+  setJetting2027Article,
   bestTravelPlanningAppsArticle,
   wanderlogVsTriptrackArticle,
   triptrackVsTripitArticle,
