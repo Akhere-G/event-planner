@@ -35,6 +35,16 @@ const SCREENSHOTS = [
     alt: "A budget with spending by category, the group's balances, and suggested payments to settle up.",
     caption: "Spending against a budget, with suggested payments to settle up.",
   },
+  {
+    src: "/screenshots/triptrack-flights.png",
+    alt: "A saved flight showing departure and arrival airports and times, price and a book button.",
+    caption: "Saved flights sit in the trip, with times, price and a link to book.",
+  },
+  {
+    src: "/screenshots/triptrack-routes.png",
+    alt: "A day's events with a walking route drawn on the map between two of them and step-by-step directions below.",
+    caption: "Routes between events are drawn on the map, with walking or transit directions.",
+  },
 ] as const;
 
 export default function AboutPage() {

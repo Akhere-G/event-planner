@@ -15,6 +15,10 @@ A shared trip planner. A group builds one itinerary on a map and a calendar, eve
     <td><img src="marketing/public/features/smart-day-optimiser-1.png" alt="Optimise your days dialog"><br><sub>Day optimiser</sub></td>
     <td><img src="marketing/public/features/google-calendar-sync-1.png" alt="Google Calendar sync"><br><sub>Google Calendar sync</sub></td>
   </tr>
+  <tr>
+    <td><img src="marketing/public/features/flight-search-1.png" alt="Saved flights"><br><sub>Saved flights</sub></td>
+    <td><img src="marketing/public/features/directions-1.png" alt="A walking route between events on the map"><br><sub>Routes between events</sub></td>
+  </tr>
 </table>
 
 ## What it does
@@ -100,5 +104,8 @@ For development without Docker, the backend is in `event-planner-app-backend/` (
 ## Known limitations
 
 * Some leftover MySQL-era code remains from before the database moved to PostgreSQL.
-* Design decisions are recorded in planning notes, not formal decision records.
+* Approving an AI proposal can overwrite newer edits to the fields it changes. A warning is shown but does not block acceptance, and there is no automatic conflict resolution.
+* If an AI provider replies with something that fails validation, the request does not retry with the next provider. Fallback covers a provider that fails or returns nothing.
+* Repayment suggestions use a simple greedy match, so they are not guaranteed to need the fewest transfers, and group balances are held in GBP.
+* Tests use fakes for Google, flights and AI, so they cannot show that the live integrations are configured correctly.
 * Event reminders run from a standalone script (`event-planner-app-backend/run_reminders.py`) rather than inside the web process.
