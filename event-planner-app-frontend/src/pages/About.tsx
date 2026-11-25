@@ -14,6 +14,29 @@ import {
   LayoutTemplate,
 } from "lucide-react";
 
+const SCREENSHOTS = [
+  {
+    src: "/screenshots/triptrack-calendar.png",
+    alt: "A month calendar of a Lisbon trip beside a map of the planned places.",
+    caption: "The trip schedule as a calendar, next to its places on the map.",
+  },
+  {
+    src: "/screenshots/triptrack-ai-proposals.png",
+    alt: "A dialog titled Review proposed changes listing four suggested events, each with a checkbox, and buttons to reject all or apply the selected changes.",
+    caption: "AI suggestions are reviewed first and only apply once you approve them.",
+  },
+  {
+    src: "/screenshots/triptrack-day-optimiser.png",
+    alt: "A dialog titled Optimise your days where the user picks which days to improve and priorities such as minimising travel.",
+    caption: "The day optimiser asks what to improve, then proposes changes to review.",
+  },
+  {
+    src: "/screenshots/triptrack-expenses.png",
+    alt: "A budget with spending by category, the group's balances, and suggested payments to settle up.",
+    caption: "Spending against a budget, with suggested payments to settle up.",
+  },
+] as const;
+
 export default function AboutPage() {
   const FEATURES = [
     {
@@ -99,8 +122,8 @@ export default function AboutPage() {
         </h1>
         <p className="text-xl text-text-secondary max-w-2xl mx-auto leading-relaxed">
           We built TripTrack to get rid of messy spreadsheets and endless tabs.
-          It's one place to plan your route, chat with friends, and let AI
-          handle the boring bits.
+          It's one place to plan your route, share the plan with friends, and
+          let AI handle the boring bits.
         </p>
       </section>
 
@@ -118,24 +141,51 @@ export default function AboutPage() {
         ))}
       </div>
 
+      <section className="mb-16">
+        <h2 className="text-2xl font-bold text-text-primary mb-6">
+          See it in action
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {SCREENSHOTS.map((shot) => (
+            <figure key={shot.src} className="m-0">
+              <img
+                src={shot.src}
+                alt={shot.alt}
+                width={1600}
+                height={1000}
+                loading="lazy"
+                className="w-full h-auto rounded-2xl border border-surface-border"
+              />
+              <figcaption className="mt-2 text-sm text-text-secondary">
+                {shot.caption}
+              </figcaption>
+            </figure>
+          ))}
+        </div>
+      </section>
+
       <section className="card p-8 bg-surface rounded-2xl shadow-sm border border-surface-border">
         <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-8">
           <div className="max-w-2xl">
             <h2 className="text-2xl font-bold text-text-primary mb-3">
-              Built by travellers, for travellers
+              How it&apos;s built
             </h2>
             <p className="text-text-secondary leading-relaxed text-lg">
-              TripTrack is a modern web app built with{" "}
-              <strong>React and TypeScript</strong>. On the frontend, we use{" "}
-              <strong>Redux</strong> to keep your trip details in sync and{" "}
-              <strong>Yup</strong> to make sure your data is valid before it
-              even leaves your browser. Our <strong>Python and Flask</strong>{" "}
-              backend handles the heavy lifting, using{" "}
-              <strong>SQLAlchemy</strong> to manage our database and{" "}
-              <strong>Marshmallow</strong> to keep our API communication clean
-              and reliable. Combined with <strong>Google Maps</strong>, this
-              setup ensures your day-planning and route optimisations happen in
-              seconds.
+              TripTrack is a <strong>React and TypeScript</strong> app talking
+              to a <strong>Python and Flask</strong> API and a{" "}
+              <strong>PostgreSQL</strong> database. When someone saves a
+              change, the server tells everyone else viewing that trip, and AI
+              suggestions only become part of the plan once a person approves
+              them.{" "}
+              <a
+                href="https://github.com/Akhere-G/event-planner"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-brand-primary underline"
+              >
+                See the code on GitHub
+              </a>
+              .
             </p>
           </div>
 
@@ -144,9 +194,9 @@ export default function AboutPage() {
               "React",
               "Python",
               "Flask",
+              "PostgreSQL",
               "Google Maps",
               "Gemini",
-              "SQLAlchemy",
             ].map((tag) => (
               <span
                 key={tag}

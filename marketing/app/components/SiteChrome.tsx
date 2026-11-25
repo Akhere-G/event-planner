@@ -72,6 +72,14 @@ export function SiteFooter() {
           >
             Terms
           </TrackedLink>
+          <a
+            href="https://github.com/Akhere-G/event-planner"
+            target="_blank"
+            rel="noreferrer"
+            className="hover:text-white/70 transition-colors"
+          >
+            How it&apos;s built
+          </a>
           <CookiePreferencesButton />
         </div>
         <span className="text-xs text-white/40 w-full md:w-auto">
