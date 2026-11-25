@@ -1,59 +1,104 @@
 # TripTrack
 
-Travel planning, simplified. TripTrack replaces messy spreadsheets and endless browser tabs with a single unified platform to plan routes, collaborate with friends, and let AI handle the logistical heavy lifting.
+A shared trip planner. A group builds one itinerary on a map and a calendar, everyone sees changes as soon as they are saved, and AI can draft or change the plan but never applies anything until a person approves it.
 
-**🔗 [Live Deployment](https://tripapp-752853711822.europe-west2.run.app/)**
+**[Live demo](https://app.triptrack.uk/demo)** · [CI workflow](.github/workflows/ci.yml)
 
----
+![A trip calendar shared by the whole group](marketing/public/features/trip-calendar-1.png)
 
-## Why Use TripTrack?
+<table>
+  <tr>
+    <td><img src="marketing/public/features/ai-proposals-1.png" alt="Review proposed changes dialog"><br><sub>AI suggestions wait for approval</sub></td>
+    <td><img src="marketing/public/features/group-expenses-1.png" alt="Budget, balances and suggested payments"><br><sub>Budget and settling up</sub></td>
+  </tr>
+  <tr>
+    <td><img src="marketing/public/features/smart-day-optimiser-1.png" alt="Optimise your days dialog"><br><sub>Day optimiser</sub></td>
+    <td><img src="marketing/public/features/google-calendar-sync-1.png" alt="Google Calendar sync"><br><sub>Google Calendar sync</sub></td>
+  </tr>
+</table>
 
-* **AI Trip Generator:** Plan a whole trip from a single sentence.
-* **AI Trip Editing:** Change your plan by just asking. Review every AI change before it's applied.
-* **Smart Planning:** Fills empty time, fixes timing clashes and drafts packing lists. You approve every change.
-* **Realtime Collaboration:** Invite your group and everyone sees changes the moment they happen, on every device. No more chasing the latest version in a group chat.
-* **Google Calendar Sync:** Keep each trip in step with Google Calendar. Changes made on either side show up on the other, so the whole group always has the right plan.
-* **Flight Search:** Search flights for your trip and keep them alongside your itinerary, so travel plans stay in one place.
-* **Map & Calendar View:** See your schedule and your map on one clean screen. No more switching between apps to work out where you need to be.
-* **Budget & Expenses:** Track what everyone spends, split costs and settle up in a few clicks, without the awkward maths.
-* **Trip Templates:** Start from premade destination templates and make them your own in seconds.
-* **Google Event Search:** Find restaurants, museums and hidden landmarks and add them to your trip with a single click.
-* **Admin & Viewer Roles:** Stay in control. Give co-planners full editing rights, or let others follow the itinerary without changing it.
-* **Calendar & Word Export:** Take your plans anywhere. Export to your calendar app as an .ics file, or download the whole trip as a Word document.
+## What it does
 
----
+* **AI trips with approval:** describe a trip in one sentence, or ask for a change such as moving a dinner. The result is a suggestion to review, not a saved change.
+* **Realtime collaboration:** everyone viewing a trip sees changes as soon as they are saved, on every device.
+* **Google Calendar sync:** changes flow both ways between a trip and each person's Google Calendar.
+* **Map and calendar view:** the schedule, routes and place details on one screen.
+* **Budget and expenses:** track spending and split costs across the group.
+* **Roles:** admins can edit, viewers can only follow the plan.
 
-## Technical Architecture
+Flights, trip templates, Google event search and calendar or Word export sit alongside these. The in-app About page lists everything.
 
-TripTrack is engineered as a decoupled, modern full-stack web application optimised for rapid geodata rendering and real-time client state synchronisation.
+## Architecture
 
-### Frontend Client
+```mermaid
+flowchart LR
+  subgraph Browser
+    UI["React + TypeScript<br/>RTK Query cache"]
+  end
+  subgraph API["Flask API (Cloud Run)"]
+    R["Routes + Marshmallow validation"]
+    DB[("PostgreSQL<br/>SQLAlchemy + Alembic")]
+    T["Change tracker<br/>(after_commit)"]
+    S["Socket.IO rooms<br/>trip:id / user:id"]
+    J["Job runner"]
+  end
+  UI -- REST --> R --> DB
+  DB --> T
+  T --> S -- "change notice" --> UI
+  T --> J
+  J -- "Cloud Tasks callback" --> J
+  J --> GC["Google Calendar"]
+  J --> AI["Gemini / Groq / Bedrock"]
+  Redis[("Redis")] --- S
+```
 
-The presentation layer operates as a highly responsive single-page application built around structured validation and strict type safety.
+* **Frontend:** React, TypeScript and Vite. Server data lives in one RTK Query cache that is refreshed when the server announces a change. Redux slices hold only interface and sign-in state. Google Maps draws the map, routes and place details.
+* **Backend:** Flask with the application factory pattern, about 100 routes across 20 blueprints. Marshmallow validates requests. SQLAlchemy and Alembic manage 24 tables on PostgreSQL.
+* **Realtime:** Socket.IO rooms per trip and per user. Redis is used as the message queue when configured, so several instances share one socket layer.
+* **Background work:** Google Cloud Tasks runs calendar syncing and AI generation outside the request. Gemini, Groq and AWS Bedrock sit behind adapters with automatic fallback. Web push tells users when a job has finished.
+* **Delivery:** Docker, GitHub Actions and Google Cloud Run.
 
-* **Core Framework:** React with TypeScript
-* **State Management:** Redux (Global trip and itinerary syncing)
-* **Data Validation:** Yup (Client-side schema validation prior to API transmission)
-* **Mapping Integration:** Google Maps API (Spatial visualisations and path planning)
+## Key decisions
 
-### Backend Services
+| Decision | Why | Cost | Code |
+| :--- | :--- | :--- | :--- |
+| One save hook powers live updates and calendar sync | No sync code per feature. A listener on the database save step notes what changed and announces it only after the commit succeeds. | Automatic behaviour is harder to trace, and every new table must be registered with a rule for who to notify. | [`change_tracker.py`](event-planner-app-backend/src/realtime/change_tracker.py), [`change_listener.py`](event-planner-app-backend/src/calendar_sync/change_listener.py) |
+| Managed task queue for slow work | The host throttles CPU once a response is sent, so threads stall. Cloud Tasks makes a fresh request back into the app and retries on failure. | Local development needs a stand-in, and the app depends on a Google service. | [`dispatchers/`](event-planner-app-backend/src/ai_tasks/dispatchers), [`cloud_tasks_auth.py`](event-planner-app-backend/src/middleware/cloud_tasks_auth.py), [`runner.py`](event-planner-app-backend/src/ai_tasks/runner.py) |
+| AI proposes, people approve, stale proposals are flagged | An AI reply takes time and the plan may change meanwhile. A snapshot is taken first, and anything edited or deleted since is marked CHANGED or DELETED in the preview. | Every AI feature needs a review step and a stored snapshot. | [`snapshots.py`](event-planner-app-backend/src/ai_tasks/snapshots.py), [`change_set_appliers.py`](event-planner-app-backend/src/services/change_set_appliers.py) |
+| More than one AI provider | A rate limit or outage at one provider does not switch off planning. | Prompts must work across models, and each adapter must be maintained. | [`ai_providers/`](event-planner-app-backend/src/services/ai_providers) |
+| One cache for server data, refreshed by the server | The map, calendar and list cannot drift apart. A socket notice invalidates only the affected cache tags. | Redux Toolkit has more setup and boilerplate than a lighter library. | [`apiSlice.ts`](event-planner-app-frontend/src/features/api/apiSlice.ts) |
 
-The backend API handles core business logic, strict relational database mapping, and conversational AI prompt parsing.
+### A harder one: fixing time zones after launch
 
-* **Language & Framework:** Python with Flask (Application Factory Pattern)
-* **Database ORM:** SQLAlchemy (Modern relational schemas)
-* **Serialization/Parsing:** Marshmallow (Strict data type marshalling and clean API contracts)
-* **AI Engine:** Gemini AI (Powering day planning, itinerary optimization, and travel tips)
+Event times were first saved with no time zone. When reminders were added, a Tokyo trip booked from London would have fired at the wrong local time. I derived a zone per trip from its map coordinates, backfilled every trip and event, and converted stored times to UTC by reading the old values as local to the trip, not the user. The migration ran on a separate branch with backfill scripts and merged only once the data and frontend were both ready. See [`backfill_trip_timezones.py`](event-planner-app-backend/scripts/backfill_trip_timezones.py) and [`convert_to_timezone_aware.py`](event-planner-app-backend/scripts/convert_to_timezone_aware.py).
 
----
+## Testing and quality
 
-## Technology Matrix
+* **Backend:** about 1,230 pytest tests across 96 files.
+* **Frontend:** about 250 Vitest tests and 24 Playwright browser tests.
+* **CI:** [GitHub Actions](.github/workflows/ci.yml) runs the backend tests, then frontend lint, build and unit tests, then the Playwright tests, on every push and pull request to `main`.
+* **Migrations:** about 40 Alembic migrations, including backfill scripts with their own tests.
+* **Security:** Google refresh tokens are encrypted at rest, Cloud Tasks callbacks are verified with Google-signed tokens, and AI and flight-search endpoints are rate limited.
 
-| Layer | Component | Primary Objective |
-| :--- | :--- | :--- |
-| **Frontend** | React / TypeScript | Component layout architecture and type safety |
-| **State & Validation** | Redux / Yup | Real-time state synchronization and form validation |
-| **Backend API** | Python / Flask | Scalable RESTful endpoint orchestration |
-| **Database ORM** | SQLAlchemy | Relational state structure and transaction mapping |
-| **Serialization** | Marshmallow | API input validation and JSON formatting schemas |
-| **Integrations** | Google Maps / Gemini / Google Calendar | Interactive geo-tracking, automated AI intelligence and two-way calendar sync |
+Run the tests locally:
+
+```bash
+cd event-planner-app-backend && pytest
+cd event-planner-app-frontend && npm test && npm run test:e2e
+```
+
+## Running locally
+
+Docker runs the app and Redis together on http://localhost:8080:
+
+```bash
+docker compose up --build
+```
+
+For development without Docker, the backend is in `event-planner-app-backend/` (`init_setup.sh` creates a virtualenv and installs the requirements) and the frontend is in `event-planner-app-frontend/` (`npm install`, then `npm run dev`). `event-planner-app-backend/.env.example` lists the Google Calendar and Unsplash settings. `marketing/` is a separate Next.js site with destination guides and articles.
+
+## Known limitations
+
+* Some leftover MySQL-era code remains from before the database moved to PostgreSQL.
+* Design decisions are recorded in planning notes, not formal decision records.
+* Event reminders run from a standalone script (`event-planner-app-backend/run_reminders.py`) rather than inside the web process.

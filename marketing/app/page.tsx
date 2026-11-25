@@ -564,6 +564,14 @@ export default function HomePage() {
               >
                 Terms
               </TrackedLink>
+              <a
+                href="https://github.com/Akhere-G/event-planner"
+                target="_blank"
+                rel="noreferrer"
+                className="text-xs text-white/45 hover:text-white/70 transition-colors"
+              >
+                How it&apos;s built
+              </a>
             </div>
           </div>
         </div>
